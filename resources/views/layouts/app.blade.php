@@ -406,17 +406,74 @@
             <div class="collapse navbar-collapse" id="navbar-menu">
                 <div class="d-flex flex-column flex-md-row flex-fill align-items-stretch align-items-md-center">
                     <ul class="navbar-nav">
+                        {{-- Dashboard: all roles --}}
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}" href="/dashboard">
                                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-layout-dashboard"></i></span>
                                 <span class="nav-link-title">Dashboard</span>
                             </a>
                         </li>
+
+                        {{-- Ajukan Cuti: pegawai, atasan, ketua --}}
                         @if(!Auth::user()->isAdmin())
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->is('leave/create') ? 'active' : '' }}" href="{{ route('leave.create') }}">
+                            <a class="nav-link {{ request()->is('leave/create') || request()->is('leave/select-type') ? 'active' : '' }}" href="{{ route('leave.create') }}">
                                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-file-plus"></i></span>
                                 <span class="nav-link-title">Ajukan Cuti</span>
+                            </a>
+                        </li>
+                        @endif
+
+                        {{-- Atasan: badge count for pending reviews --}}
+                        @if(Auth::user()->isAtasan())
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('dashboard') && Auth::user()->isAtasan() ? '' : '' }}" href="/dashboard#pending-review">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-checklist"></i></span>
+                                <span class="nav-link-title">
+                                    Pertimbangan
+                                    @php
+                                        $navPendingReview = \App\Models\LeaveRequest::where('status', \App\Models\LeaveRequest::STATUS_DIAJUKAN)
+                                            ->whereHas('user', fn($q) => $q->where('atasan_id', Auth::id()))
+                                            ->count();
+                                    @endphp
+                                    @if($navPendingReview > 0)
+                                    <span class="badge bg-white text-danger ms-1" style="font-size: 0.7rem; border-radius: 50px; min-width: 20px;">{{ $navPendingReview }}</span>
+                                    @endif
+                                </span>
+                            </a>
+                        </li>
+                        @endif
+
+                        {{-- Ketua: badge count for pending decisions --}}
+                        @if(Auth::user()->isKetua())
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard#needs-decision">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-gavel"></i></span>
+                                <span class="nav-link-title">
+                                    Keputusan
+                                    @php
+                                        $navNeedsDecision = \App\Models\LeaveRequest::where('status', \App\Models\LeaveRequest::STATUS_PERTIMBANGAN)->count();
+                                    @endphp
+                                    @if($navNeedsDecision > 0)
+                                    <span class="badge bg-white text-danger ms-1" style="font-size: 0.7rem; border-radius: 50px; min-width: 20px;">{{ $navNeedsDecision }}</span>
+                                    @endif
+                                </span>
+                            </a>
+                        </li>
+                        @endif
+
+                        {{-- Admin: Kelola Pegawai --}}
+                        @if(Auth::user()->isAdmin())
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('pegawai*') ? 'active' : '' }}" href="{{ route('pegawai.index') }}">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-users"></i></span>
+                                <span class="nav-link-title">Kelola Pegawai</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('hari-libur*') ? 'active' : '' }}" href="/hari-libur">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-calendar-off"></i></span>
+                                <span class="nav-link-title">Hari Libur</span>
                             </a>
                         </li>
                         @endif

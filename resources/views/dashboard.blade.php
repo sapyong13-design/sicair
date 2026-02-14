@@ -13,19 +13,31 @@
             </h2>
             <div class="text-muted" style="font-size: 0.9rem;">
                 Selamat datang kembali, <strong class="text-dark">{{ $user->name }}</strong>
-                <span class="sh-badge sh-badge-{{ $user->isAdmin() ? 'approved' : 'pending' }} ms-1" style="font-size: 0.7rem;">
-                    <i class="ti ti-{{ $user->isAdmin() ? 'shield-check' : 'user' }}"></i>
+                <span class="sh-badge sh-badge-{{ $user->isAdmin() ? 'approved' : ($user->isKetua() ? 'rejected' : ($user->isAtasan() ? 'pending' : 'approved')) }} ms-1" style="font-size: 0.7rem;">
+                    <i class="ti ti-{{ $user->isAdmin() ? 'shield-check' : ($user->isKetua() ? 'gavel' : ($user->isAtasan() ? 'user-check' : 'user')) }}"></i>
                     {{ ucfirst($user->role) }}
                 </span>
             </div>
         </div>
         @if(!$user->isAdmin())
-        <a href="{{ route('leave.create') }}" class="btn btn-primary sh-btn-primary">
+        <a href="{{ route('leave.select-type') }}" class="btn btn-primary sh-btn-primary">
             <i class="ti ti-file-plus me-1"></i> Ajukan Cuti
         </a>
         @endif
     </div>
 </div>
+
+@if(session('success'))
+<div class="alert mb-4" style="background: var(--sh-success-light); color: var(--sh-success); border-radius: 12px; border: none;">
+    <i class="ti ti-circle-check me-2"></i> {{ session('success') }}
+</div>
+@endif
+
+@if(session('error'))
+<div class="alert mb-4" style="background: var(--sh-danger-light); color: var(--sh-danger); border-radius: 12px; border: none;">
+    <i class="ti ti-alert-circle me-2"></i> {{ session('error') }}
+</div>
+@endif
 
 @if($user->isAdmin())
     {{-- ============================= --}}
@@ -34,14 +46,28 @@
 
     {{-- Stats Row --}}
     <div class="row g-3 mb-4">
-        <div class="col-sm-6 col-lg-4 animate-in">
+        <div class="col-sm-6 col-lg-3 animate-in">
+            <div class="card sh-stat-card stat-primary">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="sh-stat-label mb-2">Total Pegawai</div>
+                            <div class="sh-stat-number" style="color: var(--sh-primary);">{{ $totalPegawai }}</div>
+                        </div>
+                        <div class="sh-stat-icon icon-primary">
+                            <i class="ti ti-users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3 animate-in">
             <div class="card sh-stat-card stat-warning">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="sh-stat-label mb-2">Menunggu Persetujuan</div>
+                            <div class="sh-stat-label mb-2">Menunggu Proses</div>
                             <div class="sh-stat-number" style="color: var(--sh-warning);">{{ $pendingRequests->count() }}</div>
-                            <div class="text-muted mt-1" style="font-size: 0.8rem;">pengajuan aktif</div>
                         </div>
                         <div class="sh-stat-icon icon-warning">
                             <i class="ti ti-clock-hour-4"></i>
@@ -50,14 +76,13 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-lg-4 animate-in">
+        <div class="col-sm-6 col-lg-3 animate-in">
             <div class="card sh-stat-card stat-success">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="sh-stat-label mb-2">Disetujui</div>
-                            <div class="sh-stat-number" style="color: var(--sh-success);">{{ $recentDecisions->where('status', 'approved')->count() }}</div>
-                            <div class="text-muted mt-1" style="font-size: 0.8rem;">terbaru diproses</div>
+                            <div class="sh-stat-number" style="color: var(--sh-success);">{{ $recentDecisions->filter(fn($r) => $r->isApproved())->count() }}</div>
                         </div>
                         <div class="sh-stat-icon icon-success">
                             <i class="ti ti-circle-check"></i>
@@ -66,14 +91,13 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-lg-4 animate-in">
+        <div class="col-sm-6 col-lg-3 animate-in">
             <div class="card sh-stat-card stat-danger">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="sh-stat-label mb-2">Ditolak</div>
-                            <div class="sh-stat-number" style="color: var(--sh-danger);">{{ $recentDecisions->where('status', 'rejected')->count() }}</div>
-                            <div class="text-muted mt-1" style="font-size: 0.8rem;">terbaru diproses</div>
+                            <div class="sh-stat-number" style="color: var(--sh-danger);">{{ $recentDecisions->filter(fn($r) => $r->isRejected())->count() }}</div>
                         </div>
                         <div class="sh-stat-icon icon-danger">
                             <i class="ti ti-circle-x"></i>
@@ -89,7 +113,7 @@
         <div class="card-header d-flex align-items-center justify-content-between">
             <h3 class="card-title mb-0">
                 <i class="ti ti-clock-hour-4 me-2" style="color: var(--sh-warning);"></i>
-                Pengajuan Menunggu Persetujuan
+                Pengajuan Menunggu Proses
             </h3>
             @if($pendingRequests->isNotEmpty())
             <span class="sh-badge sh-badge-pending">{{ $pendingRequests->count() }} antrian</span>
@@ -99,58 +123,20 @@
         @if($pendingRequests->isEmpty())
         <div class="card-body py-5">
             <div class="text-center">
-                <div class="sh-empty-icon">
-                    <i class="ti ti-mood-happy"></i>
-                </div>
+                <div class="sh-empty-icon"><i class="ti ti-mood-happy"></i></div>
                 <h4 class="fw-bold text-dark mb-1">Semua Beres!</h4>
-                <p class="text-muted mb-0">Tidak ada pengajuan cuti yang menunggu persetujuan saat ini.</p>
+                <p class="text-muted mb-0">Tidak ada pengajuan cuti yang menunggu proses saat ini.</p>
             </div>
         </div>
         @else
-        {{-- Mobile: cards --}}
-        <div class="card-body d-md-none">
-            @foreach($pendingRequests as $req)
-            <div class="card sh-history-card status-pending mb-3">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-start justify-content-between mb-2">
-                        <div>
-                            <div class="fw-bold" style="font-size: 0.95rem;">{{ $req->user->name }}</div>
-                            <div class="text-muted" style="font-size: 0.78rem;">NIP: {{ $req->user->nip }}</div>
-                        </div>
-                        <span class="sh-badge sh-badge-pending">
-                            <i class="ti ti-clock"></i> {{ $req->total_days }} hari
-                        </span>
-                    </div>
-                    <div class="text-muted mb-2" style="font-size: 0.82rem;">
-                        <i class="ti ti-calendar me-1"></i>
-                        {{ $req->start_date->format('d M Y') }} &mdash; {{ $req->end_date->format('d M Y') }}
-                    </div>
-                    <div class="mb-3" style="font-size: 0.85rem; color: #475569;">
-                        {{ Str::limit($req->reason, 80) }}
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm sh-btn-success flex-fill" data-bs-toggle="modal" data-bs-target="#approveModal{{ $req->id }}">
-                            <i class="ti ti-check me-1"></i> Setujui
-                        </button>
-                        <button class="btn btn-sm sh-btn-danger flex-fill" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $req->id }}">
-                            <i class="ti ti-x me-1"></i> Tolak
-                        </button>
-                    </div>
-                </div>
-            </div>
-            @include('partials.admin-modals', ['req' => $req])
-            @endforeach
-        </div>
-
-        {{-- Desktop: table --}}
-        <div class="table-responsive d-none d-md-block">
+        <div class="table-responsive">
             <table class="table sh-table mb-0">
                 <thead>
                     <tr>
                         <th>Pegawai</th>
-                        <th>Periode Cuti</th>
-                        <th>Durasi</th>
-                        <th>Alasan</th>
+                        <th>Jenis Cuti</th>
+                        <th>Periode</th>
+                        <th>Status</th>
                         <th class="text-end">Aksi</th>
                     </tr>
                 </thead>
@@ -164,32 +150,22 @@
                                 </div>
                                 <div>
                                     <div class="fw-bold" style="font-size: 0.9rem;">{{ $req->user->name }}</div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">NIP: {{ $req->user->nip }} &middot; Sisa: {{ $req->user->leave_balance }} hari</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">{{ $req->user->jabatan ?? $req->user->nip }}</div>
                                 </div>
                             </div>
                         </td>
+                        <td><span style="font-size: 0.85rem;">{{ $req->type_label }}</span></td>
                         <td>
-                            <div style="font-size: 0.88rem;">{{ $req->start_date->format('d M Y') }}</div>
-                            <div class="text-muted" style="font-size: 0.78rem;">s.d. {{ $req->end_date->format('d M Y') }}</div>
+                            <div style="font-size: 0.85rem;">{{ $req->start_date->format('d M Y') }}</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">s.d. {{ $req->end_date->format('d M Y') }} &middot; {{ $req->total_days }} hari</div>
                         </td>
                         <td>
-                            <span class="sh-badge sh-badge-pending">
-                                <i class="ti ti-clock"></i> {{ $req->total_days }} hari
-                            </span>
-                        </td>
-                        <td style="max-width: 200px;">
-                            <span style="font-size: 0.85rem; color: #475569;">{{ Str::limit($req->reason, 60) }}</span>
+                            <span class="sh-badge sh-badge-pending">{{ $req->status_label }}</span>
                         </td>
                         <td class="text-end">
-                            <div class="d-flex gap-1 justify-content-end">
-                                <button class="btn btn-sm sh-btn-success" data-bs-toggle="modal" data-bs-target="#approveModal{{ $req->id }}" title="Setujui">
-                                    <i class="ti ti-check me-1"></i> Setujui
-                                </button>
-                                <button class="btn btn-sm sh-btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $req->id }}" title="Tolak">
-                                    <i class="ti ti-x me-1"></i> Tolak
-                                </button>
-                            </div>
-                            @include('partials.admin-modals', ['req' => $req])
+                            <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">
+                                <i class="ti ti-eye"></i>
+                            </a>
                         </td>
                     </tr>
                 @endforeach
@@ -205,7 +181,7 @@
         <div class="card-header">
             <h3 class="card-title mb-0">
                 <i class="ti ti-history me-2" style="color: #64748b;"></i>
-                Riwayat Keputusan Terbaru
+                Keputusan Terbaru
             </h3>
         </div>
         <div class="table-responsive">
@@ -213,38 +189,452 @@
                 <thead>
                     <tr>
                         <th>Pegawai</th>
+                        <th>Jenis</th>
                         <th>Periode</th>
-                        <th>Durasi</th>
                         <th>Status</th>
-                        <th>Catatan</th>
                     </tr>
                 </thead>
                 <tbody>
                 @foreach($recentDecisions as $req)
                     <tr>
+                        <td class="fw-semibold" style="font-size: 0.9rem;">{{ $req->user->name }}</td>
+                        <td style="font-size: 0.85rem;">{{ $req->type_label }}</td>
+                        <td style="font-size: 0.85rem;">{{ $req->start_date->format('d/m/Y') }} - {{ $req->end_date->format('d/m/Y') }}</td>
                         <td>
-                            <div class="fw-semibold" style="font-size: 0.9rem;">{{ $req->user->name }}</div>
-                        </td>
-                        <td style="font-size: 0.85rem;">
-                            {{ $req->start_date->format('d/m/Y') }} - {{ $req->end_date->format('d/m/Y') }}
-                        </td>
-                        <td>
-                            <span class="badge bg-blue-lt" style="border-radius: 50px;">{{ $req->total_days }} hari</span>
-                        </td>
-                        <td>
-                            @if($req->status === 'approved')
+                            @if($req->isApproved())
                                 <span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i> Disetujui</span>
-                            @else
+                            @elseif($req->isRejected())
                                 <span class="sh-badge sh-badge-rejected"><i class="ti ti-circle-x"></i> Ditolak</span>
+                            @else
+                                <span class="sh-badge sh-badge-pending">{{ $req->status_label }}</span>
                             @endif
-                        </td>
-                        <td style="max-width: 200px;">
-                            <span class="text-muted" style="font-size: 0.85rem;">{{ $req->admin_note ?? '-' }}</span>
                         </td>
                     </tr>
                 @endforeach
                 </tbody>
             </table>
+        </div>
+    </div>
+    @endif
+
+@elseif($user->isKetua())
+    {{-- ============================= --}}
+    {{--       KETUA DASHBOARD         --}}
+    {{-- ============================= --}}
+
+    {{-- Stats --}}
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-4 animate-in">
+            <div class="card sh-stat-card stat-warning">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="sh-stat-label mb-2">Perlu Keputusan</div>
+                            <div class="sh-stat-number" style="color: var(--sh-warning);">{{ $needsDecision->count() }}</div>
+                            <div class="text-muted mt-1" style="font-size: 0.8rem;">sudah dipertimbangkan atasan</div>
+                        </div>
+                        <div class="sh-stat-icon icon-warning">
+                            <i class="ti ti-gavel"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4 animate-in">
+            <div class="card sh-stat-card stat-primary">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="sh-stat-label mb-2">Pengajuan Langsung</div>
+                            <div class="sh-stat-number" style="color: var(--sh-primary);">{{ $directRequests->count() }}</div>
+                            <div class="text-muted mt-1" style="font-size: 0.8rem;">bawahan langsung</div>
+                        </div>
+                        <div class="sh-stat-icon icon-primary">
+                            <i class="ti ti-file-text"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-lg-4 animate-in">
+            <div class="card sh-stat-card stat-success">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="sh-stat-label mb-2">Keputusan Saya</div>
+                            <div class="sh-stat-number" style="color: var(--sh-success);">{{ $recentDecisions->count() }}</div>
+                            <div class="text-muted mt-1" style="font-size: 0.8rem;">total keputusan</div>
+                        </div>
+                        <div class="sh-stat-icon icon-success">
+                            <i class="ti ti-circle-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Needs Decision (already reviewed by atasan) --}}
+    <div class="card sh-card mb-4">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <h3 class="card-title mb-0">
+                <i class="ti ti-gavel me-2" style="color: var(--sh-warning);"></i>
+                Menunggu Keputusan Anda
+            </h3>
+            @if($needsDecision->isNotEmpty())
+            <span class="sh-badge sh-badge-pending">{{ $needsDecision->count() }} antrian</span>
+            @endif
+        </div>
+        @if($needsDecision->isEmpty())
+        <div class="card-body py-5">
+            <div class="text-center">
+                <div class="sh-empty-icon"><i class="ti ti-mood-happy"></i></div>
+                <h4 class="fw-bold text-dark mb-1">Tidak Ada Antrian</h4>
+                <p class="text-muted mb-0">Tidak ada pengajuan yang menunggu keputusan Anda saat ini.</p>
+            </div>
+        </div>
+        @else
+        <div class="card-body p-3">
+            @foreach($needsDecision as $req)
+            <div class="card sh-history-card status-{{ $req->status }} mb-3">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="sh-user-avatar" style="width: 40px; height: 40px; font-size: 0.8rem; background: var(--sh-primary-light); color: var(--sh-primary); border: none; border-radius: 10px;">
+                                {{ strtoupper(substr($req->user->name, 0, 2)) }}
+                            </div>
+                            <div>
+                                <div class="fw-bold" style="font-size: 0.95rem;">{{ $req->user->name }}</div>
+                                <div class="text-muted" style="font-size: 0.78rem;">{{ $req->user->jabatan ?? $req->user->nip }}</div>
+                            </div>
+                        </div>
+                        <span class="sh-badge sh-badge-pending">{{ $req->type_label }}</span>
+                    </div>
+                    <div class="row g-2 mb-2" style="font-size: 0.82rem;">
+                        <div class="col-sm-6">
+                            <i class="ti ti-calendar me-1 text-muted"></i>
+                            {{ $req->start_date->format('d M Y') }} &mdash; {{ $req->end_date->format('d M Y') }}
+                        </div>
+                        <div class="col-sm-6">
+                            <i class="ti ti-clock me-1 text-muted"></i>
+                            {{ $req->total_days }} hari
+                            @if($req->total_hari_kerja)
+                                ({{ $req->total_hari_kerja }} hari kerja)
+                            @endif
+                        </div>
+                    </div>
+                    @if($req->atasanReviewer)
+                    <div class="mb-2" style="background: var(--sh-primary-light); border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.82rem;">
+                        <i class="ti ti-user-check me-1" style="color: var(--sh-primary);"></i>
+                        <strong>Pertimbangan {{ $req->atasanReviewer->name }}:</strong>
+                        @if($req->pertimbangan_atasan === 'setuju')
+                            <span style="color: var(--sh-success);">Disetujui</span>
+                        @elseif($req->pertimbangan_atasan === 'ubah')
+                            <span style="color: var(--sh-primary);">Perubahan</span>
+                        @elseif($req->pertimbangan_atasan === 'tangguhkan')
+                            <span style="color: var(--sh-warning);">Ditangguhkan</span>
+                        @endif
+                        @if($req->catatan_atasan)
+                            &mdash; {{ Str::limit($req->catatan_atasan, 80) }}
+                        @endif
+                    </div>
+                    @endif
+                    <div class="d-flex gap-2 mt-2">
+                        <button class="btn btn-sm sh-btn-primary flex-fill" data-bs-toggle="modal" data-bs-target="#decisionModal{{ $req->id }}">
+                            <i class="ti ti-gavel me-1"></i> Beri Keputusan
+                        </button>
+                        <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">
+                            <i class="ti ti-eye"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @include('partials.pejabat-decision-modal', ['req' => $req])
+            @endforeach
+        </div>
+        @endif
+    </div>
+
+    {{-- Direct Requests (bawahan langsung ketua) --}}
+    @if($directRequests->isNotEmpty())
+    <div class="card sh-card mb-4">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <h3 class="card-title mb-0">
+                <i class="ti ti-file-text me-2" style="color: var(--sh-primary);"></i>
+                Pengajuan Bawahan Langsung
+            </h3>
+            <span class="sh-badge sh-badge-pending">{{ $directRequests->count() }}</span>
+        </div>
+        <div class="card-body p-3">
+            @foreach($directRequests as $req)
+            <div class="card sh-history-card status-{{ $req->status }} mb-3">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <div class="fw-bold" style="font-size: 0.95rem;">{{ $req->user->name }}</div>
+                            <div class="text-muted" style="font-size: 0.78rem;">{{ $req->type_label }} &middot; {{ $req->total_days }} hari</div>
+                        </div>
+                    </div>
+                    <div class="text-muted mb-2" style="font-size: 0.82rem;">
+                        <i class="ti ti-calendar me-1"></i>
+                        {{ $req->start_date->format('d M Y') }} &mdash; {{ $req->end_date->format('d M Y') }}
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm sh-btn-primary flex-fill" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $req->id }}">
+                            <i class="ti ti-checklist me-1"></i> Pertimbangan
+                        </button>
+                        <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">
+                            <i class="ti ti-eye"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @include('partials.atasan-review-modal', ['req' => $req])
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Ketua's Own Leave --}}
+    @if(isset($leaveRequests) && $leaveRequests->isNotEmpty())
+    <div class="card sh-card">
+        <div class="card-header">
+            <h3 class="card-title mb-0">
+                <i class="ti ti-list-details me-2" style="color: #64748b;"></i>
+                Pengajuan Cuti Saya
+            </h3>
+        </div>
+        <div class="table-responsive">
+            <table class="table sh-table mb-0">
+                <thead>
+                    <tr><th>Jenis</th><th>Periode</th><th>Durasi</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                @foreach($leaveRequests as $req)
+                    <tr>
+                        <td style="font-size: 0.85rem;">{{ $req->type_label }}</td>
+                        <td style="font-size: 0.85rem;">{{ $req->start_date->format('d M Y') }} - {{ $req->end_date->format('d M Y') }}</td>
+                        <td><span class="badge bg-blue-lt" style="border-radius: 50px;">{{ $req->total_days }} hari</span></td>
+                        <td>
+                            @if($req->isApproved())
+                                <span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i> Disetujui</span>
+                            @elseif($req->isRejected())
+                                <span class="sh-badge sh-badge-rejected"><i class="ti ti-circle-x"></i> Ditolak</span>
+                            @else
+                                <span class="sh-badge sh-badge-pending"><i class="ti ti-clock"></i> {{ $req->status_label }}</span>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+@elseif($user->isAtasan())
+    {{-- ============================= --}}
+    {{--      ATASAN DASHBOARD         --}}
+    {{-- ============================= --}}
+
+    {{-- Stats --}}
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-4 animate-in">
+            <div class="card sh-stat-card stat-warning">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="sh-stat-label mb-2">Perlu Pertimbangan</div>
+                            <div class="sh-stat-number" style="color: var(--sh-warning);">{{ $pendingReview->count() }}</div>
+                            <div class="text-muted mt-1" style="font-size: 0.8rem;">dari bawahan Anda</div>
+                        </div>
+                        <div class="sh-stat-icon icon-warning">
+                            <i class="ti ti-checklist"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4 animate-in">
+            <div class="card sh-stat-card stat-success">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="sh-stat-label mb-2">Sudah Dipertimbangkan</div>
+                            <div class="sh-stat-number" style="color: var(--sh-success);">{{ $reviewedByMe->count() }}</div>
+                            <div class="text-muted mt-1" style="font-size: 0.8rem;">riwayat pertimbangan</div>
+                        </div>
+                        <div class="sh-stat-icon icon-success">
+                            <i class="ti ti-circle-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-lg-4 animate-in">
+            <div class="card sh-stat-card stat-primary">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="sh-stat-label mb-2">Cuti Saya</div>
+                            <div class="sh-stat-number" style="color: var(--sh-primary);">{{ $user->leave_balance }}</div>
+                            <div class="text-muted mt-1" style="font-size: 0.8rem;">hari sisa cuti</div>
+                        </div>
+                        <div class="sh-stat-icon icon-primary">
+                            <i class="ti ti-calendar-stats"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Pending Review --}}
+    <div class="card sh-card mb-4">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <h3 class="card-title mb-0">
+                <i class="ti ti-checklist me-2" style="color: var(--sh-warning);"></i>
+                Menunggu Pertimbangan Anda
+            </h3>
+            @if($pendingReview->isNotEmpty())
+            <span class="sh-badge sh-badge-pending">{{ $pendingReview->count() }} antrian</span>
+            @endif
+        </div>
+        @if($pendingReview->isEmpty())
+        <div class="card-body py-5">
+            <div class="text-center">
+                <div class="sh-empty-icon"><i class="ti ti-mood-happy"></i></div>
+                <h4 class="fw-bold text-dark mb-1">Tidak Ada Antrian</h4>
+                <p class="text-muted mb-0">Tidak ada pengajuan bawahan yang menunggu pertimbangan Anda.</p>
+            </div>
+        </div>
+        @else
+        <div class="card-body p-3">
+            @foreach($pendingReview as $req)
+            <div class="card sh-history-card status-{{ $req->status }} mb-3">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="sh-user-avatar" style="width: 40px; height: 40px; font-size: 0.8rem; background: var(--sh-primary-light); color: var(--sh-primary); border: none; border-radius: 10px;">
+                                {{ strtoupper(substr($req->user->name, 0, 2)) }}
+                            </div>
+                            <div>
+                                <div class="fw-bold" style="font-size: 0.95rem;">{{ $req->user->name }}</div>
+                                <div class="text-muted" style="font-size: 0.78rem;">{{ $req->user->jabatan ?? $req->user->nip }}</div>
+                            </div>
+                        </div>
+                        <span class="sh-badge sh-badge-pending">{{ $req->type_label }}</span>
+                    </div>
+                    <div class="row g-2 mb-2" style="font-size: 0.82rem;">
+                        <div class="col-sm-6">
+                            <i class="ti ti-calendar me-1 text-muted"></i>
+                            {{ $req->start_date->format('d M Y') }} &mdash; {{ $req->end_date->format('d M Y') }}
+                        </div>
+                        <div class="col-sm-6">
+                            <i class="ti ti-clock me-1 text-muted"></i>
+                            {{ $req->total_days }} hari
+                        </div>
+                    </div>
+                    @if($req->reason)
+                    <div class="mb-2" style="font-size: 0.82rem; color: #475569;">
+                        {{ Str::limit($req->reason, 100) }}
+                    </div>
+                    @endif
+                    <div class="d-flex gap-2 mt-2">
+                        <button class="btn btn-sm sh-btn-primary flex-fill" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $req->id }}">
+                            <i class="ti ti-checklist me-1"></i> Beri Pertimbangan
+                        </button>
+                        <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">
+                            <i class="ti ti-eye"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @include('partials.atasan-review-modal', ['req' => $req])
+            @endforeach
+        </div>
+        @endif
+    </div>
+
+    {{-- Reviewed by Me --}}
+    @if($reviewedByMe->isNotEmpty())
+    <div class="card sh-card mb-4">
+        <div class="card-header">
+            <h3 class="card-title mb-0">
+                <i class="ti ti-history me-2" style="color: #64748b;"></i>
+                Riwayat Pertimbangan Saya
+            </h3>
+        </div>
+        <div class="table-responsive">
+            <table class="table sh-table mb-0">
+                <thead>
+                    <tr><th>Pemohon</th><th>Jenis</th><th>Periode</th><th>Pertimbangan</th><th>Status Akhir</th></tr>
+                </thead>
+                <tbody>
+                @foreach($reviewedByMe as $req)
+                    <tr>
+                        <td class="fw-semibold" style="font-size: 0.88rem;">{{ $req->user->name }}</td>
+                        <td style="font-size: 0.85rem;">{{ $req->type_label }}</td>
+                        <td style="font-size: 0.82rem;">{{ $req->start_date->format('d/m/Y') }} - {{ $req->end_date->format('d/m/Y') }}</td>
+                        <td>
+                            @if($req->pertimbangan_atasan === 'setuju')
+                                <span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i> Setuju</span>
+                            @elseif($req->pertimbangan_atasan === 'ubah')
+                                <span class="sh-badge" style="background: var(--sh-primary-light); color: var(--sh-primary);"><i class="ti ti-edit"></i> Ubah</span>
+                            @elseif($req->pertimbangan_atasan === 'tangguhkan')
+                                <span class="sh-badge sh-badge-pending"><i class="ti ti-clock-pause"></i> Tangguhkan</span>
+                            @elseif($req->pertimbangan_atasan === 'tolak')
+                                <span class="sh-badge sh-badge-rejected"><i class="ti ti-circle-x"></i> Tolak</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if($req->isApproved())
+                                <span class="sh-badge sh-badge-approved">Disetujui</span>
+                            @elseif($req->isRejected())
+                                <span class="sh-badge sh-badge-rejected">Ditolak</span>
+                            @else
+                                <span class="sh-badge sh-badge-pending">{{ $req->status_label }}</span>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    {{-- Atasan's Own Leave --}}
+    @if(isset($leaveRequests) && $leaveRequests->isNotEmpty())
+    <div class="card sh-card">
+        <div class="card-header">
+            <h3 class="card-title mb-0">
+                <i class="ti ti-list-details me-2" style="color: var(--sh-primary);"></i>
+                Riwayat Cuti Saya
+            </h3>
+        </div>
+        <div class="card-body p-3">
+            @foreach($leaveRequests as $req)
+            <div class="card sh-history-card status-{{ $req->status }} mb-3">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="fw-bold" style="font-size: 0.9rem;">{{ $req->type_label }}</span>
+                            <div class="text-muted" style="font-size: 0.78rem;">
+                                {{ $req->start_date->format('d M Y') }} &mdash; {{ $req->end_date->format('d M Y') }} &middot; {{ $req->total_days }} hari
+                            </div>
+                        </div>
+                        @if($req->isApproved())
+                            <span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i> Disetujui</span>
+                        @elseif($req->isRejected())
+                            <span class="sh-badge sh-badge-rejected"><i class="ti ti-circle-x"></i> Ditolak</span>
+                        @else
+                            <span class="sh-badge sh-badge-pending"><i class="ti ti-clock"></i> {{ $req->status_label }}</span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endforeach
         </div>
     </div>
     @endif
@@ -261,8 +651,28 @@
                 <div class="row align-items-center">
                     <div class="col">
                         <div style="font-size: 0.85rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 0.5rem;">
-                            <i class="ti ti-calendar-stats me-1"></i> Sisa Cuti Anda
+                            <i class="ti ti-calendar-stats me-1"></i> Sisa Cuti Tahunan
                         </div>
+                        @if($cutiInfo)
+                        <div class="d-flex align-items-baseline gap-2 mb-2">
+                            <span class="sh-hero-number">{{ $cutiInfo['sisa_cuti'] ?? $user->leave_balance }}</span>
+                            <span style="font-size: 1.1rem; opacity: 0.8;">/ {{ $cutiInfo['total_hak'] ?? 12 }} hari</span>
+                        </div>
+                        <div class="sh-hero-progress mb-2" style="max-width: 280px;">
+                            @php $hakTotal = $cutiInfo['total_hak'] ?? 12; @endphp
+                            <div class="sh-hero-progress-bar" style="width: {{ $hakTotal > 0 ? (($cutiInfo['sisa_cuti'] ?? $user->leave_balance) / $hakTotal) * 100 : 0 }}%;"></div>
+                        </div>
+                        <div style="font-size: 0.82rem; opacity: 0.7;">
+                            Hak: {{ $cutiInfo['hak_cuti'] ?? 12 }} hari
+                            @if(($cutiInfo['carry_over'] ?? 0) > 0)
+                                + Carry Over: {{ $cutiInfo['carry_over'] }} hari
+                            @endif
+                            @if(($cutiInfo['tambahan_terpencil'] ?? 0) > 0)
+                                + Terpencil: {{ $cutiInfo['tambahan_terpencil'] }} hari
+                            @endif
+                            &mdash; Terpakai: {{ $cutiInfo['cuti_diambil'] ?? 0 }} hari
+                        </div>
+                        @else
                         <div class="d-flex align-items-baseline gap-2 mb-2">
                             <span class="sh-hero-number">{{ $user->leave_balance }}</span>
                             <span style="font-size: 1.1rem; opacity: 0.8;">/ 12 hari</span>
@@ -271,8 +681,13 @@
                             <div class="sh-hero-progress-bar" style="width: {{ ($user->leave_balance / 12) * 100 }}%;"></div>
                         </div>
                         <div style="font-size: 0.82rem; opacity: 0.7;">
-                            Terpakai {{ 12 - $user->leave_balance }} hari dari total 12 hari jatah cuti tahunan
+                            @if(!$user->sudahBekerjaSatuTahun())
+                                <i class="ti ti-alert-triangle me-1"></i> Anda belum bekerja 1 tahun. Belum berhak cuti tahunan.
+                            @else
+                                Terpakai {{ 12 - $user->leave_balance }} hari dari total 12 hari jatah cuti tahunan
+                            @endif
                         </div>
+                        @endif
                     </div>
                     <div class="col-auto d-none d-sm-block">
                         <i class="ti ti-beach" style="font-size: 5rem; opacity: 0.2;"></i>
@@ -289,8 +704,8 @@
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="sh-stat-label mb-1">Pending</div>
-                            <div class="sh-stat-number" style="color: var(--sh-warning);">{{ $leaveRequests->where('status', 'pending')->count() }}</div>
+                            <div class="sh-stat-label mb-1">Diproses</div>
+                            <div class="sh-stat-number" style="color: var(--sh-warning);">{{ $leaveRequests->filter(fn($r) => $r->isPending())->count() }}</div>
                         </div>
                         <div class="sh-stat-icon icon-warning">
                             <i class="ti ti-clock-hour-4"></i>
@@ -305,7 +720,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="sh-stat-label mb-1">Disetujui</div>
-                            <div class="sh-stat-number" style="color: var(--sh-success);">{{ $leaveRequests->where('status', 'approved')->count() }}</div>
+                            <div class="sh-stat-number" style="color: var(--sh-success);">{{ $leaveRequests->filter(fn($r) => $r->isApproved())->count() }}</div>
                         </div>
                         <div class="sh-stat-icon icon-success">
                             <i class="ti ti-circle-check"></i>
@@ -320,7 +735,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="sh-stat-label mb-1">Ditolak</div>
-                            <div class="sh-stat-number" style="color: var(--sh-danger);">{{ $leaveRequests->where('status', 'rejected')->count() }}</div>
+                            <div class="sh-stat-number" style="color: var(--sh-danger);">{{ $leaveRequests->filter(fn($r) => $r->isRejected())->count() }}</div>
                         </div>
                         <div class="sh-stat-icon icon-danger">
                             <i class="ti ti-circle-x"></i>
@@ -344,12 +759,10 @@
         @if($leaveRequests->isEmpty())
         <div class="card-body py-5">
             <div class="text-center">
-                <div class="sh-empty-icon">
-                    <i class="ti ti-calendar-off"></i>
-                </div>
+                <div class="sh-empty-icon"><i class="ti ti-calendar-off"></i></div>
                 <h4 class="fw-bold text-dark mb-1">Belum Ada Pengajuan</h4>
                 <p class="text-muted mb-3">Anda belum pernah mengajukan cuti. Mulai dengan klik tombol di bawah.</p>
-                <a href="{{ route('leave.create') }}" class="btn btn-primary sh-btn-primary">
+                <a href="{{ route('leave.select-type') }}" class="btn btn-primary sh-btn-primary">
                     <i class="ti ti-file-plus me-1"></i> Ajukan Cuti Pertama Anda
                 </a>
             </div>
@@ -364,30 +777,29 @@
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
                             <div class="fw-bold" style="font-size: 0.9rem;">
-                                <i class="ti ti-calendar me-1" style="color: var(--sh-primary);"></i>
-                                {{ $req->start_date->format('d M Y') }}
+                                {{ $req->type_label }}
                             </div>
                             <div class="text-muted" style="font-size: 0.78rem;">
-                                s.d. {{ $req->end_date->format('d M Y') }} &middot; {{ $req->total_days }} hari
+                                <i class="ti ti-calendar me-1"></i>
+                                {{ $req->start_date->format('d M Y') }} s.d. {{ $req->end_date->format('d M Y') }} &middot; {{ $req->total_days }} hari
                             </div>
                         </div>
-                        @if($req->status === 'pending')
-                            <span class="sh-badge sh-badge-pending"><i class="ti ti-clock"></i> Pending</span>
-                        @elseif($req->status === 'approved')
+                        @if($req->isApproved())
                             <span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i> Disetujui</span>
-                        @else
+                        @elseif($req->isRejected())
                             <span class="sh-badge sh-badge-rejected"><i class="ti ti-circle-x"></i> Ditolak</span>
+                        @else
+                            <span class="sh-badge sh-badge-pending"><i class="ti ti-clock"></i> {{ $req->status_label }}</span>
                         @endif
                     </div>
-                    <div style="font-size: 0.85rem; color: #475569; margin-bottom: 0.5rem;">
-                        {{ Str::limit($req->reason, 80) }}
-                    </div>
-                    @if($req->admin_note)
-                    <div style="font-size: 0.8rem; background: var(--sh-gray-100); border-radius: 8px; padding: 0.5rem 0.75rem; margin-top: 0.5rem;">
-                        <i class="ti ti-message me-1" style="color: var(--sh-primary);"></i>
-                        <span class="text-muted">{{ $req->admin_note }}</span>
-                    </div>
+                    @if($req->reason)
+                    <div style="font-size: 0.85rem; color: #475569;">{{ Str::limit($req->reason, 80) }}</div>
                     @endif
+                    <div class="mt-2">
+                        <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px; font-size: 0.78rem;">
+                            <i class="ti ti-eye me-1"></i> Detail
+                        </a>
+                    </div>
                 </div>
             </div>
             @endforeach
@@ -398,43 +810,39 @@
             <table class="table sh-table mb-0">
                 <thead>
                     <tr>
+                        <th>Jenis Cuti</th>
                         <th>Periode</th>
                         <th>Durasi</th>
-                        <th>Alasan</th>
                         <th>Status</th>
-                        <th>Catatan Admin</th>
+                        <th class="text-end">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                 @foreach($leaveRequests as $req)
                     <tr>
                         <td>
-                            <div class="fw-semibold" style="font-size: 0.88rem;">{{ $req->start_date->format('d M Y') }}</div>
+                            <span class="fw-semibold" style="font-size: 0.88rem;">{{ $req->type_label }}</span>
+                        </td>
+                        <td>
+                            <div style="font-size: 0.85rem;">{{ $req->start_date->format('d M Y') }}</div>
                             <div class="text-muted" style="font-size: 0.78rem;">s.d. {{ $req->end_date->format('d M Y') }}</div>
                         </td>
                         <td>
                             <span class="badge bg-blue-lt" style="border-radius: 50px;">{{ $req->total_days }} hari</span>
                         </td>
-                        <td style="max-width: 200px;">
-                            <span style="font-size: 0.85rem; color: #475569;">{{ Str::limit($req->reason, 50) }}</span>
-                        </td>
                         <td>
-                            @if($req->status === 'pending')
-                                <span class="sh-badge sh-badge-pending"><i class="ti ti-clock"></i> Pending</span>
-                            @elseif($req->status === 'approved')
+                            @if($req->isApproved())
                                 <span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i> Disetujui</span>
-                            @else
+                            @elseif($req->isRejected())
                                 <span class="sh-badge sh-badge-rejected"><i class="ti ti-circle-x"></i> Ditolak</span>
+                            @else
+                                <span class="sh-badge sh-badge-pending"><i class="ti ti-clock"></i> {{ $req->status_label }}</span>
                             @endif
                         </td>
-                        <td style="max-width: 180px;">
-                            @if($req->admin_note)
-                            <span style="font-size: 0.82rem; color: #64748b;">
-                                <i class="ti ti-message me-1"></i> {{ Str::limit($req->admin_note, 40) }}
-                            </span>
-                            @else
-                            <span class="text-muted" style="font-size: 0.82rem;">-</span>
-                            @endif
+                        <td class="text-end">
+                            <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">
+                                <i class="ti ti-eye"></i>
+                            </a>
                         </td>
                     </tr>
                 @endforeach
