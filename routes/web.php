@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LeaveRequestController;
+use App\Http\Controllers\PegawaiController;
 use Illuminate\Support\Facades\Route;
 
 // Guest routes
@@ -17,13 +18,37 @@ Route::middleware('auth')->group(function () {
     Route::get('/', fn () => redirect('/dashboard'));
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Pegawai: leave request
+    // === Pengajuan Cuti (semua pegawai termasuk atasan/ketua) ===
+    Route::get('/leave/select-type', [LeaveRequestController::class, 'selectType'])->name('leave.select-type');
     Route::get('/leave/create', [LeaveRequestController::class, 'create'])->name('leave.create');
     Route::post('/leave', [LeaveRequestController::class, 'store'])->name('leave.store');
+    Route::get('/leave/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave.show');
 
-    // Admin: approve/reject
+    // === Approval Workflow ===
+    // Atasan: pertimbangan level 1
+    Route::middleware('role:atasan,ketua,admin')->group(function () {
+        Route::post('/leave/{leaveRequest}/review', [LeaveRequestController::class, 'reviewAtasan'])->name('leave.review');
+    });
+
+    // Ketua/Pejabat Berwenang: keputusan final
+    Route::middleware('role:ketua,admin')->group(function () {
+        Route::post('/leave/{leaveRequest}/decide', [LeaveRequestController::class, 'decidePejabat'])->name('leave.decide');
+    });
+
+    // Admin backward compat: approve/reject langsung
     Route::middleware('admin')->group(function () {
         Route::post('/leave/{leaveRequest}/approve', [LeaveRequestController::class, 'approve'])->name('leave.approve');
         Route::post('/leave/{leaveRequest}/reject', [LeaveRequestController::class, 'reject'])->name('leave.reject');
+    });
+
+    // === Manajemen Pegawai (admin only) ===
+    Route::middleware('role:admin')->prefix('pegawai')->name('pegawai.')->group(function () {
+        Route::get('/', [PegawaiController::class, 'index'])->name('index');
+        Route::get('/create', [PegawaiController::class, 'create'])->name('create');
+        Route::post('/', [PegawaiController::class, 'store'])->name('store');
+        Route::get('/{pegawai}', [PegawaiController::class, 'show'])->name('show');
+        Route::get('/{pegawai}/edit', [PegawaiController::class, 'edit'])->name('edit');
+        Route::put('/{pegawai}', [PegawaiController::class, 'update'])->name('update');
+        Route::delete('/{pegawai}', [PegawaiController::class, 'destroy'])->name('destroy');
     });
 });
