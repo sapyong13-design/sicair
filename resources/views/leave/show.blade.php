@@ -153,6 +153,28 @@
                                 @endif
                             </td>
                         </tr>
+                        <tr>
+                            <td class="text-muted" style="padding: 0.75rem 1.25rem;">Banding</td>
+                            <td style="padding: 0.75rem 1.25rem;">
+                                @if(auth()->id() === $leaveRequest->user_id && $leaveRequest->isRejected())
+                                    <a href="{{ route('appeal.create', $leaveRequest) }}" class="btn btn-sm btn-danger">
+                                        <i class="ti ti-alert-triangle me-1"></i> Ajukan Banding
+                                    </a>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+
+                                @if($leaveRequest->appeals()->where('status', 'pending')->exists())
+                                    <div class="mt-2">
+                                        @foreach($leaveRequest->appeals()->where('status', 'pending')->get() as $appeal)
+                                            <a href="{{ route('appeal.show', $appeal) }}" class="btn btn-sm btn-outline-danger">
+                                                <i class="ti ti-clock me-1"></i> Banding Pending
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
