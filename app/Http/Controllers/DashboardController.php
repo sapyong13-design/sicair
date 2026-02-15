@@ -60,7 +60,7 @@ class DashboardController extends Controller
             ->toArray();
 
         // Chart data - monthly trend
-        $chartMonthly = LeaveRequest::selectRaw('MONTH(created_at) as bulan, count(*) as total')
+        $chartMonthly = LeaveRequest::selectRaw("strftime('%m', created_at) as bulan, count(*) as total")
             ->whereYear('created_at', date('Y'))
             ->groupBy('bulan')
             ->pluck('total', 'bulan')
