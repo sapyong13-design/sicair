@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id">
+<html lang="id" data-bs-theme="light">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
@@ -24,10 +24,77 @@
             --sh-danger-light: #fee2e2;
             --sh-gray-50: #f8faf8;
             --sh-gray-100: #f0f4f0;
+            --sh-body-bg: var(--sh-gray-50);
+            --sh-card-bg: #fff;
+            --sh-text: #1e293b;
+            --sh-text-muted: #64748b;
+            --sh-border: #e2e8f0;
         }
 
+        /* ===== Dark Mode ===== */
+        [data-bs-theme="dark"] {
+            --sh-body-bg: #0f172a;
+            --sh-card-bg: #1e293b;
+            --sh-text: #e2e8f0;
+            --sh-text-muted: #94a3b8;
+            --sh-gray-50: #1e293b;
+            --sh-gray-100: #334155;
+            --sh-border: #334155;
+            --sh-primary-light: #064e3b;
+            --sh-success-light: #064e3b;
+            --sh-warning-light: #451a03;
+            --sh-danger-light: #450a0a;
+            --sh-accent-light: #422006;
+        }
+        [data-bs-theme="dark"] body {
+            background-color: var(--sh-body-bg) !important;
+            color: var(--sh-text);
+        }
+        [data-bs-theme="dark"] .sh-card,
+        [data-bs-theme="dark"] .sh-stat-card,
+        [data-bs-theme="dark"] .card {
+            background: var(--sh-card-bg) !important;
+            border-color: var(--sh-border) !important;
+        }
+        [data-bs-theme="dark"] .sh-card .card-header {
+            background: var(--sh-card-bg) !important;
+            border-bottom-color: var(--sh-border) !important;
+        }
+        [data-bs-theme="dark"] .sh-table thead th {
+            background: var(--sh-gray-50) !important;
+            color: var(--sh-text-muted) !important;
+            border-bottom-color: var(--sh-border) !important;
+        }
+        [data-bs-theme="dark"] .sh-table tbody tr:hover {
+            background: var(--sh-gray-100) !important;
+        }
+        [data-bs-theme="dark"] .text-dark { color: var(--sh-text) !important; }
+        [data-bs-theme="dark"] .text-muted { color: var(--sh-text-muted) !important; }
+        [data-bs-theme="dark"] .form-control,
+        [data-bs-theme="dark"] .form-select {
+            background: var(--sh-gray-100) !important;
+            border-color: var(--sh-border) !important;
+            color: var(--sh-text) !important;
+        }
+        [data-bs-theme="dark"] .dropdown-menu {
+            background: var(--sh-card-bg) !important;
+            border-color: var(--sh-border) !important;
+        }
+        [data-bs-theme="dark"] .dropdown-item { color: var(--sh-text) !important; }
+        [data-bs-theme="dark"] .dropdown-item:hover { background: var(--sh-gray-100) !important; }
+        [data-bs-theme="dark"] .sh-footer {
+            background: linear-gradient(to right, #0f172a, #1e293b) !important;
+        }
+        [data-bs-theme="dark"] .modal-content { background: var(--sh-card-bg) !important; }
+        [data-bs-theme="dark"] .list-group-item { background: var(--sh-card-bg) !important; border-color: var(--sh-border) !important; }
+        [data-bs-theme="dark"] .sh-page-title { color: #4ade80 !important; }
+        [data-bs-theme="dark"] .sh-history-card { background: var(--sh-card-bg) !important; }
+        [data-bs-theme="dark"] .table { color: var(--sh-text) !important; }
+        [data-bs-theme="dark"] .table-bordered td,
+        [data-bs-theme="dark"] .table-bordered th { border-color: var(--sh-border) !important; }
+
         body {
-            background-color: var(--sh-gray-50);
+            background-color: var(--sh-body-bg);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
 
@@ -123,19 +190,20 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
             transition: all 0.3s ease;
             overflow: hidden;
+            background: var(--sh-card-bg);
         }
         .sh-card:hover {
             box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
             transform: translateY(-2px);
         }
         .sh-card .card-header {
-            background: #fff;
+            background: var(--sh-card-bg);
             border-bottom: 2px solid var(--sh-gray-100);
             padding: 1rem 1.25rem;
         }
         .sh-card .card-header .card-title {
             font-weight: 700;
-            color: #1e293b;
+            color: var(--sh-text);
         }
 
         /* --- Stat Card --- */
@@ -146,6 +214,7 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            background: var(--sh-card-bg);
         }
         .sh-stat-card::before {
             content: '';
@@ -186,7 +255,7 @@
         }
         .sh-stat-label {
             font-size: 0.8rem;
-            color: #64748b;
+            color: var(--sh-text-muted);
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -252,7 +321,7 @@
             font-size: 0.78rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            color: #64748b;
+            color: var(--sh-text-muted);
             border-bottom: 2px solid var(--sh-gray-100);
             padding: 0.85rem 1rem;
         }
@@ -320,6 +389,7 @@
             box-shadow: 0 1px 4px rgba(0,0,0,0.06);
             border-left: 4px solid var(--sh-gray-100);
             transition: all 0.2s ease;
+            background: var(--sh-card-bg);
         }
         .sh-history-card:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -403,12 +473,124 @@
             box-shadow: 0 0 0 4px rgba(22, 101, 52, 0.1) !important;
         }
 
+        /* ===== Fitur 3: Notification Badge ===== */
+        .sh-notif-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 50px;
+            background: var(--sh-danger);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            border: 2px solid #14532d;
+            animation: notifPulse 2s ease infinite;
+        }
+        @keyframes notifPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .sh-notif-unread {
+            background: var(--sh-primary-light) !important;
+        }
+
+        /* ===== Fitur 8: Loading States ===== */
+        .sh-btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.75;
+        }
+        .sh-btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-top: -8px;
+            margin-left: -8px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-right-color: currentColor;
+            border-radius: 50%;
+            animation: sh-spin 0.6s linear infinite;
+        }
+        .sh-btn-loading .sh-btn-text {
+            visibility: hidden;
+        }
+        @keyframes sh-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== Fitur 9: Dark Mode Toggle ===== */
+        .sh-dark-toggle {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .sh-dark-toggle:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* ===== Fitur 10: Calendar Styles ===== */
+        .sh-cal-today {
+            background: var(--sh-primary);
+            color: #fff !important;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .sh-cal-event {
+            font-size: 0.68rem;
+            padding: 1px 4px;
+            border-radius: 4px;
+            margin-bottom: 2px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .sh-cal-leave {
+            background: var(--sh-success-light);
+            color: var(--sh-success);
+            font-weight: 600;
+        }
+        .sh-cal-holiday {
+            background: var(--sh-danger-light);
+            color: var(--sh-danger);
+            font-weight: 600;
+        }
+
+        /* ===== Fitur 7: Chart container ===== */
+        .sh-chart-container {
+            position: relative;
+            height: 280px;
+        }
+
         /* --- Mobile optimizations --- */
         @media (max-width: 768px) {
             .sh-hero-number { font-size: 3.5rem; }
             .sh-stat-number { font-size: 1.5rem; }
             .sh-page-title { font-size: 1.25rem; }
             .container-xl { padding-left: 1rem; padding-right: 1rem; }
+            .sh-chart-container { height: 200px; }
         }
     </style>
 </head>
@@ -429,6 +611,26 @@
                 </span>
             </a>
             <div class="navbar-nav flex-row order-md-last">
+                {{-- Dark Mode Toggle --}}
+                <button class="sh-dark-toggle me-2" id="darkModeToggle" title="Toggle Dark Mode">
+                    <i class="ti ti-moon" id="darkModeIcon"></i>
+                </button>
+
+                {{-- Notification Bell --}}
+                @auth
+                <div class="nav-item me-2" style="position: relative;">
+                    <a href="{{ route('notifications') }}" class="sh-dark-toggle" title="Notifikasi" style="text-decoration: none;">
+                        <i class="ti ti-bell"></i>
+                        @php
+                            $unreadCount = \App\Models\Notification::where('user_id', Auth::id())->where('is_read', false)->count();
+                        @endphp
+                        @if($unreadCount > 0)
+                        <span class="sh-notif-badge">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
+                        @endif
+                    </a>
+                </div>
+                @endauth
+
                 <div class="nav-item dropdown">
                     <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown">
                         <div class="sh-user-avatar">
@@ -449,6 +651,16 @@
                         <a href="{{ route('profile') }}" class="dropdown-item py-2">
                             <i class="ti ti-user-circle me-2"></i> Profil Saya
                         </a>
+                        <a href="{{ route('notifications') }}" class="dropdown-item py-2">
+                            <i class="ti ti-bell me-2"></i> Notifikasi
+                            @if($unreadCount > 0)
+                            <span class="badge ms-1" style="background: var(--sh-danger); border-radius: 50px; font-size: 0.65rem;">{{ $unreadCount }}</span>
+                            @endif
+                        </a>
+                        <a href="{{ route('kalender') }}" class="dropdown-item py-2">
+                            <i class="ti ti-calendar me-2"></i> Kalender Cuti
+                        </a>
+                        <div class="dropdown-divider"></div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="dropdown-item text-danger py-2">
@@ -466,6 +678,14 @@
                             <a class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}" href="/dashboard">
                                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-layout-dashboard"></i></span>
                                 <span class="nav-link-title">Dashboard</span>
+                            </a>
+                        </li>
+
+                        {{-- Kalender Cuti: all roles --}}
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('kalender*') ? 'active' : '' }}" href="{{ route('kalender') }}">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-calendar"></i></span>
+                                <span class="nav-link-title">Kalender</span>
                             </a>
                         </li>
 
@@ -526,7 +746,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->is('hari-libur*') ? 'active' : '' }}" href="/hari-libur">
+                            <a class="nav-link {{ request()->is('hari-libur*') ? 'active' : '' }}" href="{{ route('hari-libur.index') }}">
                                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-calendar-off"></i></span>
                                 <span class="nav-link-title">Hari Libur</span>
                             </a>
@@ -586,6 +806,61 @@
 
     <!-- Tabler JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/js/tabler.min.js"></script>
+
+    {{-- Fitur 9: Dark Mode Toggle JS --}}
+    <script>
+    (function() {
+        const toggle = document.getElementById('darkModeToggle');
+        const icon = document.getElementById('darkModeIcon');
+        const html = document.documentElement;
+
+        // Load saved preference
+        const saved = localStorage.getItem('sh-theme');
+        if (saved === 'dark') {
+            html.setAttribute('data-bs-theme', 'dark');
+            icon.className = 'ti ti-sun';
+        }
+
+        toggle.addEventListener('click', function() {
+            const isDark = html.getAttribute('data-bs-theme') === 'dark';
+            if (isDark) {
+                html.setAttribute('data-bs-theme', 'light');
+                icon.className = 'ti ti-moon';
+                localStorage.setItem('sh-theme', 'light');
+            } else {
+                html.setAttribute('data-bs-theme', 'dark');
+                icon.className = 'ti ti-sun';
+                localStorage.setItem('sh-theme', 'dark');
+            }
+        });
+    })();
+    </script>
+
+    {{-- Fitur 8: Loading States JS --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                var btn = form.querySelector('button[type="submit"]');
+                if (btn && !btn.classList.contains('sh-btn-loading')) {
+                    // Wrap existing content
+                    var inner = btn.innerHTML;
+                    btn.innerHTML = '<span class="sh-btn-text">' + inner + '</span>';
+                    btn.classList.add('sh-btn-loading');
+                    btn.disabled = true;
+
+                    // Auto-reset after 10s in case of error
+                    setTimeout(function() {
+                        btn.classList.remove('sh-btn-loading');
+                        btn.disabled = false;
+                        btn.innerHTML = inner;
+                    }, 10000);
+                }
+            });
+        });
+    });
+    </script>
+
     @stack('scripts')
 </body>
 </html>

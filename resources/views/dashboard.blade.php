@@ -217,6 +217,55 @@
     </div>
     @endif
 
+    {{-- Fitur 7: Charts & Statistik --}}
+    <div class="row g-3 mt-2">
+        <div class="col-lg-6 animate-in">
+            <div class="card sh-card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="ti ti-chart-bar me-2" style="color: var(--sh-primary);"></i>
+                        Pengajuan per Jenis Cuti ({{ date('Y') }})
+                    </h3>
+                </div>
+                <div class="card-body p-3">
+                    <div class="sh-chart-container">
+                        <canvas id="chartByType"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 animate-in">
+            <div class="card sh-card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="ti ti-chart-line me-2" style="color: var(--sh-accent);"></i>
+                        Tren Bulanan ({{ date('Y') }})
+                    </h3>
+                </div>
+                <div class="card-body p-3">
+                    <div class="sh-chart-container">
+                        <canvas id="chartMonthly"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 animate-in">
+            <div class="card sh-card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="ti ti-chart-pie me-2" style="color: var(--sh-success);"></i>
+                        Distribusi Status ({{ date('Y') }})
+                    </h3>
+                </div>
+                <div class="card-body p-3">
+                    <div class="sh-chart-container">
+                        <canvas id="chartByStatus"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @elseif($user->isKetua())
     {{-- ============================= --}}
     {{--       KETUA DASHBOARD         --}}
@@ -746,6 +795,59 @@
         </div>
     </div>
 
+    {{-- Fitur 6: Search & Filter --}}
+    <div class="card sh-card mb-4 animate-in">
+        <div class="card-body p-3">
+            <form method="GET" action="{{ route('dashboard') }}">
+                <div class="row g-3 align-items-end">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label" style="font-weight: 600; font-size: 0.8rem;">
+                            <i class="ti ti-search me-1" style="color: var(--sh-primary);"></i> Cari Alasan
+                        </label>
+                        <input type="text" name="search" class="form-control" placeholder="Cari alasan cuti..."
+                               value="{{ request('search') }}"
+                               style="border-radius: 10px; border: 2px solid #e2e8f0; height: 42px;">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label" style="font-weight: 600; font-size: 0.8rem;">
+                            <i class="ti ti-category me-1" style="color: var(--sh-primary);"></i> Jenis
+                        </label>
+                        <select name="type" class="form-select" style="border-radius: 10px; border: 2px solid #e2e8f0; height: 42px;">
+                            <option value="">Semua Jenis</option>
+                            @foreach(\App\Models\LeaveRequest::typeLabels() as $key => $label)
+                            <option value="{{ $key }}" {{ request('type') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label" style="font-weight: 600; font-size: 0.8rem;">
+                            <i class="ti ti-filter me-1" style="color: var(--sh-primary);"></i> Status
+                        </label>
+                        <select name="status" class="form-select" style="border-radius: 10px; border: 2px solid #e2e8f0; height: 42px;">
+                            <option value="">Semua</option>
+                            <option value="diajukan" {{ request('status') === 'diajukan' ? 'selected' : '' }}>Diajukan</option>
+                            <option value="pertimbangan_atasan" {{ request('status') === 'pertimbangan_atasan' ? 'selected' : '' }}>Pertimbangan</option>
+                            <option value="disetujui" {{ request('status') === 'disetujui' ? 'selected' : '' }}>Disetujui</option>
+                            <option value="ditolak" {{ request('status') === 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary sh-btn-primary flex-fill" style="height: 42px;">
+                                <i class="ti ti-search me-1"></i> Filter
+                            </button>
+                            @if(request()->hasAny(['search', 'type', 'status']))
+                            <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary" style="border-radius: 10px; height: 42px; display: flex; align-items: center; justify-content: center;" title="Reset">
+                                <i class="ti ti-x"></i>
+                            </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- Leave History --}}
     <div class="card sh-card">
         <div class="card-header d-flex align-items-center justify-content-between">
@@ -851,5 +953,113 @@
         </div>
         @endif
     </div>
+@endif
+
+@if($user->isAdmin())
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    var textColor = isDark ? '#94a3b8' : '#64748b';
+    var gridColor = isDark ? '#334155' : '#f0f4f0';
+
+    Chart.defaults.color = textColor;
+    Chart.defaults.borderColor = gridColor;
+
+    // Chart by Type
+    var typeLabels = @json(array_map(fn($t) => \App\Models\LeaveRequest::typeLabels()[$t] ?? $t, array_keys($chartByType)));
+    var typeData = @json(array_values($chartByType));
+    new Chart(document.getElementById('chartByType'), {
+        type: 'bar',
+        data: {
+            labels: typeLabels,
+            datasets: [{
+                label: 'Jumlah',
+                data: typeData,
+                backgroundColor: ['#166534','#059669','#d97706','#dc2626','#7c3aed','#64748b'],
+                borderRadius: 8,
+                barThickness: 32
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        }
+    });
+
+    // Monthly Trend
+    var monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+    var monthlyData = new Array(12).fill(0);
+    var rawMonthly = @json($chartMonthly);
+    for (var m in rawMonthly) { monthlyData[parseInt(m) - 1] = rawMonthly[m]; }
+    new Chart(document.getElementById('chartMonthly'), {
+        type: 'line',
+        data: {
+            labels: monthNames,
+            datasets: [{
+                label: 'Pengajuan',
+                data: monthlyData,
+                borderColor: '#b8860b',
+                backgroundColor: 'rgba(184,134,11,0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#b8860b',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        }
+    });
+
+    // Status Distribution
+    var statusMap = @json(\App\Models\LeaveRequest::statusLabels());
+    var rawStatus = @json($chartByStatus);
+    var statusLabels = [], statusData = [], statusColors = [];
+    var colorMap = {
+        'diajukan': '#d97706', 'pertimbangan_atasan': '#f59e0b',
+        'disetujui': '#059669', 'approved': '#059669',
+        'ditolak': '#dc2626', 'rejected': '#dc2626',
+        'diubah': '#166534', 'ditangguhkan': '#b8860b', 'pending': '#d97706'
+    };
+    for (var s in rawStatus) {
+        statusLabels.push(statusMap[s] || s);
+        statusData.push(rawStatus[s]);
+        statusColors.push(colorMap[s] || '#64748b');
+    }
+    if (statusLabels.length > 0) {
+        new Chart(document.getElementById('chartByStatus'), {
+            type: 'doughnut',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusData,
+                    backgroundColor: statusColors,
+                    borderWidth: 2,
+                    borderColor: isDark ? '#1e293b' : '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 16 } }
+                }
+            }
+        });
+    }
+});
+</script>
+@endpush
 @endif
 @endsection

@@ -5,31 +5,28 @@ namespace App\Http\Controllers;
 use App\Models\LeaveRequest;
 use App\Models\User;
 use App\Services\CutiTahunanCalculator;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
-        // Admin: kelola pegawai, rekapitulasi, lihat semua data
         if ($user->isAdmin()) {
             return $this->adminDashboard($user);
         }
 
-        // Ketua PN: keputusan final approval
         if ($user->isKetua()) {
             return $this->ketuaDashboard($user);
         }
 
-        // Atasan: pertimbangan level 1
         if ($user->isAtasan()) {
-            return $this->atasanDashboard($user);
+            return $this->atasanDashboard($user, $request);
         }
 
-        // Pegawai: ajukan cuti, lihat riwayat
-        return $this->pegawaiDashboard($user);
+        return $this->pegawaiDashboard($user, $request);
     }
 
     private function adminDashboard(User $user)
@@ -55,18 +52,40 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        return view('dashboard', compact('user', 'pendingRequests', 'recentDecisions', 'totalPegawai'));
+        // Fitur 7: Chart data - leave requests by type
+        $chartByType = LeaveRequest::selectRaw('type, count(*) as total')
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('type')
+            ->pluck('total', 'type')
+            ->toArray();
+
+        // Chart data - monthly trend
+        $chartMonthly = LeaveRequest::selectRaw('MONTH(created_at) as bulan, count(*) as total')
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('bulan')
+            ->pluck('total', 'bulan')
+            ->toArray();
+
+        // Chart data - status distribution
+        $chartByStatus = LeaveRequest::selectRaw('status, count(*) as total')
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('status')
+            ->pluck('total', 'status')
+            ->toArray();
+
+        return view('dashboard', compact(
+            'user', 'pendingRequests', 'recentDecisions', 'totalPegawai',
+            'chartByType', 'chartMonthly', 'chartByStatus'
+        ));
     }
 
     private function ketuaDashboard(User $user)
     {
-        // Pengajuan yang butuh keputusan Ketua (sudah dipertimbangkan atasan)
         $needsDecision = LeaveRequest::with(['user', 'atasanReviewer'])
             ->where('status', LeaveRequest::STATUS_PERTIMBANGAN)
             ->latest()
             ->get();
 
-        // Pengajuan baru langsung ke ketua (jika tidak punya atasan)
         $directRequests = LeaveRequest::with('user')
             ->where('status', LeaveRequest::STATUS_DIAJUKAN)
             ->whereHas('user', function ($q) use ($user) {
@@ -86,9 +105,8 @@ class DashboardController extends Controller
         return view('dashboard', compact('user', 'needsDecision', 'directRequests', 'recentDecisions', 'leaveRequests'));
     }
 
-    private function atasanDashboard(User $user)
+    private function atasanDashboard(User $user, Request $request)
     {
-        // Pengajuan bawahan yang perlu pertimbangan
         $pendingReview = LeaveRequest::with('user')
             ->where('status', LeaveRequest::STATUS_DIAJUKAN)
             ->whereHas('user', function ($q) use ($user) {
@@ -103,14 +121,40 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        $leaveRequests = $user->leaveRequests()->latest()->get();
+        // Fitur 6: Search & filter for atasan's own leave
+        $leaveQuery = $user->leaveRequests()->latest();
+
+        if ($request->filled('search')) {
+            $leaveQuery->where('reason', 'like', '%' . $request->search . '%');
+        }
+        if ($request->filled('type')) {
+            $leaveQuery->where('type', $request->type);
+        }
+        if ($request->filled('status')) {
+            $leaveQuery->where('status', $request->status);
+        }
+
+        $leaveRequests = $leaveQuery->get();
 
         return view('dashboard', compact('user', 'pendingReview', 'reviewedByMe', 'leaveRequests'));
     }
 
-    private function pegawaiDashboard(User $user)
+    private function pegawaiDashboard(User $user, Request $request)
     {
-        $leaveRequests = $user->leaveRequests()->latest()->get();
+        // Fitur 6: Search & Filter
+        $leaveQuery = $user->leaveRequests()->latest();
+
+        if ($request->filled('search')) {
+            $leaveQuery->where('reason', 'like', '%' . $request->search . '%');
+        }
+        if ($request->filled('type')) {
+            $leaveQuery->where('type', $request->type);
+        }
+        if ($request->filled('status')) {
+            $leaveQuery->where('status', $request->status);
+        }
+
+        $leaveRequests = $leaveQuery->get();
 
         $cutiInfo = null;
         if ($user->sudahBekerjaSatuTahun()) {

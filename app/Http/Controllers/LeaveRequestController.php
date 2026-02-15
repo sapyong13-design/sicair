@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LeaveRequest;
+use App\Models\Notification;
 use App\Services\CutiTahunanCalculator;
 use App\Services\HariKerjaCalculator;
 use Carbon\Carbon;
@@ -97,6 +98,17 @@ class LeaveRequestController extends Controller
             'status' => LeaveRequest::STATUS_DIAJUKAN,
         ]);
 
+        // Kirim notifikasi ke atasan
+        if ($user->atasan_id) {
+            Notification::kirim(
+                $user->atasan_id,
+                'Pengajuan Cuti Baru',
+                "{$user->name} mengajukan " . LeaveRequest::typeLabels()[$type],
+                Notification::TYPE_CUTI_DIAJUKAN,
+                '/dashboard#pending-review'
+            );
+        }
+
         return redirect('/dashboard')->with('success', 'Pengajuan ' . LeaveRequest::typeLabels()[$type] . ' berhasil dikirim.');
     }
 
@@ -127,6 +139,15 @@ class LeaveRequestController extends Controller
                 'reviewed_at' => now(),
                 'status' => LeaveRequest::STATUS_DITOLAK,
             ]);
+
+            Notification::kirim(
+                $leaveRequest->user_id,
+                'Pengajuan Cuti Ditolak',
+                "Pengajuan {$leaveRequest->type_label} Anda ditolak oleh {$reviewer->name}.",
+                Notification::TYPE_CUTI_DITOLAK,
+                route('leave.show', $leaveRequest)
+            );
+
             return back()->with('success', 'Pengajuan cuti ditolak.');
         }
 
@@ -138,6 +159,15 @@ class LeaveRequestController extends Controller
             'reviewed_at' => now(),
             'status' => LeaveRequest::STATUS_PERTIMBANGAN,
         ]);
+
+        // Notifikasi ke pemohon
+        Notification::kirim(
+            $leaveRequest->user_id,
+            'Cuti Sedang Dipertimbangkan',
+            "Pengajuan {$leaveRequest->type_label} Anda telah dipertimbangkan oleh {$reviewer->name}.",
+            Notification::TYPE_CUTI_PERTIMBANGAN,
+            route('leave.show', $leaveRequest)
+        );
 
         return back()->with('success', 'Pertimbangan berhasil dikirim ke Pejabat Berwenang.');
     }
@@ -190,6 +220,16 @@ class LeaveRequestController extends Controller
             'tangguhkan' => 'ditangguhkan',
             'tolak' => 'ditolak',
         };
+
+        // Notifikasi ke pemohon
+        $notifType = $keputusan === 'setuju' ? Notification::TYPE_CUTI_DISETUJUI : ($keputusan === 'tolak' ? Notification::TYPE_CUTI_DITOLAK : Notification::TYPE_CUTI_PERTIMBANGAN);
+        Notification::kirim(
+            $leaveRequest->user_id,
+            'Keputusan Cuti: ' . ucfirst($label),
+            "Pengajuan {$leaveRequest->type_label} Anda telah {$label} oleh {$pejabat->name}.",
+            $notifType,
+            route('leave.show', $leaveRequest)
+        );
 
         return back()->with('success', "Pengajuan cuti {$leaveRequest->user->name} {$label}.");
     }
