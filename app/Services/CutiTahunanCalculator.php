@@ -153,6 +153,11 @@ class CutiTahunanCalculator
 
     protected function hitungTambahanTerpencil(): int
     {
+        // Pengadilan Negeri Natuna does not qualify for terpencil benefit
+        if ($this->user->unit_kerja === 'Pengadilan Negeri Natuna') {
+            return 0;
+        }
+
         if ($this->user->lokasi_terpencil) {
             return 12; // +12 hari kalender
         }
