@@ -184,6 +184,9 @@
                     <a href="{{ route('pegawai.edit', $p) }}" class="btn btn-sm btn-outline-secondary flex-fill" style="border-radius: 8px;">
                         <i class="ti ti-edit me-1"></i> Edit
                     </a>
+                    <a href="{{ route('balance-adjustment.create', $p) }}" class="btn btn-sm btn-outline-warning" style="border-radius: 8px;" title="Ubah saldo cuti">
+                        <i class="ti ti-calendar-stats"></i>
+                    </a>
                     <button class="btn btn-sm btn-outline-danger" style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $p->id }}">
                         <i class="ti ti-trash"></i>
                     </button>
@@ -272,6 +275,9 @@
                             </a>
                             <a href="{{ route('pegawai.edit', $p) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;" title="Edit">
                                 <i class="ti ti-edit"></i>
+                            </a>
+                            <a href="{{ route('balance-adjustment.create', $p) }}" class="btn btn-sm btn-outline-warning" style="border-radius: 8px;" title="Ubah saldo cuti">
+                                <i class="ti ti-calendar-stats"></i>
                             </a>
                             <button class="btn btn-sm btn-outline-danger" style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $p->id }}" title="Hapus">
                                 <i class="ti ti-trash"></i>

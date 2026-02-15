@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\AmendmentController;
+use App\Http\Controllers\AppealController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BalanceAdjustmentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\HariLiburController;
@@ -53,21 +56,21 @@ Route::middleware('auth')->group(function () {
 
     // === Amendments ===
     Route::prefix('amendments')->name('amendment.')->group(function () {
-        Route::get('/create/{leaveRequest}', [\App\Http\Controllers\AmendmentController::class, 'create'])->name('create');
-        Route::post('/{leaveRequest}', [\App\Http\Controllers\AmendmentController::class, 'store'])->name('store');
-        Route::get('/{amendment}', [\App\Http\Controllers\AmendmentController::class, 'show'])->name('show');
-        Route::post('/{amendment}/approve', [\App\Http\Controllers\AmendmentController::class, 'approve'])->name('approve');
-        Route::post('/{amendment}/reject', [\App\Http\Controllers\AmendmentController::class, 'reject'])->name('reject');
+        Route::get('/create/{leaveRequest}', [AmendmentController::class, 'create'])->name('create');
+        Route::post('/{leaveRequest}', [AmendmentController::class, 'store'])->name('store');
+        Route::get('/{amendment}', [AmendmentController::class, 'show'])->name('show');
+        Route::post('/{amendment}/approve', [AmendmentController::class, 'approve'])->name('approve');
+        Route::post('/{amendment}/reject', [AmendmentController::class, 'reject'])->name('reject');
     });
 
     // === Appeals ===
     Route::prefix('appeals')->name('appeal.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\AppealController::class, 'index'])->name('index');
-        Route::get('/create/{leaveRequest}', [\App\Http\Controllers\AppealController::class, 'create'])->name('create');
-        Route::post('/{leaveRequest}', [\App\Http\Controllers\AppealController::class, 'store'])->name('store');
-        Route::get('/{appeal}', [\App\Http\Controllers\AppealController::class, 'show'])->name('show');
-        Route::post('/{appeal}/approve', [\App\Http\Controllers\AppealController::class, 'approve'])->name('approve');
-        Route::post('/{appeal}/deny', [\App\Http\Controllers\AppealController::class, 'deny'])->name('deny');
+        Route::get('/', [AppealController::class, 'index'])->name('index');
+        Route::get('/create/{leaveRequest}', [AppealController::class, 'create'])->name('create');
+        Route::post('/{leaveRequest}', [AppealController::class, 'store'])->name('store');
+        Route::get('/{appeal}', [AppealController::class, 'show'])->name('show');
+        Route::post('/{appeal}/approve', [AppealController::class, 'approve'])->name('approve');
+        Route::post('/{appeal}/deny', [AppealController::class, 'deny'])->name('deny');
     });
 
     // === Approval Workflow ===
@@ -117,11 +120,11 @@ Route::middleware('auth')->group(function () {
 
     // === Balance Adjustments (admin only) ===
     Route::middleware('role:admin')->prefix('balance-adjustments')->name('balance-adjustment.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\BalanceAdjustmentController::class, 'index'])->name('index');
-        Route::get('/create/{user}', [\App\Http\Controllers\BalanceAdjustmentController::class, 'create'])->name('create');
-        Route::post('/{user}', [\App\Http\Controllers\BalanceAdjustmentController::class, 'store'])->name('store');
-        Route::get('/{balanceAdjustment}', [\App\Http\Controllers\BalanceAdjustmentController::class, 'show'])->name('show');
-        Route::post('/{balanceAdjustment}/approve', [\App\Http\Controllers\BalanceAdjustmentController::class, 'approve'])->name('approve');
-        Route::post('/{balanceAdjustment}/reject', [\App\Http\Controllers\BalanceAdjustmentController::class, 'reject'])->name('reject');
+        Route::get('/', [BalanceAdjustmentController::class, 'index'])->name('index');
+        Route::get('/create/{user}', [BalanceAdjustmentController::class, 'create'])->name('create');
+        Route::post('/{user}', [BalanceAdjustmentController::class, 'store'])->name('store');
+        Route::get('/{balanceAdjustment}', [BalanceAdjustmentController::class, 'show'])->name('show');
+        Route::post('/{balanceAdjustment}/approve', [BalanceAdjustmentController::class, 'approve'])->name('approve');
+        Route::post('/{balanceAdjustment}/reject', [BalanceAdjustmentController::class, 'reject'])->name('reject');
     });
 });
