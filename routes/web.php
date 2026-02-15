@@ -104,4 +104,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [AuditLogController::class, 'index'])->name('index');
         Route::get('/{auditLog}', [AuditLogController::class, 'show'])->name('show');
     });
+
+    // === Balance Adjustments (admin only) ===
+    Route::middleware('role:admin')->prefix('balance-adjustments')->name('balance-adjustment.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\BalanceAdjustmentController::class, 'index'])->name('index');
+        Route::get('/create/{user}', [\App\Http\Controllers\BalanceAdjustmentController::class, 'create'])->name('create');
+        Route::post('/{user}', [\App\Http\Controllers\BalanceAdjustmentController::class, 'store'])->name('store');
+        Route::get('/{balanceAdjustment}', [\App\Http\Controllers\BalanceAdjustmentController::class, 'show'])->name('show');
+        Route::post('/{balanceAdjustment}/approve', [\App\Http\Controllers\BalanceAdjustmentController::class, 'approve'])->name('approve');
+        Route::post('/{balanceAdjustment}/reject', [\App\Http\Controllers\BalanceAdjustmentController::class, 'reject'])->name('reject');
+    });
 });
