@@ -51,7 +51,7 @@
                 </div>
                 <div style="height: 6px; border-radius: 3px; background: var(--sh-gray-100); margin-top: 0.75rem;">
                     @php $hakTotal = $cutiInfo['total_hak'] ?? 12; @endphp
-                    <div style="height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--sh-primary), #3b82f6); width: {{ $hakTotal > 0 ? (($cutiInfo['sisa_cuti'] ?? $user->leave_balance) / $hakTotal) * 100 : 0 }}%;"></div>
+                    <div style="height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--sh-primary), #22c55e); width: {{ $hakTotal > 0 ? (($cutiInfo['sisa_cuti'] ?? $user->leave_balance) / $hakTotal) * 100 : 0 }}%;"></div>
                 </div>
             </div>
         </div>
@@ -135,7 +135,7 @@
 
                     {{-- Duration preview --}}
                     <div class="d-none mb-4" id="duration-preview">
-                        <div class="d-flex align-items-center gap-3 p-3" id="duration-box" style="border-radius: 12px; background: var(--sh-primary-light); border: 2px solid #bfdbfe;">
+                        <div class="d-flex align-items-center gap-3 p-3" id="duration-box" style="border-radius: 12px; background: var(--sh-primary-light); border: 2px solid #bbf7d0;">
                             <div id="duration-icon-box" style="width: 44px; height: 44px; border-radius: 12px; background: var(--sh-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                 <i class="ti ti-hourglass" style="color: #fff; font-size: 1.2rem;"></i>
                             </div>
@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     durationSub.innerHTML = '<strong style="color: var(--sh-danger);">Melebihi sisa cuti Anda (' + balance + ' hari)!</strong>';
                 } else {
                     durationBox.style.background = 'var(--sh-primary-light)';
-                    durationBox.style.borderColor = '#bfdbfe';
+                    durationBox.style.borderColor = '#bbf7d0';
                     iconBox.style.background = 'var(--sh-primary)';
                     durationLabel.style.color = 'var(--sh-primary)';
                     if (type === 'cuti_tahunan') {

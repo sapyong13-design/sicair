@@ -4,24 +4,26 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>@yield('title', 'SiHEALING')</title>
+    <title>@yield('title', 'SiHEALING - PN Natuna')</title>
     <!-- Tabler CSS CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
     <style>
-        /* ===== SiHEALING Custom Theme ===== */
+        /* ===== SiHEALING - Tema Pengadilan Negeri Natuna ===== */
         :root {
-            --sh-primary: #1a56db;
-            --sh-primary-dark: #1e3a8a;
-            --sh-primary-light: #dbeafe;
+            --sh-primary: #166534;
+            --sh-primary-dark: #14532d;
+            --sh-primary-light: #dcfce7;
+            --sh-accent: #b8860b;
+            --sh-accent-light: #fef9c3;
             --sh-success: #059669;
             --sh-success-light: #d1fae5;
             --sh-warning: #d97706;
             --sh-warning-light: #fef3c7;
             --sh-danger: #dc2626;
             --sh-danger-light: #fee2e2;
-            --sh-gray-50: #f8fafc;
-            --sh-gray-100: #f1f5f9;
+            --sh-gray-50: #f8faf8;
+            --sh-gray-100: #f0f4f0;
         }
 
         body {
@@ -31,10 +33,11 @@
 
         /* --- Navbar --- */
         .sh-navbar {
-            background: linear-gradient(135deg, var(--sh-primary) 0%, var(--sh-primary-dark) 100%);
-            box-shadow: 0 4px 20px rgba(26, 86, 219, 0.3);
+            background: linear-gradient(135deg, #14532d 0%, #166534 40%, #15803d 100%);
+            box-shadow: 0 4px 20px rgba(20, 83, 45, 0.35);
             border: none;
             padding: 0.6rem 0;
+            border-bottom: 3px solid var(--sh-accent);
         }
         .sh-navbar .navbar-brand-text {
             font-size: 1.25rem;
@@ -46,8 +49,16 @@
             align-items: center;
             gap: 0.5rem;
         }
+        .sh-navbar .navbar-brand-text .brand-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            object-fit: contain;
+            background: rgba(255,255,255,0.15);
+            padding: 2px;
+        }
         .sh-navbar .navbar-brand-text .brand-icon {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.15);
             border-radius: 10px;
             width: 36px;
             height: 36px;
@@ -72,14 +83,14 @@
             width: 38px;
             height: 38px;
             border-radius: 10px;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.15);
             color: #fff;
             font-weight: 700;
             font-size: 0.85rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 2px solid var(--sh-accent);
         }
 
         /* --- Status Badges --- */
@@ -151,7 +162,7 @@
         .sh-stat-card.stat-warning::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
         .sh-stat-card.stat-success::before { background: linear-gradient(90deg, #059669, #34d399); }
         .sh-stat-card.stat-danger::before { background: linear-gradient(90deg, #dc2626, #f87171); }
-        .sh-stat-card.stat-primary::before { background: linear-gradient(90deg, #1a56db, #60a5fa); }
+        .sh-stat-card.stat-primary::before { background: linear-gradient(90deg, #166534, #22c55e); }
 
         .sh-stat-icon {
             width: 52px;
@@ -183,12 +194,13 @@
 
         /* --- Hero Balance Card (Pegawai) --- */
         .sh-hero-balance {
-            background: linear-gradient(135deg, var(--sh-primary) 0%, #2563eb 50%, #3b82f6 100%);
+            background: linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%);
             border-radius: 20px;
             color: #fff;
             position: relative;
             overflow: hidden;
             border: none;
+            border-bottom: 4px solid var(--sh-accent);
         }
         .sh-hero-balance::before {
             content: '';
@@ -197,7 +209,7 @@
             right: -20%;
             width: 300px;
             height: 300px;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(184,134,11,0.15) 0%, transparent 70%);
             border-radius: 50%;
         }
         .sh-hero-balance::after {
@@ -207,7 +219,7 @@
             left: -10%;
             width: 200px;
             height: 200px;
-            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
             border-radius: 50%;
         }
         .sh-hero-balance .hero-content {
@@ -229,7 +241,7 @@
         .sh-hero-progress-bar {
             height: 100%;
             border-radius: 4px;
-            background: rgba(255,255,255,0.9);
+            background: linear-gradient(90deg, var(--sh-accent), #fbbf24);
             transition: width 1s ease;
         }
 
@@ -257,18 +269,20 @@
 
         /* --- Buttons --- */
         .sh-btn-primary {
-            background: linear-gradient(135deg, var(--sh-primary), #2563eb);
+            background: linear-gradient(135deg, #166534, #15803d);
             border: none;
             border-radius: 10px;
             font-weight: 600;
             padding: 0.6rem 1.5rem;
-            box-shadow: 0 4px 14px rgba(26, 86, 219, 0.3);
+            box-shadow: 0 4px 14px rgba(22, 101, 52, 0.3);
             transition: all 0.2s ease;
+            color: #fff;
         }
         .sh-btn-primary:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(26, 86, 219, 0.4);
-            background: linear-gradient(135deg, #1e40af, var(--sh-primary));
+            box-shadow: 0 6px 20px rgba(22, 101, 52, 0.4);
+            background: linear-gradient(135deg, #14532d, #166534);
+            color: #fff;
         }
         .sh-btn-success {
             background: linear-gradient(135deg, #059669, #10b981);
@@ -289,6 +303,16 @@
         }
         .sh-btn-danger:hover { background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; }
 
+        .btn-primary {
+            background: linear-gradient(135deg, #166534, #15803d) !important;
+            border: none !important;
+            box-shadow: 0 4px 14px rgba(22, 101, 52, 0.3);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #14532d, #166534) !important;
+            box-shadow: 0 6px 20px rgba(22, 101, 52, 0.4);
+        }
+
         /* --- Mobile Card (History) --- */
         .sh-history-card {
             border: none;
@@ -300,9 +324,15 @@
         .sh-history-card:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
-        .sh-history-card.status-pending { border-left-color: var(--sh-warning); }
-        .sh-history-card.status-approved { border-left-color: var(--sh-success); }
-        .sh-history-card.status-rejected { border-left-color: var(--sh-danger); }
+        .sh-history-card.status-pending,
+        .sh-history-card.status-diajukan,
+        .sh-history-card.status-pertimbangan_atasan { border-left-color: var(--sh-warning); }
+        .sh-history-card.status-approved,
+        .sh-history-card.status-disetujui { border-left-color: var(--sh-success); }
+        .sh-history-card.status-rejected,
+        .sh-history-card.status-ditolak { border-left-color: var(--sh-danger); }
+        .sh-history-card.status-ditangguhkan { border-left-color: var(--sh-accent); }
+        .sh-history-card.status-diubah { border-left-color: var(--sh-primary); }
 
         /* --- Alerts --- */
         .sh-alert {
@@ -313,9 +343,15 @@
 
         /* --- Footer --- */
         .sh-footer {
-            background: #fff;
-            border-top: 1px solid var(--sh-gray-100);
+            background: linear-gradient(to right, #14532d, #166534);
+            border-top: 3px solid var(--sh-accent);
             padding: 1rem 0;
+        }
+        .sh-footer .text-muted {
+            color: rgba(255,255,255,0.7) !important;
+        }
+        .sh-footer strong {
+            color: var(--sh-accent) !important;
         }
 
         /* --- Animations --- */
@@ -335,13 +371,13 @@
             width: 80px;
             height: 80px;
             border-radius: 20px;
-            background: var(--sh-gray-100);
+            background: var(--sh-primary-light);
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 1rem;
             font-size: 2rem;
-            color: #94a3b8;
+            color: var(--sh-primary);
         }
 
         /* --- Page Header --- */
@@ -353,8 +389,18 @@
         .sh-page-title {
             font-size: 1.5rem;
             font-weight: 800;
-            color: #0f172a;
+            color: #14532d;
             letter-spacing: -0.5px;
+        }
+
+        /* --- Gold accent links --- */
+        a { color: var(--sh-primary); }
+        a:hover { color: var(--sh-primary-dark); }
+
+        /* --- Form inputs focus --- */
+        .form-control:focus, .form-select:focus {
+            border-color: var(--sh-primary) !important;
+            box-shadow: 0 0 0 4px rgba(22, 101, 52, 0.1) !important;
         }
 
         /* --- Mobile optimizations --- */
@@ -373,8 +419,14 @@
                 <i class="ti ti-menu-2" style="font-size: 1.4rem;"></i>
             </button>
             <a href="/dashboard" class="navbar-brand-text">
-                <span class="brand-icon"><i class="ti ti-building-hospital"></i></span>
-                SiHEALING
+                @if(file_exists(public_path('images/logo-pn-natuna.png')))
+                    <img src="{{ asset('images/logo-pn-natuna.png') }}" alt="Logo PN Natuna" class="brand-logo">
+                @else
+                    <span class="brand-icon"><i class="ti ti-scale"></i></span>
+                @endif
+                <span>
+                    <span style="color: var(--sh-accent);">Si</span>HEALING
+                </span>
             </a>
             <div class="navbar-nav flex-row order-md-last">
                 <div class="nav-item dropdown">
@@ -384,7 +436,7 @@
                         </div>
                         <div class="d-none d-xl-block ps-2">
                             <div class="text-white fw-semibold" style="font-size: 0.9rem;">{{ Auth::user()->name }}</div>
-                            <div style="color: rgba(255,255,255,0.6); font-size: 0.75rem;">
+                            <div style="color: var(--sh-accent); font-size: 0.75rem; font-weight: 600;">
                                 {{ ucfirst(Auth::user()->role) }}
                             </div>
                         </div>
@@ -427,7 +479,7 @@
                         {{-- Atasan: badge count for pending reviews --}}
                         @if(Auth::user()->isAtasan())
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->is('dashboard') && Auth::user()->isAtasan() ? '' : '' }}" href="/dashboard#pending-review">
+                            <a class="nav-link" href="/dashboard#pending-review">
                                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-checklist"></i></span>
                                 <span class="nav-link-title">
                                     Pertimbangan
@@ -437,7 +489,7 @@
                                             ->count();
                                     @endphp
                                     @if($navPendingReview > 0)
-                                    <span class="badge bg-white text-danger ms-1" style="font-size: 0.7rem; border-radius: 50px; min-width: 20px;">{{ $navPendingReview }}</span>
+                                    <span class="badge ms-1" style="font-size: 0.7rem; border-radius: 50px; min-width: 20px; background: var(--sh-accent); color: #fff;">{{ $navPendingReview }}</span>
                                     @endif
                                 </span>
                             </a>
@@ -455,7 +507,7 @@
                                         $navNeedsDecision = \App\Models\LeaveRequest::where('status', \App\Models\LeaveRequest::STATUS_PERTIMBANGAN)->count();
                                     @endphp
                                     @if($navNeedsDecision > 0)
-                                    <span class="badge bg-white text-danger ms-1" style="font-size: 0.7rem; border-radius: 50px; min-width: 20px;">{{ $navNeedsDecision }}</span>
+                                    <span class="badge ms-1" style="font-size: 0.7rem; border-radius: 50px; min-width: 20px; background: var(--sh-accent); color: #fff;">{{ $navNeedsDecision }}</span>
                                     @endif
                                 </span>
                             </a>
@@ -523,7 +575,7 @@
         <div class="container-xl">
             <div class="text-center">
                 <span class="text-muted" style="font-size: 0.8rem;">
-                    &copy; {{ date('Y') }} <strong>SiHEALING</strong> &mdash; Sistem Informasi Hak Cuti & Administrasi Libur Pegawai
+                    &copy; {{ date('Y') }} <strong>SiHEALING</strong> &mdash; Pengadilan Negeri Natuna, Kepulauan Riau
                 </span>
             </div>
         </div>

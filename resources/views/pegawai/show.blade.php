@@ -120,7 +120,7 @@
                     <span class="text-muted">hari tersisa</span>
                 </div>
                 <div style="height: 8px; border-radius: 4px; background: var(--sh-gray-100);">
-                    <div style="height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--sh-primary), #3b82f6); width: {{ min(100, ($pegawai->leave_balance / 12) * 100) }}%;"></div>
+                    <div style="height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--sh-primary), #22c55e); width: {{ min(100, ($pegawai->leave_balance / 12) * 100) }}%;"></div>
                 </div>
             </div>
         </div>
