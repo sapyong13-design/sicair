@@ -60,6 +60,16 @@ Route::middleware('auth')->group(function () {
         Route::post('/{amendment}/reject', [\App\Http\Controllers\AmendmentController::class, 'reject'])->name('reject');
     });
 
+    // === Appeals ===
+    Route::prefix('appeals')->name('appeal.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AppealController::class, 'index'])->name('index');
+        Route::get('/create/{leaveRequest}', [\App\Http\Controllers\AppealController::class, 'create'])->name('create');
+        Route::post('/{leaveRequest}', [\App\Http\Controllers\AppealController::class, 'store'])->name('store');
+        Route::get('/{appeal}', [\App\Http\Controllers\AppealController::class, 'show'])->name('show');
+        Route::post('/{appeal}/approve', [\App\Http\Controllers\AppealController::class, 'approve'])->name('approve');
+        Route::post('/{appeal}/deny', [\App\Http\Controllers\AppealController::class, 'deny'])->name('deny');
+    });
+
     // === Approval Workflow ===
     // Atasan: pertimbangan level 1
     Route::middleware('role:atasan,ketua,admin')->group(function () {

@@ -168,4 +168,12 @@ class LeaveRequest extends Model
     {
         return $this->hasMany(LeaveAmendment::class);
     }
+
+    /**
+     * Get appeals for this leave request
+     */
+    public function appeals()
+    {
+        return $this->hasMany(LeaveAppeal::class);
+    }
 }
