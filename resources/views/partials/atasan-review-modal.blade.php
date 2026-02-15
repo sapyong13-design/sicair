@@ -1,8 +1,8 @@
 {{-- Atasan Review Modal --}}
-<div class="modal modal-blur fade" id="reviewModal{{ $req->id }}" tabindex="-1">
+<div class="modal modal-blur fade" id="reviewModal{{ $req->id }}" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
         <div class="modal-content" style="border-radius: 16px; border: none; overflow: hidden;">
-            <form method="POST" action="{{ route('leave.review', $req) }}">
+            <form method="POST" action="{{ route('leave.review', $req) }}" id="reviewForm{{ $req->id }}">
                 @csrf
                 <div class="modal-body p-4">
                     <div class="text-center mb-3">
@@ -80,12 +80,63 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0 px-4 pb-4" style="justify-content: center; gap: 0.5rem;">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; min-width: 100px;">Batal</button>
-                    <button type="submit" class="btn sh-btn-primary text-white" style="min-width: 120px;">
-                        <i class="ti ti-send me-1"></i> Kirim Pertimbangan
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; min-width: 100px;" id="cancelBtn{{ $req->id }}">Batal</button>
+                    <button type="submit" class="btn sh-btn-primary text-white" style="min-width: 120px;" id="submitBtn{{ $req->id }}">
+                        <i class="ti ti-send me-1"></i> <span id="submitText{{ $req->id }}">Kirim Pertimbangan</span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('reviewForm{{ $req->id }}');
+    const submitBtn = document.getElementById('submitBtn{{ $req->id }}');
+    const submitText = document.getElementById('submitText{{ $req->id }}');
+    const modal = document.getElementById('reviewModal{{ $req->id }}');
+    let isSubmitting = false;
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Prevent double submission
+            if (isSubmitting) {
+                e.preventDefault();
+                return false;
+            }
+
+            isSubmitting = true;
+
+            // Disable button and show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="ti ti-loader me-1" style="animation: spin 1s linear infinite;"></i> <span id="submitText{{ $req->id }}">Mengirim...</span>';
+
+            // Add style for spinner animation if not exists
+            if (!document.getElementById('spinnerStyle')) {
+                const style = document.createElement('style');
+                style.id = 'spinnerStyle';
+                style.textContent = `
+                    @keyframes spin {
+                        from { transform: rotate(0deg); }
+                        to { transform: rotate(360deg); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        });
+    }
+
+    // Reset form when modal is closed without submission
+    if (modal) {
+        modal.addEventListener('hidden.bs.modal', function() {
+            isSubmitting = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitText.textContent = 'Kirim Pertimbangan';
+                submitBtn.innerHTML = '<i class="ti ti-send me-1"></i> <span id="submitText{{ $req->id }}">Kirim Pertimbangan</span>';
+            }
+        });
+    }
+});
+</script>
