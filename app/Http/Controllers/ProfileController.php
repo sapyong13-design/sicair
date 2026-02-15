@@ -15,8 +15,8 @@ class ProfileController extends Controller
         $cutiInfo = null;
 
         if ($user->masa_kerja_mulai && $user->sudahBekerjaSatuTahun()) {
-            $calculator = new CutiTahunanCalculator();
-            $cutiInfo = $calculator->hitung($user, date('Y'));
+            $calculator = new CutiTahunanCalculator($user);
+            $cutiInfo = $calculator->hitung();
         }
 
         return view('profile.index', compact('user', 'cutiInfo'));
