@@ -131,6 +131,28 @@
                                 </a>
                             </td>
                         </tr>
+                        <tr>
+                            <td class="text-muted" style="padding: 0.75rem 1.25rem;">Perubahan</td>
+                            <td style="padding: 0.75rem 1.25rem;">
+                                @if(auth()->id() === $leaveRequest->user_id && in_array($leaveRequest->status, ['diajukan', 'pertimbangan_atasan']))
+                                    <a href="{{ route('amendment.create', $leaveRequest) }}" class="btn btn-sm btn-warning">
+                                        <i class="ti ti-edit me-1"></i> Ajukan Perubahan
+                                    </a>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+
+                                @if($leaveRequest->amendments()->where('status', 'pending')->exists())
+                                    <div class="mt-2">
+                                        @foreach($leaveRequest->amendments()->where('status', 'pending')->get() as $amendment)
+                                            <a href="{{ route('amendment.show', $amendment) }}" class="btn btn-sm btn-outline-warning">
+                                                <i class="ti ti-clock me-1"></i> Perubahan Pending
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
