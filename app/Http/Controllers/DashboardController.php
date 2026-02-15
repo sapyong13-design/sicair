@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LeaveRequest;
 use App\Models\User;
+use App\Services\AnalyticsService;
 use App\Services\CutiTahunanCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +32,9 @@ class DashboardController extends Controller
 
     private function adminDashboard(User $user)
     {
+        $analyticsService = new AnalyticsService();
+        $year = date('Y');
+
         $totalPegawai = User::count();
         $pendingRequests = LeaveRequest::with('user')
             ->whereIn('status', [
@@ -52,30 +56,13 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        // Fitur 7: Chart data - leave requests by type
-        $chartByType = LeaveRequest::selectRaw('type, count(*) as total')
-            ->whereYear('created_at', date('Y'))
-            ->groupBy('type')
-            ->pluck('total', 'type')
-            ->toArray();
-
-        // Chart data - monthly trend
-        $chartMonthly = LeaveRequest::selectRaw("strftime('%m', created_at) as bulan, count(*) as total")
-            ->whereYear('created_at', date('Y'))
-            ->groupBy('bulan')
-            ->pluck('total', 'bulan')
-            ->toArray();
-
-        // Chart data - status distribution
-        $chartByStatus = LeaveRequest::selectRaw('status, count(*) as total')
-            ->whereYear('created_at', date('Y'))
-            ->groupBy('status')
-            ->pluck('total', 'status')
-            ->toArray();
+        // Get comprehensive analytics
+        $analytics = $analyticsService->getDashboardAnalytics($year);
+        $leaveBalances = $analyticsService->getLeaveBalanceOverview($year);
 
         return view('dashboard', compact(
             'user', 'pendingRequests', 'recentDecisions', 'totalPegawai',
-            'chartByType', 'chartMonthly', 'chartByStatus'
+            'analytics', 'leaveBalances', 'year'
         ));
     }
 
