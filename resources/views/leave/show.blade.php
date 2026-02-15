@@ -118,16 +118,19 @@
                             <td style="padding: 0.75rem 1.25rem;">{{ $leaveRequest->telepon_cuti }}</td>
                         </tr>
                         @endif
-                        @if($leaveRequest->dokumen_pendukung)
                         <tr>
-                            <td class="text-muted" style="padding: 0.75rem 1.25rem;">Dokumen Pendukung</td>
+                            <td class="text-muted" style="padding: 0.75rem 1.25rem;">Dokumen</td>
                             <td style="padding: 0.75rem 1.25rem;">
-                                <a href="{{ asset('storage/' . $leaveRequest->dokumen_pendukung) }}" target="_blank" class="btn btn-sm sh-btn-primary">
-                                    <i class="ti ti-download me-1"></i> Lihat Dokumen
+                                <a href="{{ route('document.list', $leaveRequest) }}" class="btn btn-sm sh-btn-primary">
+                                    <i class="ti ti-file-download me-1"></i>
+                                    @if($leaveRequest->dokumen_pendukung)
+                                        Lihat Dokumen (1)
+                                    @else
+                                        Kelola Dokumen
+                                    @endif
                                 </a>
                             </td>
                         </tr>
-                        @endif
                     </tbody>
                 </table>
             </div>

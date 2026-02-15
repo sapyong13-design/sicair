@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\HariLiburController;
 use App\Http\Controllers\KalenderController;
 use App\Http\Controllers\LeaveRequestController;
@@ -43,6 +44,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/leave/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave.show');
     Route::get('/leave/{leaveRequest}/export-pdf', [LeaveRequestController::class, 'exportPdf'])->name('leave.export-pdf');
     Route::get('/leave/export/summary', [LeaveRequestController::class, 'exportSummaryPdf'])->name('leave.export-summary');
+
+    // === Dokumen ===
+    Route::get('/documents/{leaveRequest}', [DocumentController::class, 'list'])->name('document.list');
+    Route::get('/documents/{leaveRequest}/api', [DocumentController::class, 'getDocuments'])->name('document.api');
+    Route::get('/documents/{leaveRequest}/view/{documentType?}', [DocumentController::class, 'view'])->name('document.view');
+    Route::get('/documents/{leaveRequest}/download/{documentType?}', [DocumentController::class, 'download'])->name('document.download');
 
     // === Approval Workflow ===
     // Atasan: pertimbangan level 1
