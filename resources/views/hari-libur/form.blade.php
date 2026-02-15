@@ -1,0 +1,63 @@
+@extends('layouts.app')
+
+@section('title', ($hariLibur ? 'Edit' : 'Tambah') . ' Hari Libur - SiHEALING')
+
+@section('content')
+<div class="sh-page-header">
+    <div class="d-flex align-items-center gap-3">
+        <a href="{{ route('hari-libur.index') }}" class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;">
+            <i class="ti ti-arrow-left" style="font-size: 1.2rem;"></i>
+        </a>
+        <h2 class="sh-page-title mb-0">{{ $hariLibur ? 'Edit Hari Libur' : 'Tambah Hari Libur' }}</h2>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card sh-card">
+            <div class="card-body p-4">
+                @if($errors->any())
+                <div class="alert mb-4" style="background: var(--sh-danger-light); color: var(--sh-danger); border-radius: 12px; border: none;">
+                    <ul class="mb-0 ps-3">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+                </div>
+                @endif
+
+                <form method="POST" action="{{ $hariLibur ? route('hari-libur.update', $hariLibur) : route('hari-libur.store') }}">
+                    @csrf
+                    @if($hariLibur) @method('PUT') @endif
+
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">Tanggal <span class="text-danger">*</span></label>
+                        <input type="date" name="tanggal" class="form-control @error('tanggal') is-invalid @enderror"
+                               value="{{ old('tanggal', $hariLibur?->tanggal?->format('Y-m-d')) }}" required
+                               style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
+                        @error('tanggal') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">Keterangan <span class="text-danger">*</span></label>
+                        <input type="text" name="keterangan" class="form-control @error('keterangan') is-invalid @enderror"
+                               value="{{ old('keterangan', $hariLibur?->keterangan) }}" required placeholder="Contoh: Hari Raya Idul Fitri"
+                               style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
+                        @error('keterangan') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-check" style="cursor: pointer;">
+                            <input class="form-check-input" type="checkbox" name="is_cuti_bersama" value="1"
+                                   {{ old('is_cuti_bersama', $hariLibur?->is_cuti_bersama) ? 'checked' : '' }}>
+                            <span class="form-check-label fw-semibold" style="font-size: 0.85rem;">
+                                <i class="ti ti-users me-1" style="color: var(--sh-accent);"></i> Cuti Bersama
+                            </span>
+                        </label>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn sh-btn-primary flex-fill">
+                            <i class="ti ti-device-floppy me-1"></i> {{ $hariLibur ? 'Simpan' : 'Tambah' }}
+                        </button>
+                        <a href="{{ route('hari-libur.index') }}" class="btn btn-outline-secondary" style="border-radius: 10px;">Batal</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

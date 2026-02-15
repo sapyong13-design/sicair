@@ -1,0 +1,80 @@
+@extends('layouts.app')
+
+@section('title', 'Hari Libur - SiHEALING')
+
+@section('content')
+<div class="sh-page-header">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <h2 class="sh-page-title mb-0">
+            <i class="ti ti-calendar-off me-1" style="color: var(--sh-danger);"></i> Hari Libur {{ $tahun }}
+        </h2>
+        <div class="d-flex gap-2 align-items-center">
+            <form method="GET" class="d-flex gap-2 align-items-center">
+                <select name="tahun" class="form-select" style="border-radius: 10px; border: 2px solid #e2e8f0; width: auto; height: 40px;" onchange="this.form.submit()">
+                    @foreach($tahunList as $t)
+                    <option value="{{ $t }}" {{ $t == $tahun ? 'selected' : '' }}>{{ $t }}</option>
+                    @endforeach
+                </select>
+            </form>
+            <a href="{{ route('hari-libur.create') }}" class="btn sh-btn-primary">
+                <i class="ti ti-plus me-1"></i> Tambah
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card sh-card">
+    @if($hariLibur->isEmpty())
+    <div class="card-body py-5 text-center">
+        <div class="sh-empty-icon"><i class="ti ti-calendar-off"></i></div>
+        <h4 class="fw-bold text-dark mb-1">Belum Ada Data</h4>
+        <p class="text-muted mb-3">Belum ada hari libur yang terdaftar untuk tahun {{ $tahun }}.</p>
+        <a href="{{ route('hari-libur.create') }}" class="btn sh-btn-primary"><i class="ti ti-plus me-1"></i> Tambah Hari Libur</a>
+    </div>
+    @else
+    <div class="table-responsive">
+        <table class="table sh-table mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">#</th>
+                    <th>Tanggal</th>
+                    <th>Hari</th>
+                    <th>Keterangan</th>
+                    <th>Jenis</th>
+                    <th class="text-end">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach($hariLibur as $i => $hl)
+                <tr>
+                    <td class="text-muted">{{ $i + 1 }}</td>
+                    <td class="fw-semibold">{{ \Carbon\Carbon::parse($hl->tanggal)->format('d M Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($hl->tanggal)->translatedFormat('l') }}</td>
+                    <td>{{ $hl->keterangan }}</td>
+                    <td>
+                        @if($hl->is_cuti_bersama)
+                            <span class="sh-badge" style="background: var(--sh-accent-light, #fef9c3); color: var(--sh-accent);">Cuti Bersama</span>
+                        @else
+                            <span class="sh-badge sh-badge-rejected">Libur Nasional</span>
+                        @endif
+                    </td>
+                    <td class="text-end">
+                        <div class="d-flex gap-1 justify-content-end">
+                            <a href="{{ route('hari-libur.edit', $hl) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;"><i class="ti ti-edit"></i></a>
+                            <form method="POST" action="{{ route('hari-libur.destroy', $hl) }}" onsubmit="return confirm('Hapus hari libur ini?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius: 8px;"><i class="ti ti-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer text-muted text-center" style="font-size: 0.82rem;">
+        Total: {{ $hariLibur->count() }} hari ({{ $hariLibur->where('is_cuti_bersama', true)->count() }} cuti bersama, {{ $hariLibur->where('is_cuti_bersama', false)->count() }} libur nasional)
+    </div>
+    @endif
+</div>
+@endsection

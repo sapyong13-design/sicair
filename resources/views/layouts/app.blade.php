@@ -446,6 +446,9 @@
                             <div class="fw-bold">{{ Auth::user()->name }}</div>
                             <div class="text-muted small">NIP: {{ Auth::user()->nip }}</div>
                         </div>
+                        <a href="{{ route('profile') }}" class="dropdown-item py-2">
+                            <i class="ti ti-user-circle me-2"></i> Profil Saya
+                        </a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="dropdown-item text-danger py-2">
