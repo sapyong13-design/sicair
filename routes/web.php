@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HariLiburController;
@@ -77,5 +78,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/{hariLibur}/edit', [HariLiburController::class, 'edit'])->name('edit');
         Route::put('/{hariLibur}', [HariLiburController::class, 'update'])->name('update');
         Route::delete('/{hariLibur}', [HariLiburController::class, 'destroy'])->name('destroy');
+    });
+
+    // === Audit Log (admin only) ===
+    Route::middleware('role:admin')->prefix('admin/audit-logs')->name('admin.audit-logs.')->group(function () {
+        Route::get('/', [AuditLogController::class, 'index'])->name('index');
+        Route::get('/{auditLog}', [AuditLogController::class, 'show'])->name('show');
     });
 });
