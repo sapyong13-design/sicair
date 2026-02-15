@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/leave/create', [LeaveRequestController::class, 'create'])->name('leave.create');
     Route::post('/leave', [LeaveRequestController::class, 'store'])->name('leave.store');
     Route::get('/leave/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave.show');
+    Route::get('/leave/{leaveRequest}/export-pdf', [LeaveRequestController::class, 'exportPdf'])->name('leave.export-pdf');
+    Route::get('/leave/export/summary', [LeaveRequestController::class, 'exportSummaryPdf'])->name('leave.export-summary');
 
     // === Approval Workflow ===
     // Atasan: pertimbangan level 1
@@ -57,6 +59,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('admin')->group(function () {
         Route::post('/leave/{leaveRequest}/approve', [LeaveRequestController::class, 'approve'])->name('leave.approve');
         Route::post('/leave/{leaveRequest}/reject', [LeaveRequestController::class, 'reject'])->name('leave.reject');
+        Route::get('/leave/export/all-pdf', [LeaveRequestController::class, 'exportAllPdf'])->name('leave.export-all-pdf');
     });
 
     // === Manajemen Pegawai (admin only) ===

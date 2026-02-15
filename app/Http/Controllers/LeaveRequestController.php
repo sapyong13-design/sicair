@@ -6,6 +6,7 @@ use App\Models\LeaveRequest;
 use App\Models\Notification;
 use App\Services\CutiTahunanCalculator;
 use App\Services\HariKerjaCalculator;
+use App\Services\PdfExportService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -293,6 +294,69 @@ class LeaveRequestController extends Controller
         ]);
 
         return back()->with('success', "Pengajuan cuti {$leaveRequest->user->name} ditolak.");
+    }
+
+    /**
+     * Export single leave request to PDF
+     */
+    public function exportPdf(LeaveRequest $leaveRequest)
+    {
+        $user = Auth::user();
+
+        // Check authorization
+        if ($leaveRequest->user_id !== $user->id && !$user->isAdmin() && !$user->isKetua()) {
+            return back()->with('error', 'Anda tidak memiliki akses untuk export dokumen ini.');
+        }
+
+        $pdf = (new PdfExportService())->exportLeaveRequest($leaveRequest);
+        return $pdf->download("leave-request-{$leaveRequest->id}.pdf");
+    }
+
+    /**
+     * Export all leave requests as PDF report
+     */
+    public function exportAllPdf(Request $request)
+    {
+        $user = Auth::user();
+
+        // Only admin and ketua can export all
+        if (!$user->isAdmin() && !$user->isKetua()) {
+            return back()->with('error', 'Anda tidak memiliki akses untuk export laporan ini.');
+        }
+
+        $query = LeaveRequest::query();
+
+        // Filter by status if provided
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by year
+        if ($request->filled('year')) {
+            $query->whereYear('created_at', $request->year);
+        }
+
+        // Filter by month
+        if ($request->filled('month')) {
+            $query->whereMonth('created_at', $request->month);
+        }
+
+        $leaveRequests = $query->latest()->get();
+
+        $pdf = (new PdfExportService())->exportLeaveRequests($leaveRequests);
+        return $pdf->download("leave-requests-report-" . now()->format('Y-m-d') . ".pdf");
+    }
+
+    /**
+     * Export leave summary for current user
+     */
+    public function exportSummaryPdf(Request $request)
+    {
+        $user = Auth::user();
+        $year = $request->input('year', date('Y'));
+
+        $pdf = (new PdfExportService())->exportLeaveSummary($user, $year);
+        return $pdf->download("leave-summary-{$year}.pdf");
     }
 
     // ===== Private helpers =====
