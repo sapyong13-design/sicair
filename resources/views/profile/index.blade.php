@@ -44,15 +44,15 @@
             <div class="card-body p-4">
                 @if($cutiInfo)
                 <div class="d-flex align-items-baseline gap-2 mb-2">
-                    <span style="font-size: 2.5rem; font-weight: 800; color: var(--sh-primary);">{{ $cutiInfo['sisa_cuti'] }}</span>
+                    <span style="font-size: 2.5rem; font-weight: 800; color: var(--sh-primary);">{{ $cutiInfo['sisa'] }}</span>
                     <span class="text-muted">/ {{ $cutiInfo['total_hak'] }} hari</span>
                 </div>
                 <div style="height: 8px; border-radius: 4px; background: var(--sh-gray-100); margin-bottom: 0.75rem;">
-                    @php $pct = $cutiInfo['total_hak'] > 0 ? ($cutiInfo['sisa_cuti'] / $cutiInfo['total_hak']) * 100 : 0; @endphp
+                    @php $pct = $cutiInfo['total_hak'] > 0 ? ($cutiInfo['sisa'] / $cutiInfo['total_hak']) * 100 : 0; @endphp
                     <div style="height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--sh-primary), #22c55e); width: {{ $pct }}%;"></div>
                 </div>
                 <div style="font-size: 0.8rem; color: #64748b;">
-                    Hak: {{ $cutiInfo['hak_cuti'] }}
+                    Hak: {{ $cutiInfo['hak_dasar'] }}
                     @if(($cutiInfo['carry_over'] ?? 0) > 0) + CO: {{ $cutiInfo['carry_over'] }} @endif
                     @if(($cutiInfo['tambahan_terpencil'] ?? 0) > 0) + Terpencil: {{ $cutiInfo['tambahan_terpencil'] }} @endif
                     &mdash; Terpakai: {{ $cutiInfo['cuti_diambil'] }}
