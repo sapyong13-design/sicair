@@ -93,12 +93,12 @@ class User extends Authenticatable
 
     public function sudahBekerjaSatuTahun(): bool
     {
-        return $this->masa_kerja_tahun !== null && $this->masa_kerja_tahun >= 1;
+        return $this->masaKerjaTahun !== null && $this->masaKerjaTahun >= 1;
     }
 
     public function sudahBekerjaLimaTahun(): bool
     {
-        return $this->masa_kerja_tahun !== null && $this->masa_kerja_tahun >= 5;
+        return $this->masaKerjaTahun !== null && $this->masaKerjaTahun >= 5;
     }
 
     // ===== Relationships =====
