@@ -43,10 +43,12 @@
                     </label>
                     <select name="role" class="form-select" style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
                         <option value="">Semua Role</option>
-                        <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
-                        <option value="ketua" {{ request('role') === 'ketua' ? 'selected' : '' }}>Ketua</option>
-                        <option value="atasan" {{ request('role') === 'atasan' ? 'selected' : '' }}>Atasan</option>
                         <option value="pegawai" {{ request('role') === 'pegawai' ? 'selected' : '' }}>Pegawai</option>
+                        <option value="hakim" {{ request('role') === 'hakim' ? 'selected' : '' }}>Hakim</option>
+                        <option value="hakim_ad_hoc" {{ request('role') === 'hakim_ad_hoc' ? 'selected' : '' }}>Hakim Ad Hoc</option>
+                        <option value="atasan" {{ request('role') === 'atasan' ? 'selected' : '' }}>Atasan</option>
+                        <option value="ketua" {{ request('role') === 'ketua' ? 'selected' : '' }}>Ketua</option>
+                        <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
                     </select>
                 </div>
                 <div class="col-6 col-md-3">
@@ -135,6 +137,8 @@
                             'admin' => 'background: #f3e8ff; color: #7c3aed;',
                             'ketua' => 'background: var(--sh-primary-light); color: var(--sh-primary);',
                             'atasan' => 'background: var(--sh-success-light); color: var(--sh-success);',
+                            'hakim' => 'background: #fef3c7; color: #b45309;',
+                            'hakim_ad_hoc' => 'background: #dbeafe; color: #0c4a6e;',
                             default => 'background: var(--sh-gray-100); color: #64748b;',
                         };
                     @endphp
@@ -234,12 +238,16 @@
                                 'admin' => 'background: #f3e8ff; color: #7c3aed;',
                                 'ketua' => 'background: var(--sh-primary-light); color: var(--sh-primary);',
                                 'atasan' => 'background: var(--sh-success-light); color: var(--sh-success);',
+                                'hakim' => 'background: #fef3c7; color: #b45309;',
+                                'hakim_ad_hoc' => 'background: #dbeafe; color: #0c4a6e;',
                                 default => 'background: var(--sh-gray-100); color: #64748b;',
                             };
                             $roleIcon = match($p->role) {
                                 'admin' => 'ti-shield-check',
                                 'ketua' => 'ti-crown',
                                 'atasan' => 'ti-user-star',
+                                'hakim' => 'ti-gavel',
+                                'hakim_ad_hoc' => 'ti-scale',
                                 default => 'ti-user',
                             };
                         @endphp

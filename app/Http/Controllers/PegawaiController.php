@@ -51,7 +51,7 @@ class PegawaiController extends Controller
             'name' => 'required|string|max:255',
             'nip' => 'required|string|size:18|unique:users,nip',
             'password' => 'required|string|min:6',
-            'role' => 'required|in:admin,ketua,atasan,pegawai',
+            'role' => 'required|in:admin,ketua,atasan,pegawai,hakim,hakim_ad_hoc',
             'jabatan' => 'nullable|string|max:255',
             'golongan_ruang' => 'nullable|string|max:10',
             'unit_kerja' => 'required|string|max:255',
@@ -103,7 +103,7 @@ class PegawaiController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'nip' => 'required|string|size:18|unique:users,nip,' . $pegawai->id,
-            'role' => 'required|in:admin,ketua,atasan,pegawai',
+            'role' => 'required|in:admin,ketua,atasan,pegawai,hakim,hakim_ad_hoc',
             'jabatan' => 'nullable|string|max:255',
             'golongan_ruang' => 'nullable|string|max:10',
             'unit_kerja' => 'required|string|max:255',

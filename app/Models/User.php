@@ -58,7 +58,12 @@ class User extends Authenticatable
 
     public function isHakim(): bool
     {
-        return $this->status_pegawai === 'hakim';
+        return $this->role === 'hakim';
+    }
+
+    public function isHakimAdHoc(): bool
+    {
+        return $this->role === 'hakim_ad_hoc';
     }
 
     public function canApproveAsAtasan(): bool
@@ -69,6 +74,11 @@ class User extends Authenticatable
     public function canApproveAsPejabat(): bool
     {
         return in_array($this->role, ['ketua', 'admin']);
+    }
+
+    public function isKepegawaian(): bool
+    {
+        return $this->role === 'atasan' && in_array($this->unit_kerja, ['kepegawaian', 'Kepegawaian', 'KEPEGAWAIAN']);
     }
 
     // ===== Masa Kerja =====
