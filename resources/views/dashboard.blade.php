@@ -982,6 +982,20 @@
                             <span class="sh-badge sh-badge-pending"><i class="ti ti-clock"></i> {{ $req->status_label }}</span>
                         @endif
                     </div>
+
+                    {{-- Show rejection reason if rejected --}}
+                    @if($req->isRejected() && ($req->catatan_atasan || $req->catatan_pejabat))
+                    <div class="alert mb-2" style="background: var(--sh-danger-light); color: var(--sh-danger); border: 1px solid rgba(220, 38, 38, 0.2); border-radius: 8px; padding: 0.75rem; font-size: 0.85rem;">
+                        <div class="d-flex gap-2">
+                            <i class="ti ti-alert-circle" style="flex-shrink: 0; margin-top: 2px;"></i>
+                            <div>
+                                <div class="fw-semibold mb-1">Alasan Penolakan:</div>
+                                <div>{{ $req->catatan_pejabat ?? $req->catatan_atasan }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     @if($req->reason)
                     <div style="font-size: 0.85rem; color: #475569;">{{ Str::limit($req->reason, 80) }}</div>
                     @endif
@@ -1024,7 +1038,14 @@
                             @if($req->isApproved())
                                 <span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i> Disetujui</span>
                             @elseif($req->isRejected())
-                                <span class="sh-badge sh-badge-rejected"><i class="ti ti-circle-x"></i> Ditolak</span>
+                                <div>
+                                    <span class="sh-badge sh-badge-rejected" title="{{ $req->catatan_pejabat ?? $req->catatan_atasan ?? 'Tidak ada catatan' }}" style="cursor: help;"><i class="ti ti-circle-x"></i> Ditolak</span>
+                                    @if($req->catatan_pejabat || $req->catatan_atasan)
+                                    <div class="small text-muted mt-1" style="font-size: 0.75rem; max-width: 200px; white-space: normal;">
+                                        <i class="ti ti-info-circle" style="font-size: 0.7rem;"></i> {{ Str::limit($req->catatan_pejabat ?? $req->catatan_atasan, 60) }}
+                                    </div>
+                                    @endif
+                                </div>
                             @else
                                 <span class="sh-badge sh-badge-pending"><i class="ti ti-clock"></i> {{ $req->status_label }}</span>
                             @endif
