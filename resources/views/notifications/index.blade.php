@@ -72,9 +72,12 @@
                             <i class="ti ti-clock me-1"></i>{{ $notif->created_at->diffForHumans() }}
                         </span>
                         @if($notif->link && !$notif->is_read)
-                        <a href="{{ route('notifications.read', $notif) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-size: 0.75rem; padding: 0.2rem 0.6rem;">
-                            <i class="ti ti-eye me-1"></i> Lihat
-                        </a>
+                        <form method="POST" action="{{ route('notifications.read', $notif) }}" style="display: inline;">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-size: 0.75rem; padding: 0.2rem 0.6rem;">
+                                <i class="ti ti-eye me-1"></i> Lihat
+                            </button>
+                        </form>
                         @elseif($notif->link)
                         <a href="{{ $notif->link }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 6px; font-size: 0.75rem; padding: 0.2rem 0.6rem;">
                             <i class="ti ti-eye me-1"></i> Lihat
