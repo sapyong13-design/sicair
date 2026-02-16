@@ -24,19 +24,17 @@ class LeaveRequestNeedsConsideration extends Mailable implements ShouldQueue
         $this->onQueue('mails');
     }
 
-    public function to(): array|string
-    {
-        // Send to ketua (head of organization)
-        $ketua = User::where('role', 'ketua')->first();
-        return $ketua?->email ?? config('mail.to.address');
-    }
-
     /**
      * Get the message envelope.
      */
     public function envelope(): Envelope
     {
+        // Send to ketua (head of organization)
+        $ketua = User::where('role', 'ketua')->first();
+        $recipientEmail = $ketua?->email ?? config('mail.to.address');
+
         return new Envelope(
+            to: $recipientEmail,
             subject: '⏳ Pengajuan Cuti Memerlukan Pertimbangan - ' . $this->leaveRequest->type_label,
             from: config('mail.from.address'),
         );

@@ -20,14 +20,10 @@ class LeaveRequestSubmitted extends Mailable implements ShouldQueue
         $this->onQueue('mails');
     }
 
-    public function to(): array|string
-    {
-        return $this->leaveRequest->user->email;
-    }
-
     public function envelope(): Envelope
     {
         return new Envelope(
+            to: $this->leaveRequest->user->email,
             subject: '✉️ Pengajuan Cuti Baru - ' . $this->leaveRequest->user->name,
             from: config('mail.from.address'),
         );
