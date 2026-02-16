@@ -129,7 +129,8 @@
             </div>
         </div>
         @else
-        <div class="table-responsive">
+        {{-- Desktop Table View --}}
+        <div class="table-responsive d-none d-md-block">
             <table class="table sh-table mb-0">
                 <thead>
                     <tr>
@@ -172,6 +173,47 @@
                 </tbody>
             </table>
         </div>
+
+        {{-- Mobile Card View --}}
+        <div class="card-body d-md-none">
+            @foreach($pendingRequests as $req)
+            <div class="card sh-history-card mb-3" style="border-left-color: var(--sh-warning);">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-start justify-content-between mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="sh-user-avatar" style="width: 36px; height: 36px; font-size: 0.75rem; background: var(--sh-primary-light); color: var(--sh-primary); border: none; border-radius: 10px;">
+                                {{ strtoupper(substr($req->user->name, 0, 2)) }}
+                            </div>
+                            <div>
+                                <div class="fw-bold" style="font-size: 0.9rem;">{{ $req->user->name }}</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">{{ $req->user->jabatan ?? $req->user->nip }}</div>
+                            </div>
+                        </div>
+                        <span class="sh-badge sh-badge-pending">{{ $req->status_label }}</span>
+                    </div>
+                    <div class="row g-2 mb-2" style="font-size: 0.82rem;">
+                        <div class="col-6">
+                            <div class="text-muted">Jenis</div>
+                            <div class="fw-semibold">{{ $req->type_label }}</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted">Durasi</div>
+                            <div class="fw-semibold">{{ $req->total_days }} hari</div>
+                        </div>
+                    </div>
+                    <div class="mb-2" style="font-size: 0.82rem;">
+                        <div class="text-muted">Periode</div>
+                        <div class="fw-semibold">{{ $req->start_date->format('d M Y') }} - {{ $req->end_date->format('d M Y') }}</div>
+                    </div>
+                    <div class="text-end">
+                        <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">
+                            <i class="ti ti-eye me-1"></i> Lihat
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
         @endif
     </div>
 
@@ -184,7 +226,9 @@
                 Keputusan Terbaru
             </h3>
         </div>
-        <div class="table-responsive">
+
+        {{-- Desktop Table View --}}
+        <div class="table-responsive d-none d-md-block">
             <table class="table sh-table mb-0">
                 <thead>
                     <tr>
@@ -199,7 +243,7 @@
                     <tr>
                         <td class="fw-semibold" style="font-size: 0.9rem;">{{ $req->user->name }}</td>
                         <td style="font-size: 0.85rem;">{{ $req->type_label }}</td>
-                        <td style="font-size: 0.85rem;">{{ $req->start_date->format('d/m/Y') }} - {{ $req->end_date->format('d/m/Y') }}</td>
+                        <td style="font-size: 0.85rem;">{{ $req->start_date->format('d M Y') }} - {{ $req->end_date->format('d M Y') }}</td>
                         <td>
                             @if($req->isApproved())
                                 <span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i> Disetujui</span>
@@ -213,6 +257,50 @@
                 @endforeach
                 </tbody>
             </table>
+        </div>
+
+        {{-- Mobile Card View --}}
+        <div class="card-body d-md-none">
+            @foreach($recentDecisions as $req)
+            <div class="card sh-history-card mb-3" style="border-left-color: #64748b;">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-start justify-content-between mb-2">
+                        <div>
+                            <div class="fw-bold" style="font-size: 0.9rem;">{{ $req->user->name }}</div>
+                        </div>
+                        @if($req->isApproved())
+                            <span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i></span>
+                        @elseif($req->isRejected())
+                            <span class="sh-badge sh-badge-rejected"><i class="ti ti-circle-x"></i></span>
+                        @else
+                            <span class="sh-badge sh-badge-pending">{{ $req->status_label }}</span>
+                        @endif
+                    </div>
+                    <div class="row g-2 mb-2" style="font-size: 0.82rem;">
+                        <div class="col-6">
+                            <div class="text-muted">Jenis</div>
+                            <div class="fw-semibold">{{ $req->type_label }}</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted">Status</div>
+                            <div class="fw-semibold">
+                                @if($req->isApproved())
+                                    Disetujui
+                                @elseif($req->isRejected())
+                                    Ditolak
+                                @else
+                                    {{ $req->status_label }}
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.82rem;">
+                        <div class="text-muted">Periode</div>
+                        <div class="fw-semibold">{{ $req->start_date->format('d M Y') }} - {{ $req->end_date->format('d M Y') }}</div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
         </div>
     </div>
     @endif
