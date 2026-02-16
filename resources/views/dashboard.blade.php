@@ -712,7 +712,7 @@
                     <tr>
                         <td class="fw-semibold" style="font-size: 0.88rem;">{{ $req->user->name }}</td>
                         <td style="font-size: 0.85rem;">{{ $req->type_label }}</td>
-                        <td style="font-size: 0.82rem;">{{ $req->start_date->format('d/m/Y') }} - {{ $req->end_date->format('d/m/Y') }}</td>
+                        <td style="font-size: 0.82rem;">{{ $req->start_date->format('d M Y') }} - {{ $req->end_date->format('d M Y') }}</td>
                         <td>
                             @if($req->pertimbangan_atasan === 'setuju')
                                 <span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i> Setuju</span>
