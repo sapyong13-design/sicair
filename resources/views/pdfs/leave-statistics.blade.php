@@ -5,7 +5,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 11px;
+            font-size: 10px;
             color: #333;
         }
         .header {
@@ -19,43 +19,53 @@
             font-size: 16px;
             color: #2c3e50;
         }
-        .summary {
+        .period {
+            text-align: center;
+            color: #666;
             margin-bottom: 15px;
-            padding: 10px;
-            background-color: #f9fafb;
-            border-left: 3px solid #3b82f6;
+            font-size: 11px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-bottom: 20px;
         }
         th {
             background-color: #2c3e50;
             color: white;
-            padding: 8px;
+            padding: 6px;
             text-align: left;
             font-weight: bold;
-            font-size: 10px;
         }
         td {
-            padding: 6px;
+            padding: 5px;
             border-bottom: 1px solid #ddd;
-            font-size: 10px;
         }
         tr:nth-child(even) {
             background-color: #f9fafb;
         }
-        .status-approved {
-            color: #10b981;
+        .summary-box {
+            background-color: #f0f9ff;
+            border: 1px solid #3b82f6;
+            padding: 10px;
+            margin-top: 20px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        .summary-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .summary-label {
             font-weight: bold;
         }
-        .status-pending {
-            color: #f59e0b;
-            font-weight: bold;
-        }
-        .status-rejected {
-            color: #ef4444;
+        .summary-value {
+            color: #2c3e50;
             font-weight: bold;
         }
         .footer {
@@ -68,12 +78,11 @@
 </head>
 <body>
     <div class="header">
-        <h1>Ringkasan Pengajuan Cuti</h1>
-        <p>Periode: {{ $generatedAt->format('d M Y') }}</p>
+        <h1>Statistik Pengajuan Cuti yang Disetujui</h1>
     </div>
 
-    <div class="summary">
-        <strong>Total Pengajuan: {{ $totalCount }}</strong>
+    <div class="period">
+        Periode: {{ $startDate->format('d M Y') }} s/d {{ $endDate->format('d M Y') }}
     </div>
 
     <table>
@@ -82,26 +91,39 @@
                 <th>Nama Pegawai</th>
                 <th>NIP</th>
                 <th>Jenis Cuti</th>
-                <th>Tanggal Mulai</th>
-                <th>Tanggal Selesai</th>
+                <th>Mulai</th>
+                <th>Selesai</th>
                 <th>Hari Kerja</th>
-                <th>Status</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($leaveRequests as $leave)
+            @forelse($leaveRequests as $leave)
             <tr>
                 <td>{{ $leave->user->name }}</td>
                 <td>{{ $leave->user->nip }}</td>
                 <td>{{ $leave->type_label }}</td>
                 <td>{{ $leave->start_date->format('d/m/Y') }}</td>
                 <td>{{ $leave->end_date->format('d/m/Y') }}</td>
-                <td>{{ $leave->total_hari_kerja ?? '-' }}</td>
-                <td class="status-{{ strtolower(str_replace(' ', '-', $leave->status)) }}">{{ $leave->status_label }}</td>
+                <td style="text-align: center;">{{ $leave->total_hari_kerja ?? '-' }}</td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 15px;">Tidak ada data pengajuan cuti yang disetujui dalam periode ini.</td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
+
+    <div class="summary-box">
+        <div class="summary-row">
+            <span class="summary-label">Total Pengajuan Disetujui:</span>
+            <span class="summary-value">{{ $leaveRequests->count() }}</span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">Total Hari Kerja:</span>
+            <span class="summary-value">{{ $leaveRequests->sum('total_hari_kerja') }} hari</span>
+        </div>
+    </div>
 
     <div class="footer">
         <p>Dicetak: {{ $generatedAt->format('d M Y H:i:s') }}</p>

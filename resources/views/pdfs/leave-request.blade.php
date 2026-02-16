@@ -1,280 +1,152 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Leave Request</title>
+    <meta charset="utf-8">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.6;
+            font-size: 12px;
             color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             border-bottom: 2px solid #333;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
         }
         .header h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
+            margin: 0;
+            font-size: 18px;
+            color: #2c3e50;
         }
         .header p {
-            font-size: 12px;
+            margin: 3px 0;
+            font-size: 11px;
             color: #666;
         }
         .section {
-            margin-bottom: 25px;
+            margin-bottom: 15px;
         }
         .section-title {
-            font-size: 14px;
             font-weight: bold;
-            background-color: #f0f0f0;
-            padding: 8px 12px;
-            margin-bottom: 12px;
-            border-left: 3px solid #007bff;
-        }
-        .row {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 10px;
-        }
-        .col {
-            flex: 1;
-        }
-        .label {
-            font-size: 11px;
-            font-weight: bold;
-            color: #666;
-            text-transform: uppercase;
-        }
-        .value {
-            font-size: 12px;
-            color: #333;
-            margin-top: 3px;
+            font-size: 13px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 3px;
         }
         .status-badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 4px;
+            padding: 3px 8px;
+            border-radius: 3px;
             font-size: 11px;
             font-weight: bold;
-            text-transform: uppercase;
+            color: white;
         }
-        .status-diajukan {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        .status-pertimbangan {
-            background-color: #cfe2ff;
-            color: #084298;
-        }
-        .status-disetujui {
-            background-color: #d1e7dd;
-            color: #0f5132;
-        }
-        .status-ditolak {
-            background-color: #f8d7da;
-            color: #842029;
-        }
-        .status-approved {
-            background-color: #d1e7dd;
-            color: #0f5132;
-        }
-        .status-rejected {
-            background-color: #f8d7da;
-            color: #842029;
-        }
-        .table {
+        .status-diajukan { background-color: #f59e0b; }
+        .status-disetujui { background-color: #10b981; }
+        .status-ditolak { background-color: #ef4444; }
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 11px;
+            margin-top: 8px;
         }
-        .table th {
-            background-color: #f0f0f0;
-            padding: 8px;
-            text-align: left;
-            border: 1px solid #ddd;
+        td {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        td.label {
             font-weight: bold;
-        }
-        .table td {
-            padding: 8px;
-            border: 1px solid #ddd;
+            width: 35%;
+            color: #555;
         }
         .footer {
-            margin-top: 40px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-        }
-        .signature {
-            width: 35%;
-            text-align: center;
-        }
-        .signature-line {
-            border-top: 1px solid #333;
-            margin-top: 40px;
-            padding-top: 5px;
+            margin-top: 30px;
+            text-align: right;
+            font-size: 10px;
+            color: #999;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Surat Pengajuan Cuti</h1>
-            <p>Sistem Informasi Kesehatan - SI Healing</p>
-        </div>
+    <div class="header">
+        <h1>Pengajuan Cuti</h1>
+        <p>Sistem Informasi Cuti Tahunan - Pengadilan Negeri Natuna</p>
+    </div>
 
-        <div class="section">
-            <div class="section-title">Informasi Karyawan</div>
-            <div class="row">
-                <div class="col">
-                    <div class="label">Nama</div>
-                    <div class="value">{{ $leaveRequest->user->name }}</div>
-                </div>
-                <div class="col">
-                    <div class="label">Email</div>
-                    <div class="value">{{ $leaveRequest->user->email }}</div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <div class="label">Posisi</div>
-                    <div class="value">{{ $leaveRequest->user->position ?? '-' }}</div>
-                </div>
-                <div class="col">
-                    <div class="label">Departemen</div>
-                    <div class="value">{{ $leaveRequest->user->department ?? '-' }}</div>
-                </div>
-            </div>
-        </div>
+    <div class="section">
+        <div class="section-title">Informasi Pemohon</div>
+        <table>
+            <tr>
+                <td class="label">Nama:</td>
+                <td>{{ $leaveRequest->user->name }}</td>
+            </tr>
+            <tr>
+                <td class="label">NIP:</td>
+                <td>{{ $leaveRequest->user->nip }}</td>
+            </tr>
+            <tr>
+                <td class="label">Jabatan:</td>
+                <td>{{ $leaveRequest->user->jabatan }}</td>
+            </tr>
+            <tr>
+                <td class="label">Unit Kerja:</td>
+                <td>{{ $leaveRequest->user->unit_kerja }}</td>
+            </tr>
+        </table>
+    </div>
 
-        <div class="section">
-            <div class="section-title">Detail Pengajuan Cuti</div>
-            <div class="row">
-                <div class="col">
-                    <div class="label">Jenis Cuti</div>
-                    <div class="value">{{ $leaveRequest->type }}</div>
-                </div>
-                <div class="col">
-                    <div class="label">Status</div>
-                    <div class="value">
-                        <span class="status-badge status-{{ strtolower($leaveRequest->status) }}">
-                            {{ ucfirst(str_replace('_', ' ', $leaveRequest->status)) }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <div class="label">Tanggal Mulai</div>
-                    <div class="value">{{ $leaveRequest->start_date->format('d M Y') }}</div>
-                </div>
-                <div class="col">
-                    <div class="label">Tanggal Selesai</div>
-                    <div class="value">{{ $leaveRequest->end_date->format('d M Y') }}</div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <div class="label">Jumlah Hari</div>
-                    <div class="value">{{ $leaveRequest->number_of_days }} hari</div>
-                </div>
-                <div class="col">
-                    <div class="label">Tanggal Pengajuan</div>
-                    <div class="value">{{ $leaveRequest->created_at->format('d M Y H:i') }}</div>
-                </div>
-            </div>
-        </div>
+    <div class="section">
+        <div class="section-title">Detail Pengajuan</div>
+        <table>
+            <tr>
+                <td class="label">Jenis Cuti:</td>
+                <td>{{ $leaveRequest->type_label }}</td>
+            </tr>
+            <tr>
+                <td class="label">Tanggal Mulai:</td>
+                <td>{{ $leaveRequest->start_date->format('d M Y') }}</td>
+            </tr>
+            <tr>
+                <td class="label">Tanggal Selesai:</td>
+                <td>{{ $leaveRequest->end_date->format('d M Y') }}</td>
+            </tr>
+            <tr>
+                <td class="label">Durasi:</td>
+                <td>{{ $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days }} hari kerja</td>
+            </tr>
+            <tr>
+                <td class="label">Alasan:</td>
+                <td>{{ $leaveRequest->reason }}</td>
+            </tr>
+        </table>
+    </div>
 
-        <div class="section">
-            <div class="section-title">Alasan Cuti</div>
-            <div class="value" style="padding: 10px; background-color: #f9f9f9; border-radius: 4px;">
-                {{ $leaveRequest->reason ?? 'Tidak ada keterangan' }}
-            </div>
-        </div>
+    <div class="section">
+        <div class="section-title">Status</div>
+        <table>
+            <tr>
+                <td class="label">Status:</td>
+                <td>
+                    <span class="status-badge status-{{ strtolower(str_replace(' ', '-', $leaveRequest->status)) }}">
+                        {{ $leaveRequest->status_label }}
+                    </span>
+                </td>
+            </tr>
+            @if($leaveRequest->catatan_pejabat)
+            <tr>
+                <td class="label">Catatan:</td>
+                <td>{{ $leaveRequest->catatan_pejabat }}</td>
+            </tr>
+            @endif
+        </table>
+    </div>
 
-        @if($leaveRequest->atasanReviewer || $leaveRequest->pejabat)
-            <div class="section">
-                <div class="section-title">Approval History</div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Peran</th>
-                            <th>Nama</th>
-                            <th>Status</th>
-                            <th>Tanggal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if($leaveRequest->atasanReviewer)
-                            <tr>
-                                <td>Atasan Langsung</td>
-                                <td>{{ $leaveRequest->atasanReviewer->name }}</td>
-                                <td>
-                                    @if($leaveRequest->atasan_review_status)
-                                        <span class="status-badge status-{{ strtolower($leaveRequest->atasan_review_status) }}">
-                                            {{ $leaveRequest->atasan_review_status }}
-                                        </span>
-                                    @else
-                                        <span>Pending</span>
-                                    @endif
-                                </td>
-                                <td>{{ $leaveRequest->atasan_review_date?->format('d M Y') ?? '-' }}</td>
-                            </tr>
-                        @endif
-                        @if($leaveRequest->pejabat)
-                            <tr>
-                                <td>Pejabat Pemerintah</td>
-                                <td>{{ $leaveRequest->pejabat->name }}</td>
-                                <td>
-                                    @if($leaveRequest->pejabat_review_status)
-                                        <span class="status-badge status-{{ strtolower($leaveRequest->pejabat_review_status) }}">
-                                            {{ $leaveRequest->pejabat_review_status }}
-                                        </span>
-                                    @else
-                                        <span>Pending</span>
-                                    @endif
-                                </td>
-                                <td>{{ $leaveRequest->pejabat_review_date?->format('d M Y') ?? '-' }}</td>
-                            </tr>
-                        @endif
-                    </tbody>
-                </table>
-            </div>
-        @endif
-
-        <div class="footer">
-            <div class="signature">
-                <div class="label">Pemohon</div>
-                <div class="signature-line">{{ $leaveRequest->user->name }}</div>
-            </div>
-            <div class="signature">
-                <div class="label">Disetujui</div>
-                <div class="signature-line">
-                    @if($leaveRequest->pejabat)
-                        {{ $leaveRequest->pejabat->name }}
-                    @else
-                        ________________
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <div style="text-align: center; margin-top: 30px; font-size: 10px; color: #999;">
-            <p>Dokumen ini digenerated otomatis pada {{ now()->format('d M Y H:i:s') }}</p>
-        </div>
+    <div class="footer">
+        <p>Dicetak: {{ $generatedAt->format('d M Y H:i:s') }}</p>
+        <p>ID: {{ $leaveRequest->id }}</p>
     </div>
 </body>
 </html>

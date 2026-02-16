@@ -8,6 +8,7 @@ use App\Mail\LeaveRequestRejected;
 use App\Mail\LeaveRequestSubmitted;
 use App\Models\LeaveRequest;
 use App\Models\Notification;
+use App\Services\BalanceAuditService;
 use App\Services\CutiTahunanCalculator;
 use App\Services\HariKerjaCalculator;
 use App\Services\PdfExportService;
@@ -230,7 +231,18 @@ class LeaveRequestController extends Controller
 
         // Jika disetujui, kurangi leave_balance untuk cuti tahunan
         if ($keputusan === 'setuju' && $leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
-            $leaveRequest->user->decrement('leave_balance', $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days);
+            $previousBalance = $leaveRequest->user->leave_balance;
+            $totalDays = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days;
+            $leaveRequest->user->decrement('leave_balance', $totalDays);
+
+            // Log balance change
+            BalanceAuditService::logBalanceChange(
+                $leaveRequest->user,
+                $previousBalance,
+                $previousBalance - $totalDays,
+                "Pengajuan {$leaveRequest->type_label} disetujui",
+                $leaveRequest->id
+            );
         }
 
         // Kirim email sesuai keputusan
@@ -298,7 +310,17 @@ class LeaveRequestController extends Controller
         ]);
 
         if ($leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
+            $previousBalance = $user->leave_balance;
             $user->decrement('leave_balance', $totalDays);
+
+            // Log balance change
+            BalanceAuditService::logBalanceChange(
+                $user,
+                $previousBalance,
+                $previousBalance - $totalDays,
+                "Pengajuan {$leaveRequest->type_label} disetujui",
+                $leaveRequest->id
+            );
         }
 
         // Kirim email persetujuan

@@ -5,12 +5,14 @@ use App\Http\Controllers\AppealController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BalanceAdjustmentController;
+use App\Http\Controllers\BalanceHistoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\HariLiburController;
 use App\Http\Controllers\KalenderController;
 use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PdfExportController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +49,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/leave/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave.show');
     Route::get('/leave/{leaveRequest}/export-pdf', [LeaveRequestController::class, 'exportPdf'])->name('leave.export-pdf');
     Route::get('/leave/export/summary', [LeaveRequestController::class, 'exportSummaryPdf'])->name('leave.export-summary');
+
+    // === Riwayat Saldo Cuti ===
+    Route::prefix('balance-history')->name('balance-history.')->group(function () {
+        Route::get('/', [BalanceHistoryController::class, 'index'])->name('index');
+        Route::get('/{user}', [BalanceHistoryController::class, 'show'])->name('show')->middleware('auth');
+        Route::get('/{user}/export', [BalanceHistoryController::class, 'export'])->name('export');
+    });
 
     // === Dokumen ===
     Route::get('/documents/{leaveRequest}', [DocumentController::class, 'list'])->name('document.list');
@@ -126,5 +135,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/{balanceAdjustment}', [BalanceAdjustmentController::class, 'show'])->name('show');
         Route::post('/{balanceAdjustment}/approve', [BalanceAdjustmentController::class, 'approve'])->name('approve');
         Route::post('/{balanceAdjustment}/reject', [BalanceAdjustmentController::class, 'reject'])->name('reject');
+    });
+
+    // === PDF Export ===
+    Route::prefix('pdf-export')->name('pdf-export.')->group(function () {
+        Route::get('/leave/{leaveRequest}', [PdfExportController::class, 'leaveRequest'])->name('leave-request');
+        Route::get('/balance/{user}', [PdfExportController::class, 'balanceReport'])->name('balance-report');
+
+        // Admin only
+        Route::middleware('role:admin')->group(function () {
+            Route::get('/all-leaves', [PdfExportController::class, 'allLeaveRequests'])->name('all-leaves');
+            Route::get('/statistics', [PdfExportController::class, 'statistics'])->name('statistics');
+        });
     });
 });
