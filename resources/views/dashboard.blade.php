@@ -517,7 +517,7 @@
                         {{ $req->start_date->format('d M Y') }} &mdash; {{ $req->end_date->format('d M Y') }}
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-sm sh-btn-primary flex-fill" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $req->id }}">
+                        <button class="btn btn-sm sh-btn-primary flex-fill" onclick="openReviewModal{{ $req->id }}()">
                             <i class="ti ti-checklist me-1"></i> Pertimbangan
                         </button>
                         <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">
@@ -678,7 +678,7 @@
                     </div>
                     @endif
                     <div class="d-flex gap-2 mt-2">
-                        <button class="btn btn-sm sh-btn-primary flex-fill" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $req->id }}">
+                        <button class="btn btn-sm sh-btn-primary flex-fill" onclick="openReviewModal{{ $req->id }}()">
                             <i class="ti ti-checklist me-1"></i> Beri Pertimbangan
                         </button>
                         <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">

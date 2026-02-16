@@ -1,13 +1,17 @@
-{{-- Atasan Review Modal --}}
-<div class="modal modal-blur fade" id="reviewModal{{ $req->id }}" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
-        <div class="modal-content" style="border-radius: 16px; border: none; overflow: hidden;">
+{{-- Atasan Review Modal - Custom Implementation (No Flicker) --}}
+
+{{-- Modal Overlay - Custom (not Bootstrap) --}}
+<div class="sh-modal-overlay" id="reviewModalOverlay{{ $req->id }}" data-modal-id="{{ $req->id }}">
+    {{-- Modal Container --}}
+    <div class="sh-modal-container" data-modal-container>
+        <div class="sh-modal-content">
             <form method="POST" action="{{ route('leave.review', $req) }}" id="reviewForm{{ $req->id }}">
                 @csrf
-                <div class="modal-body p-4">
+                <div class="sh-modal-body">
+                    {{-- Header --}}
                     <div class="text-center mb-3">
-                        <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--sh-primary-light); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.75rem;">
-                            <i class="ti ti-checklist" style="font-size: 2rem; color: var(--sh-primary);"></i>
+                        <div class="sh-modal-icon">
+                            <i class="ti ti-checklist"></i>
                         </div>
                         <h3 class="fw-bold mb-1">Pertimbangan Atasan</h3>
                         <p class="text-muted mb-0" style="font-size: 0.88rem;">
@@ -17,7 +21,7 @@
                     </div>
 
                     {{-- Request Summary --}}
-                    <div class="mb-3" style="background: var(--sh-gray-50); border-radius: 12px; padding: 0.85rem 1rem;">
+                    <div class="sh-modal-summary">
                         <div class="row g-2" style="font-size: 0.85rem;">
                             <div class="col-6">
                                 <div class="text-muted mb-1">Jenis Cuti</div>
@@ -42,47 +46,66 @@
 
                     {{-- Pertimbangan Options --}}
                     <div class="mb-3">
-                        <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">
+                        <label class="form-label fw-bold" style="font-size: 0.85rem;">
                             Pertimbangan <span class="text-danger">*</span>
                         </label>
-                        <div class="d-flex flex-column gap-2" id="pertimbanganGroup{{ $req->id }}">
-                            <div style="display: flex; align-items: center; background: var(--sh-success-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative; gap: 0.75rem; padding-left: 2.5rem;">
-                                <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="setuju" id="pertimbangan_setuju{{ $req->id }}" required style="opacity: 0; width: 0; height: 0; margin: 0; padding: 0; position: absolute; pointer-events: none;">
-                                <label for="pertimbangan_setuju{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-success); margin: 0; cursor: pointer; flex: 1; user-select: none;">
-                                    <i class="ti ti-circle-check me-1"></i> Disetujui
-                                </label>
-                            </div>
-                            <div style="display: flex; align-items: center; background: var(--sh-primary-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative; gap: 0.75rem; padding-left: 2.5rem;">
-                                <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="ubah" id="pertimbangan_ubah{{ $req->id }}" style="opacity: 0; width: 0; height: 0; margin: 0; padding: 0; position: absolute; pointer-events: none;">
-                                <label for="pertimbangan_ubah{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-primary); margin: 0; cursor: pointer; flex: 1; user-select: none;">
-                                    <i class="ti ti-edit me-1"></i> Perubahan
-                                </label>
-                            </div>
-                            <div style="display: flex; align-items: center; background: var(--sh-warning-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative; gap: 0.75rem; padding-left: 2.5rem;">
-                                <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="tangguhkan" id="pertimbangan_tangguhkan{{ $req->id }}" style="opacity: 0; width: 0; height: 0; margin: 0; padding: 0; position: absolute; pointer-events: none;">
-                                <label for="pertimbangan_tangguhkan{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-warning); margin: 0; cursor: pointer; flex: 1; user-select: none;">
-                                    <i class="ti ti-clock-pause me-1"></i> Ditangguhkan
-                                </label>
-                            </div>
-                            <div style="display: flex; align-items: center; background: var(--sh-danger-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative; gap: 0.75rem; padding-left: 2.5rem;">
-                                <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="tolak" id="pertimbangan_tolak{{ $req->id }}" style="opacity: 0; width: 0; height: 0; margin: 0; padding: 0; position: absolute; pointer-events: none;">
-                                <label for="pertimbangan_tolak{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-danger); margin: 0; cursor: pointer; flex: 1; user-select: none;">
-                                    <i class="ti ti-circle-x me-1"></i> Tidak Disetujui
-                                </label>
-                            </div>
+                        <div class="sh-pertimbangan-options" id="pertimbanganGroup{{ $req->id }}">
+                            {{-- Setuju --}}
+                            <label class="sh-option sh-option-success" data-option="setuju">
+                                <input type="radio" name="pertimbangan" value="setuju" id="pertimbangan_setuju{{ $req->id }}" required>
+                                <span class="sh-option-indicator"></span>
+                                <span class="sh-option-content">
+                                    <i class="ti ti-circle-check"></i> Disetujui
+                                </span>
+                            </label>
+
+                            {{-- Ubah --}}
+                            <label class="sh-option sh-option-primary" data-option="ubah">
+                                <input type="radio" name="pertimbangan" value="ubah" id="pertimbangan_ubah{{ $req->id }}">
+                                <span class="sh-option-indicator"></span>
+                                <span class="sh-option-content">
+                                    <i class="ti ti-edit"></i> Perubahan
+                                </span>
+                            </label>
+
+                            {{-- Tangguhkan --}}
+                            <label class="sh-option sh-option-warning" data-option="tangguhkan">
+                                <input type="radio" name="pertimbangan" value="tangguhkan" id="pertimbangan_tangguhkan{{ $req->id }}">
+                                <span class="sh-option-indicator"></span>
+                                <span class="sh-option-content">
+                                    <i class="ti ti-clock-pause"></i> Ditangguhkan
+                                </span>
+                            </label>
+
+                            {{-- Tolak --}}
+                            <label class="sh-option sh-option-danger" data-option="tolak">
+                                <input type="radio" name="pertimbangan" value="tolak" id="pertimbangan_tolak{{ $req->id }}">
+                                <span class="sh-option-indicator"></span>
+                                <span class="sh-option-content">
+                                    <i class="ti ti-circle-x"></i> Tidak Disetujui
+                                </span>
+                            </label>
                         </div>
                     </div>
 
                     {{-- Catatan --}}
                     <div class="mb-0">
-                        <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">Catatan Atasan</label>
-                        <textarea name="catatan_atasan" class="form-control" rows="2" placeholder="Catatan atau keterangan tambahan..." style="border-radius: 10px; border: 2px solid #e2e8f0;"></textarea>
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">Catatan Atasan</label>
+                        <textarea name="catatan_atasan" class="form-control" rows="2"
+                                  placeholder="Catatan atau keterangan tambahan..."
+                                  style="border-radius: 10px; border: 2px solid #e2e8f0;"></textarea>
                     </div>
                 </div>
-                <div class="modal-footer border-0 pt-0 px-4 pb-4" style="justify-content: center; gap: 0.5rem;">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; min-width: 100px;" id="cancelBtn{{ $req->id }}">Batal</button>
-                    <button type="submit" class="btn sh-btn-primary text-white" style="min-width: 120px;" id="submitBtn{{ $req->id }}">
-                        <i class="ti ti-send me-1"></i> <span id="submitText{{ $req->id }}">Kirim Pertimbangan</span>
+
+                {{-- Footer --}}
+                <div class="sh-modal-footer">
+                    <button type="button" class="btn btn-secondary sh-modal-cancel"
+                            data-modal-close="{{ $req->id }}" style="border-radius: 10px; min-width: 100px;">
+                        Batal
+                    </button>
+                    <button type="submit" class="btn sh-btn-primary text-white"
+                            style="min-width: 120px;" id="submitBtn{{ $req->id }}">
+                        <i class="ti ti-send me-1"></i> <span>Kirim Pertimbangan</span>
                     </button>
                 </div>
             </form>
@@ -90,203 +113,385 @@
     </div>
 </div>
 
+{{-- Custom Modal Styles (Inline for scoping) --}}
+<style>
+/* === Modal Overlay - Custom System (No Layout Shift) === */
+.sh-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+    padding: 1rem;
+    /* Prevent scrolling without changing body */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Modal Open State */
+.sh-modal-overlay.sh-modal-active {
+    opacity: 1;
+    visibility: visible;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* Modal Container */
+.sh-modal-container {
+    max-width: 520px;
+    width: 100%;
+    margin: auto;
+    transform: scale(0.95) translateY(20px);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.sh-modal-active .sh-modal-container {
+    transform: scale(1) translateY(0);
+}
+
+/* Modal Content */
+.sh-modal-content {
+    background: var(--sh-card-bg);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+/* Modal Body */
+.sh-modal-body {
+    padding: 1.5rem;
+}
+
+/* Modal Icon */
+.sh-modal-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--sh-primary-light);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    font-size: 2rem;
+    color: var(--sh-primary);
+}
+
+/* Modal Summary */
+.sh-modal-summary {
+    background: var(--sh-gray-50);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Pertimbangan Options */
+.sh-pertimbangan-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Option Item */
+.sh-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    user-select: none;
+}
+
+/* Hide native radio */
+.sh-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+/* Custom Radio Indicator */
+.sh-option-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    flex-shrink: 0;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+/* Radio Indicator - Checked State */
+.sh-option input[type="radio"]:checked + .sh-option-indicator {
+    background: currentColor;
+    box-shadow: inset 0 0 0 4px var(--sh-card-bg);
+}
+
+/* Option Content */
+.sh-option-content {
+    font-weight: 600;
+    flex: 1;
+}
+
+/* Option Variants */
+.sh-option-success {
+    background: var(--sh-success-light);
+    color: var(--sh-success);
+}
+
+.sh-option-primary {
+    background: var(--sh-primary-light);
+    color: var(--sh-primary);
+}
+
+.sh-option-warning {
+    background: var(--sh-warning-light);
+    color: var(--sh-warning);
+}
+
+.sh-option-danger {
+    background: var(--sh-danger-light);
+    color: var(--sh-danger);
+}
+
+/* Hover States */
+.sh-option:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+.sh-option input[type="radio"]:checked ~ .sh-option-content {
+    font-weight: 700;
+}
+
+/* Selected State */
+.sh-option:has(input[type="radio"]:checked) {
+    border-color: currentColor;
+    filter: brightness(1.1);
+}
+
+/* Modal Footer */
+.sh-modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 2px solid var(--sh-gray-100);
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Scroll Lock Body (applied via JS) */
+body.sh-scroll-locked {
+    /* Important: Don't change overflow or padding - use fixed wrapper instead */
+    position: relative;
+}
+
+/* Scroll Lock Wrapper - prevents scrolling without layout shift */
+.sh-scroll-lock-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9998;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.sh-scroll-lock-wrapper.sh-active {
+    pointer-events: auto;
+}
+
+/* Mobile Responsive */
+@media (max-width: 576px) {
+    .sh-modal-overlay {
+        padding: 0.5rem;
+    }
+
+    .sh-modal-body {
+        padding: 1rem;
+    }
+
+    .sh-modal-footer {
+        padding: 0.75rem 1rem;
+        flex-direction: column;
+    }
+
+    .sh-modal-footer button {
+        width: 100%;
+    }
+}
+
+/* Animation Keyframes */
+@keyframes sh-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes sh-fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}
+</style>
+
+{{-- Custom Modal JavaScript --}}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('reviewForm{{ $req->id }}');
-    const submitBtn = document.getElementById('submitBtn{{ $req->id }}');
-    const modal = document.getElementById('reviewModal{{ $req->id }}');
-    const pertimbanganGroup = document.getElementById('pertimbanganGroup{{ $req->id }}');
+(function() {
+    const modalId = '{{ $req->id }}';
+    const overlay = document.getElementById('reviewModalOverlay' + modalId);
+    const form = document.getElementById('reviewForm' + modalId);
+    const submitBtn = document.getElementById('submitBtn' + modalId);
     let isSubmitting = false;
+    let scrollLockWrapper = null;
 
-    // Handle radio button visual feedback with CSS classes
-    if (pertimbanganGroup) {
-        const radioInputs = pertimbanganGroup.querySelectorAll('.pertimbangan-input');
+    if (!overlay || !form || !submitBtn) return;
 
-        radioInputs.forEach(radio => {
-            const container = radio.parentElement;
+    // Open Modal Function - No Layout Shift
+    window['openReviewModal' + modalId] = function() {
+        // Create scroll lock wrapper
+        scrollLockWrapper = document.createElement('div');
+        scrollLockWrapper.className = 'sh-scroll-lock-wrapper';
+        document.body.appendChild(scrollLockWrapper);
 
-            // Set initial class if checked
-            if (radio.checked) {
-                container.classList.add('pertimbangan-selected');
-            }
+        // Force reflow
+        void overlay.offsetHeight;
 
-            // Change event - only toggle class, let CSS do the animation
-            radio.addEventListener('change', function(e) {
-                e.stopPropagation();
-
-                // Remove class from all
-                radioInputs.forEach(r => {
-                    r.parentElement.classList.remove('pertimbangan-selected');
-                });
-
-                // Add class to selected
-                if (this.checked) {
-                    container.classList.add('pertimbangan-selected');
-                }
-            });
-
-            // Click on container to select radio
-            container.addEventListener('click', function(e) {
-                // Allow clicks anywhere on container to select radio (radio is already hidden)
-                if (!radio.checked) {
-                    radio.checked = true;
-                    radio.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-            });
+        // Activate (no body manipulation = no layout shift)
+        requestAnimationFrame(() => {
+            overlay.classList.add('sh-modal-active');
+            scrollLockWrapper.classList.add('sh-active');
+            document.body.classList.add('sh-scroll-locked');
         });
-    }
+    };
 
-    if (form && submitBtn && modal) {
-        form.addEventListener('submit', function(e) {
+    // Close Modal Function
+    window['closeReviewModal' + modalId] = function() {
+        overlay.classList.remove('sh-modal-active');
+        document.body.classList.remove('sh-scroll-locked');
+
+        setTimeout(() => {
+            if (scrollLockWrapper && scrollLockWrapper.parentNode) {
+                scrollLockWrapper.parentNode.removeChild(scrollLockWrapper);
+                scrollLockWrapper = null;
+            }
+        }, 250);
+    };
+
+    // Close button handler
+    const closeBtn = overlay.querySelector('[data-modal-close="' + modalId + '"]');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function(e) {
             e.preventDefault();
-
-            // Prevent double submission
-            if (isSubmitting) {
-                return false;
-            }
-
-            isSubmitting = true;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="ti ti-loader me-1" style="animation: spin 1s linear infinite;"></i> Mengirim...';
-
-            const formData = new FormData(form);
-
-            // Send AJAX request
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Close modal
-                const bsModal = bootstrap.Modal.getInstance(modal);
-                if (bsModal) bsModal.hide();
-
-                // Remove the request card from DOM
-                const requestCard = document.querySelector('[data-request-id="{{ $req->id }}"]');
-                if (requestCard) {
-                    requestCard.style.animation = 'fadeOut 0.3s ease-out';
-                    setTimeout(() => {
-                        requestCard.remove();
-                    }, 300);
-                }
-
-                // Show success message
-                const successMsg = document.createElement('div');
-                successMsg.className = 'alert alert-success';
-                successMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; background: var(--sh-success-light); color: var(--sh-success); border-radius: 12px; border: none; padding: 1rem;';
-                successMsg.innerHTML = '<i class="ti ti-circle-check me-2"></i> Pertimbangan berhasil dikirim!';
-                document.body.appendChild(successMsg);
-
-                // Remove success message after 3 seconds
-                setTimeout(() => {
-                    successMsg.style.animation = 'fadeOut 0.3s ease-out';
-                    setTimeout(() => {
-                        successMsg.remove();
-                    }, 300);
-                }, 3000);
-
-                isSubmitting = false;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="ti ti-send me-1"></i> Kirim Pertimbangan';
-                isSubmitting = false;
-
-                // Show error message
-                const errorMsg = document.createElement('div');
-                errorMsg.className = 'alert alert-danger';
-                errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; background: var(--sh-danger-light); color: var(--sh-danger); border-radius: 12px; border: none; padding: 1rem;';
-                errorMsg.innerHTML = '<i class="ti ti-alert-circle me-2"></i> Gagal mengirim pertimbangan. Silahkan coba lagi.';
-                document.body.appendChild(errorMsg);
-
-                setTimeout(() => {
-                    errorMsg.remove();
-                }, 5000);
-            });
-
-            return false;
+            window['closeReviewModal' + modalId]();
         });
-
-        // Add styles if not exists
-        if (!document.getElementById('reviewModalStyles')) {
-            const style = document.createElement('style');
-            style.id = 'reviewModalStyles';
-            style.textContent = `
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-                @keyframes fadeOut {
-                    from { opacity: 1; transform: translateY(0); }
-                    to { opacity: 0; transform: translateY(-10px); }
-                }
-
-                /* Custom radio button styling - Option 1 */
-                [id*="pertimbanganGroup"] > div::before {
-                    content: '';
-                    display: block;
-                    width: 20px;
-                    height: 20px;
-                    border-radius: 50%;
-                    border: 2px solid currentColor;
-                    flex-shrink: 0;
-                    position: absolute;
-                    left: 0.65rem;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    transition: all 0.2s ease;
-                    background-color: transparent;
-                }
-
-                /* Selected state - filled circle */
-                [id*="pertimbanganGroup"] > div.pertimbangan-selected::before {
-                    background-color: currentColor;
-                    box-shadow: inset 0 0 0 3px;
-                }
-
-                /* Fade effect for radio options */
-                .pertimbangan-selected {
-                    opacity: 1 !important;
-                    filter: brightness(1.1) !important;
-                }
-
-                /* Unselected state - dimmed */
-                [id*="pertimbanganGroup"] > div:not(.pertimbangan-selected) {
-                    opacity: 0.9;
-                    filter: brightness(0.95);
-                }
-
-                /* Hover effect - unselected */
-                [id*="pertimbanganGroup"] > div:hover:not(.pertimbangan-selected) {
-                    opacity: 0.95;
-                    filter: brightness(0.98);
-                }
-
-                /* Hover effect - selected */
-                [id*="pertimbanganGroup"] > div.pertimbangan-selected:hover {
-                    opacity: 1;
-                    filter: brightness(1.15);
-                }
-            `;
-            document.head.appendChild(style);
-        }
     }
 
-    // Reset form when modal is closed
-    if (modal) {
-        modal.addEventListener('hidden.bs.modal', function() {
-            if (!isSubmitting && form) {
+    // Close on overlay click (outside modal)
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+            window['closeReviewModal' + modalId]();
+        }
+    });
+
+    // Close on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && overlay.classList.contains('sh-modal-active')) {
+            window['closeReviewModal' + modalId]();
+        }
+    });
+
+    // Form submission with AJAX
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        if (isSubmitting) return false;
+
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="ti ti-loader me-1" style="animation: sh-spin 1s linear infinite;"></i> Mengirim...';
+
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Close modal
+            window['closeReviewModal' + modalId]();
+
+            // Remove request card from DOM
+            const requestCard = document.querySelector('[data-request-id="{{ $req->id }}"]');
+            if (requestCard) {
+                requestCard.style.animation = 'sh-fadeOut 0.3s ease-out';
+                setTimeout(() => requestCard.remove(), 300);
+            }
+
+            // Show success message
+            showToast('success', '<i class="ti ti-circle-check me-2"></i> Pertimbangan berhasil dikirim!');
+
+            isSubmitting = false;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="ti ti-send me-1"></i> <span>Kirim Pertimbangan</span>';
+            isSubmitting = false;
+
+            showToast('error', '<i class="ti ti-alert-circle me-2"></i> Gagal mengirim pertimbangan. Silahkan coba lagi.');
+        });
+
+        return false;
+    });
+
+    // Reset form when modal closes
+    overlay.addEventListener('transitionend', function(e) {
+        if (e.target === overlay && !overlay.classList.contains('sh-modal-active')) {
+            if (!isSubmitting) {
                 form.reset();
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="ti ti-send me-1"></i> Kirim Pertimbangan';
+                submitBtn.innerHTML = '<i class="ti ti-send me-1"></i> <span>Kirim Pertimbangan</span>';
             }
-        });
+        }
+    });
+
+    // Toast notification helper
+    function showToast(type, message) {
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-' + type;
+        toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 99999; min-width: 300px; border-radius: 12px; border: none; padding: 1rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15);';
+
+        if (type === 'success') {
+            toast.style.background = 'var(--sh-success-light)';
+            toast.style.color = 'var(--sh-success)';
+        } else {
+            toast.style.background = 'var(--sh-danger-light)';
+            toast.style.color = 'var(--sh-danger)';
+        }
+
+        toast.innerHTML = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'sh-fadeOut 0.3s ease-out';
+            setTimeout(() => toast.remove(), 300);
+        }, type === 'success' ? 3000 : 5000);
     }
-});
+})();
 </script>
