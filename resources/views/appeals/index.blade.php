@@ -72,7 +72,7 @@
                                         #{{ str_pad($appeal->leave_request_id, 6, '0', STR_PAD_LEFT) }}
                                     </a>
                                 </td>
-                                <td>{{ $appeal->created_at->format('d/m/Y') }}</td>
+                                <td>{{ $appeal->created_at->format('d M Y') }}</td>
                                 <td>{{ $appeal->leaveRequest->jenis_cuti }}</td>
                                 <td>
                                     <span class="badge bg-{{ $appeal->getStatusBadgeClass() }}">

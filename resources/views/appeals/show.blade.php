@@ -60,9 +60,9 @@
                             <div class="mb-3">
                                 <label class="form-label text-muted">Periode Cuti</label>
                                 <p class="fs-5">
-                                    {{ \Carbon\Carbon::parse($appeal->leaveRequest->tanggal_mulai)->format('d/m/Y') }}
+                                    {{ \Carbon\Carbon::parse($appeal->leaveRequest->tanggal_mulai)->format('d M Y') }}
                                     s/d
-                                    {{ \Carbon\Carbon::parse($appeal->leaveRequest->tanggal_selesai)->format('d/m/Y') }}
+                                    {{ \Carbon\Carbon::parse($appeal->leaveRequest->tanggal_selesai)->format('d M Y') }}
                                 </p>
                             </div>
                             <div class="mb-3">
@@ -99,7 +99,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label text-muted">Diajukan Pada</label>
-                                <p>{{ $appeal->created_at->format('d/m/Y H:i') }}</p>
+                                <p>{{ $appeal->created_at->format('d M Y, H:i') }}</p>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -110,7 +110,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label text-muted">Tanggal Keputusan</label>
-                                    <p>{{ $appeal->decided_at?->format('d/m/Y H:i') ?? '-' }}</p>
+                                    <p>{{ $appeal->decided_at?->format('d M Y, H:i') ?? '-' }}</p>
                                 </div>
                             @endif
                         </div>
@@ -184,7 +184,7 @@
                             <div class="timeline-content">
                                 <strong>Banding Diajukan</strong>
                                 <small class="text-muted d-block">
-                                    {{ $appeal->created_at->format('d/m/Y H:i') }}
+                                    {{ $appeal->created_at->format('d M Y, H:i') }}
                                 </small>
                             </div>
                         </div>
@@ -195,7 +195,7 @@
                                 <div class="timeline-content">
                                     <strong>{{ $appeal->isApproved() ? 'Banding Disetujui' : 'Banding Ditolak' }}</strong>
                                     <small class="text-muted d-block">
-                                        {{ $appeal->decided_at->format('d/m/Y H:i') }}
+                                        {{ $appeal->decided_at->format('d M Y, H:i') }}
                                     </small>
                                 </div>
                             </div>

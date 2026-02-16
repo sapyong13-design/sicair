@@ -113,15 +113,15 @@
                         <td>{{ $key + 1 }}</td>
                         <td>{{ $leave->user->name }}</td>
                         <td>{{ $leave->type }}</td>
-                        <td>{{ $leave->start_date->format('d/m/Y') }}</td>
-                        <td>{{ $leave->end_date->format('d/m/Y') }}</td>
+                        <td>{{ $leave->start_date->format('d M Y') }}</td>
+                        <td>{{ $leave->end_date->format('d M Y') }}</td>
                         <td style="text-align: center;">{{ $leave->number_of_days }}</td>
                         <td>
                             <span class="status-badge status-{{ strtolower($leave->status) }}">
                                 {{ ucfirst(str_replace('_', ' ', $leave->status)) }}
                             </span>
                         </td>
-                        <td>{{ $leave->created_at->format('d/m/Y') }}</td>
+                        <td>{{ $leave->created_at->format('d M Y') }}</td>
                     </tr>
                 @empty
                     <tr>

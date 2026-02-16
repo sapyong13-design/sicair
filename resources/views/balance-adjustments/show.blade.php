@@ -94,7 +94,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label text-muted">Tanggal Dibuat</label>
-                                <p>{{ $adjustment->created_at->format('d/m/Y H:i') }}</p>
+                                <p>{{ $adjustment->created_at->format('d M Y, H:i') }}</p>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -105,7 +105,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label text-muted">Tanggal Keputusan</label>
-                                    <p>{{ $adjustment->approved_at?->format('d/m/Y H:i') ?? '-' }}</p>
+                                    <p>{{ $adjustment->approved_at?->format('d M Y, H:i') ?? '-' }}</p>
                                 </div>
                             @endif
                         </div>
@@ -169,7 +169,7 @@
                             <div class="timeline-content">
                                 <strong>Dibuat</strong>
                                 <small class="text-muted d-block">
-                                    {{ $adjustment->created_at->format('d/m/Y H:i') }}
+                                    {{ $adjustment->created_at->format('d M Y, H:i') }}
                                 </small>
                             </div>
                         </div>
@@ -180,7 +180,7 @@
                                 <div class="timeline-content">
                                     <strong>{{ $adjustment->isApproved() ? 'Disetujui' : 'Ditolak' }}</strong>
                                     <small class="text-muted d-block">
-                                        {{ $adjustment->approved_at->format('d/m/Y H:i') }}
+                                        {{ $adjustment->approved_at->format('d M Y, H:i') }}
                                     </small>
                                 </div>
                             </div>
