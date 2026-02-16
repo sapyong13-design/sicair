@@ -128,9 +128,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Click on container to select radio
             container.addEventListener('click', function(e) {
                 // Allow clicks anywhere on container to select radio (radio is already hidden)
-                radio.checked = true;
-                radio.dispatchEvent(new Event('change', { bubbles: true }));
-                radio.focus();
+                if (!radio.checked) {
+                    radio.checked = true;
+                    radio.dispatchEvent(new Event('change', { bubbles: true }));
+                }
             });
         });
     }
