@@ -127,13 +127,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Click on container to select radio
             container.addEventListener('click', function(e) {
-                if (e.target !== radio && !e.target.closest('label')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    radio.checked = true;
-                    radio.dispatchEvent(new Event('change', { bubbles: true }));
-                    radio.focus();
-                }
+                // Allow clicks anywhere on container to select radio (radio is already hidden)
+                radio.checked = true;
+                radio.dispatchEvent(new Event('change', { bubbles: true }));
+                radio.focus();
             });
         });
     }
