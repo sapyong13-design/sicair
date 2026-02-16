@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\LeaveRequestApproved;
+use App\Mail\LeaveRequestNeedsConsideration;
+use App\Mail\LeaveRequestRejected;
+use App\Mail\LeaveRequestSubmitted;
 use App\Models\LeaveRequest;
 use App\Models\Notification;
 use App\Services\CutiTahunanCalculator;
@@ -10,6 +14,7 @@ use App\Services\PdfExportService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class LeaveRequestController extends Controller
 {
@@ -84,7 +89,7 @@ class LeaveRequestController extends Controller
             $dokumenPath = $request->file('dokumen_pendukung')->store('dokumen-cuti', 'public');
         }
 
-        LeaveRequest::create([
+        $leaveRequest = LeaveRequest::create([
             'user_id' => $user->id,
             'type' => $type,
             'start_date' => $request->start_date,
@@ -98,6 +103,9 @@ class LeaveRequestController extends Controller
             'total_hari_kerja' => $hariKerja,
             'status' => LeaveRequest::STATUS_DIAJUKAN,
         ]);
+
+        // Kirim email ke pemohon
+        Mail::queue(new LeaveRequestSubmitted($leaveRequest));
 
         // Kirim notifikasi ke atasan
         if ($user->atasan_id) {
@@ -141,6 +149,13 @@ class LeaveRequestController extends Controller
                 'status' => LeaveRequest::STATUS_DITOLAK,
             ]);
 
+            // Kirim email penolakan
+            Mail::queue(new LeaveRequestRejected(
+                $leaveRequest,
+                $reviewer->name,
+                $request->catatan_atasan
+            ));
+
             Notification::kirim(
                 $leaveRequest->user_id,
                 'Pengajuan Cuti Ditolak',
@@ -160,6 +175,9 @@ class LeaveRequestController extends Controller
             'reviewed_at' => now(),
             'status' => LeaveRequest::STATUS_PERTIMBANGAN,
         ]);
+
+        // Kirim email ke pejabat untuk pertimbangan lanjutan
+        Mail::queue(new LeaveRequestNeedsConsideration($leaveRequest));
 
         // Notifikasi ke pemohon
         Notification::kirim(
@@ -215,6 +233,17 @@ class LeaveRequestController extends Controller
             $leaveRequest->user->decrement('leave_balance', $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days);
         }
 
+        // Kirim email sesuai keputusan
+        if ($keputusan === 'setuju') {
+            Mail::queue(new LeaveRequestApproved($leaveRequest, $pejabat->name));
+        } elseif ($keputusan === 'tolak') {
+            Mail::queue(new LeaveRequestRejected(
+                $leaveRequest,
+                $pejabat->name,
+                $request->catatan_pejabat
+            ));
+        }
+
         $label = match ($keputusan) {
             'setuju' => 'disetujui',
             'ubah' => 'diubah',
@@ -259,10 +288,11 @@ class LeaveRequestController extends Controller
             return back()->with('error', "Sisa cuti pegawai tidak mencukupi ($user->leave_balance hari tersisa).");
         }
 
+        $pejabat = Auth::user();
         $leaveRequest->update([
             'status' => LeaveRequest::STATUS_DISETUJUI,
             'admin_note' => $request->input('admin_note'),
-            'pejabat_id' => Auth::id(),
+            'pejabat_id' => $pejabat->id,
             'keputusan_pejabat' => 'setuju',
             'decided_at' => now(),
         ]);
@@ -270,6 +300,9 @@ class LeaveRequestController extends Controller
         if ($leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
             $user->decrement('leave_balance', $totalDays);
         }
+
+        // Kirim email persetujuan
+        Mail::queue(new LeaveRequestApproved($leaveRequest, $pejabat->name));
 
         return back()->with('success', "Cuti {$user->name} disetujui ($totalDays hari).");
     }
@@ -284,14 +317,20 @@ class LeaveRequestController extends Controller
             'admin_note' => 'required|string|max:500',
         ]);
 
+        $pejabat = Auth::user();
+        $adminNote = $request->input('admin_note');
+
         $leaveRequest->update([
             'status' => LeaveRequest::STATUS_DITOLAK,
-            'admin_note' => $request->input('admin_note'),
-            'pejabat_id' => Auth::id(),
+            'admin_note' => $adminNote,
+            'pejabat_id' => $pejabat->id,
             'keputusan_pejabat' => 'tolak',
-            'catatan_pejabat' => $request->input('admin_note'),
+            'catatan_pejabat' => $adminNote,
             'decided_at' => now(),
         ]);
+
+        // Kirim email penolakan
+        Mail::queue(new LeaveRequestRejected($leaveRequest, $pejabat->name, $adminNote));
 
         return back()->with('success', "Pengajuan cuti {$leaveRequest->user->name} ditolak.");
     }
