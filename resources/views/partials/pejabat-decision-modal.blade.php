@@ -83,27 +83,27 @@
                         <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">
                             Keputusan <span class="text-danger">*</span>
                         </label>
-                        <div class="d-flex flex-column gap-2">
-                            <label class="form-check" style="background: var(--sh-success-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
-                                <input class="form-check-input" type="radio" name="keputusan" value="setuju" required>
+                        <div class="d-flex flex-column gap-2" id="keputusanGroup{{ $req->id }}">
+                            <label class="form-check keputusan-label" style="background: var(--sh-success-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
+                                <input class="form-check-input keputusan-input" type="radio" name="keputusan" value="setuju" required>
                                 <span class="form-check-label fw-semibold" style="color: var(--sh-success);">
                                     <i class="ti ti-circle-check me-1"></i> Disetujui
                                 </span>
                             </label>
-                            <label class="form-check" style="background: var(--sh-primary-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
-                                <input class="form-check-input" type="radio" name="keputusan" value="ubah">
+                            <label class="form-check keputusan-label" style="background: var(--sh-primary-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
+                                <input class="form-check-input keputusan-input" type="radio" name="keputusan" value="ubah">
                                 <span class="form-check-label fw-semibold" style="color: var(--sh-primary);">
                                     <i class="ti ti-edit me-1"></i> Perubahan
                                 </span>
                             </label>
-                            <label class="form-check" style="background: var(--sh-warning-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
-                                <input class="form-check-input" type="radio" name="keputusan" value="tangguhkan">
+                            <label class="form-check keputusan-label" style="background: var(--sh-warning-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
+                                <input class="form-check-input keputusan-input" type="radio" name="keputusan" value="tangguhkan">
                                 <span class="form-check-label fw-semibold" style="color: var(--sh-warning);">
                                     <i class="ti ti-clock-pause me-1"></i> Ditangguhkan
                                 </span>
                             </label>
-                            <label class="form-check" style="background: var(--sh-danger-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
-                                <input class="form-check-input" type="radio" name="keputusan" value="tolak">
+                            <label class="form-check keputusan-label" style="background: var(--sh-danger-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
+                                <input class="form-check-input keputusan-input" type="radio" name="keputusan" value="tolak">
                                 <span class="form-check-label fw-semibold" style="color: var(--sh-danger);">
                                     <i class="ti ti-circle-x me-1"></i> Tidak Disetujui
                                 </span>
@@ -134,7 +134,41 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.getElementById('submitBtn{{ $req->id }}');
     const submitText = document.getElementById('submitText{{ $req->id }}');
     const modal = document.getElementById('decisionModal{{ $req->id }}');
+    const keputusanGroup = document.getElementById('keputusanGroup{{ $req->id }}');
     let isSubmitting = false;
+
+    // Handle radio button visual feedback for keputusan
+    if (keputusanGroup) {
+        const radioInputs = keputusanGroup.querySelectorAll('.keputusan-input');
+        radioInputs.forEach(radio => {
+            const label = radio.closest('.keputusan-label');
+
+            // Initial state
+            if (radio.checked) {
+                label.style.borderColor = 'currentColor';
+            }
+
+            // Change event
+            radio.addEventListener('change', function(e) {
+                e.stopPropagation();
+                radioInputs.forEach(r => {
+                    r.closest('.keputusan-label').style.borderColor = 'transparent';
+                });
+                if (this.checked) {
+                    label.style.borderColor = 'currentColor';
+                }
+            });
+
+            // Click on label should work smoothly
+            label.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (!radio.checked) {
+                    radio.checked = true;
+                    radio.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+        });
+    }
 
     if (form) {
         form.addEventListener('submit', function(e) {

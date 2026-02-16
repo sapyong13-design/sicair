@@ -111,7 +111,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Change event
-            radio.addEventListener('change', function() {
+            radio.addEventListener('change', function(e) {
+                e.stopPropagation();
                 radioInputs.forEach(r => {
                     r.parentElement.style.borderColor = 'transparent';
                 });
@@ -124,6 +125,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Click on container should click the radio
             container.addEventListener('click', function(e) {
                 if (e.target !== radio && !e.target.closest('label')) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     radio.click();
                     radio.focus();
                 }
