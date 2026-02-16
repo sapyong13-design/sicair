@@ -96,6 +96,14 @@
         body {
             background-color: var(--sh-body-bg);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            scrollbar-gutter: stable;
+            overflow-y: scroll;
+        }
+
+        /* Prevent modal from removing scrollbar space and causing layout shift */
+        body.modal-open {
+            padding-right: 0 !important;
+            overflow-y: scroll !important;
         }
 
         /* --- Navbar --- */
