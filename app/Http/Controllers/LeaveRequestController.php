@@ -128,9 +128,11 @@ class LeaveRequestController extends Controller
     public function reviewAtasan(Request $request, LeaveRequest $leaveRequest)
     {
         $reviewer = Auth::user();
+        $isAjax = $request->header('X-Requested-With') === 'XMLHttpRequest';
 
         if (!$leaveRequest->needsAtasanReview()) {
-            return back()->with('error', 'Pengajuan ini tidak dalam status menunggu pertimbangan atasan.');
+            $message = 'Pengajuan ini tidak dalam status menunggu pertimbangan atasan.';
+            return $isAjax ? response()->json(['error' => $message], 400) : back()->with('error', $message);
         }
 
         $request->validate([
@@ -165,7 +167,7 @@ class LeaveRequestController extends Controller
                 route('leave.show', $leaveRequest)
             );
 
-            return back()->with('success', 'Pengajuan cuti ditolak.');
+            return $isAjax ? response()->json(['success' => true, 'message' => 'Pengajuan cuti ditolak.']) : back()->with('success', 'Pengajuan cuti ditolak.');
         }
 
         // Setuju / ubah / tangguhkan → lanjut ke Pejabat Berwenang
@@ -189,7 +191,7 @@ class LeaveRequestController extends Controller
             route('leave.show', $leaveRequest)
         );
 
-        return back()->with('success', 'Pertimbangan berhasil dikirim ke Pejabat Berwenang.');
+        return $isAjax ? response()->json(['success' => true, 'message' => 'Pertimbangan berhasil dikirim ke Pejabat Berwenang.']) : back()->with('success', 'Pertimbangan berhasil dikirim ke Pejabat Berwenang.');
     }
 
     /**

@@ -504,7 +504,7 @@
         </div>
         <div class="card-body p-3">
             @foreach($directRequests as $req)
-            <div class="card sh-history-card status-{{ $req->status }} mb-3">
+            <div class="card sh-history-card status-{{ $req->status }} mb-3" data-request-id="{{ $req->id }}">
                 <div class="card-body p-3">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
@@ -648,7 +648,7 @@
         @else
         <div class="card-body p-3">
             @foreach($pendingReview as $req)
-            <div class="card sh-history-card status-{{ $req->status }} mb-3">
+            <div class="card sh-history-card status-{{ $req->status }} mb-3" data-request-id="{{ $req->id }}">
                 <div class="card-body p-3">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="d-flex align-items-center gap-2">

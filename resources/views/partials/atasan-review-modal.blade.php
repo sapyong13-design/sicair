@@ -97,19 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('reviewModal{{ $req->id }}');
     let isSubmitting = false;
 
-    if (!document.getElementById('spinnerStyle')) {
-        const style = document.createElement('style');
-        style.id = 'spinnerStyle';
-        style.textContent = `
-            @keyframes spin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
-    if (form && modal) {
+    if (form && submitBtn && modal) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -124,35 +112,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const formData = new FormData(form);
 
+            // Send AJAX request
             fetch(form.action, {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
                 }
             })
-            .then(response => {
-                if (response.ok) {
-                    // Close modal
-                    const bsModal = bootstrap.Modal.getInstance(modal);
-                    if (bsModal) {
-                        bsModal.hide();
-                    }
+            .then(response => response.json())
+            .then(data => {
+                // Close modal
+                const bsModal = bootstrap.Modal.getInstance(modal);
+                if (bsModal) bsModal.hide();
 
-                    // Show success message
-                    const successMsg = document.createElement('div');
-                    successMsg.className = 'alert mt-3';
-                    successMsg.style.cssText = 'background: var(--sh-success-light); color: var(--sh-success); border-radius: 12px; border: none;';
-                    successMsg.innerHTML = '<i class="ti ti-circle-check me-2"></i> Pertimbangan berhasil dikirim!';
-                    form.parentElement.insertBefore(successMsg, form);
-
-                    // Reload page after 1.5 seconds to show updated data
+                // Remove the request card from DOM
+                const requestCard = document.querySelector('[data-request-id="{{ $req->id }}"]');
+                if (requestCard) {
+                    requestCard.style.animation = 'fadeOut 0.3s ease-out';
                     setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    throw new Error('Gagal mengirim pertimbangan');
+                        requestCard.remove();
+                    }, 300);
                 }
+
+                // Show success message
+                const successMsg = document.createElement('div');
+                successMsg.className = 'alert alert-success';
+                successMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; background: var(--sh-success-light); color: var(--sh-success); border-radius: 12px; border: none; padding: 1rem;';
+                successMsg.innerHTML = '<i class="ti ti-circle-check me-2"></i> Pertimbangan berhasil dikirim!';
+                document.body.appendChild(successMsg);
+
+                // Remove success message after 3 seconds
+                setTimeout(() => {
+                    successMsg.style.animation = 'fadeOut 0.3s ease-out';
+                    setTimeout(() => {
+                        successMsg.remove();
+                    }, 300);
+                }, 3000);
+
+                isSubmitting = false;
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -162,24 +161,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Show error message
                 const errorMsg = document.createElement('div');
-                errorMsg.className = 'alert mt-3';
-                errorMsg.style.cssText = 'background: var(--sh-danger-light); color: var(--sh-danger); border-radius: 12px; border: none;';
-                errorMsg.innerHTML = '<i class="ti ti-alert-circle me-2"></i> ' + error.message;
-                form.parentElement.insertBefore(errorMsg, form);
+                errorMsg.className = 'alert alert-danger';
+                errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; background: var(--sh-danger-light); color: var(--sh-danger); border-radius: 12px; border: none; padding: 1rem;';
+                errorMsg.innerHTML = '<i class="ti ti-alert-circle me-2"></i> Gagal mengirim pertimbangan. Silahkan coba lagi.';
+                document.body.appendChild(errorMsg);
+
+                setTimeout(() => {
+                    errorMsg.remove();
+                }, 5000);
             });
 
             return false;
         });
+
+        // Add styles if not exists
+        if (!document.getElementById('reviewModalStyles')) {
+            const style = document.createElement('style');
+            style.id = 'reviewModalStyles';
+            style.textContent = `
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                @keyframes fadeOut {
+                    from { opacity: 1; transform: translateY(0); }
+                    to { opacity: 0; transform: translateY(-10px); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
     }
 
-    // Reset form when modal is closed without submission
+    // Reset form when modal is closed
     if (modal) {
         modal.addEventListener('hidden.bs.modal', function() {
-            if (!isSubmitting) {
+            if (!isSubmitting && form) {
                 form.reset();
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="ti ti-send me-1"></i> Kirim Pertimbangan';
-                isSubmitting = false;
             }
         });
     }
