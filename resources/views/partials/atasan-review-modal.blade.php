@@ -46,25 +46,25 @@
                             Pertimbangan <span class="text-danger">*</span>
                         </label>
                         <div class="d-flex flex-column gap-2" id="pertimbanganGroup{{ $req->id }}">
-                            <div style="display: flex; align-items: center; background: var(--sh-success-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: border-color 0.15s ease, box-shadow 0.15s ease; will-change: border-color, box-shadow; position: relative;">
+                            <div style="display: flex; align-items: center; background: var(--sh-success-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative;">
                                 <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="setuju" id="pertimbangan_setuju{{ $req->id }}" required style="margin: 0; cursor: pointer; width: 20px; height: 20px; flex-shrink: 0;">
                                 <label for="pertimbangan_setuju{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-success); margin: 0; margin-left: 0.75rem; cursor: pointer; flex: 1; user-select: none;">
                                     <i class="ti ti-circle-check me-1"></i> Disetujui
                                 </label>
                             </div>
-                            <div style="display: flex; align-items: center; background: var(--sh-primary-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: border-color 0.15s ease, box-shadow 0.15s ease; will-change: border-color, box-shadow; position: relative;">
+                            <div style="display: flex; align-items: center; background: var(--sh-primary-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative;">
                                 <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="ubah" id="pertimbangan_ubah{{ $req->id }}" style="margin: 0; cursor: pointer; width: 20px; height: 20px; flex-shrink: 0;">
                                 <label for="pertimbangan_ubah{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-primary); margin: 0; margin-left: 0.75rem; cursor: pointer; flex: 1; user-select: none;">
                                     <i class="ti ti-edit me-1"></i> Perubahan
                                 </label>
                             </div>
-                            <div style="display: flex; align-items: center; background: var(--sh-warning-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: border-color 0.15s ease, box-shadow 0.15s ease; will-change: border-color, box-shadow; position: relative;">
+                            <div style="display: flex; align-items: center; background: var(--sh-warning-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative;">
                                 <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="tangguhkan" id="pertimbangan_tangguhkan{{ $req->id }}" style="margin: 0; cursor: pointer; width: 20px; height: 20px; flex-shrink: 0;">
                                 <label for="pertimbangan_tangguhkan{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-warning); margin: 0; margin-left: 0.75rem; cursor: pointer; flex: 1; user-select: none;">
                                     <i class="ti ti-clock-pause me-1"></i> Ditangguhkan
                                 </label>
                             </div>
-                            <div style="display: flex; align-items: center; background: var(--sh-danger-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: border-color 0.15s ease, box-shadow 0.15s ease; will-change: border-color, box-shadow; position: relative;">
+                            <div style="display: flex; align-items: center; background: var(--sh-danger-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative;">
                                 <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="tolak" id="pertimbangan_tolak{{ $req->id }}" style="margin: 0; cursor: pointer; width: 20px; height: 20px; flex-shrink: 0;">
                                 <label for="pertimbangan_tolak{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-danger); margin: 0; margin-left: 0.75rem; cursor: pointer; flex: 1; user-select: none;">
                                     <i class="ti ti-circle-x me-1"></i> Tidak Disetujui
@@ -98,46 +98,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const pertimbanganGroup = document.getElementById('pertimbanganGroup{{ $req->id }}');
     let isSubmitting = false;
 
-    // Handle radio button visual feedback
+    // Handle radio button visual feedback with CSS classes
     if (pertimbanganGroup) {
         const radioInputs = pertimbanganGroup.querySelectorAll('.pertimbangan-input');
-        let isChanging = false;
 
         radioInputs.forEach(radio => {
             const container = radio.parentElement;
 
-            // Initial state
+            // Set initial class if checked
             if (radio.checked) {
-                container.style.borderColor = 'currentColor';
-                container.style.boxShadow = '0 0 0 2px currentColor';
+                container.classList.add('pertimbangan-selected');
             }
 
-            // Change event - use box-shadow instead
+            // Change event - only toggle class, let CSS do the animation
             radio.addEventListener('change', function(e) {
-                if (isChanging) return;
-                isChanging = true;
-
                 e.stopPropagation();
-                // Reset all
-                radioInputs.forEach(r => {
-                    const parent = r.parentElement;
-                    parent.style.borderColor = 'transparent';
-                    parent.style.boxShadow = 'none';
-                });
-                // Activate selected
-                if (this.checked) {
-                    container.style.borderColor = 'currentColor';
-                    container.style.boxShadow = '0 0 0 2px currentColor';
-                }
 
-                setTimeout(() => { isChanging = false; }, 200);
+                // Remove class from all
+                radioInputs.forEach(r => {
+                    r.parentElement.classList.remove('pertimbangan-selected');
+                });
+
+                // Add class to selected
+                if (this.checked) {
+                    container.classList.add('pertimbangan-selected');
+                }
             });
 
-            // Click on container should check the radio
+            // Click on container to select radio
             container.addEventListener('click', function(e) {
-                // Prevent if already checked (avoid double trigger)
-                if (radio.checked) return;
-
                 if (e.target !== radio && !e.target.closest('label')) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -238,6 +227,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 @keyframes fadeOut {
                     from { opacity: 1; transform: translateY(0); }
                     to { opacity: 0; transform: translateY(-10px); }
+                }
+
+                /* Fade effect for radio options - Mode 2 */
+                .pertimbangan-selected {
+                    opacity: 1 !important;
+                    filter: brightness(1.1) !important;
+                }
+
+                /* Unselected state - dimmed */
+                [id*="pertimbanganGroup"] > div:not(.pertimbangan-selected) {
+                    opacity: 0.9;
+                    filter: brightness(0.95);
+                }
+
+                /* Hover effect - unselected */
+                [id*="pertimbanganGroup"] > div:hover:not(.pertimbangan-selected) {
+                    opacity: 0.95;
+                    filter: brightness(0.98);
+                }
+
+                /* Hover effect - selected */
+                [id*="pertimbanganGroup"] > div.pertimbangan-selected:hover {
+                    opacity: 1;
+                    filter: brightness(1.15);
                 }
             `;
             document.head.appendChild(style);
