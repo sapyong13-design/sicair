@@ -60,9 +60,16 @@ class DashboardController extends Controller
         $analytics = $analyticsService->getDashboardAnalytics($year);
         $leaveBalances = $analyticsService->getLeaveBalanceOverview($year);
 
+        // Unpack chart data for view compatibility
+        $chartByType = $analytics['charts']['by_type']['values'] ?? [];
+        $chartStatus = $analytics['charts']['by_status']['values'] ?? [];
+        $chartMonthly = $analytics['charts']['monthly_trend'] ?? [];
+        $chartDepartment = $analytics['charts']['by_department']['values'] ?? [];
+
         return view('dashboard', compact(
             'user', 'pendingRequests', 'recentDecisions', 'totalPegawai',
-            'analytics', 'leaveBalances', 'year'
+            'analytics', 'leaveBalances', 'year',
+            'chartByType', 'chartStatus', 'chartMonthly', 'chartDepartment'
         ));
     }
 
