@@ -284,24 +284,48 @@ document.addEventListener('DOMContentLoaded', function() {
     const iconBox = document.getElementById('duration-icon-box');
     const durationLabel = document.getElementById('duration-label');
     const durationSub = document.getElementById('duration-sub');
+    const submitBtn = document.querySelector('button[type="submit"]');
     const type = '{{ $type }}';
     const balance = {{ $type === 'cuti_tahunan' ? ($cutiInfo['sisa_cuti'] ?? $user->leave_balance) : 0 }};
+
+    let isValid = false;
+
+    function validateDates() {
+        if (!startDate.value || !endDate.value) {
+            return true; // Allow empty until both filled
+        }
+
+        const start = new Date(startDate.value);
+        const end = new Date(endDate.value);
+
+        // End date must be >= start date
+        if (end < start) {
+            endDate.classList.add('is-invalid');
+            return false;
+        } else {
+            endDate.classList.remove('is-invalid');
+            return true;
+        }
+    }
 
     function calcDays() {
         if (startDate.value && endDate.value) {
             const start = new Date(startDate.value);
             const end = new Date(endDate.value);
             const diff = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
             if (diff > 0) {
                 daysLabel.textContent = diff;
                 preview.classList.remove('d-none');
+                isValid = true;
 
                 if (type === 'cuti_tahunan' && diff > balance) {
                     durationBox.style.background = 'var(--sh-danger-light)';
                     durationBox.style.borderColor = '#fca5a5';
                     iconBox.style.background = 'var(--sh-danger)';
                     durationLabel.style.color = 'var(--sh-danger)';
-                    durationSub.innerHTML = '<strong style="color: var(--sh-danger);">Melebihi sisa cuti Anda (' + balance + ' hari)!</strong>';
+                    durationSub.innerHTML = '<strong style="color: var(--sh-danger);">⚠️ Melebihi sisa cuti Anda (' + balance + ' hari)!</strong>';
+                    isValid = false;
                 } else {
                     durationBox.style.background = 'var(--sh-primary-light)';
                     durationBox.style.borderColor = '#bbf7d0';
@@ -312,21 +336,47 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else {
                         durationSub.innerHTML = diff + ' hari kalender';
                     }
+                    isValid = true;
                 }
             } else {
                 preview.classList.add('d-none');
+                isValid = false;
             }
+        } else {
+            isValid = false;
+        }
+
+        // Update submit button state
+        updateSubmitButton();
+    }
+
+    function updateSubmitButton() {
+        if (submitBtn) {
+            submitBtn.disabled = !isValid || !startDate.value || !endDate.value;
+            submitBtn.style.opacity = submitBtn.disabled ? '0.5' : '1';
+            submitBtn.title = submitBtn.disabled ? 'Lengkapi dan validasi tanggal terlebih dahulu' : '';
         }
     }
 
     startDate.addEventListener('change', function() {
-        if (endDate.value && endDate.value < startDate.value) {
-            endDate.value = startDate.value;
+        if (this.value) {
+            endDate.min = this.value;
+            // Auto-set end_date if it's earlier than start_date
+            if (endDate.value && endDate.value < this.value) {
+                endDate.value = this.value;
+            }
         }
-        endDate.min = startDate.value;
+        validateDates();
         calcDays();
     });
-    endDate.addEventListener('change', calcDays);
+
+    endDate.addEventListener('change', function() {
+        validateDates();
+        calcDays();
+    });
+
+    // Initial state
+    updateSubmitButton();
 });
 </script>
 @endpush
