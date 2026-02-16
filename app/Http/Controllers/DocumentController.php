@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LeaveRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -73,6 +74,41 @@ class DocumentController extends Controller
             'success' => true,
             'documents' => $documents,
         ]);
+    }
+
+    /**
+     * Upload supporting document for leave request
+     */
+    public function upload(Request $request, LeaveRequest $leaveRequest)
+    {
+        // Only the leave requester can upload documents
+        if ($leaveRequest->user_id !== Auth::id()) {
+            return back()->with('error', 'Anda tidak memiliki akses untuk upload dokumen ini.');
+        }
+
+        $request->validate([
+            'dokumen' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ], [
+            'dokumen.required' => 'File dokumen harus dipilih.',
+            'dokumen.file' => 'Input harus berupa file.',
+            'dokumen.mimes' => 'File harus berformat PDF, JPG, JPEG, atau PNG.',
+            'dokumen.max' => 'Ukuran file maksimal 5 MB.',
+        ]);
+
+        // Delete old document if exists
+        if ($leaveRequest->dokumen_pendukung && Storage::disk('public')->exists($leaveRequest->dokumen_pendukung)) {
+            Storage::disk('public')->delete($leaveRequest->dokumen_pendukung);
+        }
+
+        // Store new document
+        $path = $request->file('dokumen')->store('leave-documents', 'public');
+
+        // Update leave request
+        $leaveRequest->update([
+            'dokumen_pendukung' => $path,
+        ]);
+
+        return back()->with('success', 'Dokumen berhasil diupload.');
     }
 
     /**

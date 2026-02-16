@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/documents/{leaveRequest}/api', [DocumentController::class, 'getDocuments'])->name('document.api');
     Route::get('/documents/{leaveRequest}/view/{documentType?}', [DocumentController::class, 'view'])->name('document.view');
     Route::get('/documents/{leaveRequest}/download/{documentType?}', [DocumentController::class, 'download'])->name('document.download');
+    Route::post('/documents/{leaveRequest}/upload', [DocumentController::class, 'upload'])->name('document.upload');
 
     // === Amendments ===
     Route::prefix('amendments')->name('amendment.')->group(function () {
