@@ -46,27 +46,27 @@
                             Pertimbangan <span class="text-danger">*</span>
                         </label>
                         <div class="d-flex flex-column gap-2" id="pertimbanganGroup{{ $req->id }}">
-                            <div style="display: flex; align-items: center; background: var(--sh-success-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative;">
-                                <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="setuju" id="pertimbangan_setuju{{ $req->id }}" required style="margin: 0; cursor: pointer; width: 20px; height: 20px; flex-shrink: 0;">
-                                <label for="pertimbangan_setuju{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-success); margin: 0; margin-left: 0.75rem; cursor: pointer; flex: 1; user-select: none;">
+                            <div style="display: flex; align-items: center; background: var(--sh-success-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative; gap: 0.75rem; padding-left: 2.5rem;">
+                                <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="setuju" id="pertimbangan_setuju{{ $req->id }}" required style="opacity: 0; width: 0; height: 0; margin: 0; padding: 0; position: absolute; pointer-events: none;">
+                                <label for="pertimbangan_setuju{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-success); margin: 0; cursor: pointer; flex: 1; user-select: none;">
                                     <i class="ti ti-circle-check me-1"></i> Disetujui
                                 </label>
                             </div>
-                            <div style="display: flex; align-items: center; background: var(--sh-primary-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative;">
-                                <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="ubah" id="pertimbangan_ubah{{ $req->id }}" style="margin: 0; cursor: pointer; width: 20px; height: 20px; flex-shrink: 0;">
-                                <label for="pertimbangan_ubah{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-primary); margin: 0; margin-left: 0.75rem; cursor: pointer; flex: 1; user-select: none;">
+                            <div style="display: flex; align-items: center; background: var(--sh-primary-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative; gap: 0.75rem; padding-left: 2.5rem;">
+                                <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="ubah" id="pertimbangan_ubah{{ $req->id }}" style="opacity: 0; width: 0; height: 0; margin: 0; padding: 0; position: absolute; pointer-events: none;">
+                                <label for="pertimbangan_ubah{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-primary); margin: 0; cursor: pointer; flex: 1; user-select: none;">
                                     <i class="ti ti-edit me-1"></i> Perubahan
                                 </label>
                             </div>
-                            <div style="display: flex; align-items: center; background: var(--sh-warning-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative;">
-                                <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="tangguhkan" id="pertimbangan_tangguhkan{{ $req->id }}" style="margin: 0; cursor: pointer; width: 20px; height: 20px; flex-shrink: 0;">
-                                <label for="pertimbangan_tangguhkan{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-warning); margin: 0; margin-left: 0.75rem; cursor: pointer; flex: 1; user-select: none;">
+                            <div style="display: flex; align-items: center; background: var(--sh-warning-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative; gap: 0.75rem; padding-left: 2.5rem;">
+                                <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="tangguhkan" id="pertimbangan_tangguhkan{{ $req->id }}" style="opacity: 0; width: 0; height: 0; margin: 0; padding: 0; position: absolute; pointer-events: none;">
+                                <label for="pertimbangan_tangguhkan{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-warning); margin: 0; cursor: pointer; flex: 1; user-select: none;">
                                     <i class="ti ti-clock-pause me-1"></i> Ditangguhkan
                                 </label>
                             </div>
-                            <div style="display: flex; align-items: center; background: var(--sh-danger-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative;">
-                                <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="tolak" id="pertimbangan_tolak{{ $req->id }}" style="margin: 0; cursor: pointer; width: 20px; height: 20px; flex-shrink: 0;">
-                                <label for="pertimbangan_tolak{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-danger); margin: 0; margin-left: 0.75rem; cursor: pointer; flex: 1; user-select: none;">
+                            <div style="display: flex; align-items: center; background: var(--sh-danger-light); border-radius: 10px; padding: 0.65rem 0.85rem; margin: 0; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s ease, filter 0.2s ease; will-change: opacity, filter; position: relative; gap: 0.75rem; padding-left: 2.5rem;">
+                                <input class="form-check-input pertimbangan-input" type="radio" name="pertimbangan" value="tolak" id="pertimbangan_tolak{{ $req->id }}" style="opacity: 0; width: 0; height: 0; margin: 0; padding: 0; position: absolute; pointer-events: none;">
+                                <label for="pertimbangan_tolak{{ $req->id }}" class="form-check-label fw-semibold" style="color: var(--sh-danger); margin: 0; cursor: pointer; flex: 1; user-select: none;">
                                     <i class="ti ti-circle-x me-1"></i> Tidak Disetujui
                                 </label>
                             </div>
@@ -229,7 +229,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     to { opacity: 0; transform: translateY(-10px); }
                 }
 
-                /* Fade effect for radio options - Mode 2 */
+                /* Custom radio button styling - Option 1 */
+                [id*="pertimbanganGroup"] > div::before {
+                    content: '';
+                    display: block;
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    border: 2px solid currentColor;
+                    flex-shrink: 0;
+                    position: absolute;
+                    left: 0.65rem;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    transition: all 0.2s ease;
+                    background-color: transparent;
+                }
+
+                /* Selected state - filled circle */
+                [id*="pertimbanganGroup"] > div.pertimbangan-selected::before {
+                    background-color: currentColor;
+                    box-shadow: inset 0 0 0 3px;
+                }
+
+                /* Fade effect for radio options */
                 .pertimbangan-selected {
                     opacity: 1 !important;
                     filter: brightness(1.1) !important;
