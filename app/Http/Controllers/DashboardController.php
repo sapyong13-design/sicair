@@ -77,6 +77,7 @@ class DashboardController extends Controller
     {
         $needsDecision = LeaveRequest::with(['user', 'atasanReviewer'])
             ->where('status', LeaveRequest::STATUS_PERTIMBANGAN)
+            ->distinct()
             ->latest()
             ->get();
 
@@ -85,6 +86,7 @@ class DashboardController extends Controller
             ->whereHas('user', function ($q) use ($user) {
                 $q->where('atasan_id', $user->id);
             })
+            ->distinct()
             ->latest()
             ->get();
 
@@ -106,6 +108,7 @@ class DashboardController extends Controller
             ->whereHas('user', function ($q) use ($user) {
                 $q->where('atasan_id', $user->id);
             })
+            ->distinct()
             ->latest()
             ->get();
 
