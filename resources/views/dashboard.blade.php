@@ -1079,57 +1079,63 @@ document.addEventListener('DOMContentLoaded', function() {
     // Chart by Type
     var typeLabels = @json(array_map(fn($t) => \App\Models\LeaveRequest::typeLabels()[$t] ?? $t, array_keys($chartByType)));
     var typeData = @json(array_values($chartByType));
-    new Chart(document.getElementById('chartByType'), {
-        type: 'bar',
-        data: {
-            labels: typeLabels,
-            datasets: [{
-                label: 'Jumlah',
-                data: typeData,
-                backgroundColor: ['#166534','#059669','#d97706','#dc2626','#7c3aed','#64748b'],
-                borderRadius: 8,
-                barThickness: 32
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+    if (typeLabels.length > 0 && typeData.length > 0 && document.getElementById('chartByType')) {
+        new Chart(document.getElementById('chartByType'), {
+            type: 'bar',
+            data: {
+                labels: typeLabels,
+                datasets: [{
+                    label: 'Jumlah',
+                    data: typeData,
+                    backgroundColor: ['#166534','#059669','#d97706','#dc2626','#7c3aed','#64748b'],
+                    borderRadius: 8,
+                    barThickness: 32
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
             }
-        }
-    });
+        });
+    }
 
     // Monthly Trend
     var monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
     var monthlyData = new Array(12).fill(0);
     var rawMonthly = @json($chartMonthly);
-    for (var m in rawMonthly) { monthlyData[parseInt(m) - 1] = rawMonthly[m]; }
-    new Chart(document.getElementById('chartMonthly'), {
-        type: 'line',
-        data: {
-            labels: monthNames,
-            datasets: [{
-                label: 'Pengajuan',
-                data: monthlyData,
-                borderColor: '#b8860b',
-                backgroundColor: 'rgba(184,134,11,0.1)',
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#b8860b',
-                pointRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+    if (rawMonthly && Object.keys(rawMonthly).length > 0) {
+        for (var m in rawMonthly) { monthlyData[parseInt(m) - 1] = rawMonthly[m]; }
+    }
+    if (document.getElementById('chartMonthly')) {
+        new Chart(document.getElementById('chartMonthly'), {
+            type: 'line',
+            data: {
+                labels: monthNames,
+                datasets: [{
+                    label: 'Pengajuan',
+                    data: monthlyData,
+                    borderColor: '#b8860b',
+                    backgroundColor: 'rgba(184,134,11,0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#b8860b',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
             }
-        }
-    });
+        });
+    }
 
     // Status Distribution
     var statusMap = @json(\App\Models\LeaveRequest::statusLabels());
@@ -1146,7 +1152,7 @@ document.addEventListener('DOMContentLoaded', function() {
         statusData.push(rawStatus[s]);
         statusColors.push(colorMap[s] || '#64748b');
     }
-    if (statusLabels.length > 0) {
+    if (statusLabels.length > 0 && document.getElementById('chartByStatus')) {
         new Chart(document.getElementById('chartByStatus'), {
             type: 'doughnut',
             data: {
