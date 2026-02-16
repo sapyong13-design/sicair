@@ -94,47 +94,92 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('reviewForm{{ $req->id }}');
     const submitBtn = document.getElementById('submitBtn{{ $req->id }}');
-    const submitText = document.getElementById('submitText{{ $req->id }}');
     const modal = document.getElementById('reviewModal{{ $req->id }}');
     let isSubmitting = false;
 
-    if (form) {
+    if (!document.getElementById('spinnerStyle')) {
+        const style = document.createElement('style');
+        style.id = 'spinnerStyle';
+        style.textContent = `
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    if (form && modal) {
         form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
             // Prevent double submission
             if (isSubmitting) {
-                e.preventDefault();
                 return false;
             }
 
             isSubmitting = true;
-
-            // Disable button and show loading state
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="ti ti-loader me-1" style="animation: spin 1s linear infinite;"></i> <span id="submitText{{ $req->id }}">Mengirim...</span>';
+            submitBtn.innerHTML = '<i class="ti ti-loader me-1" style="animation: spin 1s linear infinite;"></i> Mengirim...';
 
-            // Add style for spinner animation if not exists
-            if (!document.getElementById('spinnerStyle')) {
-                const style = document.createElement('style');
-                style.id = 'spinnerStyle';
-                style.textContent = `
-                    @keyframes spin {
-                        from { transform: rotate(0deg); }
-                        to { transform: rotate(360deg); }
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Close modal
+                    const bsModal = bootstrap.Modal.getInstance(modal);
+                    if (bsModal) {
+                        bsModal.hide();
                     }
-                `;
-                document.head.appendChild(style);
-            }
+
+                    // Show success message
+                    const successMsg = document.createElement('div');
+                    successMsg.className = 'alert mt-3';
+                    successMsg.style.cssText = 'background: var(--sh-success-light); color: var(--sh-success); border-radius: 12px; border: none;';
+                    successMsg.innerHTML = '<i class="ti ti-circle-check me-2"></i> Pertimbangan berhasil dikirim!';
+                    form.parentElement.insertBefore(successMsg, form);
+
+                    // Reload page after 1.5 seconds to show updated data
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    throw new Error('Gagal mengirim pertimbangan');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="ti ti-send me-1"></i> Kirim Pertimbangan';
+                isSubmitting = false;
+
+                // Show error message
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'alert mt-3';
+                errorMsg.style.cssText = 'background: var(--sh-danger-light); color: var(--sh-danger); border-radius: 12px; border: none;';
+                errorMsg.innerHTML = '<i class="ti ti-alert-circle me-2"></i> ' + error.message;
+                form.parentElement.insertBefore(errorMsg, form);
+            });
+
+            return false;
         });
     }
 
     // Reset form when modal is closed without submission
     if (modal) {
         modal.addEventListener('hidden.bs.modal', function() {
-            isSubmitting = false;
-            if (submitBtn) {
+            if (!isSubmitting) {
+                form.reset();
                 submitBtn.disabled = false;
-                submitText.textContent = 'Kirim Pertimbangan';
-                submitBtn.innerHTML = '<i class="ti ti-send me-1"></i> <span id="submitText{{ $req->id }}">Kirim Pertimbangan</span>';
+                submitBtn.innerHTML = '<i class="ti ti-send me-1"></i> Kirim Pertimbangan';
+                isSubmitting = false;
             }
         });
     }
