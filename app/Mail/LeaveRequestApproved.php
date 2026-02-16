@@ -23,8 +23,10 @@ class LeaveRequestApproved extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
+        $userEmail = $this->leaveRequest->user?->email ?? config('mail.from.address');
+
         return new Envelope(
-            to: $this->leaveRequest->user->email,
+            to: $userEmail,
             subject: '✅ Pengajuan Cuti Disetujui - ' . $this->leaveRequest->type_label,
             from: config('mail.from.address'),
         );

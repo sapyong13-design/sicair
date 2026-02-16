@@ -31,7 +31,13 @@ class LeaveRequestNeedsConsideration extends Mailable implements ShouldQueue
     {
         // Send to ketua (head of organization)
         $ketua = User::where('role', 'ketua')->first();
-        $recipientEmail = $ketua?->email ?? config('mail.to.address');
+
+        // If no ketua found, try to find admin, fallback to from address
+        if (!$ketua) {
+            $ketua = User::where('role', 'admin')->first();
+        }
+
+        $recipientEmail = $ketua?->email ?? config('mail.from.address');
 
         return new Envelope(
             to: $recipientEmail,
