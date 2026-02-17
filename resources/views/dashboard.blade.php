@@ -11,7 +11,7 @@
                 <i class="ti ti-layout-dashboard me-1" style="color: var(--sh-primary);"></i>
                 Dashboard
             </h2>
-            <div class="text-muted" style="font-size: 0.9rem;">
+            <div class="text-muted" style="font-size: 0.85rem;">
                 Selamat datang kembali, <strong class="text-dark">{{ $user->name }}</strong>
                 <span class="sh-badge sh-badge-{{ $user->isAdmin() ? 'approved' : ($user->isKetua() ? 'rejected' : ($user->isAtasan() ? 'pending' : 'approved')) }} ms-1" style="font-size: 0.7rem;">
                     <i class="ti ti-{{ $user->isAdmin() ? 'shield-check' : ($user->isKetua() ? 'gavel' : ($user->isAtasan() ? 'user-check' : 'user')) }}"></i>
