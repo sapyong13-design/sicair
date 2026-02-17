@@ -906,16 +906,6 @@
                         </li>
                         @endif
 
-                        {{-- Riwayat Cuti (semua role kecuali admin) --}}
-                        @if(!Auth::user()->isAdmin())
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->is('leave*') && !request()->is('leave/create') && !request()->is('leave/select-type') ? 'active' : '' }}" href="{{ route('leave.index') }}">
-                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-history"></i></span>
-                                <span class="nav-link-title">Riwayat Cuti</span>
-                            </a>
-                        </li>
-                        @endif
-
                         {{-- Atasan: badge count for pending reviews --}}
                         @if(Auth::user()->isAtasan())
                         <li class="nav-item">
