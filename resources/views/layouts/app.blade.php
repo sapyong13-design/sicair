@@ -612,12 +612,32 @@
         [data-bs-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
         /* --- Mobile optimizations --- */
-        @media (max-width: 768px) {
+        @media (max-width: 767.98px) {
             .sh-hero-number { font-size: 3.5rem; }
             .sh-stat-number { font-size: 1.5rem; }
-            .sh-page-title { font-size: 1.25rem; }
+            .sh-page-title { font-size: 1.2rem; }
             .container-xl { padding-left: 1rem; padding-right: 1rem; }
             .sh-chart-container { height: 200px; }
+
+            /* More breathing room between navbar and page content */
+            .page-wrapper { padding-top: 1.75rem !important; }
+
+            /* Page header: stack title + button vertically on small screens */
+            .sh-page-header {
+                margin-bottom: 1.25rem;
+                padding-bottom: 0.85rem;
+            }
+            .sh-page-header > div {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 0.75rem !important;
+            }
+            /* Button in page header takes full width on mobile */
+            .sh-page-header .btn {
+                align-self: stretch;
+                text-align: center;
+                justify-content: center;
+            }
         }
 
         /* === Mobile Nav Panel ===
