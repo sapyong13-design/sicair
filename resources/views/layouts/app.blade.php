@@ -459,6 +459,12 @@
             color: var(--sh-primary);
         }
 
+        /* --- Page Wrapper --- */
+        .sh-page-wrapper {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+
         /* --- Page Header --- */
         .sh-page-header {
             margin-bottom: 1.5rem;
@@ -619,24 +625,23 @@
             .container-xl { padding-left: 1rem; padding-right: 1rem; }
             .sh-chart-container { height: 200px; }
 
-            /* More breathing room between navbar and page content */
-            .page-wrapper { padding-top: 1.75rem !important; }
+            /* Taller navbar on mobile for better visual weight */
+            .sh-navbar { padding: 0.75rem 0 !important; }
 
-            /* Page header: stack title + button vertically on small screens */
+            /* Significant breathing room between navbar and page content */
+            .sh-page-wrapper { padding-top: 2.5rem; }
+
+            /* Page header: consistent top padding + natural flex-wrap behavior */
             .sh-page-header {
+                padding-top: 0.5rem;
                 margin-bottom: 1.25rem;
                 padding-bottom: 0.85rem;
             }
+            /* Let flex-wrap naturally handle the button on narrow screens;
+               no forced column direction so layout stays predictable */
             .sh-page-header > div {
-                flex-direction: column;
-                align-items: flex-start !important;
                 gap: 0.75rem !important;
-            }
-            /* Button in page header takes full width on mobile */
-            .sh-page-header .btn {
-                align-self: stretch;
-                text-align: center;
-                justify-content: center;
+                align-items: center !important;
             }
         }
 
@@ -1004,7 +1009,7 @@
         </div>
     </header>
 
-    <div class="page-wrapper flex-fill" style="padding-top: 1.5rem; padding-bottom: 1.5rem;">
+    <div class="page-wrapper flex-fill sh-page-wrapper">
         <div class="container-xl">
             {{-- Flash messages --}}
             @if(session('success'))
