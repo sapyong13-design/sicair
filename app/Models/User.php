@@ -107,9 +107,13 @@ class User extends Authenticatable
         if (!$this->masa_kerja_mulai) {
             return null;
         }
-        $years = $this->masa_kerja_mulai->diffInYears(now());
-        $months = $this->masa_kerja_mulai->diffInMonths(now()) % 12;
-        return "{$years} tahun {$months} bulan";
+        $now = now();
+        $years = $this->masa_kerja_mulai->diffInYears($now);
+        $afterYears = $this->masa_kerja_mulai->copy()->addYears($years);
+        $months = $afterYears->diffInMonths($now);
+        $afterMonths = $afterYears->copy()->addMonths($months);
+        $days = $afterMonths->diffInDays($now);
+        return "{$years} tahun {$months} bulan {$days} hari";
     }
 
     public function sudahBekerjaSatuTahun(): bool
