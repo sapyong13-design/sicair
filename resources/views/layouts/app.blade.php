@@ -616,11 +616,13 @@
                     <span style="color: var(--sh-accent);">Si</span>HEALING
                 </span>
             </a>
-            <div class="navbar-nav flex-row order-md-last">
+            <div class="navbar-nav flex-row order-md-last align-items-center">
                 {{-- Dark Mode Toggle --}}
-                <button class="sh-dark-toggle me-2" id="darkModeToggle" title="Toggle Dark Mode">
-                    <i class="ti ti-moon" id="darkModeIcon"></i>
-                </button>
+                <div class="nav-item me-2">
+                    <button class="sh-dark-toggle" id="darkModeToggle" title="Toggle Dark Mode">
+                        <i class="ti ti-moon" id="darkModeIcon"></i>
+                    </button>
+                </div>
 
                 {{-- Notification Bell --}}
                 @auth
