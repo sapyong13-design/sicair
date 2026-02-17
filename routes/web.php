@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminLeaveController;
 use App\Http\Controllers\AmendmentController;
 use App\Http\Controllers\AppealController;
 use App\Http\Controllers\AuditLogController;
@@ -110,6 +111,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/{pegawai}/edit', [PegawaiController::class, 'edit'])->name('edit');
         Route::put('/{pegawai}', [PegawaiController::class, 'update'])->name('update');
         Route::delete('/{pegawai}', [PegawaiController::class, 'destroy'])->name('destroy');
+    });
+
+    // === Admin: Manajemen Cuti Pegawai (manual entry) ===
+    Route::middleware('role:admin')->prefix('admin/leave')->name('admin.leave.')->group(function () {
+        Route::get('/create/{user}', [AdminLeaveController::class, 'create'])->name('create');
+        Route::post('/create/{user}', [AdminLeaveController::class, 'store'])->name('store');
+        Route::get('/{leaveRequest}/edit', [AdminLeaveController::class, 'edit'])->name('edit');
+        Route::put('/{leaveRequest}', [AdminLeaveController::class, 'update'])->name('update');
+        Route::delete('/{leaveRequest}', [AdminLeaveController::class, 'destroy'])->name('destroy');
     });
 
     // === Hari Libur (admin only) ===

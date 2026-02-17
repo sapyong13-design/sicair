@@ -17,9 +17,14 @@
                 </div>
             </div>
         </div>
-        <a href="{{ route('pegawai.edit', $pegawai) }}" class="btn sh-btn-primary">
-            <i class="ti ti-edit me-1"></i> Edit
-        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ route('admin.leave.create', $pegawai) }}" class="btn sh-btn-success text-white">
+                <i class="ti ti-file-plus me-1"></i> Tambah Cuti
+            </a>
+            <a href="{{ route('pegawai.edit', $pegawai) }}" class="btn sh-btn-primary">
+                <i class="ti ti-edit me-1"></i> Edit Pegawai
+            </a>
+        </div>
     </div>
 </div>
 
@@ -211,8 +216,27 @@
                             <span class="sh-badge {{ $badgeClass }}">{{ $req->status_label }}</span>
                         </div>
                         @if($req->reason)
-                        <div style="font-size: 0.82rem; color: #475569;">{{ Str::limit($req->reason, 100) }}</div>
+                        <div style="font-size: 0.82rem; color: #475569;" class="mb-2">{{ Str::limit($req->reason, 100) }}</div>
                         @endif
+                        {{-- Admin Actions --}}
+                        <div class="d-flex gap-2 mt-1">
+                            <a href="{{ route('leave.show', $req) }}"
+                               class="btn btn-sm btn-outline-secondary" style="border-radius: 7px; font-size: 0.78rem; padding: 0.2rem 0.65rem;">
+                                <i class="ti ti-eye me-1"></i>Detail
+                            </a>
+                            <a href="{{ route('admin.leave.edit', $req) }}"
+                               class="btn btn-sm btn-outline-primary" style="border-radius: 7px; font-size: 0.78rem; padding: 0.2rem 0.65rem;">
+                                <i class="ti ti-edit me-1"></i>Edit
+                            </a>
+                            <form method="POST" action="{{ route('admin.leave.destroy', $req) }}"
+                                  onsubmit="return confirm('Hapus riwayat cuti ini? Saldo cuti tahunan akan dikembalikan jika status disetujui.')">
+                                @csrf @method('DELETE')
+                                <button type="submit"
+                                        class="btn btn-sm btn-outline-danger" style="border-radius: 7px; font-size: 0.78rem; padding: 0.2rem 0.65rem;">
+                                    <i class="ti ti-trash me-1"></i>Hapus
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 @endforeach
