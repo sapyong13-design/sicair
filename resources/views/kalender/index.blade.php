@@ -191,8 +191,8 @@
                 <div class="mb-2 p-2" style="background: var(--sh-gray-50); border-radius: 8px; font-size: 0.82rem;">
                     <div class="fw-bold" style="color: #1e293b;">{{ $d }} {{ $months[$month - 1] }}</div>
                     @if($ev['holiday'])
-                    <div style="color: var(--sh-danger);">
-                        <i class="ti ti-flag-filled me-1" style="font-size: 0.7rem;"></i> {{ $ev['holiday'] }}
+                    <div style="color: {{ $ev['holiday']->is_cuti_bersama ? 'var(--sh-primary)' : 'var(--sh-danger)' }};">
+                        <i class="ti {{ $ev['holiday']->is_cuti_bersama ? 'ti-check' : 'ti-flag-filled' }} me-1" style="font-size: 0.7rem;"></i> {{ $ev['holiday']->keterangan }}
                     </div>
                     @endif
                     @foreach($ev['leaves'] as $lv)
