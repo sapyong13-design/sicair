@@ -232,7 +232,6 @@
             height: 4px;
         }
         .sh-stat-card:hover {
-            transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
         .sh-stat-card.stat-warning::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
