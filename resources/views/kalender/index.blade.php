@@ -62,12 +62,12 @@
                 }
             }
 
-            // Build holiday map
+            // Build holiday map (with full object to get is_cuti_bersama)
             $holidayMap = [];
             foreach ($holidays as $h) {
                 $hDate = \Carbon\Carbon::parse($h->tanggal);
                 if ($hDate->month == $month) {
-                    $holidayMap[$hDate->day] = $h->keterangan;
+                    $holidayMap[$hDate->day] = $h;
                 }
             }
         @endphp
@@ -107,9 +107,10 @@
                                             </span>
                                         </div>
                                         @if($isHoliday)
-                                        <div class="sh-cal-event sh-cal-holiday" title="{{ $holidayMap[$dayCount] }}">
-                                            <i class="ti ti-flag-filled" style="font-size: 0.65rem;"></i>
-                                            {{ Str::limit($holidayMap[$dayCount], 12) }}
+                                        @php $holiday = $holidayMap[$dayCount]; @endphp
+                                        <div class="sh-cal-event {{ $holiday->is_cuti_bersama ? 'sh-cal-cuti-bersama' : 'sh-cal-holiday' }}" title="{{ $holiday->keterangan }}">
+                                            <i class="ti {{ $holiday->is_cuti_bersama ? 'ti-check' : 'ti-flag-filled' }}" style="font-size: 0.65rem;"></i>
+                                            {{ Str::limit($holiday->keterangan, 12) }}
                                         </div>
                                         @endif
                                         @foreach(array_slice($dayLeaves, 0, 2) as $lv)

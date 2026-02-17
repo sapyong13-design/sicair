@@ -601,6 +601,12 @@
             color: var(--sh-danger);
             font-weight: 600;
         }
+        .sh-cal-cuti-bersama {
+            background: var(--sh-primary-light);
+            color: var(--sh-primary);
+            font-weight: 600;
+            border-left: 3px solid var(--sh-primary);
+        }
 
         /* ===== Fitur 7: Chart container ===== */
         .sh-chart-container {
