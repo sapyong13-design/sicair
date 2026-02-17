@@ -220,8 +220,12 @@
                 Cuti Disetujui
             </div>
             <div class="d-flex align-items-center gap-1">
+                <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-primary-light); border-left: 3px solid var(--sh-primary);"></span>
+                Cuti Bersama
+            </div>
+            <div class="d-flex align-items-center gap-1">
                 <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-danger);"></span>
-                Hari Libur
+                Hari Libur Nasional
             </div>
             <div class="d-flex align-items-center gap-1">
                 <span style="width: 12px; height: 12px; border-radius: 3px; background: #fef2f2; border: 1px solid #fca5a5;"></span>
