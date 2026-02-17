@@ -196,7 +196,7 @@
             border: none;
             border-radius: 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
-            transition: all 0.3s ease;
+            transition: box-shadow 0.3s ease;
             overflow: hidden;
             background: var(--sh-card-bg);
         }
@@ -218,7 +218,7 @@
             border: none;
             border-radius: 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
-            transition: all 0.3s ease;
+            transition: box-shadow 0.3s ease;
             position: relative;
             overflow: hidden;
             background: var(--sh-card-bg);
@@ -350,11 +350,10 @@
             font-weight: 600;
             padding: 0.6rem 1.5rem;
             box-shadow: 0 4px 14px rgba(22, 101, 52, 0.3);
-            transition: all 0.2s ease;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
             color: #fff;
         }
         .sh-btn-primary:hover {
-            transform: translateY(-1px);
             box-shadow: 0 6px 20px rgba(22, 101, 52, 0.4);
             background: linear-gradient(135deg, #14532d, #166534);
             color: #fff;
@@ -366,8 +365,9 @@
             font-weight: 600;
             color: #fff;
             box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+            transition: background 0.2s ease, box-shadow 0.2s ease;
         }
-        .sh-btn-success:hover { background: linear-gradient(135deg, #047857, #059669); color: #fff; }
+        .sh-btn-success:hover { background: linear-gradient(135deg, #047857, #059669); color: #fff; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4); }
         .sh-btn-danger {
             background: linear-gradient(135deg, #dc2626, #ef4444);
             border: none;
@@ -375,13 +375,15 @@
             font-weight: 600;
             color: #fff;
             box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+            transition: background 0.2s ease, box-shadow 0.2s ease;
         }
-        .sh-btn-danger:hover { background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; }
+        .sh-btn-danger:hover { background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4); }
 
         .btn-primary {
             background: linear-gradient(135deg, #166534, #15803d) !important;
             border: none !important;
             box-shadow: 0 4px 14px rgba(22, 101, 52, 0.3);
+            transition: background 0.2s ease, box-shadow 0.2s ease;
         }
         .btn-primary:hover {
             background: linear-gradient(135deg, #14532d, #166534) !important;
@@ -394,7 +396,7 @@
             border-radius: 14px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.06);
             border-left: 4px solid var(--sh-gray-100);
-            transition: all 0.2s ease;
+            transition: box-shadow 0.2s ease;
             background: var(--sh-card-bg);
         }
         .sh-history-card:hover {
@@ -447,7 +449,8 @@
             width: 80px;
             height: 80px;
             border-radius: 20px;
-            background: var(--sh-primary-light);
+            background: radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--sh-primary-light) 80%, white), var(--sh-primary-light));
+            box-shadow: 0 4px 16px color-mix(in srgb, var(--sh-primary) 15%, transparent);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -547,10 +550,19 @@
             justify-content: center;
             font-size: 1.1rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: background 0.2s ease;
         }
         .sh-dark-toggle:hover {
             background: rgba(255,255,255,0.2);
+        }
+        /* Dark mode icon rotate animation */
+        #darkModeIcon {
+            display: inline-block;
+            transition: transform 0.35s ease, opacity 0.2s ease;
+        }
+        #darkModeIcon.sh-icon-spin {
+            transform: rotate(180deg);
+            opacity: 0;
         }
 
         /* ===== Fitur 10: Calendar Styles ===== */
@@ -588,6 +600,24 @@
         .sh-chart-container {
             position: relative;
             height: 280px;
+        }
+
+        /* --- Scrollbar dark mode --- */
+        [data-bs-theme="dark"] {
+            scrollbar-color: #334155 #0f172a;
+        }
+        [data-bs-theme="dark"] ::-webkit-scrollbar { width: 8px; height: 8px; }
+        [data-bs-theme="dark"] ::-webkit-scrollbar-track { background: #0f172a; }
+        [data-bs-theme="dark"] ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        [data-bs-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* --- Navbar mobile collapse smooth --- */
+        .navbar-collapse {
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            overflow: hidden;
+        }
+        .navbar-collapse:not(.show):not(.collapsing) {
+            max-height: 0;
         }
 
         /* --- Mobile optimizations --- */
@@ -644,7 +674,7 @@
                         <div class="sh-user-avatar">
                             {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
                         </div>
-                        <div class="d-none d-xl-block ps-2">
+                        <div class="d-none d-md-block ps-2">
                             <div class="text-white fw-semibold" style="font-size: 0.9rem;">{{ Auth::user()->name }}</div>
                             <div style="color: var(--sh-accent); font-size: 0.75rem; font-weight: 600;">
                                 {{ ucfirst(Auth::user()->role) }}
@@ -815,7 +845,7 @@
     <!-- Tabler JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/js/tabler.min.js"></script>
 
-    {{-- Fitur 9: Dark Mode Toggle JS --}}
+    {{-- Dark Mode Toggle JS --}}
     <script>
     (function() {
         const toggle = document.getElementById('darkModeToggle');
@@ -831,38 +861,73 @@
 
         toggle.addEventListener('click', function() {
             const isDark = html.getAttribute('data-bs-theme') === 'dark';
-            if (isDark) {
-                html.setAttribute('data-bs-theme', 'light');
-                icon.className = 'ti ti-moon';
-                localStorage.setItem('sh-theme', 'light');
-            } else {
-                html.setAttribute('data-bs-theme', 'dark');
-                icon.className = 'ti ti-sun';
-                localStorage.setItem('sh-theme', 'dark');
-            }
+            // Spin out
+            icon.classList.add('sh-icon-spin');
+            setTimeout(function() {
+                if (isDark) {
+                    html.setAttribute('data-bs-theme', 'light');
+                    icon.className = 'ti ti-moon';
+                    localStorage.setItem('sh-theme', 'light');
+                } else {
+                    html.setAttribute('data-bs-theme', 'dark');
+                    icon.className = 'ti ti-sun';
+                    localStorage.setItem('sh-theme', 'dark');
+                }
+                // Spin in
+                icon.style.transform = 'rotate(0deg)';
+                icon.style.opacity = '1';
+                setTimeout(function() {
+                    icon.classList.remove('sh-icon-spin');
+                }, 50);
+            }, 200);
         });
     })();
     </script>
 
-    {{-- Fitur 8: Loading States JS --}}
+    {{-- Flash Message Auto-Dismiss --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.sh-alert.alert-dismissible').forEach(function(alert) {
+            var delay = alert.classList.contains('alert-danger') ? 7000 : 4000;
+            setTimeout(function() {
+                var bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                if (bsAlert) bsAlert.close();
+            }, delay);
+        });
+    });
+    </script>
+
+    {{-- Loading States JS --}}
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('form').forEach(function(form) {
+            // Skip forms handled via AJAX (review modal handles its own submit)
+            if (form.dataset.ajaxHandled) return;
+
             form.addEventListener('submit', function(e) {
                 var btn = form.querySelector('button[type="submit"]');
                 if (btn && !btn.classList.contains('sh-btn-loading')) {
-                    // Wrap existing content
                     var inner = btn.innerHTML;
                     btn.innerHTML = '<span class="sh-btn-text">' + inner + '</span>';
                     btn.classList.add('sh-btn-loading');
                     btn.disabled = true;
 
-                    // Auto-reset after 10s in case of error
+                    // Reset on back-button navigation
+                    window.addEventListener('pageshow', function onPageShow(ev) {
+                        if (ev.persisted) {
+                            btn.classList.remove('sh-btn-loading');
+                            btn.disabled = false;
+                            btn.innerHTML = inner;
+                        }
+                        window.removeEventListener('pageshow', onPageShow);
+                    });
+
+                    // Fallback reset after 15s
                     setTimeout(function() {
                         btn.classList.remove('sh-btn-loading');
                         btn.disabled = false;
                         btn.innerHTML = inner;
-                    }, 10000);
+                    }, 15000);
                 }
             });
         });
