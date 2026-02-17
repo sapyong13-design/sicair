@@ -611,15 +611,6 @@
         [data-bs-theme="dark"] ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         [data-bs-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
-        /* --- Navbar mobile collapse smooth --- */
-        .navbar-collapse {
-            transition: max-height 0.3s ease, opacity 0.3s ease;
-            overflow: hidden;
-        }
-        .navbar-collapse:not(.show):not(.collapsing) {
-            max-height: 0;
-        }
-
         /* --- Mobile optimizations --- */
         @media (max-width: 768px) {
             .sh-hero-number { font-size: 3.5rem; }
@@ -627,6 +618,159 @@
             .sh-page-title { font-size: 1.25rem; }
             .container-xl { padding-left: 1rem; padding-right: 1rem; }
             .sh-chart-container { height: 200px; }
+        }
+
+        /* === Mobile Nav Panel ===
+           Slides out as a clean white card below the navbar,
+           replacing the hard-to-read white-on-green look.
+        */
+        @media (max-width: 767.98px) {
+            .sh-navbar { position: relative; }
+
+            /* The collapse panel itself */
+            #navbar-menu {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                z-index: 1050;
+                background: #ffffff;
+                border-top: 3px solid var(--sh-accent);
+                border-radius: 0 0 16px 16px;
+                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+                overflow: hidden;
+                /* Animate open/close with max-height */
+                max-height: 0;
+                transition: max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            #navbar-menu.show {
+                max-height: 600px;
+            }
+            [data-bs-theme="dark"] #navbar-menu {
+                background: #1e293b;
+                border-top-color: var(--sh-accent);
+            }
+
+            /* User info strip at top of mobile menu */
+            .sh-mobile-user-strip {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.85rem 1.25rem;
+                border-bottom: 2px solid #f1f5f9;
+                background: var(--sh-gray-100);
+            }
+            [data-bs-theme="dark"] .sh-mobile-user-strip {
+                background: #0f172a;
+                border-bottom-color: #334155;
+            }
+            .sh-mobile-user-strip .sh-user-avatar {
+                background: var(--sh-primary);
+                border-color: var(--sh-accent);
+                flex-shrink: 0;
+            }
+            .sh-mobile-user-strip .mu-name {
+                font-weight: 700;
+                font-size: 0.9rem;
+                color: #1e293b;
+                line-height: 1.2;
+            }
+            [data-bs-theme="dark"] .sh-mobile-user-strip .mu-name {
+                color: #e2e8f0;
+            }
+            .sh-mobile-user-strip .mu-role {
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: var(--sh-primary);
+            }
+
+            /* Nav links */
+            #navbar-menu .nav-link {
+                color: #1e293b !important;
+                padding: 0.8rem 1.25rem !important;
+                font-size: 0.92rem;
+                font-weight: 500;
+                border-radius: 0 !important;
+                border-bottom: 1px solid #f1f5f9;
+                display: flex !important;
+                align-items: center;
+                gap: 0.75rem;
+                background: transparent;
+                transition: background 0.15s ease, color 0.15s ease;
+                min-height: 52px;
+            }
+            [data-bs-theme="dark"] #navbar-menu .nav-link {
+                color: #cbd5e1 !important;
+                border-bottom-color: #334155;
+            }
+            #navbar-menu .nav-link:hover,
+            #navbar-menu .nav-link:focus {
+                background: var(--sh-primary-light) !important;
+                color: var(--sh-primary) !important;
+            }
+            #navbar-menu .nav-link.active {
+                background: var(--sh-primary-light) !important;
+                color: var(--sh-primary) !important;
+                font-weight: 700;
+                border-left: 4px solid var(--sh-primary);
+            }
+            [data-bs-theme="dark"] #navbar-menu .nav-link:hover,
+            [data-bs-theme="dark"] #navbar-menu .nav-link:focus,
+            [data-bs-theme="dark"] #navbar-menu .nav-link.active {
+                background: #064e3b !important;
+                color: #4ade80 !important;
+            }
+
+            /* Icons inside mobile nav */
+            #navbar-menu .nav-link-icon {
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+                width: 28px;
+                height: 28px;
+                border-radius: 8px;
+                background: var(--sh-primary-light);
+                color: var(--sh-primary);
+                font-size: 1rem;
+                flex-shrink: 0;
+            }
+            [data-bs-theme="dark"] #navbar-menu .nav-link-icon {
+                background: #064e3b;
+                color: #4ade80;
+            }
+            #navbar-menu .nav-link.active .nav-link-icon {
+                background: var(--sh-primary);
+                color: #fff;
+            }
+
+            /* Bottom action buttons (Profil, Keluar) */
+            .sh-mobile-nav-footer {
+                padding: 0.75rem 1.25rem;
+                display: flex;
+                gap: 0.5rem;
+                border-top: 2px solid #f1f5f9;
+                background: var(--sh-gray-100);
+            }
+            [data-bs-theme="dark"] .sh-mobile-nav-footer {
+                background: #0f172a;
+                border-top-color: #334155;
+            }
+            .sh-mobile-nav-footer .btn {
+                flex: 1;
+                border-radius: 10px;
+                font-size: 0.82rem;
+                font-weight: 600;
+                padding: 0.5rem 0.75rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.4rem;
+            }
+        }
+        /* Hide mobile-only elements on desktop */
+        @media (min-width: 768px) {
+            .sh-mobile-user-strip,
+            .sh-mobile-nav-footer { display: none !important; }
         }
     </style>
 </head>
@@ -709,6 +853,31 @@
                 </div>
             </div>
             <div class="collapse navbar-collapse" id="navbar-menu">
+                {{-- Mobile-only: user info strip --}}
+                <div class="sh-mobile-user-strip">
+                    <div class="sh-user-avatar" style="width:38px;height:38px;border-radius:10px;color:#fff;font-weight:700;font-size:0.85rem;display:flex;align-items:center;justify-content:center;border:2px solid var(--sh-accent);">
+                        {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+                    </div>
+                    <div>
+                        <div class="mu-name">{{ Auth::user()->name }}</div>
+                        <div class="mu-role">
+                            @php
+                                $roleLabel = match(Auth::user()->role) {
+                                    'admin' => 'Admin Kepegawaian',
+                                    'ketua' => 'Ketua Pengadilan',
+                                    'panitera' => 'Panitera',
+                                    'sekretaris' => 'Sekretaris',
+                                    'atasan' => 'Atasan',
+                                    'hakim' => 'Hakim',
+                                    'hakim_ad_hoc' => 'Hakim Ad Hoc',
+                                    default => 'Pegawai',
+                                };
+                            @endphp
+                            {{ $roleLabel }} &bull; NIP {{ Auth::user()->nip }}
+                        </div>
+                    </div>
+                </div>
+
                 <div class="d-flex flex-column flex-md-row flex-fill align-items-stretch align-items-md-center">
                     <ul class="navbar-nav">
                         {{-- Dashboard: all roles --}}
@@ -733,6 +902,16 @@
                             <a class="nav-link {{ request()->is('leave/create') || request()->is('leave/select-type') ? 'active' : '' }}" href="{{ route('leave.create') }}">
                                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-file-plus"></i></span>
                                 <span class="nav-link-title">Ajukan Cuti</span>
+                            </a>
+                        </li>
+                        @endif
+
+                        {{-- Riwayat Cuti (semua role kecuali admin) --}}
+                        @if(!Auth::user()->isAdmin())
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('leave*') && !request()->is('leave/create') && !request()->is('leave/select-type') ? 'active' : '' }}" href="{{ route('leave.index') }}">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-history"></i></span>
+                                <span class="nav-link-title">Riwayat Cuti</span>
                             </a>
                         </li>
                         @endif
@@ -791,6 +970,25 @@
                         </li>
                         @endif
                     </ul>
+                </div>
+
+                {{-- Mobile-only: quick action footer --}}
+                <div class="sh-mobile-nav-footer">
+                    <a href="{{ route('profile') }}" class="btn btn-outline-secondary">
+                        <i class="ti ti-user-circle"></i> Profil
+                    </a>
+                    <a href="{{ route('notifications') }}" class="btn btn-outline-secondary" style="position:relative;">
+                        <i class="ti ti-bell"></i> Notifikasi
+                        @if(isset($unreadCount) && $unreadCount > 0)
+                        <span style="position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--sh-danger);display:block;"></span>
+                        @endif
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}" style="flex:1;">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            <i class="ti ti-logout"></i> Keluar
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -932,6 +1130,51 @@
             });
         });
     });
+    </script>
+
+    {{-- Mobile Nav Toggle JS --}}
+    <script>
+    (function() {
+        var menu   = document.getElementById('navbar-menu');
+        var toggler = document.querySelector('.navbar-toggler[data-bs-target="#navbar-menu"]');
+        if (!menu || !toggler) return;
+
+        function isMobile() { return window.innerWidth < 768; }
+
+        // Override Bootstrap collapse — use CSS max-height animation instead
+        toggler.addEventListener('click', function(e) {
+            if (!isMobile()) return; // let Bootstrap handle desktop
+            e.stopPropagation();
+            e.preventDefault();
+
+            if (menu.classList.contains('show')) {
+                menu.classList.remove('show');
+            } else {
+                menu.classList.add('show');
+            }
+        });
+
+        // Close menu when a nav link inside is clicked
+        menu.querySelectorAll('.nav-link').forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (isMobile()) menu.classList.remove('show');
+            });
+        });
+
+        // Close menu on outside click
+        document.addEventListener('click', function(e) {
+            if (isMobile() && menu.classList.contains('show')
+                && !menu.contains(e.target)
+                && !toggler.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        // Reset on resize to desktop
+        window.addEventListener('resize', function() {
+            if (!isMobile()) menu.classList.remove('show');
+        });
+    })();
     </script>
 
     @stack('scripts')
