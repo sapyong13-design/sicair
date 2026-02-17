@@ -108,11 +108,11 @@ class User extends Authenticatable
             return null;
         }
         $now = now();
-        $years = $this->masa_kerja_mulai->diffInYears($now);
+        $years = (int) $this->masa_kerja_mulai->diffInYears($now);
         $afterYears = $this->masa_kerja_mulai->copy()->addYears($years);
-        $months = $afterYears->diffInMonths($now);
+        $months = (int) $afterYears->diffInMonths($now);
         $afterMonths = $afterYears->copy()->addMonths($months);
-        $days = $afterMonths->diffInDays($now);
+        $days = (int) $afterMonths->diffInDays($now);
         return "{$years} tahun {$months} bulan {$days} hari";
     }
 
