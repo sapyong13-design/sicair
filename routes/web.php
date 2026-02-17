@@ -159,4 +159,14 @@ Route::middleware('auth')->group(function () {
             Route::get('/statistics', [PdfExportController::class, 'statistics'])->name('statistics');
         });
     });
+
+    // === Debug: Test masa kerja format ===
+    Route::get('/debug/masa-kerja', function () {
+        $users = \App\Models\User::whereNotNull('masa_kerja_mulai')->take(3)->get();
+        foreach ($users as $u) {
+            echo "<div><strong>{$u->name}</strong><br>";
+            echo "masa_kerja_format: {$u->masa_kerja_format}<br>";
+            echo "masa_kerja_mulai: {$u->masa_kerja_mulai}<br></div>";
+        }
+    });
 });
