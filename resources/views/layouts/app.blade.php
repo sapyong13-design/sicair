@@ -629,19 +629,18 @@
             .sh-navbar { padding: 0.75rem 0 !important; }
 
             /* Significant breathing room between navbar and page content */
-            .sh-page-wrapper { padding-top: 2.5rem; }
+            .sh-page-wrapper { padding-top: 3rem; }
 
-            /* Page header: consistent top padding + natural flex-wrap behavior */
+            /* Page header: generous top padding matching Notification style */
             .sh-page-header {
-                padding-top: 0.5rem;
-                margin-bottom: 1.25rem;
-                padding-bottom: 0.85rem;
+                padding-top: 1.25rem;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
             }
-            /* Let flex-wrap naturally handle the button on narrow screens;
-               no forced column direction so layout stays predictable */
+            /* Consistent layout for page header content */
             .sh-page-header > div {
-                gap: 0.75rem !important;
-                align-items: center !important;
+                gap: 1rem !important;
+                align-items: flex-start !important;
             }
         }
 
