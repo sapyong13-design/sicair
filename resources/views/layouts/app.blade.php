@@ -202,7 +202,6 @@
         }
         .sh-card:hover {
             box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
-            transform: translateY(-2px);
         }
         .sh-card .card-header {
             background: var(--sh-card-bg);
