@@ -35,7 +35,7 @@ class PegawaiController extends Controller
 
     public function create()
     {
-        $atasanOptions = User::whereIn('role', ['atasan', 'ketua'])
+        $atasanOptions = User::whereIn('role', ['atasan', 'panitera', 'sekretaris', 'ketua'])
             ->orderBy('name')
             ->get();
 
@@ -51,7 +51,7 @@ class PegawaiController extends Controller
             'name' => 'required|string|max:255',
             'nip' => 'required|string|size:18|unique:users,nip',
             'password' => 'required|string|min:6',
-            'role' => 'required|in:admin,ketua,atasan,pegawai,hakim,hakim_ad_hoc',
+            'role' => 'required|in:admin,ketua,atasan,panitera,sekretaris,pegawai,hakim,hakim_ad_hoc',
             'jabatan' => 'nullable|string|max:255',
             'golongan_ruang' => 'nullable|string|max:10',
             'unit_kerja' => 'required|string|max:255',
@@ -87,7 +87,7 @@ class PegawaiController extends Controller
 
     public function edit(User $pegawai)
     {
-        $atasanOptions = User::whereIn('role', ['atasan', 'ketua'])
+        $atasanOptions = User::whereIn('role', ['atasan', 'panitera', 'sekretaris', 'ketua'])
             ->where('id', '!=', $pegawai->id)
             ->orderBy('name')
             ->get();
@@ -103,7 +103,7 @@ class PegawaiController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'nip' => 'required|string|size:18|unique:users,nip,' . $pegawai->id,
-            'role' => 'required|in:admin,ketua,atasan,pegawai,hakim,hakim_ad_hoc',
+            'role' => 'required|in:admin,ketua,atasan,panitera,sekretaris,pegawai,hakim,hakim_ad_hoc',
             'jabatan' => 'nullable|string|max:255',
             'golongan_ruang' => 'nullable|string|max:10',
             'unit_kerja' => 'required|string|max:255',

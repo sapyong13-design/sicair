@@ -226,8 +226,10 @@
                                 <option value="pegawai" {{ old('role', $pegawai->role ?? 'pegawai') === 'pegawai' ? 'selected' : '' }}>Pegawai</option>
                                 <option value="hakim" {{ old('role', $pegawai->role ?? '') === 'hakim' ? 'selected' : '' }}>Hakim</option>
                                 <option value="hakim_ad_hoc" {{ old('role', $pegawai->role ?? '') === 'hakim_ad_hoc' ? 'selected' : '' }}>Hakim Ad Hoc</option>
-                                <option value="atasan" {{ old('role', $pegawai->role ?? '') === 'atasan' ? 'selected' : '' }}>Atasan (Panitera/Sekretaris)</option>
-                                <option value="ketua" {{ old('role', $pegawai->role ?? '') === 'ketua' ? 'selected' : '' }}>Ketua PN (Pejabat Berwenang)</option>
+                                <option value="panitera" {{ old('role', $pegawai->role ?? '') === 'panitera' ? 'selected' : '' }}>Panitera</option>
+                                <option value="sekretaris" {{ old('role', $pegawai->role ?? '') === 'sekretaris' ? 'selected' : '' }}>Sekretaris</option>
+                                <option value="atasan" {{ old('role', $pegawai->role ?? '') === 'atasan' ? 'selected' : '' }}>Atasan Lainnya</option>
+                                <option value="ketua" {{ old('role', $pegawai->role ?? '') === 'ketua' ? 'selected' : '' }}>Ketua Pengadilan (Pejabat Berwenang)</option>
                                 <option value="admin" {{ old('role', $pegawai->role ?? '') === 'admin' ? 'selected' : '' }}>Admin Kepegawaian</option>
                             </select>
                             @error('role') <div class="invalid-feedback">{{ $message }}</div> @enderror

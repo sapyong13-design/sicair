@@ -46,8 +46,10 @@
                         <option value="pegawai" {{ request('role') === 'pegawai' ? 'selected' : '' }}>Pegawai</option>
                         <option value="hakim" {{ request('role') === 'hakim' ? 'selected' : '' }}>Hakim</option>
                         <option value="hakim_ad_hoc" {{ request('role') === 'hakim_ad_hoc' ? 'selected' : '' }}>Hakim Ad Hoc</option>
-                        <option value="atasan" {{ request('role') === 'atasan' ? 'selected' : '' }}>Atasan</option>
-                        <option value="ketua" {{ request('role') === 'ketua' ? 'selected' : '' }}>Ketua</option>
+                        <option value="panitera" {{ request('role') === 'panitera' ? 'selected' : '' }}>Panitera</option>
+                        <option value="sekretaris" {{ request('role') === 'sekretaris' ? 'selected' : '' }}>Sekretaris</option>
+                        <option value="atasan" {{ request('role') === 'atasan' ? 'selected' : '' }}>Atasan Lainnya</option>
+                        <option value="ketua" {{ request('role') === 'ketua' ? 'selected' : '' }}>Ketua Pengadilan</option>
                         <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
                     </select>
                 </div>
@@ -136,14 +138,27 @@
                         $roleBadge = match($p->role) {
                             'admin' => 'background: #f3e8ff; color: #7c3aed;',
                             'ketua' => 'background: var(--sh-primary-light); color: var(--sh-primary);',
-                            'atasan' => 'background: var(--sh-success-light); color: var(--sh-success);',
+                            'panitera' => 'background: var(--sh-success-light); color: var(--sh-success);',
+                            'sekretaris' => 'background: #d1fae5; color: #065f46;',
+                            'atasan' => 'background: #dcfce7; color: #166534;',
                             'hakim' => 'background: #fef3c7; color: #b45309;',
                             'hakim_ad_hoc' => 'background: #dbeafe; color: #0c4a6e;',
                             default => 'background: var(--sh-gray-100); color: #64748b;',
                         };
+                        $roleLabel = match($p->role) {
+                            'admin' => 'Admin',
+                            'ketua' => 'Ketua PN',
+                            'panitera' => 'Panitera',
+                            'sekretaris' => 'Sekretaris',
+                            'atasan' => 'Atasan',
+                            'hakim' => 'Hakim',
+                            'hakim_ad_hoc' => 'Hakim Ad Hoc',
+                            'pegawai' => 'Pegawai',
+                            default => ucfirst($p->role),
+                        };
                     @endphp
                     <span class="sh-badge" style="{{ $roleBadge }}">
-                        {{ ucfirst($p->role) }}
+                        {{ $roleLabel }}
                     </span>
                 </div>
 
@@ -237,7 +252,9 @@
                             $roleBadge = match($p->role) {
                                 'admin' => 'background: #f3e8ff; color: #7c3aed;',
                                 'ketua' => 'background: var(--sh-primary-light); color: var(--sh-primary);',
-                                'atasan' => 'background: var(--sh-success-light); color: var(--sh-success);',
+                                'panitera' => 'background: var(--sh-success-light); color: var(--sh-success);',
+                                'sekretaris' => 'background: #d1fae5; color: #065f46;',
+                                'atasan' => 'background: #dcfce7; color: #166534;',
                                 'hakim' => 'background: #fef3c7; color: #b45309;',
                                 'hakim_ad_hoc' => 'background: #dbeafe; color: #0c4a6e;',
                                 default => 'background: var(--sh-gray-100); color: #64748b;',
@@ -245,14 +262,27 @@
                             $roleIcon = match($p->role) {
                                 'admin' => 'ti-shield-check',
                                 'ketua' => 'ti-crown',
-                                'atasan' => 'ti-user-star',
+                                'panitera' => 'ti-user-star',
+                                'sekretaris' => 'ti-user-edit',
+                                'atasan' => 'ti-user-check',
                                 'hakim' => 'ti-gavel',
                                 'hakim_ad_hoc' => 'ti-scale',
                                 default => 'ti-user',
                             };
+                            $roleLabel = match($p->role) {
+                                'admin' => 'Admin',
+                                'ketua' => 'Ketua PN',
+                                'panitera' => 'Panitera',
+                                'sekretaris' => 'Sekretaris',
+                                'atasan' => 'Atasan',
+                                'hakim' => 'Hakim',
+                                'hakim_ad_hoc' => 'Hakim Ad Hoc',
+                                'pegawai' => 'Pegawai',
+                                default => ucfirst($p->role),
+                            };
                         @endphp
                         <span class="sh-badge" style="{{ $roleBadge }}">
-                            <i class="ti {{ $roleIcon }}"></i> {{ ucfirst($p->role) }}
+                            <i class="ti {{ $roleIcon }}"></i> {{ $roleLabel }}
                         </span>
                     </td>
                     <td>

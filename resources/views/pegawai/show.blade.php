@@ -40,8 +40,27 @@
                 <h3 class="fw-bold mb-1">{{ $pegawai->name }}</h3>
                 <div class="text-muted mb-2" style="font-size: 0.88rem;">{{ $pegawai->jabatan ?? '-' }}</div>
                 <div class="d-flex justify-content-center gap-2 flex-wrap">
-                    <span class="sh-badge sh-badge-{{ $pegawai->role === 'admin' ? 'approved' : ($pegawai->role === 'ketua' ? 'rejected' : ($pegawai->role === 'atasan' ? 'pending' : 'approved')) }}" style="font-size: 0.75rem;">
-                        {{ ucfirst($pegawai->role) }}
+                    @php
+                        $roleBadgeClass = match($pegawai->role) {
+                            'admin' => 'sh-badge-approved',
+                            'ketua' => 'sh-badge-rejected',
+                            'panitera', 'sekretaris', 'atasan' => 'sh-badge-pending',
+                            default => 'sh-badge-approved',
+                        };
+                        $roleLabelShow = match($pegawai->role) {
+                            'admin' => 'Admin',
+                            'ketua' => 'Ketua PN',
+                            'panitera' => 'Panitera',
+                            'sekretaris' => 'Sekretaris',
+                            'atasan' => 'Atasan',
+                            'hakim' => 'Hakim',
+                            'hakim_ad_hoc' => 'Hakim Ad Hoc',
+                            'pegawai' => 'Pegawai',
+                            default => ucfirst($pegawai->role),
+                        };
+                    @endphp
+                    <span class="sh-badge {{ $roleBadgeClass }}" style="font-size: 0.75rem;">
+                        {{ $roleLabelShow }}
                     </span>
                     <span class="badge" style="background: #f1f5f9; color: #475569; border-radius: 50px; font-weight: 600; font-size: 0.75rem; padding: 0.35rem 0.75rem;">
                         {{ ucfirst($pegawai->status_pegawai ?? '-') }}

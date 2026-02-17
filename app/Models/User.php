@@ -48,7 +48,17 @@ class User extends Authenticatable
 
     public function isAtasan(): bool
     {
-        return $this->role === 'atasan';
+        return in_array($this->role, ['atasan', 'panitera', 'sekretaris']);
+    }
+
+    public function isPanitera(): bool
+    {
+        return $this->role === 'panitera';
+    }
+
+    public function isSekretaris(): bool
+    {
+        return $this->role === 'sekretaris';
     }
 
     public function isPegawai(): bool
@@ -68,7 +78,7 @@ class User extends Authenticatable
 
     public function canApproveAsAtasan(): bool
     {
-        return in_array($this->role, ['atasan', 'ketua', 'admin']);
+        return in_array($this->role, ['atasan', 'panitera', 'sekretaris', 'ketua', 'admin']);
     }
 
     public function canApproveAsPejabat(): bool
@@ -78,7 +88,8 @@ class User extends Authenticatable
 
     public function isKepegawaian(): bool
     {
-        return $this->role === 'atasan' && in_array($this->unit_kerja, ['kepegawaian', 'Kepegawaian', 'KEPEGAWAIAN']);
+        return in_array($this->role, ['atasan', 'panitera', 'sekretaris'])
+            && in_array($this->unit_kerja, ['kepegawaian', 'Kepegawaian', 'KEPEGAWAIAN']);
     }
 
     // ===== Masa Kerja =====

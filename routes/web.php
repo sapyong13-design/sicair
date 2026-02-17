@@ -86,7 +86,7 @@ Route::middleware('auth')->group(function () {
 
     // === Approval Workflow ===
     // Atasan: pertimbangan level 1
-    Route::middleware('role:atasan,ketua,admin')->group(function () {
+    Route::middleware('role:atasan,panitera,sekretaris,ketua,admin')->group(function () {
         Route::post('/leave/{leaveRequest}/review', [LeaveRequestController::class, 'reviewAtasan'])->name('leave.review');
     });
 
