@@ -3,9 +3,16 @@
 @section('title', 'Profil Saya - SiHEALING')
 
 @section('content')
+{{-- Breadcrumb (#10) --}}
+<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ route('dashboard') }}">Dashboard</a>
+    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sh-breadcrumb-current">Profil Saya</span>
+</nav>
+
 <div class="sh-page-header">
     <h2 class="sh-page-title mb-0">
-        <i class="ti ti-user-circle me-1" style="color: var(--sh-primary);"></i> Profil Saya
+        <i class="ti ti-user-circle me-1" style="color: var(--sh-primary);" aria-hidden="true"></i> Profil Saya
     </h2>
 </div>
 

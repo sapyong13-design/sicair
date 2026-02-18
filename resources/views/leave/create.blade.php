@@ -10,11 +10,20 @@
 @endphp
 
 @section('content')
+{{-- Breadcrumb (#10) --}}
+<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ route('dashboard') }}">Dashboard</a>
+    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <a href="{{ route('leave.select-type') }}">Pilih Jenis Cuti</a>
+    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sh-breadcrumb-current">{{ $typeLabel }}</span>
+</nav>
+
 {{-- Page Header --}}
 <div class="sh-page-header">
     <div class="d-flex align-items-center gap-3">
-        <a href="{{ route('leave.select-type') }}" class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;">
-            <i class="ti ti-arrow-left" style="font-size: 1.2rem;"></i>
+        <a href="{{ route('leave.select-type') }}" class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;" aria-label="Kembali ke pilih jenis cuti">
+            <i class="ti ti-arrow-left" style="font-size: 1.2rem;" aria-hidden="true"></i>
         </a>
         <div>
             <h2 class="sh-page-title mb-0">Ajukan {{ $typeLabel }}</h2>
@@ -207,11 +216,10 @@
                                   } }}"
                                   style="border-radius: 12px; border: 2px solid #e2e8f0; resize: vertical;">{{ old('reason') }}</textarea>
                         @error('reason') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        {{-- Character counter (#14) --}}
                         <div class="d-flex justify-content-between mt-1">
                             <div class="form-hint" style="font-size: 0.78rem; color: #94a3b8;">Jelaskan alasan dengan jelas dan singkat.</div>
-                            <div id="reason-counter" style="font-size: 0.78rem; color: #94a3b8; font-weight: 500;">
-                                <span id="reason-count">0</span> / 500
-                            </div>
+                            <div class="sh-char-counter" id="reason-counter">0 / 500 karakter</div>
                         </div>
                     </div>
 
@@ -385,28 +393,70 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial state
     updateSubmitButton();
 
-    // Character counter for reason textarea
-    const reasonTextarea = document.getElementById('reason-textarea');
-    const reasonCount = document.getElementById('reason-count');
-    const reasonCounter = document.getElementById('reason-counter');
+    // Real-time validation helpers (#4)
+    function showValidation(input, message) {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        var fb = input.parentElement.querySelector('.invalid-feedback');
+        if (!fb) {
+            fb = document.createElement('div');
+            fb.className = 'invalid-feedback';
+            input.parentElement.appendChild(fb);
+        }
+        fb.textContent = message;
+        fb.style.display = 'block';
+    }
+    function clearValidation(input) {
+        input.classList.remove('is-invalid');
+        var fb = input.parentElement.querySelector('.invalid-feedback');
+        if (fb && !fb.dataset.server) fb.style.display = 'none';
+    }
+    function markValid(input) {
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+    }
 
-    if (reasonTextarea && reasonCount) {
-        function updateCounter() {
-            const len = reasonTextarea.value.length;
-            reasonCount.textContent = len;
-            if (len >= 480) {
-                reasonCounter.style.color = 'var(--sh-danger)';
-                reasonCount.style.fontWeight = '700';
-            } else if (len >= 400) {
-                reasonCounter.style.color = 'var(--sh-warning)';
-                reasonCount.style.fontWeight = '600';
-            } else {
-                reasonCounter.style.color = '#94a3b8';
-                reasonCount.style.fontWeight = '500';
+    // Real-time date validation (#4)
+    [startDate, endDate].forEach(function(input) {
+        input.addEventListener('blur', function() {
+            if (!input.value && input.required) {
+                showValidation(input, 'Tanggal wajib diisi.');
+            } else if (input.value) {
+                markValid(input);
             }
+        });
+    });
+
+    // Character counter for reason textarea (#14)
+    var reasonTextarea = document.getElementById('reason-textarea');
+    var reasonCounter = document.getElementById('reason-counter');
+
+    if (reasonTextarea && reasonCounter) {
+        function updateCounter() {
+            var len = reasonTextarea.value.length;
+            reasonCounter.textContent = len + ' / 500 karakter';
+            reasonCounter.className = 'sh-char-counter';
+            if (len >= 450) reasonCounter.classList.add('sh-char-danger');
+            else if (len >= 350) reasonCounter.classList.add('sh-char-warning');
         }
         reasonTextarea.addEventListener('input', updateCounter);
         updateCounter(); // run on page load for old() value
+    }
+
+    // Validate reason on blur (#4)
+    if (reasonTextarea) {
+        reasonTextarea.addEventListener('blur', function() {
+            if (!reasonTextarea.value.trim()) {
+                showValidation(reasonTextarea, 'Alasan cuti wajib diisi.');
+            } else if (reasonTextarea.value.trim().length < 10) {
+                showValidation(reasonTextarea, 'Alasan terlalu singkat (min. 10 karakter).');
+            } else {
+                markValid(reasonTextarea);
+            }
+        });
+        reasonTextarea.addEventListener('input', function() {
+            if (reasonTextarea.value.trim().length >= 10) clearValidation(reasonTextarea);
+        });
     }
 });
 </script>

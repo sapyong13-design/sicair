@@ -3,11 +3,18 @@
 @section('title', 'Notifikasi - SiHEALING')
 
 @section('content')
+{{-- Breadcrumb (#10) --}}
+<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ route('dashboard') }}">Dashboard</a>
+    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sh-breadcrumb-current">Notifikasi</span>
+</nav>
+
 <div class="sh-page-header">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div>
             <h2 class="sh-page-title mb-1">
-                <i class="ti ti-bell me-1" style="color: var(--sh-primary);"></i>
+                <i class="ti ti-bell me-1" style="color: var(--sh-primary);" aria-hidden="true"></i>
                 Notifikasi
             </h2>
             <div class="text-muted" style="font-size: 0.85rem;">

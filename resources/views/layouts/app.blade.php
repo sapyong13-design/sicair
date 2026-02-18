@@ -662,6 +662,139 @@
         [data-bs-theme="dark"] ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         [data-bs-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
+        /* --- Focus States (#11) --- */
+        .btn:focus-visible,
+        .form-control:focus-visible,
+        .form-select:focus-visible,
+        .form-check-input:focus-visible,
+        .nav-link:focus-visible,
+        a:focus-visible {
+            outline: 3px solid var(--sh-accent) !important;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(184, 134, 11, 0.2) !important;
+        }
+        .sh-leave-type-card:focus-within {
+            border-color: var(--sh-accent) !important;
+            box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.2);
+        }
+
+        /* --- Disabled Button Styling (#27) --- */
+        .btn:disabled,
+        .btn.disabled {
+            opacity: 0.55 !important;
+            cursor: not-allowed !important;
+            pointer-events: auto !important;
+            filter: grayscale(30%);
+        }
+
+        /* --- Link Underline on Hover/Focus (#30) --- */
+        .card-body a:not(.btn):not(.text-decoration-none):not(.nav-link):not(.navbar-brand-text):hover,
+        .card-body a:not(.btn):not(.text-decoration-none):not(.nav-link):not(.navbar-brand-text):focus-visible {
+            text-decoration: underline !important;
+        }
+
+        /* --- Loading Skeleton (#21) --- */
+        .sh-skeleton {
+            background: linear-gradient(90deg, var(--sh-gray-100) 25%, var(--sh-gray-50) 50%, var(--sh-gray-100) 75%);
+            background-size: 200% 100%;
+            animation: sh-shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        .sh-skeleton-text { height: 14px; margin-bottom: 8px; }
+        .sh-skeleton-title { height: 24px; width: 60%; margin-bottom: 12px; }
+        .sh-skeleton-circle { width: 48px; height: 48px; border-radius: 50%; }
+        .sh-skeleton-card { height: 120px; border-radius: 16px; }
+        @keyframes sh-shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* --- Toast Notifications (#13) --- */
+        .sh-toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .sh-toast {
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            pointer-events: auto;
+            animation: sh-toast-in 0.4s ease forwards;
+            max-width: 380px;
+        }
+        .sh-toast-success { background: var(--sh-success); color: #fff; }
+        .sh-toast-error { background: var(--sh-danger); color: #fff; }
+        .sh-toast-warning { background: var(--sh-warning); color: #fff; }
+        .sh-toast-out { animation: sh-toast-out 0.3s ease forwards; }
+        @keyframes sh-toast-in {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes sh-toast-out {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(40px); }
+        }
+
+        /* --- Character Counter (#14) --- */
+        .sh-char-counter {
+            font-size: 0.75rem;
+            color: var(--sh-text-muted);
+            text-align: right;
+            margin-top: 4px;
+            transition: color 0.2s;
+        }
+        .sh-char-counter.sh-char-warning { color: var(--sh-warning); }
+        .sh-char-counter.sh-char-danger { color: var(--sh-danger); font-weight: 600; }
+
+        /* --- Breadcrumb (#10) --- */
+        .sh-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.82rem;
+            color: var(--sh-text-muted);
+            margin-bottom: 0.75rem;
+        }
+        .sh-breadcrumb a {
+            color: var(--sh-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .sh-breadcrumb a:hover { text-decoration: underline; }
+        .sh-breadcrumb .sh-breadcrumb-sep { color: var(--sh-text-muted); opacity: 0.5; }
+        .sh-breadcrumb .sh-breadcrumb-current { color: var(--sh-text); font-weight: 600; }
+
+        /* --- Skip to Content (#9) --- */
+        .sh-skip-link {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--sh-primary);
+            color: #fff;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0 0 10px 10px;
+            z-index: 10000;
+            font-weight: 600;
+            text-decoration: none;
+            transition: top 0.2s;
+        }
+        .sh-skip-link:focus {
+            top: 0;
+            color: #fff;
+        }
+
         /* --- Mobile optimizations --- */
         @media (max-width: 767.98px) {
             .sh-hero-number { font-size: 3.5rem; }
@@ -669,6 +802,9 @@
             .sh-page-title { font-size: 1.2rem; }
             .container-xl { padding-left: 1rem; padding-right: 1rem; }
             .sh-chart-container { height: 200px; }
+            .sh-history-card .card-body { padding: 0.75rem !important; }
+            .sh-toast-container { right: 10px; left: 10px; }
+            .sh-toast { max-width: 100%; }
 
             /* Taller navbar on mobile with proper vertical spacing */
             .sh-navbar {
@@ -690,6 +826,15 @@
                 gap: 1rem !important;
                 align-items: flex-start !important;
             }
+        }
+
+        /* --- Tablet optimizations (#26) --- */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .sh-hero-number { font-size: 3.8rem; }
+            .sh-stat-number { font-size: 1.7rem; }
+            .sh-page-title { font-size: 1.35rem; }
+            .sh-chart-container { height: 240px; }
+            .sh-stat-card .card-body { padding: 0.75rem !important; }
         }
 
         /* === Mobile Nav Panel ===
@@ -847,10 +992,13 @@
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
-    <header class="navbar navbar-expand-md d-print-none sh-navbar">
+    {{-- Skip to Content (#9) --}}
+    <a href="#main-content" class="sh-skip-link">Langsung ke Konten</a>
+
+    <header class="navbar navbar-expand-md d-print-none sh-navbar" role="banner">
         <div class="container-xl">
-            <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
-                <i class="ti ti-menu-2" style="font-size: 1.4rem;"></i>
+            <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu" aria-label="Toggle navigasi">
+                <i class="ti ti-menu-2" style="font-size: 1.4rem;" aria-hidden="true"></i>
             </button>
             <a href="/dashboard" class="navbar-brand-text">
                 @if(file_exists(public_path('images/logo-pn-natuna.png')))
@@ -863,23 +1011,20 @@
                 </span>
             </a>
             <div class="navbar-nav flex-row order-md-last align-items-center">
-                {{-- Dark Mode Toggle --}}
+                {{-- Dark Mode Toggle (#6, #7) --}}
                 <div class="nav-item me-2">
-                    <button class="sh-dark-toggle" id="darkModeToggle" title="Toggle Dark Mode">
-                        <i class="ti ti-moon" id="darkModeIcon"></i>
+                    <button class="sh-dark-toggle" id="darkModeToggle" title="Toggle Dark Mode" aria-label="Toggle mode gelap/terang">
+                        <i class="ti ti-moon" id="darkModeIcon" aria-hidden="true"></i>
                     </button>
                 </div>
 
-                {{-- Notification Bell --}}
+                {{-- Notification Bell (#8) --}}
                 @auth
                 <div class="nav-item me-2" style="position: relative;">
-                    <a href="{{ route('notifications') }}" class="sh-dark-toggle" title="Notifikasi" style="text-decoration: none;">
-                        <i class="ti ti-bell"></i>
-                        @php
-                            $unreadCount = \App\Models\Notification::where('user_id', Auth::id())->where('is_read', false)->count();
-                        @endphp
+                    <a href="{{ route('notifications') }}" class="sh-dark-toggle" title="Notifikasi" style="text-decoration: none;" aria-label="Notifikasi{{ ($unreadCount = \App\Models\Notification::where('user_id', Auth::id())->where('is_read', false)->count()) > 0 ? ' - ' . $unreadCount . ' belum dibaca' : '' }}">
+                        <i class="ti ti-bell" aria-hidden="true"></i>
                         @if($unreadCount > 0)
-                        <span class="sh-notif-badge">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
+                        <span class="sh-notif-badge" role="status" aria-label="{{ $unreadCount }} notifikasi belum dibaca">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
                         @endif
                     </a>
                 </div>
@@ -951,7 +1096,7 @@
                 </div>
 
                 <div class="d-flex flex-column flex-md-row flex-fill align-items-stretch align-items-md-center">
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav" role="navigation" aria-label="Navigasi utama">
                         {{-- Dashboard: all roles --}}
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}" href="/dashboard">
@@ -1056,7 +1201,10 @@
         </div>
     </header>
 
-    <div class="page-wrapper flex-fill sh-page-wrapper">
+    {{-- Toast Container (#13) --}}
+    <div class="sh-toast-container" id="shToastContainer" aria-live="polite"></div>
+
+    <div class="page-wrapper flex-fill sh-page-wrapper" id="main-content" role="main" tabindex="-1">
         <div class="container-xl">
             {{-- Flash messages --}}
             @if(session('success'))
@@ -1092,7 +1240,7 @@
         </div>
     </div>
 
-    <footer class="sh-footer d-print-none mt-auto">
+    <footer class="sh-footer d-print-none mt-auto" role="contentinfo">
         <div class="container-xl">
             <div class="text-center">
                 <span class="text-muted" style="font-size: 0.8rem;">
@@ -1157,14 +1305,44 @@
     });
     </script>
 
-    {{-- Loading States JS --}}
+    {{-- Fitur 8: Loading States + Network Error + Toast (#1, #5, #13) --}}
     <script>
+    // Toast notification system (#13)
+    window.shToast = function(message, type) {
+        type = type || 'success';
+        var container = document.getElementById('shToastContainer');
+        if (!container) return;
+        var toast = document.createElement('div');
+        toast.className = 'sh-toast sh-toast-' + type;
+        var icon = type === 'success' ? 'ti-circle-check' : (type === 'error' ? 'ti-alert-triangle' : 'ti-info-circle');
+        toast.innerHTML = '<i class="ti ' + icon + '"></i> ' + message;
+        container.appendChild(toast);
+        setTimeout(function() {
+            toast.classList.add('sh-toast-out');
+            setTimeout(function() { toast.remove(); }, 300);
+        }, 4000);
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
+        // Show toast for flash messages
+        @if(session('success'))
+        shToast(@json(session('success')), 'success');
+        @endif
+        @if(session('error'))
+        shToast(@json(session('error')), 'error');
+        @endif
+
+        // Enhanced form submit with loading state + double-submit prevention (#1, #5)
         document.querySelectorAll('form').forEach(function(form) {
             // Skip forms handled via AJAX (review modal handles its own submit)
             if (form.dataset.ajaxHandled) return;
 
+            var submitted = false;
             form.addEventListener('submit', function(e) {
+                // Prevent double submission (#1)
+                if (submitted) { e.preventDefault(); return; }
+                submitted = true;
+
                 var btn = form.querySelector('button[type="submit"]');
                 if (btn && !btn.classList.contains('sh-btn-loading')) {
                     var inner = btn.innerHTML;
@@ -1178,18 +1356,29 @@
                             btn.classList.remove('sh-btn-loading');
                             btn.disabled = false;
                             btn.innerHTML = inner;
+                            submitted = false;
                         }
                         window.removeEventListener('pageshow', onPageShow);
                     });
 
-                    // Fallback reset after 15s
+                    // Fallback reset after 15s in case of network error (#5)
                     setTimeout(function() {
                         btn.classList.remove('sh-btn-loading');
                         btn.disabled = false;
                         btn.innerHTML = inner;
+                        submitted = false;
+                        shToast('Koneksi timeout. Silakan coba lagi.', 'error');
                     }, 15000);
                 }
             });
+        });
+
+        // Network status detection (#5)
+        window.addEventListener('offline', function() {
+            shToast('Koneksi internet terputus. Periksa jaringan Anda.', 'error');
+        });
+        window.addEventListener('online', function() {
+            shToast('Koneksi internet kembali aktif.', 'success');
         });
     });
     </script>

@@ -3,11 +3,18 @@
 @section('title', 'Pilih Jenis Cuti - SiHEALING')
 
 @section('content')
+{{-- Breadcrumb (#10) --}}
+<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ route('dashboard') }}">Dashboard</a>
+    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sh-breadcrumb-current">Pilih Jenis Cuti</span>
+</nav>
+
 {{-- Page Header --}}
 <div class="sh-page-header">
     <div class="d-flex align-items-center gap-3">
-        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;">
-            <i class="ti ti-arrow-left" style="font-size: 1.2rem;"></i>
+        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;" aria-label="Kembali ke dashboard">
+            <i class="ti ti-arrow-left" style="font-size: 1.2rem;" aria-hidden="true"></i>
         </a>
         <div>
             <h2 class="sh-page-title mb-0">Ajukan Cuti</h2>
@@ -180,12 +187,20 @@
     .sh-leave-type-card {
         transition: all 0.3s ease;
         border: 2px solid transparent;
+        cursor: pointer;
     }
-    .sh-leave-type-card:hover {
-        border-color: var(--sh-primary-light);
+    .sh-leave-type-card:hover,
+    .sh-leave-type-card:focus-within {
+        border-color: var(--sh-primary);
+        box-shadow: 0 8px 25px rgba(22, 101, 52, 0.15);
+        transform: translateY(-3px);
     }
-    .sh-leave-type-card:hover .sh-leave-type-icon {
-        transform: scale(1.1);
+    .sh-leave-type-card:hover .sh-leave-type-icon,
+    .sh-leave-type-card:focus-within .sh-leave-type-icon {
+        transform: scale(1.15) rotate(-5deg);
+    }
+    .sh-leave-type-card:active {
+        transform: translateY(-1px);
     }
 </style>
 @endpush

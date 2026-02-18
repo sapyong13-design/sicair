@@ -3,11 +3,20 @@
 @section('title', ($pegawai ? 'Edit' : 'Tambah') . ' Pegawai - SiHEALING')
 
 @section('content')
+{{-- Breadcrumb (#10) --}}
+<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ route('dashboard') }}">Dashboard</a>
+    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <a href="{{ route('pegawai.index') }}">Kelola Pegawai</a>
+    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sh-breadcrumb-current">{{ $pegawai ? 'Edit' : 'Tambah' }}</span>
+</nav>
+
 {{-- Page Header --}}
 <div class="sh-page-header">
     <div class="d-flex align-items-center gap-3">
-        <a href="{{ route('pegawai.index') }}" class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;">
-            <i class="ti ti-arrow-left" style="font-size: 1.2rem;"></i>
+        <a href="{{ route('pegawai.index') }}" class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;" aria-label="Kembali ke daftar pegawai">
+            <i class="ti ti-arrow-left" style="font-size: 1.2rem;" aria-hidden="true"></i>
         </a>
         <div>
             <h2 class="sh-page-title mb-0">{{ $pegawai ? 'Edit Pegawai' : 'Tambah Pegawai Baru' }}</h2>
@@ -60,10 +69,18 @@
                             <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
                                 NIP <span class="text-danger">*</span>
                             </label>
+                            @if($pegawai)
+                            {{-- Readonly NIP on edit (#22) --}}
+                            <input type="text" class="form-control" value="{{ $pegawai->nip }}" readonly
+                                   style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px; background: var(--sh-gray-100); color: var(--sh-text-muted); cursor: not-allowed;">
+                            <input type="hidden" name="nip" value="{{ $pegawai->nip }}">
+                            <div class="form-hint mt-1" style="font-size: 0.75rem; color: #94a3b8;"><i class="ti ti-lock" style="font-size: 0.7rem;"></i> NIP tidak dapat diubah</div>
+                            @else
                             <input type="text" name="nip" class="form-control @error('nip') is-invalid @enderror"
-                                   value="{{ old('nip', $pegawai->nip ?? '') }}" required placeholder="18 digit NIP" maxlength="18"
+                                   value="{{ old('nip', '') }}" required placeholder="18 digit NIP" maxlength="18"
                                    style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
                             @error('nip') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            @endif
                         </div>
                         <div class="col-md-4">
                             <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">

@@ -3,12 +3,19 @@
 @section('title', 'Kelola Pegawai - SiHEALING')
 
 @section('content')
+{{-- Breadcrumb (#10) --}}
+<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ route('dashboard') }}">Dashboard</a>
+    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sh-breadcrumb-current">Kelola Pegawai</span>
+</nav>
+
 {{-- Page Header --}}
 <div class="sh-page-header">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div>
             <h2 class="sh-page-title mb-1">
-                <i class="ti ti-users-group me-1" style="color: var(--sh-primary);"></i>
+                <i class="ti ti-users-group me-1" style="color: var(--sh-primary);" aria-hidden="true"></i>
                 Kelola Pegawai
             </h2>
             <div class="text-muted" style="font-size: 0.85rem;">
@@ -308,17 +315,17 @@
                     </td>
                     <td class="text-end">
                         <div class="d-flex gap-1 justify-content-end">
-                            <a href="{{ route('pegawai.show', $p) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 8px;" title="Detail">
-                                <i class="ti ti-eye"></i>
+                            <a href="{{ route('pegawai.show', $p) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 8px;" title="Detail {{ $p->name }}" aria-label="Lihat detail {{ $p->name }}">
+                                <i class="ti ti-eye" aria-hidden="true"></i>
                             </a>
-                            <a href="{{ route('pegawai.edit', $p) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;" title="Edit">
-                                <i class="ti ti-edit"></i>
+                            <a href="{{ route('pegawai.edit', $p) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;" title="Edit {{ $p->name }}" aria-label="Edit data {{ $p->name }}">
+                                <i class="ti ti-edit" aria-hidden="true"></i>
                             </a>
-                            <a href="{{ route('balance-adjustment.create', $p) }}" class="btn btn-sm btn-outline-warning" style="border-radius: 8px;" title="Ubah saldo cuti">
-                                <i class="ti ti-calendar-stats"></i>
+                            <a href="{{ route('balance-adjustment.create', $p) }}" class="btn btn-sm btn-outline-warning" style="border-radius: 8px;" title="Ubah saldo cuti {{ $p->name }}" aria-label="Ubah saldo cuti {{ $p->name }}">
+                                <i class="ti ti-calendar-stats" aria-hidden="true"></i>
                             </a>
-                            <button class="btn btn-sm btn-outline-danger" style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $p->id }}" title="Hapus">
-                                <i class="ti ti-trash"></i>
+                            <button class="btn btn-sm btn-outline-danger" style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $p->id }}" title="Hapus {{ $p->name }}" aria-label="Hapus {{ $p->name }}">
+                                <i class="ti ti-trash" aria-hidden="true"></i>
                             </button>
                         </div>
                     </td>
@@ -345,7 +352,7 @@
 
 {{-- Delete Modals --}}
 @foreach($pegawai as $p)
-<div class="modal modal-blur fade" id="deleteModal{{ $p->id }}" tabindex="-1">
+<div class="modal modal-blur fade" id="deleteModal{{ $p->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $p->id }}" aria-modal="true" role="dialog">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
         <div class="modal-content" style="border-radius: 16px; border: none; overflow: hidden;">
             <form method="POST" action="{{ route('pegawai.destroy', $p) }}">
@@ -355,7 +362,7 @@
                     <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--sh-danger-light); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
                         <i class="ti ti-alert-triangle" style="font-size: 2rem; color: var(--sh-danger);"></i>
                     </div>
-                    <h3 class="fw-bold mb-1">Hapus Pegawai?</h3>
+                    <h3 class="fw-bold mb-1" id="deleteModalLabel{{ $p->id }}">Hapus Pegawai?</h3>
                     <p class="text-muted mb-1">
                         Anda yakin ingin menghapus data pegawai:
                     </p>

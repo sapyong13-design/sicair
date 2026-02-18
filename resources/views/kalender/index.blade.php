@@ -3,11 +3,18 @@
 @section('title', 'Kalender Cuti - SiHEALING')
 
 @section('content')
+{{-- Breadcrumb (#10) --}}
+<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ route('dashboard') }}">Dashboard</a>
+    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sh-breadcrumb-current">Kalender Cuti</span>
+</nav>
+
 <div class="sh-page-header">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div>
             <h2 class="sh-page-title mb-1">
-                <i class="ti ti-calendar me-1" style="color: var(--sh-primary);"></i>
+                <i class="ti ti-calendar me-1" style="color: var(--sh-primary);" aria-hidden="true"></i>
                 Kalender Cuti
             </h2>
             <div class="text-muted" style="font-size: 0.85rem;">
@@ -29,14 +36,14 @@
 <div class="card sh-card mb-4">
     <div class="card-body p-3">
         <div class="d-flex align-items-center justify-content-between">
-            <a href="{{ route('kalender', ['year' => $prevYear, 'month' => $prevMonth]) }}" class="btn btn-outline-secondary" style="border-radius: 10px;">
-                <i class="ti ti-chevron-left"></i>
+            <a href="{{ route('kalender', ['year' => $prevYear, 'month' => $prevMonth]) }}" class="btn btn-outline-secondary" style="border-radius: 10px;" aria-label="Bulan sebelumnya">
+                <i class="ti ti-chevron-left" aria-hidden="true"></i>
             </a>
             <div class="text-center">
                 <h3 class="fw-bold mb-0" style="color: var(--sh-primary);">{{ $months[$month - 1] }} {{ $year }}</h3>
             </div>
-            <a href="{{ route('kalender', ['year' => $nextYear, 'month' => $nextMonth]) }}" class="btn btn-outline-secondary" style="border-radius: 10px;">
-                <i class="ti ti-chevron-right"></i>
+            <a href="{{ route('kalender', ['year' => $nextYear, 'month' => $nextMonth]) }}" class="btn btn-outline-secondary" style="border-radius: 10px;" aria-label="Bulan berikutnya">
+                <i class="ti ti-chevron-right" aria-hidden="true"></i>
             </a>
         </div>
     </div>
@@ -108,13 +115,13 @@
                                         </div>
                                         @if($isHoliday)
                                         @php $holiday = $holidayMap[$dayCount]; @endphp
-                                        <div class="sh-cal-event {{ $holiday->is_cuti_bersama ? 'sh-cal-cuti-bersama' : 'sh-cal-holiday' }}" title="{{ $holiday->keterangan }}">
-                                            <i class="ti {{ $holiday->is_cuti_bersama ? 'ti-check' : 'ti-flag-filled' }}" style="font-size: 0.65rem;"></i>
+                                        <div class="sh-cal-event {{ $holiday->is_cuti_bersama ? 'sh-cal-cuti-bersama' : 'sh-cal-holiday' }}" title="{{ $holiday->keterangan }}" data-bs-toggle="tooltip" data-bs-placement="top">
+                                            <i class="ti {{ $holiday->is_cuti_bersama ? 'ti-check' : 'ti-flag-filled' }}" style="font-size: 0.65rem;" aria-hidden="true"></i>
                                             {{ Str::limit($holiday->keterangan, 12) }}
                                         </div>
                                         @endif
                                         @foreach(array_slice($dayLeaves, 0, 2) as $lv)
-                                        <div class="sh-cal-event sh-cal-leave" title="{{ $lv->user->name }} - {{ $lv->type_label }}">
+                                        <div class="sh-cal-event sh-cal-leave" title="{{ $lv->user->name }} - {{ $lv->type_label }}" data-bs-toggle="tooltip" data-bs-placement="top">
                                             {{ Str::limit($lv->user->name, 10) }}
                                         </div>
                                         @endforeach
@@ -235,12 +242,35 @@
     </div>
 </div>
 
+{{-- Empty month state (#29) --}}
+@if($leaves->isEmpty() && $holidays->isEmpty())
+<div class="card sh-card mt-4">
+    <div class="card-body py-4 text-center">
+        <div class="sh-empty-icon" style="width: 60px; height: 60px; font-size: 1.5rem;">
+            <i class="ti ti-calendar-off" aria-hidden="true"></i>
+        </div>
+        <h5 class="fw-bold text-dark mb-1">Tidak Ada Event</h5>
+        <p class="text-muted mb-0" style="font-size: 0.85rem;">Tidak ada jadwal cuti atau hari libur pada bulan {{ $months[$month - 1] }} {{ $year }}.</p>
+    </div>
+</div>
+@endif
+
 {{-- Legend cards for leaves --}}
+@push('scripts')
+<script>
+// Initialize Bootstrap tooltips (#17)
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(function(el) { new bootstrap.Tooltip(el); });
+});
+</script>
+@endpush
+
 @if($leaves->isNotEmpty())
 <div class="card sh-card mt-4">
     <div class="card-header">
         <h3 class="card-title mb-0">
-            <i class="ti ti-beach me-2" style="color: var(--sh-success);"></i>
+            <i class="ti ti-beach me-2" style="color: var(--sh-success);" aria-hidden="true"></i>
             Cuti Bulan {{ $months[$month - 1] }} {{ $year }}
         </h3>
     </div>

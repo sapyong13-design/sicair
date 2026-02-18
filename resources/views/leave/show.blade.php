@@ -3,11 +3,18 @@
 @section('title', 'Detail Cuti - SiHEALING')
 
 @section('content')
+{{-- Breadcrumb (#10) --}}
+<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ route('dashboard') }}">Dashboard</a>
+    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sh-breadcrumb-current">Detail Cuti</span>
+</nav>
+
 {{-- Page Header --}}
 <div class="sh-page-header">
     <div class="d-flex align-items-center gap-3">
-        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;">
-            <i class="ti ti-arrow-left" style="font-size: 1.2rem;"></i>
+        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;" aria-label="Kembali ke dashboard">
+            <i class="ti ti-arrow-left" style="font-size: 1.2rem;" aria-hidden="true"></i>
         </a>
         <div>
             <h2 class="sh-page-title mb-0">Detail Pengajuan Cuti</h2>

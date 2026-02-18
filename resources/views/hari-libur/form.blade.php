@@ -3,10 +3,19 @@
 @section('title', ($hariLibur ? 'Edit' : 'Tambah') . ' Hari Libur - SiHEALING')
 
 @section('content')
+{{-- Breadcrumb (#10) --}}
+<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ route('dashboard') }}">Dashboard</a>
+    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <a href="{{ route('hari-libur.index') }}">Hari Libur</a>
+    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sh-breadcrumb-current">{{ $hariLibur ? 'Edit' : 'Tambah' }}</span>
+</nav>
+
 <div class="sh-page-header">
     <div class="d-flex align-items-center gap-3">
-        <a href="{{ route('hari-libur.index') }}" class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;">
-            <i class="ti ti-arrow-left" style="font-size: 1.2rem;"></i>
+        <a href="{{ route('hari-libur.index') }}" class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;" aria-label="Kembali ke daftar hari libur">
+            <i class="ti ti-arrow-left" style="font-size: 1.2rem;" aria-hidden="true"></i>
         </a>
         <h2 class="sh-page-title mb-0">{{ $hariLibur ? 'Edit Hari Libur' : 'Tambah Hari Libur' }}</h2>
     </div>
@@ -16,9 +25,16 @@
     <div class="col-lg-6">
         <div class="card sh-card">
             <div class="card-body p-4">
+                {{-- Error display (#3) --}}
                 @if($errors->any())
-                <div class="alert mb-4" style="background: var(--sh-danger-light); color: var(--sh-danger); border-radius: 12px; border: none;">
-                    <ul class="mb-0 ps-3">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+                <div class="alert mb-4" role="alert" style="background: var(--sh-danger-light); color: var(--sh-danger); border-radius: 12px; border: none;">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="ti ti-alert-circle" style="font-size: 1.2rem; margin-top: 2px;" aria-hidden="true"></i>
+                        <div>
+                            <div class="fw-bold mb-1">Terjadi Kesalahan</div>
+                            <ul class="mb-0 ps-3">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+                        </div>
+                    </div>
                 </div>
                 @endif
 
