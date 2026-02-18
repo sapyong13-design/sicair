@@ -192,8 +192,10 @@
                             Alasan Cuti <span class="text-danger">*</span>
                         </label>
                         <textarea name="reason"
+                                  id="reason-textarea"
                                   class="form-control @error('reason') is-invalid @enderror"
                                   rows="3" required
+                                  maxlength="500"
                                   placeholder="{{ match($type) {
                                       'cuti_tahunan' => 'Contoh: Keperluan keluarga, liburan, urusan pribadi...',
                                       'cuti_sakit' => 'Contoh: Diagnosa dokter, kondisi kesehatan...',
@@ -205,7 +207,12 @@
                                   } }}"
                                   style="border-radius: 12px; border: 2px solid #e2e8f0; resize: vertical;">{{ old('reason') }}</textarea>
                         @error('reason') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        <div class="form-hint mt-1" style="font-size: 0.78rem; color: #94a3b8;">Maksimal 500 karakter.</div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <div class="form-hint" style="font-size: 0.78rem; color: #94a3b8;">Jelaskan alasan dengan jelas dan singkat.</div>
+                            <div id="reason-counter" style="font-size: 0.78rem; color: #94a3b8; font-weight: 500;">
+                                <span id="reason-count">0</span> / 500
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Dokumen Pendukung (for types that need it) --}}
@@ -377,6 +384,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial state
     updateSubmitButton();
+
+    // Character counter for reason textarea
+    const reasonTextarea = document.getElementById('reason-textarea');
+    const reasonCount = document.getElementById('reason-count');
+    const reasonCounter = document.getElementById('reason-counter');
+
+    if (reasonTextarea && reasonCount) {
+        function updateCounter() {
+            const len = reasonTextarea.value.length;
+            reasonCount.textContent = len;
+            if (len >= 480) {
+                reasonCounter.style.color = 'var(--sh-danger)';
+                reasonCount.style.fontWeight = '700';
+            } else if (len >= 400) {
+                reasonCounter.style.color = 'var(--sh-warning)';
+                reasonCount.style.fontWeight = '600';
+            } else {
+                reasonCounter.style.color = '#94a3b8';
+                reasonCount.style.fontWeight = '500';
+            }
+        }
+        reasonTextarea.addEventListener('input', updateCounter);
+        updateCounter(); // run on page load for old() value
+    }
 });
 </script>
 @endpush
