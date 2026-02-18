@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LeaveAmendment;
 use App\Models\LeaveRequest;
 use App\Models\Notification;
+use App\Services\HariKerjaCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -56,6 +57,23 @@ class AmendmentController extends Controller
 
         $startDate = Carbon::parse($request->start_date);
         $endDate = Carbon::parse($request->end_date);
+
+        // FIX #7: Validate business rules for new amendment dates
+        if ($leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
+            // Must be at least 5 working days in advance
+            $hariSebelum = HariKerjaCalculator::hitungHariKerja(now(), $startDate->copy()->subDay());
+            if ($hariSebelum < 5) {
+                return back()->withErrors(['start_date' => 'Tanggal cuti baru minimal 5 hari kerja dari sekarang.'])->withInput();
+            }
+
+            // Check leave balance for new duration
+            $newHariKerja = HariKerjaCalculator::hitungHariKerja($startDate, $endDate);
+            $oldHariKerja = $leaveRequest->total_hari_kerja ?? 0;
+            $selisih = $newHariKerja - $oldHariKerja;
+            if ($selisih > 0 && $selisih > Auth::user()->leave_balance) {
+                return back()->withErrors(['end_date' => "Sisa cuti tidak mencukupi untuk menambah {$selisih} hari kerja."])->withInput();
+            }
+        }
 
         // Create amendment request
         $amendment = LeaveAmendment::create([
@@ -121,11 +139,15 @@ class AmendmentController extends Controller
             'approved_at' => now(),
         ]);
 
-        // Update leave request dates
+        // FIX #6: Update leave request dates AND recalculate total_hari_kerja
         $leaveRequest = $amendment->leaveRequest;
+        $newStart = Carbon::parse($amendment->requested_start_date);
+        $newEnd = Carbon::parse($amendment->requested_end_date);
+        $newHariKerja = HariKerjaCalculator::hitungHariKerja($newStart, $newEnd);
         $leaveRequest->update([
             'start_date' => $amendment->requested_start_date,
             'end_date' => $amendment->requested_end_date,
+            'total_hari_kerja' => $newHariKerja,
         ]);
 
         // Create audit log
@@ -145,6 +167,20 @@ class AmendmentController extends Controller
             Notification::TYPE_CUTI_DISETUJUI,
             route('leave.show', $leaveRequest)
         );
+
+        // FIX #26: Notify admin/ketua that amendment was approved so they are aware
+        $notifyAdmins = \App\Models\User::whereIn('role', ['admin', 'ketua'])->pluck('id');
+        foreach ($notifyAdmins as $adminId) {
+            if ($adminId !== $user->id) {
+                Notification::kirim(
+                    $adminId,
+                    'Perubahan Cuti Disetujui',
+                    "{$user->name} menyetujui perubahan cuti {$leaveRequest->user->name}",
+                    Notification::TYPE_INFO,
+                    route('leave.show', $leaveRequest)
+                );
+            }
+        }
 
         return back()->with('success', 'Perubahan cuti telah disetujui.');
     }

@@ -8,6 +8,7 @@ use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BalanceAdjustmentController extends Controller
 {
@@ -30,11 +31,11 @@ class BalanceAdjustmentController extends Controller
             $query->where('year', $request->year);
         }
 
-        // Search by user name
+        // FIX #23: Search by name/nip only — 'email' column does not exist in users table
         if ($request->filled('search')) {
             $query->whereHas('user', fn($q) =>
                 $q->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('email', 'like', "%{$request->search}%")
+                  ->orWhere('nip', 'like', "%{$request->search}%")
             );
         }
 
@@ -139,43 +140,53 @@ class BalanceAdjustmentController extends Controller
             'approval_note' => 'nullable|string|max:500',
         ]);
 
-        $user = Auth::user();
+        $admin = Auth::user();
+        $approvalNote = $request->approval_note;
 
-        // Update adjustment
-        $adjustment->update([
-            'status' => BalanceAdjustment::STATUS_APPROVED,
-            'approved_by' => $user->id,
-            'approval_note' => $request->approval_note,
-            'approved_at' => now(),
-        ]);
+        // FIX #5/#28: Use DB transaction with lock to prevent concurrent double-approval
+        DB::transaction(function () use ($adjustment, $admin, $approvalNote) {
+            // Re-fetch inside transaction with lock to check status again
+            $locked = BalanceAdjustment::lockForUpdate()->find($adjustment->id);
+            if (!$locked->isPending()) {
+                return; // Already processed by another request
+            }
 
-        // Update cuti record
-        $cutiRecord = CutiRecord::firstOrCreate(
-            [
-                'user_id' => $adjustment->user_id,
-                'tahun' => $adjustment->year,
-                'jenis_cuti' => 'Cuti Tahunan',
-            ],
-            ['alokasi_awal' => 12]
-        );
+            // Update adjustment
+            $locked->update([
+                'status' => BalanceAdjustment::STATUS_APPROVED,
+                'approved_by' => $admin->id,
+                'approval_note' => $approvalNote,
+                'approved_at' => now(),
+            ]);
 
-        $newSisa = ($cutiRecord->sisa ?? 0) + $adjustment->adjustment_days;
-        $cutiRecord->update(['sisa' => $newSisa]);
+            // Update cuti record
+            $cutiRecord = CutiRecord::firstOrCreate(
+                [
+                    'user_id' => $locked->user_id,
+                    'tahun' => $locked->year,
+                    'jenis_cuti' => 'Cuti Tahunan',
+                ],
+                ['alokasi_awal' => 12]
+            );
 
-        // Create audit log
-        \App\Models\AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'approve_balance_adjustment',
-            'description' => "Approve balance adjustment for {$adjustment->user->name}: {$adjustment->adjustment_days} days",
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-        ]);
+            $newSisa = ($cutiRecord->sisa ?? 0) + $locked->adjustment_days;
+            $cutiRecord->update(['sisa' => $newSisa]);
+
+            // Create audit log
+            \App\Models\AuditLog::create([
+                'user_id' => $admin->id,
+                'action' => 'approve_balance_adjustment',
+                'description' => "Approve balance adjustment for {$locked->user->name}: {$locked->adjustment_days} days",
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        });
 
         // Notify user
         Notification::kirim(
             $adjustment->user_id,
             'Perubahan Saldo Cuti Disetujui',
-            "Perubahan saldo cuti Anda telah disetujui oleh {$user->name}.",
+            "Perubahan saldo cuti Anda telah disetujui oleh {$admin->name}.",
             Notification::TYPE_CUTI_DISETUJUI,
             route('balance-adjustment.show', $adjustment)
         );

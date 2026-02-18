@@ -9,6 +9,7 @@ use App\Services\HariKerjaCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AdminLeaveController extends Controller
 {
@@ -126,14 +127,15 @@ class AdminLeaveController extends Controller
 
         $admin      = Auth::user();
         $user       = $leaveRequest->user;
-        $oldData    = $leaveRequest->toArray();
+        // FIX #9: Capture old data BEFORE update so getOriginal() works correctly
+        $oldData         = $leaveRequest->toArray();
+        $oldHariKerja    = $leaveRequest->total_hari_kerja ?? 0;
+        $wasApprovedTahunan = $leaveRequest->status === LeaveRequest::STATUS_DISETUJUI
+                              && $leaveRequest->type === LeaveRequest::TYPE_TAHUNAN;
+
         $startDate  = Carbon::parse($request->start_date);
         $endDate    = Carbon::parse($request->end_date);
         $hariKerja  = HariKerjaCalculator::hitungHariKerja($startDate, $endDate);
-
-        // Kembalikan saldo jika sebelumnya disetujui cuti tahunan
-        $wasApprovedTahunan = $leaveRequest->status === LeaveRequest::STATUS_DISETUJUI
-                              && $leaveRequest->type === LeaveRequest::TYPE_TAHUNAN;
 
         $data = [
             'type'             => $request->type,
@@ -160,28 +162,29 @@ class AdminLeaveController extends Controller
             $data['reviewed_at']          = $leaveRequest->reviewed_at ?? now();
         }
 
-        $leaveRequest->update($data);
+        // FIX #8/#5: Wrap all balance changes + update in a DB transaction
+        DB::transaction(function () use ($leaveRequest, $data, $user, $request, $wasApprovedTahunan, $oldHariKerja, $hariKerja) {
+            $leaveRequest->update($data);
 
-        // Koreksi leave_balance untuk cuti tahunan
-        if ($request->type === LeaveRequest::TYPE_TAHUNAN) {
-            $oldHari = $leaveRequest->getOriginal('total_hari_kerja') ?? 0;
-
-            if ($wasApprovedTahunan && $request->status !== LeaveRequest::STATUS_DISETUJUI) {
-                // Status berubah dari disetujui → kembalikan saldo
-                $user->increment('leave_balance', $oldHari);
-            } elseif (!$wasApprovedTahunan && $request->status === LeaveRequest::STATUS_DISETUJUI) {
-                // Status berubah ke disetujui → kurangi saldo
-                $user->decrement('leave_balance', $hariKerja);
-            } elseif ($wasApprovedTahunan && $request->status === LeaveRequest::STATUS_DISETUJUI) {
-                // Tetap disetujui tapi hari berubah → koreksi selisih
-                $selisih = $hariKerja - $oldHari;
-                if ($selisih > 0) {
-                    $user->decrement('leave_balance', $selisih);
-                } elseif ($selisih < 0) {
-                    $user->increment('leave_balance', abs($selisih));
+            // Koreksi leave_balance untuk cuti tahunan (use pre-captured $oldHariKerja)
+            if ($request->type === LeaveRequest::TYPE_TAHUNAN) {
+                if ($wasApprovedTahunan && $request->status !== LeaveRequest::STATUS_DISETUJUI) {
+                    // Status berubah dari disetujui → kembalikan saldo
+                    $user->increment('leave_balance', $oldHariKerja);
+                } elseif (!$wasApprovedTahunan && $request->status === LeaveRequest::STATUS_DISETUJUI) {
+                    // Status berubah ke disetujui → kurangi saldo
+                    $user->decrement('leave_balance', $hariKerja);
+                } elseif ($wasApprovedTahunan && $request->status === LeaveRequest::STATUS_DISETUJUI) {
+                    // Tetap disetujui tapi hari berubah → koreksi selisih
+                    $selisih = $hariKerja - $oldHariKerja;
+                    if ($selisih > 0) {
+                        $user->decrement('leave_balance', $selisih);
+                    } elseif ($selisih < 0) {
+                        $user->increment('leave_balance', abs($selisih));
+                    }
                 }
             }
-        }
+        });
 
         AuditLog::log(
             'update',

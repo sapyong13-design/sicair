@@ -15,6 +15,7 @@ use App\Services\PdfExportService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class LeaveRequestController extends Controller
@@ -231,20 +232,22 @@ class LeaveRequestController extends Controller
             'status' => $statusMap[$keputusan],
         ]);
 
-        // Jika disetujui, kurangi leave_balance untuk cuti tahunan
+        // FIX #5: Wrap balance deduction in transaction with row lock to prevent race condition
         if ($keputusan === 'setuju' && $leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
-            $previousBalance = $leaveRequest->user->leave_balance;
-            $totalDays = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days;
-            $leaveRequest->user->decrement('leave_balance', $totalDays);
+            DB::transaction(function () use ($leaveRequest) {
+                $lockedUser = \App\Models\User::lockForUpdate()->find($leaveRequest->user_id);
+                $totalDays = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days;
+                $previousBalance = $lockedUser->leave_balance;
+                $lockedUser->decrement('leave_balance', $totalDays);
 
-            // Log balance change
-            BalanceAuditService::logBalanceChange(
-                $leaveRequest->user,
-                $previousBalance,
-                $previousBalance - $totalDays,
-                "Pengajuan {$leaveRequest->type_label} disetujui",
-                $leaveRequest->id
-            );
+                BalanceAuditService::logBalanceChange(
+                    $lockedUser,
+                    $previousBalance,
+                    $previousBalance - $totalDays,
+                    "Pengajuan {$leaveRequest->type_label} disetujui",
+                    $leaveRequest->id
+                );
+            });
         }
 
         // Kirim email sesuai keputusan
@@ -295,40 +298,51 @@ class LeaveRequestController extends Controller
             return back()->with('error', 'Pengajuan ini sudah diproses.');
         }
 
-        $user = $leaveRequest->user;
-        $totalDays = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days;
-
-        if ($leaveRequest->type === LeaveRequest::TYPE_TAHUNAN && $totalDays > $user->leave_balance) {
-            return back()->with('error', "Sisa cuti pegawai tidak mencukupi ($user->leave_balance hari tersisa).");
-        }
-
         $pejabat = Auth::user();
-        $leaveRequest->update([
-            'status' => LeaveRequest::STATUS_DISETUJUI,
-            'admin_note' => $request->input('admin_note'),
-            'pejabat_id' => $pejabat->id,
-            'keputusan_pejabat' => 'setuju',
-            'decided_at' => now(),
-        ]);
+        $adminNote = $request->input('admin_note');
 
-        if ($leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
-            $previousBalance = $user->leave_balance;
-            $user->decrement('leave_balance', $totalDays);
+        // FIX #5: Use DB transaction with row-level lock to prevent race conditions
+        $error = DB::transaction(function () use ($leaveRequest, $pejabat, $adminNote) {
+            $lockedUser = \App\Models\User::lockForUpdate()->find($leaveRequest->user_id);
+            $totalDays = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days;
 
-            // Log balance change
-            BalanceAuditService::logBalanceChange(
-                $user,
-                $previousBalance,
-                $previousBalance - $totalDays,
-                "Pengajuan {$leaveRequest->type_label} disetujui",
-                $leaveRequest->id
-            );
+            if ($leaveRequest->type === LeaveRequest::TYPE_TAHUNAN && $totalDays > $lockedUser->leave_balance) {
+                return "Sisa cuti pegawai tidak mencukupi ({$lockedUser->leave_balance} hari tersisa).";
+            }
+
+            $leaveRequest->update([
+                'status' => LeaveRequest::STATUS_DISETUJUI,
+                'admin_note' => $adminNote,
+                'pejabat_id' => $pejabat->id,
+                'keputusan_pejabat' => 'setuju',
+                'decided_at' => now(),
+            ]);
+
+            if ($leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
+                $previousBalance = $lockedUser->leave_balance;
+                $lockedUser->decrement('leave_balance', $totalDays);
+
+                BalanceAuditService::logBalanceChange(
+                    $lockedUser,
+                    $previousBalance,
+                    $previousBalance - $totalDays,
+                    "Pengajuan {$leaveRequest->type_label} disetujui",
+                    $leaveRequest->id
+                );
+            }
+
+            return null;
+        });
+
+        if ($error) {
+            return back()->with('error', $error);
         }
 
         // Kirim email persetujuan
         Mail::queue(new LeaveRequestApproved($leaveRequest, $pejabat->name));
 
-        return back()->with('success', "Cuti {$user->name} disetujui ($totalDays hari).");
+        $totalDays = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days;
+        return back()->with('success', "Cuti {$leaveRequest->user->name} disetujui ($totalDays hari).");
     }
 
     public function reject(Request $request, LeaveRequest $leaveRequest)
@@ -426,6 +440,15 @@ class LeaveRequestController extends Controller
 
     private function addTypeSpecificRules(array &$rules, string $type): void
     {
+        // FIX #25: Determine if document is required BEFORE Laravel file validation runs
+        // by checking the alasan_cap from the incoming request directly
+        $alasanCap = request()->input('alasan_cap');
+        $capRequiresDocument = in_array($alasanCap, [
+            LeaveRequest::CAP_SAKIT_KERAS,
+            LeaveRequest::CAP_ISTRI_MELAHIRKAN,
+            LeaveRequest::CAP_MUSIBAH,
+        ]);
+
         switch ($type) {
             case LeaveRequest::TYPE_SAKIT:
                 $rules['dokumen_pendukung'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120';
@@ -435,7 +458,10 @@ class LeaveRequestController extends Controller
                 break;
             case LeaveRequest::TYPE_ALASAN_PENTING:
                 $rules['alasan_cap'] = 'required|in:' . implode(',', array_keys(LeaveRequest::capLabels()));
-                $rules['dokumen_pendukung'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120';
+                // If the CAP type requires a document, make it required at the validation layer
+                $rules['dokumen_pendukung'] = $capRequiresDocument
+                    ? 'required|file|mimes:pdf,jpg,jpeg,png|max:5120'
+                    : 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120';
                 break;
             case LeaveRequest::TYPE_BESAR:
                 $rules['dokumen_pendukung'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120';
@@ -500,6 +526,10 @@ class LeaveRequestController extends Controller
                 break;
 
             case LeaveRequest::TYPE_MELAHIRKAN:
+                // FIX #30: Only female employees can request maternity leave
+                if ($user->jenis_kelamin !== 'P') {
+                    return 'Cuti Melahirkan hanya dapat diajukan oleh pegawai perempuan.';
+                }
                 $kelahiranKe = $request->kelahiran_ke;
                 // Hanya anak ke-1,2,3 saat PNS
                 if ($kelahiranKe > 3) {

@@ -27,7 +27,14 @@ class BalanceHistoryController extends Controller
      */
     public function show(User $user)
     {
-        if (!Auth::user()->isAdmin() && Auth::id() !== $user->id) {
+        $authUser = Auth::user();
+
+        // FIX #12: Allow admin/ketua, the user themselves, or their direct atasan
+        $isOwnRecord = $authUser->id === $user->id;
+        $isAdmin = $authUser->isAdmin() || $authUser->isKetua();
+        $isDirectAtasan = $authUser->isAtasan() && $user->atasan_id === $authUser->id;
+
+        if (!$isOwnRecord && !$isAdmin && !$isDirectAtasan) {
             return back()->with('error', 'Anda tidak memiliki akses.');
         }
 

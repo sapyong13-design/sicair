@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class PegawaiController extends Controller
 {
@@ -50,7 +51,8 @@ class PegawaiController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'nip' => 'required|string|size:18|unique:users,nip',
-            'password' => 'required|string|min:6',
+            'email' => 'nullable|email|max:255|unique:users,email', // FIX #17: Add email validation
+            'password' => 'required|string|min:8',
             'role' => 'required|in:admin,ketua,atasan,panitera,sekretaris,pegawai,hakim,hakim_ad_hoc',
             'jabatan' => 'nullable|string|max:255',
             'golongan_ruang' => 'nullable|string|max:10',
@@ -68,6 +70,8 @@ class PegawaiController extends Controller
 
         $validated['lokasi_terpencil'] = $request->boolean('lokasi_terpencil');
         $validated['leave_balance'] = $validated['leave_balance'] ?? 12;
+        // FIX #2: Explicitly hash password regardless of model cast
+        $validated['password'] = Hash::make($validated['password']);
 
         User::create($validated);
 
@@ -103,6 +107,7 @@ class PegawaiController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'nip' => 'required|string|size:18|unique:users,nip,' . $pegawai->id,
+            'email' => 'nullable|email|max:255|unique:users,email,' . $pegawai->id, // FIX #17
             'role' => 'required|in:admin,ketua,atasan,panitera,sekretaris,pegawai,hakim,hakim_ad_hoc',
             'jabatan' => 'nullable|string|max:255',
             'golongan_ruang' => 'nullable|string|max:10',
@@ -121,8 +126,9 @@ class PegawaiController extends Controller
         $validated['lokasi_terpencil'] = $request->boolean('lokasi_terpencil');
 
         if ($request->filled('password')) {
-            $request->validate(['password' => 'string|min:6']);
-            $validated['password'] = $request->password;
+            $request->validate(['password' => 'string|min:8']);
+            // FIX #2: Explicitly hash password to ensure it's never stored as plaintext
+            $validated['password'] = Hash::make($request->password);
         }
 
         $pegawai->update($validated);
@@ -132,6 +138,16 @@ class PegawaiController extends Controller
 
     public function destroy(User $pegawai)
     {
+        // FIX #18: Prevent deletion if pegawai has active/pending leave requests
+        $activeLeavesCount = $pegawai->leaveRequests()
+            ->whereIn('status', ['diajukan', 'pertimbangan_atasan'])
+            ->count();
+
+        if ($activeLeavesCount > 0) {
+            return redirect()->route('pegawai.index')
+                ->with('error', "Pegawai {$pegawai->name} memiliki {$activeLeavesCount} pengajuan cuti aktif. Selesaikan terlebih dahulu sebelum menghapus.");
+        }
+
         $pegawai->delete();
 
         return redirect()->route('pegawai.index')->with('success', 'Pegawai berhasil dihapus.');

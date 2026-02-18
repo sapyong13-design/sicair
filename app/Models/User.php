@@ -12,7 +12,7 @@ class User extends Authenticatable
     use HasFactory;
 
     protected $fillable = [
-        'name', 'nip', 'password', 'role', 'leave_balance',
+        'name', 'nip', 'email', 'password', 'role', 'leave_balance',
         'jabatan', 'golongan_ruang', 'unit_kerja', 'masa_kerja_mulai',
         'status_pegawai', 'jenis_kelamin', 'jumlah_anak', 'lokasi_terpencil',
         'atasan_id', 'telepon', 'alamat',

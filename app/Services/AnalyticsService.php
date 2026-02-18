@@ -51,7 +51,8 @@ class AnalyticsService
         ])
             ->whereYear('created_at', $year)
             ->get()
-            ->sum(fn($lr) => $lr->total_hari_kerja ?? $lr->number_of_days);
+            // FIX #21: number_of_days doesn't exist; use total_hari_kerja or total_days accessor
+            ->sum(fn($lr) => $lr->total_hari_kerja ?? $lr->total_days ?? 0);
 
         return [
             'total_requests' => $approvedCount + $pendingCount + $rejectedCount,
@@ -191,7 +192,8 @@ class AnalyticsService
         $data = LeaveRequest::with('user')
             ->whereYear('created_at', $year)
             ->get()
-            ->groupBy(fn($lr) => $lr->user->department ?? 'Unknown')
+            // FIX #16: 'department' column doesn't exist; use unit_kerja
+            ->groupBy(fn($lr) => $lr->user->unit_kerja ?? 'Tidak Diketahui')
             ->map(fn($group) => $group->count());
 
         $labels = array_keys($data->toArray());
@@ -217,7 +219,8 @@ class AnalyticsService
             ->get()
             ->map(fn($lr) => [
                 'name' => $lr->user->name,
-                'email' => $lr->user->email,
+                // FIX #16: Use nip instead of email (email may not exist in users table)
+                'nip' => $lr->user->nip,
                 'leave_count' => $lr->leave_count,
                 'total_days' => (int)$lr->total_days,
             ])
@@ -246,7 +249,8 @@ class AnalyticsService
                 'type' => $lr->type,
                 'start_date' => $lr->start_date->format('d M Y'),
                 'end_date' => $lr->end_date->format('d M Y'),
-                'days' => $lr->number_of_days,
+                // FIX #21: Use correct column/accessor
+                'days' => $lr->total_hari_kerja ?? $lr->total_days ?? 0,
             ])
             ->toArray();
     }
@@ -258,7 +262,8 @@ class AnalyticsService
     {
         $year = $year ?? date('Y');
 
-        $users = User::where('status', 'aktif')
+        // FIX #20: 'status' column doesn't exist in users; filter by status_pegawai instead
+        $users = User::where('status_pegawai', '!=', 'cpns')
             ->with('cutiRecords')
             ->get()
             ->map(function ($user) use ($year) {

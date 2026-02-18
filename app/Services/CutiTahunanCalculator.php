@@ -153,8 +153,13 @@ class CutiTahunanCalculator
 
     protected function hitungTambahanTerpencil(): int
     {
-        // Pengadilan Negeri Natuna does not qualify for terpencil benefit
-        if ($this->user->unit_kerja === 'Pengadilan Negeri Natuna') {
+        // FIX #24: Use case-insensitive comparison so 'pengadilan negeri natuna' etc. also excluded
+        $unitKerja = strtolower(trim($this->user->unit_kerja ?? ''));
+        $excludedLocations = array_map('strtolower', [
+            'Pengadilan Negeri Natuna',
+        ]);
+
+        if (in_array($unitKerja, $excludedLocations)) {
             return 0;
         }
 
@@ -166,14 +171,15 @@ class CutiTahunanCalculator
 
     protected function hitungCutiDiambilTahunIni(): int
     {
-        return LeaveRequest::where('user_id', $this->user->id)
+        // FIX #29: Use DB-level SUM for performance; avoid loading all rows to PHP
+        return (int) LeaveRequest::where('user_id', $this->user->id)
             ->where('type', LeaveRequest::TYPE_TAHUNAN)
             ->whereIn('status', [
                 LeaveRequest::STATUS_APPROVED,
                 LeaveRequest::STATUS_DISETUJUI,
             ])
             ->whereYear('start_date', $this->tahun)
-            ->sum('total_hari_kerja') ?: 0;
+            ->sum('total_hari_kerja');
     }
 
     protected function getRecord(int $tahun): ?CutiRecord

@@ -30,21 +30,24 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label text-muted">Jenis Cuti</label>
-                                <p class="fs-5">{{ $leaveRequest->jenis_cuti }}</p>
+                                {{-- FIX #11: Use correct accessor type_label instead of non-existent jenis_cuti --}}
+                                <p class="fs-5">{{ $leaveRequest->type_label }}</p>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label text-muted">Periode</label>
+                                {{-- FIX #11: Use correct column names start_date / end_date (already Carbon via cast) --}}
                                 <p class="fs-5">
-                                    {{ \Carbon\Carbon::parse($leaveRequest->tanggal_mulai)->format('d/m/Y') }}
+                                    {{ $leaveRequest->start_date->format('d/m/Y') }}
                                     s/d
-                                    {{ \Carbon\Carbon::parse($leaveRequest->tanggal_selesai)->format('d/m/Y') }}
+                                    {{ $leaveRequest->end_date->format('d/m/Y') }}
                                 </p>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label text-muted">Jumlah Hari</label>
-                                <p class="fs-5">{{ $leaveRequest->jumlah_hari }} hari</p>
+                                <label class="form-label text-muted">Jumlah Hari Kerja</label>
+                                {{-- FIX #11: Use correct column total_hari_kerja instead of non-existent jumlah_hari --}}
+                                <p class="fs-5">{{ $leaveRequest->total_hari_kerja }} hari kerja</p>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label text-muted">Status</label>

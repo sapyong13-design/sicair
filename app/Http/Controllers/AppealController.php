@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\LeaveAppeal;
 use App\Models\LeaveRequest;
 use App\Models\Notification;
+use App\Services\BalanceAuditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AppealController extends Controller
 {
@@ -120,32 +122,50 @@ class AppealController extends Controller
         $user = Auth::user();
         $leaveRequest = $appeal->leaveRequest;
 
-        // Update appeal
-        $appeal->update([
-            'status' => LeaveAppeal::STATUS_APPROVED,
-            'decided_by' => $user->id,
-            'decision' => LeaveAppeal::DECISION_APPROVED,
-            'decision_note' => $request->decision_note,
-            'decided_at' => now(),
-        ]);
+        DB::transaction(function () use ($appeal, $leaveRequest, $user, $request) {
+            // Update appeal
+            $appeal->update([
+                'status' => LeaveAppeal::STATUS_APPROVED,
+                'decided_by' => $user->id,
+                'decision' => LeaveAppeal::DECISION_APPROVED,
+                'decision_note' => $request->decision_note,
+                'decided_at' => now(),
+            ]);
 
-        // Update leave request - mark as approved after appeal
-        $leaveRequest->update([
-            'status' => LeaveRequest::STATUS_DISETUJUI,
-            'pejabat_id' => $user->id,
-            'keputusan_pejabat' => 'setuju',
-            'catatan_pejabat' => "Persetujuan hasil banding: {$request->decision_note}",
-            'decided_at' => now(),
-        ]);
+            // Update leave request - mark as approved after appeal
+            $leaveRequest->update([
+                'status' => LeaveRequest::STATUS_DISETUJUI,
+                'pejabat_id' => $user->id,
+                'keputusan_pejabat' => 'setuju',
+                'catatan_pejabat' => "Persetujuan hasil banding: {$request->decision_note}",
+                'decided_at' => now(),
+            ]);
 
-        // Create audit log
-        \App\Models\AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'approve_appeal',
-            'description' => "Approve appeal for {$leaveRequest->user->name} - leave now approved",
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-        ]);
+            // FIX #1: Deduct leave_balance for annual leave when appeal is approved
+            if ($leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
+                $leaveUser = \App\Models\User::lockForUpdate()->find($leaveRequest->user_id);
+                $totalDays = $leaveRequest->total_hari_kerja ?? 0;
+                $previousBalance = $leaveUser->leave_balance;
+                $leaveUser->decrement('leave_balance', $totalDays);
+
+                BalanceAuditService::logBalanceChange(
+                    $leaveUser,
+                    $previousBalance,
+                    $previousBalance - $totalDays,
+                    "Banding disetujui — pengajuan {$leaveRequest->type_label}",
+                    $leaveRequest->id
+                );
+            }
+
+            // Create audit log
+            \App\Models\AuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'approve_appeal',
+                'description' => "Approve appeal for {$leaveRequest->user->name} - leave now approved",
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        });
 
         // Notify appellant
         Notification::kirim(
@@ -218,6 +238,15 @@ class AppealController extends Controller
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        // FIX #28: Add search by appellant name or NIP
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('appellant', fn($q) =>
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('nip', 'like', "%{$search}%")
+            );
         }
 
         $appeals = $query->latest()->paginate(20);
