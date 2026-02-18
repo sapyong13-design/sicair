@@ -111,8 +111,17 @@
             background: linear-gradient(135deg, #14532d 0%, #166534 40%, #15803d 100%);
             box-shadow: 0 4px 20px rgba(20, 83, 45, 0.35);
             border: none;
-            padding: 0.6rem 0;
+            padding: 0.8rem 0;
             border-bottom: 3px solid var(--sh-accent);
+            display: flex;
+            align-items: center;
+            min-height: 68px;
+        }
+        .sh-navbar .container-xl {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 1rem;
         }
         .sh-navbar .navbar-brand-text {
             font-size: 1.25rem;
@@ -478,6 +487,36 @@
             letter-spacing: -0.5px;
         }
 
+        /* --- Modal overflow fix (mobile) --- */
+        .modal-dialog {
+            max-height: 90vh;
+        }
+        .modal-body {
+            max-height: 65vh;
+            overflow-y: auto;
+        }
+
+        /* --- Mobile table scroll hint --- */
+        .table-responsive {
+            position: relative;
+        }
+        @media (max-width: 767.98px) {
+            .table-responsive::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 32px;
+                background: linear-gradient(to right, transparent, rgba(255,255,255,0.85));
+                pointer-events: none;
+                border-radius: 0 0 16px 0;
+            }
+            [data-bs-theme="dark"] .table-responsive::after {
+                background: linear-gradient(to right, transparent, rgba(30,41,59,0.85));
+            }
+        }
+
         /* --- Gold accent links --- */
         a { color: var(--sh-primary); }
         a:hover { color: var(--sh-primary-dark); }
@@ -631,8 +670,11 @@
             .container-xl { padding-left: 1rem; padding-right: 1rem; }
             .sh-chart-container { height: 200px; }
 
-            /* Taller navbar on mobile for better visual weight */
-            .sh-navbar { padding: 0.75rem 0 !important; }
+            /* Taller navbar on mobile with proper vertical spacing */
+            .sh-navbar {
+                padding: 1rem 0 !important;
+                min-height: 72px !important;
+            }
 
             /* Significant breathing room between navbar and page content */
             .sh-page-wrapper { padding-top: 3rem; }
