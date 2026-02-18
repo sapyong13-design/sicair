@@ -1,8 +1,8 @@
 {{-- Pejabat (Ketua PN) Decision Modal --}}
-<div class="modal modal-blur fade" id="decisionModal{{ $req->id }}" tabindex="-1">
+<div class="modal modal-blur fade" id="decisionModal{{ $req->id }}" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 560px;">
         <div class="modal-content" style="border-radius: 16px; border: none; overflow: hidden;">
-            <form method="POST" action="{{ route('leave.decide', $req) }}">
+            <form method="POST" action="{{ route('leave.decide', $req) }}" id="decisionForm{{ $req->id }}">
                 @csrf
                 <div class="modal-body p-4">
                     <div class="text-center mb-3">
@@ -83,27 +83,27 @@
                         <label class="form-label" style="font-weight: 700; font-size: 0.85rem;">
                             Keputusan <span class="text-danger">*</span>
                         </label>
-                        <div class="d-flex flex-column gap-2">
-                            <label class="form-check" style="background: var(--sh-success-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
-                                <input class="form-check-input" type="radio" name="keputusan" value="setuju" required>
+                        <div class="d-flex flex-column gap-2" id="keputusanGroup{{ $req->id }}">
+                            <label class="form-check keputusan-label" style="background: var(--sh-success-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
+                                <input class="form-check-input keputusan-input" type="radio" name="keputusan" value="setuju" required>
                                 <span class="form-check-label fw-semibold" style="color: var(--sh-success);">
                                     <i class="ti ti-circle-check me-1"></i> Disetujui
                                 </span>
                             </label>
-                            <label class="form-check" style="background: var(--sh-primary-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
-                                <input class="form-check-input" type="radio" name="keputusan" value="ubah">
+                            <label class="form-check keputusan-label" style="background: var(--sh-primary-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
+                                <input class="form-check-input keputusan-input" type="radio" name="keputusan" value="ubah">
                                 <span class="form-check-label fw-semibold" style="color: var(--sh-primary);">
                                     <i class="ti ti-edit me-1"></i> Perubahan
                                 </span>
                             </label>
-                            <label class="form-check" style="background: var(--sh-warning-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
-                                <input class="form-check-input" type="radio" name="keputusan" value="tangguhkan">
+                            <label class="form-check keputusan-label" style="background: var(--sh-warning-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
+                                <input class="form-check-input keputusan-input" type="radio" name="keputusan" value="tangguhkan">
                                 <span class="form-check-label fw-semibold" style="color: var(--sh-warning);">
                                     <i class="ti ti-clock-pause me-1"></i> Ditangguhkan
                                 </span>
                             </label>
-                            <label class="form-check" style="background: var(--sh-danger-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
-                                <input class="form-check-input" type="radio" name="keputusan" value="tolak">
+                            <label class="form-check keputusan-label" style="background: var(--sh-danger-light); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; margin: 0; border: 2px solid transparent; transition: border-color 0.2s;">
+                                <input class="form-check-input keputusan-input" type="radio" name="keputusan" value="tolak">
                                 <span class="form-check-label fw-semibold" style="color: var(--sh-danger);">
                                     <i class="ti ti-circle-x me-1"></i> Tidak Disetujui
                                 </span>
@@ -118,12 +118,97 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0 px-4 pb-4" style="justify-content: center; gap: 0.5rem;">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; min-width: 100px;">Batal</button>
-                    <button type="submit" class="btn sh-btn-primary text-white" style="min-width: 130px;">
-                        <i class="ti ti-gavel me-1"></i> Tetapkan Keputusan
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; min-width: 100px;" id="cancelBtn{{ $req->id }}">Batal</button>
+                    <button type="submit" class="btn sh-btn-primary text-white" style="min-width: 130px;" id="submitBtn{{ $req->id }}">
+                        <i class="ti ti-gavel me-1"></i> <span id="submitText{{ $req->id }}">Tetapkan Keputusan</span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('decisionForm{{ $req->id }}');
+    const submitBtn = document.getElementById('submitBtn{{ $req->id }}');
+    const submitText = document.getElementById('submitText{{ $req->id }}');
+    const modal = document.getElementById('decisionModal{{ $req->id }}');
+    const keputusanGroup = document.getElementById('keputusanGroup{{ $req->id }}');
+    let isSubmitting = false;
+
+    // Handle radio button visual feedback for keputusan
+    if (keputusanGroup) {
+        const radioInputs = keputusanGroup.querySelectorAll('.keputusan-input');
+        radioInputs.forEach(radio => {
+            const label = radio.closest('.keputusan-label');
+
+            // Initial state
+            if (radio.checked) {
+                label.style.borderColor = 'currentColor';
+            }
+
+            // Change event
+            radio.addEventListener('change', function(e) {
+                e.stopPropagation();
+                radioInputs.forEach(r => {
+                    r.closest('.keputusan-label').style.borderColor = 'transparent';
+                });
+                if (this.checked) {
+                    label.style.borderColor = 'currentColor';
+                }
+            });
+
+            // Click on label should work smoothly
+            label.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (!radio.checked) {
+                    radio.checked = true;
+                    radio.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+        });
+    }
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Prevent double submission
+            if (isSubmitting) {
+                e.preventDefault();
+                return false;
+            }
+
+            isSubmitting = true;
+
+            // Disable button and show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="ti ti-loader me-1" style="animation: spin 1s linear infinite;"></i> <span id="submitText{{ $req->id }}">Memproses...</span>';
+
+            // Add style for spinner animation if not exists
+            if (!document.getElementById('spinnerStyle')) {
+                const style = document.createElement('style');
+                style.id = 'spinnerStyle';
+                style.textContent = `
+                    @keyframes spin {
+                        from { transform: rotate(0deg); }
+                        to { transform: rotate(360deg); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        });
+    }
+
+    // Reset form when modal is closed without submission
+    if (modal) {
+        modal.addEventListener('hidden.bs.modal', function() {
+            isSubmitting = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitText.textContent = 'Tetapkan Keputusan';
+                submitBtn.innerHTML = '<i class="ti ti-gavel me-1"></i> <span id="submitText{{ $req->id }}">Tetapkan Keputusan</span>';
+            }
+        });
+    }
+});
+</script>

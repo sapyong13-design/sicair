@@ -62,12 +62,12 @@
                 }
             }
 
-            // Build holiday map
+            // Build holiday map (with full object to get is_cuti_bersama)
             $holidayMap = [];
             foreach ($holidays as $h) {
                 $hDate = \Carbon\Carbon::parse($h->tanggal);
                 if ($hDate->month == $month) {
-                    $holidayMap[$hDate->day] = $h->keterangan;
+                    $holidayMap[$hDate->day] = $h;
                 }
             }
         @endphp
@@ -107,9 +107,10 @@
                                             </span>
                                         </div>
                                         @if($isHoliday)
-                                        <div class="sh-cal-event sh-cal-holiday" title="{{ $holidayMap[$dayCount] }}">
-                                            <i class="ti ti-flag-filled" style="font-size: 0.65rem;"></i>
-                                            {{ Str::limit($holidayMap[$dayCount], 12) }}
+                                        @php $holiday = $holidayMap[$dayCount]; @endphp
+                                        <div class="sh-cal-event {{ $holiday->is_cuti_bersama ? 'sh-cal-cuti-bersama' : 'sh-cal-holiday' }}" title="{{ $holiday->keterangan }}">
+                                            <i class="ti {{ $holiday->is_cuti_bersama ? 'ti-check' : 'ti-flag-filled' }}" style="font-size: 0.65rem;"></i>
+                                            {{ Str::limit($holiday->keterangan, 12) }}
                                         </div>
                                         @endif
                                         @foreach(array_slice($dayLeaves, 0, 2) as $lv)
@@ -190,8 +191,8 @@
                 <div class="mb-2 p-2" style="background: var(--sh-gray-50); border-radius: 8px; font-size: 0.82rem;">
                     <div class="fw-bold" style="color: #1e293b;">{{ $d }} {{ $months[$month - 1] }}</div>
                     @if($ev['holiday'])
-                    <div style="color: var(--sh-danger);">
-                        <i class="ti ti-flag-filled me-1" style="font-size: 0.7rem;"></i> {{ $ev['holiday'] }}
+                    <div style="color: {{ $ev['holiday']->is_cuti_bersama ? 'var(--sh-primary)' : 'var(--sh-danger)' }};">
+                        <i class="ti {{ $ev['holiday']->is_cuti_bersama ? 'ti-check' : 'ti-flag-filled' }} me-1" style="font-size: 0.7rem;"></i> {{ $ev['holiday']->keterangan }}
                     </div>
                     @endif
                     @foreach($ev['leaves'] as $lv)
@@ -219,8 +220,12 @@
                 Cuti Disetujui
             </div>
             <div class="d-flex align-items-center gap-1">
+                <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-primary-light); border-left: 3px solid var(--sh-primary);"></span>
+                Cuti Bersama
+            </div>
+            <div class="d-flex align-items-center gap-1">
                 <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-danger);"></span>
-                Hari Libur
+                Hari Libur Nasional
             </div>
             <div class="d-flex align-items-center gap-1">
                 <span style="width: 12px; height: 12px; border-radius: 3px; background: #fef2f2; border: 1px solid #fca5a5;"></span>

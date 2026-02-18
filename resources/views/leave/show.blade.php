@@ -118,16 +118,63 @@
                             <td style="padding: 0.75rem 1.25rem;">{{ $leaveRequest->telepon_cuti }}</td>
                         </tr>
                         @endif
-                        @if($leaveRequest->dokumen_pendukung)
                         <tr>
-                            <td class="text-muted" style="padding: 0.75rem 1.25rem;">Dokumen Pendukung</td>
+                            <td class="text-muted" style="padding: 0.75rem 1.25rem;">Dokumen</td>
                             <td style="padding: 0.75rem 1.25rem;">
-                                <a href="{{ asset('storage/' . $leaveRequest->dokumen_pendukung) }}" target="_blank" class="btn btn-sm sh-btn-primary">
-                                    <i class="ti ti-download me-1"></i> Lihat Dokumen
+                                <a href="{{ route('document.list', $leaveRequest) }}" class="btn btn-sm sh-btn-primary">
+                                    <i class="ti ti-file-download me-1"></i>
+                                    @if($leaveRequest->dokumen_pendukung)
+                                        Lihat Dokumen (1)
+                                    @else
+                                        Kelola Dokumen
+                                    @endif
                                 </a>
                             </td>
                         </tr>
-                        @endif
+                        <tr>
+                            <td class="text-muted" style="padding: 0.75rem 1.25rem;">Perubahan</td>
+                            <td style="padding: 0.75rem 1.25rem;">
+                                @if(auth()->id() === $leaveRequest->user_id && in_array($leaveRequest->status, ['diajukan', 'pertimbangan_atasan']))
+                                    <a href="{{ route('amendment.create', $leaveRequest) }}" class="btn btn-sm btn-warning">
+                                        <i class="ti ti-edit me-1"></i> Ajukan Perubahan
+                                    </a>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+
+                                @if($leaveRequest->amendments()->where('status', 'pending')->exists())
+                                    <div class="mt-2">
+                                        @foreach($leaveRequest->amendments()->where('status', 'pending')->get() as $amendment)
+                                            <a href="{{ route('amendment.show', $amendment) }}" class="btn btn-sm btn-outline-warning">
+                                                <i class="ti ti-clock me-1"></i> Perubahan Pending
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted" style="padding: 0.75rem 1.25rem;">Banding</td>
+                            <td style="padding: 0.75rem 1.25rem;">
+                                @if(auth()->id() === $leaveRequest->user_id && $leaveRequest->isRejected())
+                                    <a href="{{ route('appeal.create', $leaveRequest) }}" class="btn btn-sm btn-danger">
+                                        <i class="ti ti-alert-triangle me-1"></i> Ajukan Banding
+                                    </a>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+
+                                @if($leaveRequest->appeals()->where('status', 'pending')->exists())
+                                    <div class="mt-2">
+                                        @foreach($leaveRequest->appeals()->where('status', 'pending')->get() as $appeal)
+                                            <a href="{{ route('appeal.show', $appeal) }}" class="btn btn-sm btn-outline-danger">
+                                                <i class="ti ti-clock me-1"></i> Banding Pending
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

@@ -96,6 +96,14 @@
         body {
             background-color: var(--sh-body-bg);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            scrollbar-gutter: stable;
+            overflow-y: scroll;
+        }
+
+        /* Prevent modal from removing scrollbar space and causing layout shift */
+        body.modal-open {
+            padding-right: 0 !important;
+            overflow-y: scroll !important;
         }
 
         /* --- Navbar --- */
@@ -188,13 +196,12 @@
             border: none;
             border-radius: 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
-            transition: all 0.3s ease;
+            transition: box-shadow 0.3s ease;
             overflow: hidden;
             background: var(--sh-card-bg);
         }
         .sh-card:hover {
             box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
-            transform: translateY(-2px);
         }
         .sh-card .card-header {
             background: var(--sh-card-bg);
@@ -211,7 +218,7 @@
             border: none;
             border-radius: 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
-            transition: all 0.3s ease;
+            transition: box-shadow 0.3s ease;
             position: relative;
             overflow: hidden;
             background: var(--sh-card-bg);
@@ -225,7 +232,6 @@
             height: 4px;
         }
         .sh-stat-card:hover {
-            transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
         .sh-stat-card.stat-warning::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
@@ -344,11 +350,10 @@
             font-weight: 600;
             padding: 0.6rem 1.5rem;
             box-shadow: 0 4px 14px rgba(22, 101, 52, 0.3);
-            transition: all 0.2s ease;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
             color: #fff;
         }
         .sh-btn-primary:hover {
-            transform: translateY(-1px);
             box-shadow: 0 6px 20px rgba(22, 101, 52, 0.4);
             background: linear-gradient(135deg, #14532d, #166534);
             color: #fff;
@@ -360,8 +365,9 @@
             font-weight: 600;
             color: #fff;
             box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+            transition: background 0.2s ease, box-shadow 0.2s ease;
         }
-        .sh-btn-success:hover { background: linear-gradient(135deg, #047857, #059669); color: #fff; }
+        .sh-btn-success:hover { background: linear-gradient(135deg, #047857, #059669); color: #fff; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4); }
         .sh-btn-danger {
             background: linear-gradient(135deg, #dc2626, #ef4444);
             border: none;
@@ -369,13 +375,15 @@
             font-weight: 600;
             color: #fff;
             box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+            transition: background 0.2s ease, box-shadow 0.2s ease;
         }
-        .sh-btn-danger:hover { background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; }
+        .sh-btn-danger:hover { background: linear-gradient(135deg, #b91c1c, #dc2626); color: #fff; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4); }
 
         .btn-primary {
             background: linear-gradient(135deg, #166534, #15803d) !important;
             border: none !important;
             box-shadow: 0 4px 14px rgba(22, 101, 52, 0.3);
+            transition: background 0.2s ease, box-shadow 0.2s ease;
         }
         .btn-primary:hover {
             background: linear-gradient(135deg, #14532d, #166534) !important;
@@ -388,7 +396,7 @@
             border-radius: 14px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.06);
             border-left: 4px solid var(--sh-gray-100);
-            transition: all 0.2s ease;
+            transition: box-shadow 0.2s ease;
             background: var(--sh-card-bg);
         }
         .sh-history-card:hover {
@@ -441,13 +449,20 @@
             width: 80px;
             height: 80px;
             border-radius: 20px;
-            background: var(--sh-primary-light);
+            background: radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--sh-primary-light) 80%, white), var(--sh-primary-light));
+            box-shadow: 0 4px 16px color-mix(in srgb, var(--sh-primary) 15%, transparent);
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 1rem;
             font-size: 2rem;
             color: var(--sh-primary);
+        }
+
+        /* --- Page Wrapper --- */
+        .sh-page-wrapper {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
         }
 
         /* --- Page Header --- */
@@ -541,10 +556,19 @@
             justify-content: center;
             font-size: 1.1rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: background 0.2s ease;
         }
         .sh-dark-toggle:hover {
             background: rgba(255,255,255,0.2);
+        }
+        /* Dark mode icon rotate animation */
+        #darkModeIcon {
+            display: inline-block;
+            transition: transform 0.35s ease, opacity 0.2s ease;
+        }
+        #darkModeIcon.sh-icon-spin {
+            transform: rotate(180deg);
+            opacity: 0;
         }
 
         /* ===== Fitur 10: Calendar Styles ===== */
@@ -577,6 +601,12 @@
             color: var(--sh-danger);
             font-weight: 600;
         }
+        .sh-cal-cuti-bersama {
+            background: var(--sh-primary-light);
+            color: var(--sh-primary);
+            font-weight: 600;
+            border-left: 3px solid var(--sh-primary);
+        }
 
         /* ===== Fitur 7: Chart container ===== */
         .sh-chart-container {
@@ -584,13 +614,193 @@
             height: 280px;
         }
 
+        /* --- Scrollbar dark mode --- */
+        [data-bs-theme="dark"] {
+            scrollbar-color: #334155 #0f172a;
+        }
+        [data-bs-theme="dark"] ::-webkit-scrollbar { width: 8px; height: 8px; }
+        [data-bs-theme="dark"] ::-webkit-scrollbar-track { background: #0f172a; }
+        [data-bs-theme="dark"] ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        [data-bs-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
         /* --- Mobile optimizations --- */
-        @media (max-width: 768px) {
+        @media (max-width: 767.98px) {
             .sh-hero-number { font-size: 3.5rem; }
             .sh-stat-number { font-size: 1.5rem; }
-            .sh-page-title { font-size: 1.25rem; }
+            .sh-page-title { font-size: 1.2rem; }
             .container-xl { padding-left: 1rem; padding-right: 1rem; }
             .sh-chart-container { height: 200px; }
+
+            /* Taller navbar on mobile for better visual weight */
+            .sh-navbar { padding: 0.75rem 0 !important; }
+
+            /* Significant breathing room between navbar and page content */
+            .sh-page-wrapper { padding-top: 3rem; }
+
+            /* Page header: generous top padding matching Notification style */
+            .sh-page-header {
+                padding-top: 1.25rem;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+            }
+            /* Consistent layout for page header content */
+            .sh-page-header > div {
+                gap: 1rem !important;
+                align-items: flex-start !important;
+            }
+        }
+
+        /* === Mobile Nav Panel ===
+           Slides out as a clean white card below the navbar,
+           replacing the hard-to-read white-on-green look.
+        */
+        @media (max-width: 767.98px) {
+            .sh-navbar { position: relative; }
+
+            /* The collapse panel itself */
+            #navbar-menu {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                z-index: 1050;
+                background: #ffffff;
+                border-top: 3px solid var(--sh-accent);
+                border-radius: 0 0 16px 16px;
+                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+                overflow: hidden;
+                /* Animate open/close with max-height */
+                max-height: 0;
+                transition: max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            #navbar-menu.show {
+                max-height: 600px;
+            }
+            [data-bs-theme="dark"] #navbar-menu {
+                background: #1e293b;
+                border-top-color: var(--sh-accent);
+            }
+
+            /* User info strip at top of mobile menu */
+            .sh-mobile-user-strip {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.85rem 1.25rem;
+                border-bottom: 2px solid #f1f5f9;
+                background: var(--sh-gray-100);
+            }
+            [data-bs-theme="dark"] .sh-mobile-user-strip {
+                background: #0f172a;
+                border-bottom-color: #334155;
+            }
+            .sh-mobile-user-strip .sh-user-avatar {
+                background: var(--sh-primary);
+                border-color: var(--sh-accent);
+                flex-shrink: 0;
+            }
+            .sh-mobile-user-strip .mu-name {
+                font-weight: 700;
+                font-size: 0.9rem;
+                color: #1e293b;
+                line-height: 1.2;
+            }
+            [data-bs-theme="dark"] .sh-mobile-user-strip .mu-name {
+                color: #e2e8f0;
+            }
+            .sh-mobile-user-strip .mu-role {
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: var(--sh-primary);
+            }
+
+            /* Nav links */
+            #navbar-menu .nav-link {
+                color: #1e293b !important;
+                padding: 0.8rem 1.25rem !important;
+                font-size: 0.92rem;
+                font-weight: 500;
+                border-radius: 0 !important;
+                border-bottom: 1px solid #f1f5f9;
+                display: flex !important;
+                align-items: center;
+                gap: 0.75rem;
+                background: transparent;
+                transition: background 0.15s ease, color 0.15s ease;
+                min-height: 52px;
+            }
+            [data-bs-theme="dark"] #navbar-menu .nav-link {
+                color: #cbd5e1 !important;
+                border-bottom-color: #334155;
+            }
+            #navbar-menu .nav-link:hover,
+            #navbar-menu .nav-link:focus {
+                background: var(--sh-primary-light) !important;
+                color: var(--sh-primary) !important;
+            }
+            #navbar-menu .nav-link.active {
+                background: var(--sh-primary-light) !important;
+                color: var(--sh-primary) !important;
+                font-weight: 700;
+                border-left: 4px solid var(--sh-primary);
+            }
+            [data-bs-theme="dark"] #navbar-menu .nav-link:hover,
+            [data-bs-theme="dark"] #navbar-menu .nav-link:focus,
+            [data-bs-theme="dark"] #navbar-menu .nav-link.active {
+                background: #064e3b !important;
+                color: #4ade80 !important;
+            }
+
+            /* Icons inside mobile nav */
+            #navbar-menu .nav-link-icon {
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+                width: 28px;
+                height: 28px;
+                border-radius: 8px;
+                background: var(--sh-primary-light);
+                color: var(--sh-primary);
+                font-size: 1rem;
+                flex-shrink: 0;
+            }
+            [data-bs-theme="dark"] #navbar-menu .nav-link-icon {
+                background: #064e3b;
+                color: #4ade80;
+            }
+            #navbar-menu .nav-link.active .nav-link-icon {
+                background: var(--sh-primary);
+                color: #fff;
+            }
+
+            /* Bottom action buttons (Profil, Keluar) */
+            .sh-mobile-nav-footer {
+                padding: 0.75rem 1.25rem;
+                display: flex;
+                gap: 0.5rem;
+                border-top: 2px solid #f1f5f9;
+                background: var(--sh-gray-100);
+            }
+            [data-bs-theme="dark"] .sh-mobile-nav-footer {
+                background: #0f172a;
+                border-top-color: #334155;
+            }
+            .sh-mobile-nav-footer .btn {
+                flex: 1;
+                border-radius: 10px;
+                font-size: 0.82rem;
+                font-weight: 600;
+                padding: 0.5rem 0.75rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.4rem;
+            }
+        }
+        /* Hide mobile-only elements on desktop */
+        @media (min-width: 768px) {
+            .sh-mobile-user-strip,
+            .sh-mobile-nav-footer { display: none !important; }
         }
     </style>
 </head>
@@ -610,11 +820,13 @@
                     <span style="color: var(--sh-accent);">Si</span>HEALING
                 </span>
             </a>
-            <div class="navbar-nav flex-row order-md-last">
+            <div class="navbar-nav flex-row order-md-last align-items-center">
                 {{-- Dark Mode Toggle --}}
-                <button class="sh-dark-toggle me-2" id="darkModeToggle" title="Toggle Dark Mode">
-                    <i class="ti ti-moon" id="darkModeIcon"></i>
-                </button>
+                <div class="nav-item me-2">
+                    <button class="sh-dark-toggle" id="darkModeToggle" title="Toggle Dark Mode">
+                        <i class="ti ti-moon" id="darkModeIcon"></i>
+                    </button>
+                </div>
 
                 {{-- Notification Bell --}}
                 @auth
@@ -636,7 +848,7 @@
                         <div class="sh-user-avatar">
                             {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
                         </div>
-                        <div class="d-none d-xl-block ps-2">
+                        <div class="d-none d-md-block ps-2">
                             <div class="text-white fw-semibold" style="font-size: 0.9rem;">{{ Auth::user()->name }}</div>
                             <div style="color: var(--sh-accent); font-size: 0.75rem; font-weight: 600;">
                                 {{ ucfirst(Auth::user()->role) }}
@@ -671,6 +883,31 @@
                 </div>
             </div>
             <div class="collapse navbar-collapse" id="navbar-menu">
+                {{-- Mobile-only: user info strip --}}
+                <div class="sh-mobile-user-strip">
+                    <div class="sh-user-avatar" style="width:38px;height:38px;border-radius:10px;color:#fff;font-weight:700;font-size:0.85rem;display:flex;align-items:center;justify-content:center;border:2px solid var(--sh-accent);">
+                        {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+                    </div>
+                    <div>
+                        <div class="mu-name">{{ Auth::user()->name }}</div>
+                        <div class="mu-role">
+                            @php
+                                $roleLabel = match(Auth::user()->role) {
+                                    'admin' => 'Admin Kepegawaian',
+                                    'ketua' => 'Ketua Pengadilan',
+                                    'panitera' => 'Panitera',
+                                    'sekretaris' => 'Sekretaris',
+                                    'atasan' => 'Atasan',
+                                    'hakim' => 'Hakim',
+                                    'hakim_ad_hoc' => 'Hakim Ad Hoc',
+                                    default => 'Pegawai',
+                                };
+                            @endphp
+                            {{ $roleLabel }} &bull; NIP {{ Auth::user()->nip }}
+                        </div>
+                    </div>
+                </div>
+
                 <div class="d-flex flex-column flex-md-row flex-fill align-items-stretch align-items-md-center">
                     <ul class="navbar-nav">
                         {{-- Dashboard: all roles --}}
@@ -754,11 +991,30 @@
                         @endif
                     </ul>
                 </div>
+
+                {{-- Mobile-only: quick action footer --}}
+                <div class="sh-mobile-nav-footer">
+                    <a href="{{ route('profile') }}" class="btn btn-outline-secondary">
+                        <i class="ti ti-user-circle"></i> Profil
+                    </a>
+                    <a href="{{ route('notifications') }}" class="btn btn-outline-secondary" style="position:relative;">
+                        <i class="ti ti-bell"></i> Notifikasi
+                        @if(isset($unreadCount) && $unreadCount > 0)
+                        <span style="position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--sh-danger);display:block;"></span>
+                        @endif
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}" style="flex:1;">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            <i class="ti ti-logout"></i> Keluar
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </header>
 
-    <div class="page-wrapper flex-fill" style="padding-top: 1.5rem; padding-bottom: 1.5rem;">
+    <div class="page-wrapper flex-fill sh-page-wrapper">
         <div class="container-xl">
             {{-- Flash messages --}}
             @if(session('success'))
@@ -807,7 +1063,7 @@
     <!-- Tabler JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/js/tabler.min.js"></script>
 
-    {{-- Fitur 9: Dark Mode Toggle JS --}}
+    {{-- Dark Mode Toggle JS --}}
     <script>
     (function() {
         const toggle = document.getElementById('darkModeToggle');
@@ -823,42 +1079,122 @@
 
         toggle.addEventListener('click', function() {
             const isDark = html.getAttribute('data-bs-theme') === 'dark';
-            if (isDark) {
-                html.setAttribute('data-bs-theme', 'light');
-                icon.className = 'ti ti-moon';
-                localStorage.setItem('sh-theme', 'light');
-            } else {
-                html.setAttribute('data-bs-theme', 'dark');
-                icon.className = 'ti ti-sun';
-                localStorage.setItem('sh-theme', 'dark');
-            }
+            // Spin out
+            icon.classList.add('sh-icon-spin');
+            setTimeout(function() {
+                if (isDark) {
+                    html.setAttribute('data-bs-theme', 'light');
+                    icon.className = 'ti ti-moon';
+                    localStorage.setItem('sh-theme', 'light');
+                } else {
+                    html.setAttribute('data-bs-theme', 'dark');
+                    icon.className = 'ti ti-sun';
+                    localStorage.setItem('sh-theme', 'dark');
+                }
+                // Spin in
+                icon.style.transform = 'rotate(0deg)';
+                icon.style.opacity = '1';
+                setTimeout(function() {
+                    icon.classList.remove('sh-icon-spin');
+                }, 50);
+            }, 200);
         });
     })();
     </script>
 
-    {{-- Fitur 8: Loading States JS --}}
+    {{-- Flash Message Auto-Dismiss --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.sh-alert.alert-dismissible').forEach(function(alert) {
+            var delay = alert.classList.contains('alert-danger') ? 7000 : 4000;
+            setTimeout(function() {
+                var bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                if (bsAlert) bsAlert.close();
+            }, delay);
+        });
+    });
+    </script>
+
+    {{-- Loading States JS --}}
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('form').forEach(function(form) {
+            // Skip forms handled via AJAX (review modal handles its own submit)
+            if (form.dataset.ajaxHandled) return;
+
             form.addEventListener('submit', function(e) {
                 var btn = form.querySelector('button[type="submit"]');
                 if (btn && !btn.classList.contains('sh-btn-loading')) {
-                    // Wrap existing content
                     var inner = btn.innerHTML;
                     btn.innerHTML = '<span class="sh-btn-text">' + inner + '</span>';
                     btn.classList.add('sh-btn-loading');
                     btn.disabled = true;
 
-                    // Auto-reset after 10s in case of error
+                    // Reset on back-button navigation
+                    window.addEventListener('pageshow', function onPageShow(ev) {
+                        if (ev.persisted) {
+                            btn.classList.remove('sh-btn-loading');
+                            btn.disabled = false;
+                            btn.innerHTML = inner;
+                        }
+                        window.removeEventListener('pageshow', onPageShow);
+                    });
+
+                    // Fallback reset after 15s
                     setTimeout(function() {
                         btn.classList.remove('sh-btn-loading');
                         btn.disabled = false;
                         btn.innerHTML = inner;
-                    }, 10000);
+                    }, 15000);
                 }
             });
         });
     });
+    </script>
+
+    {{-- Mobile Nav Toggle JS --}}
+    <script>
+    (function() {
+        var menu   = document.getElementById('navbar-menu');
+        var toggler = document.querySelector('.navbar-toggler[data-bs-target="#navbar-menu"]');
+        if (!menu || !toggler) return;
+
+        function isMobile() { return window.innerWidth < 768; }
+
+        // Override Bootstrap collapse — use CSS max-height animation instead
+        toggler.addEventListener('click', function(e) {
+            if (!isMobile()) return; // let Bootstrap handle desktop
+            e.stopPropagation();
+            e.preventDefault();
+
+            if (menu.classList.contains('show')) {
+                menu.classList.remove('show');
+            } else {
+                menu.classList.add('show');
+            }
+        });
+
+        // Close menu when a nav link inside is clicked
+        menu.querySelectorAll('.nav-link').forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (isMobile()) menu.classList.remove('show');
+            });
+        });
+
+        // Close menu on outside click
+        document.addEventListener('click', function(e) {
+            if (isMobile() && menu.classList.contains('show')
+                && !menu.contains(e.target)
+                && !toggler.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        // Reset on resize to desktop
+        window.addEventListener('resize', function() {
+            if (!isMobile()) menu.classList.remove('show');
+        });
+    })();
     </script>
 
     @stack('scripts')

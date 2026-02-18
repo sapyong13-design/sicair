@@ -25,8 +25,8 @@ class KalenderController extends Controller
             ->where('start_date', '<=', $endOfMonth)
             ->where('end_date', '>=', $startOfMonth);
 
-        // Pegawai only sees their own
-        if ($user->isPegawai()) {
+        // Pegawai, Hakim, Hakim Ad Hoc only see their own
+        if ($user->isPegawai() || $user->isHakim() || $user->isHakimAdHoc()) {
             $query->where('user_id', $user->id);
         } elseif ($user->isAtasan()) {
             $query->where(function ($q) use ($user) {

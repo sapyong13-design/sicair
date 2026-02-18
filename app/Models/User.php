@@ -48,7 +48,17 @@ class User extends Authenticatable
 
     public function isAtasan(): bool
     {
-        return $this->role === 'atasan';
+        return in_array($this->role, ['atasan', 'panitera', 'sekretaris']);
+    }
+
+    public function isPanitera(): bool
+    {
+        return $this->role === 'panitera';
+    }
+
+    public function isSekretaris(): bool
+    {
+        return $this->role === 'sekretaris';
     }
 
     public function isPegawai(): bool
@@ -58,17 +68,28 @@ class User extends Authenticatable
 
     public function isHakim(): bool
     {
-        return $this->status_pegawai === 'hakim';
+        return $this->role === 'hakim';
+    }
+
+    public function isHakimAdHoc(): bool
+    {
+        return $this->role === 'hakim_ad_hoc';
     }
 
     public function canApproveAsAtasan(): bool
     {
-        return in_array($this->role, ['atasan', 'ketua', 'admin']);
+        return in_array($this->role, ['atasan', 'panitera', 'sekretaris', 'ketua', 'admin']);
     }
 
     public function canApproveAsPejabat(): bool
     {
         return in_array($this->role, ['ketua', 'admin']);
+    }
+
+    public function isKepegawaian(): bool
+    {
+        return in_array($this->role, ['atasan', 'panitera', 'sekretaris'])
+            && in_array($this->unit_kerja, ['kepegawaian', 'Kepegawaian', 'KEPEGAWAIAN']);
     }
 
     // ===== Masa Kerja =====
@@ -86,19 +107,23 @@ class User extends Authenticatable
         if (!$this->masa_kerja_mulai) {
             return null;
         }
-        $years = $this->masa_kerja_mulai->diffInYears(now());
-        $months = $this->masa_kerja_mulai->diffInMonths(now()) % 12;
-        return "{$years} tahun {$months} bulan";
+        $now = now();
+        $years = (int) $this->masa_kerja_mulai->diffInYears($now);
+        $afterYears = $this->masa_kerja_mulai->copy()->addYears($years);
+        $months = (int) $afterYears->diffInMonths($now);
+        $afterMonths = $afterYears->copy()->addMonths($months);
+        $days = (int) $afterMonths->diffInDays($now);
+        return "{$years} tahun {$months} bulan {$days} hari";
     }
 
     public function sudahBekerjaSatuTahun(): bool
     {
-        return $this->masa_kerja_tahun !== null && $this->masa_kerja_tahun >= 1;
+        return $this->masaKerjaTahun !== null && $this->masaKerjaTahun >= 1;
     }
 
     public function sudahBekerjaLimaTahun(): bool
     {
-        return $this->masa_kerja_tahun !== null && $this->masa_kerja_tahun >= 5;
+        return $this->masaKerjaTahun !== null && $this->masaKerjaTahun >= 5;
     }
 
     // ===== Relationships =====

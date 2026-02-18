@@ -11,7 +11,7 @@
                 <i class="ti ti-layout-dashboard me-1" style="color: var(--sh-primary);"></i>
                 Dashboard
             </h2>
-            <div class="text-muted" style="font-size: 0.9rem;">
+            <div class="text-muted" style="font-size: 0.85rem;">
                 Selamat datang kembali, <strong class="text-dark">{{ $user->name }}</strong>
                 <span class="sh-badge sh-badge-{{ $user->isAdmin() ? 'approved' : ($user->isKetua() ? 'rejected' : ($user->isAtasan() ? 'pending' : 'approved')) }} ms-1" style="font-size: 0.7rem;">
                     <i class="ti ti-{{ $user->isAdmin() ? 'shield-check' : ($user->isKetua() ? 'gavel' : ($user->isAtasan() ? 'user-check' : 'user')) }}"></i>
@@ -129,7 +129,8 @@
             </div>
         </div>
         @else
-        <div class="table-responsive">
+        {{-- Desktop Table View --}}
+        <div class="table-responsive d-none d-md-block">
             <table class="table sh-table mb-0">
                 <thead>
                     <tr>
@@ -172,6 +173,47 @@
                 </tbody>
             </table>
         </div>
+
+        {{-- Mobile Card View --}}
+        <div class="card-body d-md-none">
+            @foreach($pendingRequests as $req)
+            <div class="card sh-history-card mb-3" style="border-left-color: var(--sh-warning);">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-start justify-content-between mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="sh-user-avatar" style="width: 36px; height: 36px; font-size: 0.75rem; background: var(--sh-primary-light); color: var(--sh-primary); border: none; border-radius: 10px;">
+                                {{ strtoupper(substr($req->user->name, 0, 2)) }}
+                            </div>
+                            <div>
+                                <div class="fw-bold" style="font-size: 0.9rem;">{{ $req->user->name }}</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">{{ $req->user->jabatan ?? $req->user->nip }}</div>
+                            </div>
+                        </div>
+                        <span class="sh-badge sh-badge-pending">{{ $req->status_label }}</span>
+                    </div>
+                    <div class="row g-2 mb-2" style="font-size: 0.82rem;">
+                        <div class="col-6">
+                            <div class="text-muted">Jenis</div>
+                            <div class="fw-semibold">{{ $req->type_label }}</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted">Durasi</div>
+                            <div class="fw-semibold">{{ $req->total_days }} hari</div>
+                        </div>
+                    </div>
+                    <div class="mb-2" style="font-size: 0.82rem;">
+                        <div class="text-muted">Periode</div>
+                        <div class="fw-semibold">{{ $req->start_date->format('d M Y') }} - {{ $req->end_date->format('d M Y') }}</div>
+                    </div>
+                    <div class="text-end">
+                        <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">
+                            <i class="ti ti-eye me-1"></i> Lihat
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
         @endif
     </div>
 
@@ -184,7 +226,9 @@
                 Keputusan Terbaru
             </h3>
         </div>
-        <div class="table-responsive">
+
+        {{-- Desktop Table View --}}
+        <div class="table-responsive d-none d-md-block">
             <table class="table sh-table mb-0">
                 <thead>
                     <tr>
@@ -199,7 +243,7 @@
                     <tr>
                         <td class="fw-semibold" style="font-size: 0.9rem;">{{ $req->user->name }}</td>
                         <td style="font-size: 0.85rem;">{{ $req->type_label }}</td>
-                        <td style="font-size: 0.85rem;">{{ $req->start_date->format('d/m/Y') }} - {{ $req->end_date->format('d/m/Y') }}</td>
+                        <td style="font-size: 0.85rem;">{{ $req->start_date->format('d M Y') }} - {{ $req->end_date->format('d M Y') }}</td>
                         <td>
                             @if($req->isApproved())
                                 <span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i> Disetujui</span>
@@ -213,6 +257,50 @@
                 @endforeach
                 </tbody>
             </table>
+        </div>
+
+        {{-- Mobile Card View --}}
+        <div class="card-body d-md-none">
+            @foreach($recentDecisions as $req)
+            <div class="card sh-history-card mb-3" style="border-left-color: #64748b;">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-start justify-content-between mb-2">
+                        <div>
+                            <div class="fw-bold" style="font-size: 0.9rem;">{{ $req->user->name }}</div>
+                        </div>
+                        @if($req->isApproved())
+                            <span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i></span>
+                        @elseif($req->isRejected())
+                            <span class="sh-badge sh-badge-rejected"><i class="ti ti-circle-x"></i></span>
+                        @else
+                            <span class="sh-badge sh-badge-pending">{{ $req->status_label }}</span>
+                        @endif
+                    </div>
+                    <div class="row g-2 mb-2" style="font-size: 0.82rem;">
+                        <div class="col-6">
+                            <div class="text-muted">Jenis</div>
+                            <div class="fw-semibold">{{ $req->type_label }}</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted">Status</div>
+                            <div class="fw-semibold">
+                                @if($req->isApproved())
+                                    Disetujui
+                                @elseif($req->isRejected())
+                                    Ditolak
+                                @else
+                                    {{ $req->status_label }}
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.82rem;">
+                        <div class="text-muted">Periode</div>
+                        <div class="fw-semibold">{{ $req->start_date->format('d M Y') }} - {{ $req->end_date->format('d M Y') }}</div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
         </div>
     </div>
     @endif
@@ -416,7 +504,7 @@
         </div>
         <div class="card-body p-3">
             @foreach($directRequests as $req)
-            <div class="card sh-history-card status-{{ $req->status }} mb-3">
+            <div class="card sh-history-card status-{{ $req->status }} mb-3" data-request-id="{{ $req->id }}">
                 <div class="card-body p-3">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
@@ -429,7 +517,7 @@
                         {{ $req->start_date->format('d M Y') }} &mdash; {{ $req->end_date->format('d M Y') }}
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-sm sh-btn-primary flex-fill" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $req->id }}">
+                        <button class="btn btn-sm sh-btn-primary flex-fill" onclick="openReviewModal{{ $req->id }}()">
                             <i class="ti ti-checklist me-1"></i> Pertimbangan
                         </button>
                         <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">
@@ -560,7 +648,7 @@
         @else
         <div class="card-body p-3">
             @foreach($pendingReview as $req)
-            <div class="card sh-history-card status-{{ $req->status }} mb-3">
+            <div class="card sh-history-card status-{{ $req->status }} mb-3" data-request-id="{{ $req->id }}">
                 <div class="card-body p-3">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="d-flex align-items-center gap-2">
@@ -590,7 +678,7 @@
                     </div>
                     @endif
                     <div class="d-flex gap-2 mt-2">
-                        <button class="btn btn-sm sh-btn-primary flex-fill" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $req->id }}">
+                        <button class="btn btn-sm sh-btn-primary flex-fill" onclick="openReviewModal{{ $req->id }}()">
                             <i class="ti ti-checklist me-1"></i> Beri Pertimbangan
                         </button>
                         <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">
@@ -624,7 +712,7 @@
                     <tr>
                         <td class="fw-semibold" style="font-size: 0.88rem;">{{ $req->user->name }}</td>
                         <td style="font-size: 0.85rem;">{{ $req->type_label }}</td>
-                        <td style="font-size: 0.82rem;">{{ $req->start_date->format('d/m/Y') }} - {{ $req->end_date->format('d/m/Y') }}</td>
+                        <td style="font-size: 0.82rem;">{{ $req->start_date->format('d M Y') }} - {{ $req->end_date->format('d M Y') }}</td>
                         <td>
                             @if($req->pertimbangan_atasan === 'setuju')
                                 <span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i> Setuju</span>
@@ -894,6 +982,20 @@
                             <span class="sh-badge sh-badge-pending"><i class="ti ti-clock"></i> {{ $req->status_label }}</span>
                         @endif
                     </div>
+
+                    {{-- Show rejection reason if rejected --}}
+                    @if($req->isRejected() && ($req->catatan_atasan || $req->catatan_pejabat))
+                    <div class="alert mb-2" style="background: var(--sh-danger-light); color: var(--sh-danger); border: 1px solid rgba(220, 38, 38, 0.2); border-radius: 8px; padding: 0.75rem; font-size: 0.85rem;">
+                        <div class="d-flex gap-2">
+                            <i class="ti ti-alert-circle" style="flex-shrink: 0; margin-top: 2px;"></i>
+                            <div>
+                                <div class="fw-semibold mb-1">Alasan Penolakan:</div>
+                                <div>{{ $req->catatan_pejabat ?? $req->catatan_atasan }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     @if($req->reason)
                     <div style="font-size: 0.85rem; color: #475569;">{{ Str::limit($req->reason, 80) }}</div>
                     @endif
@@ -936,7 +1038,14 @@
                             @if($req->isApproved())
                                 <span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i> Disetujui</span>
                             @elseif($req->isRejected())
-                                <span class="sh-badge sh-badge-rejected"><i class="ti ti-circle-x"></i> Ditolak</span>
+                                <div>
+                                    <span class="sh-badge sh-badge-rejected" title="{{ $req->catatan_pejabat ?? $req->catatan_atasan ?? 'Tidak ada catatan' }}" style="cursor: help;"><i class="ti ti-circle-x"></i> Ditolak</span>
+                                    @if($req->catatan_pejabat || $req->catatan_atasan)
+                                    <div class="small text-muted mt-1" style="font-size: 0.75rem; max-width: 200px; white-space: normal;">
+                                        <i class="ti ti-info-circle" style="font-size: 0.7rem;"></i> {{ Str::limit($req->catatan_pejabat ?? $req->catatan_atasan, 60) }}
+                                    </div>
+                                    @endif
+                                </div>
                             @else
                                 <span class="sh-badge sh-badge-pending"><i class="ti ti-clock"></i> {{ $req->status_label }}</span>
                             @endif
@@ -970,57 +1079,63 @@ document.addEventListener('DOMContentLoaded', function() {
     // Chart by Type
     var typeLabels = @json(array_map(fn($t) => \App\Models\LeaveRequest::typeLabels()[$t] ?? $t, array_keys($chartByType)));
     var typeData = @json(array_values($chartByType));
-    new Chart(document.getElementById('chartByType'), {
-        type: 'bar',
-        data: {
-            labels: typeLabels,
-            datasets: [{
-                label: 'Jumlah',
-                data: typeData,
-                backgroundColor: ['#166534','#059669','#d97706','#dc2626','#7c3aed','#64748b'],
-                borderRadius: 8,
-                barThickness: 32
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+    if (typeLabels.length > 0 && typeData.length > 0 && document.getElementById('chartByType')) {
+        new Chart(document.getElementById('chartByType'), {
+            type: 'bar',
+            data: {
+                labels: typeLabels,
+                datasets: [{
+                    label: 'Jumlah',
+                    data: typeData,
+                    backgroundColor: ['#166534','#059669','#d97706','#dc2626','#7c3aed','#64748b'],
+                    borderRadius: 8,
+                    barThickness: 32
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
             }
-        }
-    });
+        });
+    }
 
     // Monthly Trend
     var monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
     var monthlyData = new Array(12).fill(0);
     var rawMonthly = @json($chartMonthly);
-    for (var m in rawMonthly) { monthlyData[parseInt(m) - 1] = rawMonthly[m]; }
-    new Chart(document.getElementById('chartMonthly'), {
-        type: 'line',
-        data: {
-            labels: monthNames,
-            datasets: [{
-                label: 'Pengajuan',
-                data: monthlyData,
-                borderColor: '#b8860b',
-                backgroundColor: 'rgba(184,134,11,0.1)',
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#b8860b',
-                pointRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+    if (rawMonthly && Object.keys(rawMonthly).length > 0) {
+        for (var m in rawMonthly) { monthlyData[parseInt(m) - 1] = rawMonthly[m]; }
+    }
+    if (document.getElementById('chartMonthly')) {
+        new Chart(document.getElementById('chartMonthly'), {
+            type: 'line',
+            data: {
+                labels: monthNames,
+                datasets: [{
+                    label: 'Pengajuan',
+                    data: monthlyData,
+                    borderColor: '#b8860b',
+                    backgroundColor: 'rgba(184,134,11,0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#b8860b',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
             }
-        }
-    });
+        });
+    }
 
     // Status Distribution
     var statusMap = @json(\App\Models\LeaveRequest::statusLabels());
@@ -1037,7 +1152,7 @@ document.addEventListener('DOMContentLoaded', function() {
         statusData.push(rawStatus[s]);
         statusColors.push(colorMap[s] || '#64748b');
     }
-    if (statusLabels.length > 0) {
+    if (statusLabels.length > 0 && document.getElementById('chartByStatus')) {
         new Chart(document.getElementById('chartByStatus'), {
             type: 'doughnut',
             data: {

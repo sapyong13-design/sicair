@@ -2,13 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\LeaveRequestApproved;
+use App\Mail\LeaveRequestNeedsConsideration;
+use App\Mail\LeaveRequestRejected;
+use App\Mail\LeaveRequestSubmitted;
 use App\Models\LeaveRequest;
 use App\Models\Notification;
+use App\Services\BalanceAuditService;
 use App\Services\CutiTahunanCalculator;
 use App\Services\HariKerjaCalculator;
+use App\Services\PdfExportService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class LeaveRequestController extends Controller
 {
@@ -83,7 +90,7 @@ class LeaveRequestController extends Controller
             $dokumenPath = $request->file('dokumen_pendukung')->store('dokumen-cuti', 'public');
         }
 
-        LeaveRequest::create([
+        $leaveRequest = LeaveRequest::create([
             'user_id' => $user->id,
             'type' => $type,
             'start_date' => $request->start_date,
@@ -97,6 +104,9 @@ class LeaveRequestController extends Controller
             'total_hari_kerja' => $hariKerja,
             'status' => LeaveRequest::STATUS_DIAJUKAN,
         ]);
+
+        // Kirim email ke pemohon
+        Mail::queue(new LeaveRequestSubmitted($leaveRequest));
 
         // Kirim notifikasi ke atasan
         if ($user->atasan_id) {
@@ -118,9 +128,11 @@ class LeaveRequestController extends Controller
     public function reviewAtasan(Request $request, LeaveRequest $leaveRequest)
     {
         $reviewer = Auth::user();
+        $isAjax = $request->header('X-Requested-With') === 'XMLHttpRequest';
 
         if (!$leaveRequest->needsAtasanReview()) {
-            return back()->with('error', 'Pengajuan ini tidak dalam status menunggu pertimbangan atasan.');
+            $message = 'Pengajuan ini tidak dalam status menunggu pertimbangan atasan.';
+            return $isAjax ? response()->json(['error' => $message], 400) : back()->with('error', $message);
         }
 
         $request->validate([
@@ -140,6 +152,13 @@ class LeaveRequestController extends Controller
                 'status' => LeaveRequest::STATUS_DITOLAK,
             ]);
 
+            // Kirim email penolakan
+            Mail::queue(new LeaveRequestRejected(
+                $leaveRequest,
+                $reviewer->name,
+                $request->catatan_atasan
+            ));
+
             Notification::kirim(
                 $leaveRequest->user_id,
                 'Pengajuan Cuti Ditolak',
@@ -148,7 +167,7 @@ class LeaveRequestController extends Controller
                 route('leave.show', $leaveRequest)
             );
 
-            return back()->with('success', 'Pengajuan cuti ditolak.');
+            return $isAjax ? response()->json(['success' => true, 'message' => 'Pengajuan cuti ditolak.']) : back()->with('success', 'Pengajuan cuti ditolak.');
         }
 
         // Setuju / ubah / tangguhkan → lanjut ke Pejabat Berwenang
@@ -160,6 +179,9 @@ class LeaveRequestController extends Controller
             'status' => LeaveRequest::STATUS_PERTIMBANGAN,
         ]);
 
+        // Kirim email ke pejabat untuk pertimbangan lanjutan
+        Mail::queue(new LeaveRequestNeedsConsideration($leaveRequest));
+
         // Notifikasi ke pemohon
         Notification::kirim(
             $leaveRequest->user_id,
@@ -169,7 +191,7 @@ class LeaveRequestController extends Controller
             route('leave.show', $leaveRequest)
         );
 
-        return back()->with('success', 'Pertimbangan berhasil dikirim ke Pejabat Berwenang.');
+        return $isAjax ? response()->json(['success' => true, 'message' => 'Pertimbangan berhasil dikirim ke Pejabat Berwenang.']) : back()->with('success', 'Pertimbangan berhasil dikirim ke Pejabat Berwenang.');
     }
 
     /**
@@ -211,7 +233,29 @@ class LeaveRequestController extends Controller
 
         // Jika disetujui, kurangi leave_balance untuk cuti tahunan
         if ($keputusan === 'setuju' && $leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
-            $leaveRequest->user->decrement('leave_balance', $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days);
+            $previousBalance = $leaveRequest->user->leave_balance;
+            $totalDays = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days;
+            $leaveRequest->user->decrement('leave_balance', $totalDays);
+
+            // Log balance change
+            BalanceAuditService::logBalanceChange(
+                $leaveRequest->user,
+                $previousBalance,
+                $previousBalance - $totalDays,
+                "Pengajuan {$leaveRequest->type_label} disetujui",
+                $leaveRequest->id
+            );
+        }
+
+        // Kirim email sesuai keputusan
+        if ($keputusan === 'setuju') {
+            Mail::queue(new LeaveRequestApproved($leaveRequest, $pejabat->name));
+        } elseif ($keputusan === 'tolak') {
+            Mail::queue(new LeaveRequestRejected(
+                $leaveRequest,
+                $pejabat->name,
+                $request->catatan_pejabat
+            ));
         }
 
         $label = match ($keputusan) {
@@ -258,17 +302,31 @@ class LeaveRequestController extends Controller
             return back()->with('error', "Sisa cuti pegawai tidak mencukupi ($user->leave_balance hari tersisa).");
         }
 
+        $pejabat = Auth::user();
         $leaveRequest->update([
             'status' => LeaveRequest::STATUS_DISETUJUI,
             'admin_note' => $request->input('admin_note'),
-            'pejabat_id' => Auth::id(),
+            'pejabat_id' => $pejabat->id,
             'keputusan_pejabat' => 'setuju',
             'decided_at' => now(),
         ]);
 
         if ($leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
+            $previousBalance = $user->leave_balance;
             $user->decrement('leave_balance', $totalDays);
+
+            // Log balance change
+            BalanceAuditService::logBalanceChange(
+                $user,
+                $previousBalance,
+                $previousBalance - $totalDays,
+                "Pengajuan {$leaveRequest->type_label} disetujui",
+                $leaveRequest->id
+            );
         }
+
+        // Kirim email persetujuan
+        Mail::queue(new LeaveRequestApproved($leaveRequest, $pejabat->name));
 
         return back()->with('success', "Cuti {$user->name} disetujui ($totalDays hari).");
     }
@@ -283,16 +341,85 @@ class LeaveRequestController extends Controller
             'admin_note' => 'required|string|max:500',
         ]);
 
+        $pejabat = Auth::user();
+        $adminNote = $request->input('admin_note');
+
         $leaveRequest->update([
             'status' => LeaveRequest::STATUS_DITOLAK,
-            'admin_note' => $request->input('admin_note'),
-            'pejabat_id' => Auth::id(),
+            'admin_note' => $adminNote,
+            'pejabat_id' => $pejabat->id,
             'keputusan_pejabat' => 'tolak',
-            'catatan_pejabat' => $request->input('admin_note'),
+            'catatan_pejabat' => $adminNote,
             'decided_at' => now(),
         ]);
 
+        // Kirim email penolakan
+        Mail::queue(new LeaveRequestRejected($leaveRequest, $pejabat->name, $adminNote));
+
         return back()->with('success', "Pengajuan cuti {$leaveRequest->user->name} ditolak.");
+    }
+
+    /**
+     * Export single leave request to PDF
+     */
+    public function exportPdf(LeaveRequest $leaveRequest)
+    {
+        $user = Auth::user();
+
+        // Check authorization
+        if ($leaveRequest->user_id !== $user->id && !$user->isAdmin() && !$user->isKetua()) {
+            return back()->with('error', 'Anda tidak memiliki akses untuk export dokumen ini.');
+        }
+
+        $pdf = (new PdfExportService())->exportLeaveRequest($leaveRequest);
+        return $pdf->download("leave-request-{$leaveRequest->id}.pdf");
+    }
+
+    /**
+     * Export all leave requests as PDF report
+     */
+    public function exportAllPdf(Request $request)
+    {
+        $user = Auth::user();
+
+        // Only admin and ketua can export all
+        if (!$user->isAdmin() && !$user->isKetua()) {
+            return back()->with('error', 'Anda tidak memiliki akses untuk export laporan ini.');
+        }
+
+        $query = LeaveRequest::query();
+
+        // Filter by status if provided
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by year
+        if ($request->filled('year')) {
+            $query->whereYear('created_at', $request->year);
+        }
+
+        // Filter by month
+        if ($request->filled('month')) {
+            $query->whereMonth('created_at', $request->month);
+        }
+
+        $leaveRequests = $query->latest()->get();
+
+        $pdf = (new PdfExportService())->exportLeaveRequests($leaveRequests);
+        return $pdf->download("leave-requests-report-" . now()->format('Y-m-d') . ".pdf");
+    }
+
+    /**
+     * Export leave summary for current user
+     */
+    public function exportSummaryPdf(Request $request)
+    {
+        $user = Auth::user();
+        $year = $request->input('year', date('Y'));
+
+        $pdf = (new PdfExportService())->exportLeaveSummary($user, $year);
+        return $pdf->download("leave-summary-{$year}.pdf");
     }
 
     // ===== Private helpers =====

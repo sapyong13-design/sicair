@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Hendra Wijaya, S.H., M.H.',
             'nip' => '198003202005011003',
             'password' => Hash::make('atasan123'),
-            'role' => 'atasan',
+            'role' => 'panitera',
             'leave_balance' => 12,
             'jabatan' => 'Panitera',
             'golongan_ruang' => 'IV/a',
@@ -52,7 +52,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Dewi Kartika, S.H.',
             'nip' => '198507102008012004',
             'password' => Hash::make('atasan123'),
-            'role' => 'atasan',
+            'role' => 'sekretaris',
             'leave_balance' => 10,
             'jabatan' => 'Sekretaris',
             'golongan_ruang' => 'III/d',
@@ -228,23 +228,23 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // ===== HARI LIBUR NASIONAL 2026 =====
+        // Sumber: SKB 3 Menteri tentang Hari Libur Nasional dan Cuti Bersama 2026
         $hariLibur2026 = [
             ['tanggal' => '2026-01-01', 'keterangan' => 'Tahun Baru Masehi'],
-            ['tanggal' => '2026-01-29', 'keterangan' => 'Tahun Baru Imlek'],
-            ['tanggal' => '2026-02-17', 'keterangan' => 'Isra Miraj Nabi Muhammad SAW'],
-            ['tanggal' => '2026-03-20', 'keterangan' => 'Hari Raya Nyepi'],
-            ['tanggal' => '2026-03-22', 'keterangan' => 'Nuzulul Quran (perkiraan)'],
+            // Tahun Baru Imlek 2577 & Isra Miraj jatuh pada hari yang sama: 17 Februari 2026
+            ['tanggal' => '2026-02-17', 'keterangan' => 'Isra Miraj Nabi Muhammad SAW & Tahun Baru Imlek 2577'],
+            ['tanggal' => '2026-03-19', 'keterangan' => 'Hari Raya Nyepi (Tahun Baru Saka 1948)'],
             ['tanggal' => '2026-04-03', 'keterangan' => 'Wafat Isa Al-Masih'],
-            ['tanggal' => '2026-04-20', 'keterangan' => 'Hari Raya Idul Fitri 1 Syawal'],
-            ['tanggal' => '2026-04-21', 'keterangan' => 'Hari Raya Idul Fitri 2 Syawal'],
+            ['tanggal' => '2026-04-20', 'keterangan' => 'Hari Raya Idul Fitri 1 Syawal 1447H'],
+            ['tanggal' => '2026-04-21', 'keterangan' => 'Hari Raya Idul Fitri 2 Syawal 1447H'],
             ['tanggal' => '2026-05-01', 'keterangan' => 'Hari Buruh Internasional'],
             ['tanggal' => '2026-05-14', 'keterangan' => 'Kenaikan Isa Al-Masih'],
-            ['tanggal' => '2026-05-26', 'keterangan' => 'Hari Raya Waisak'],
+            ['tanggal' => '2026-05-31', 'keterangan' => 'Hari Raya Waisak 2570 BE'],
             ['tanggal' => '2026-06-01', 'keterangan' => 'Hari Lahir Pancasila'],
-            ['tanggal' => '2026-06-27', 'keterangan' => 'Hari Raya Idul Adha'],
-            ['tanggal' => '2026-07-18', 'keterangan' => 'Tahun Baru Islam 1448H'],
-            ['tanggal' => '2026-08-17', 'keterangan' => 'Hari Kemerdekaan RI'],
-            ['tanggal' => '2026-09-27', 'keterangan' => 'Maulid Nabi Muhammad SAW'],
+            ['tanggal' => '2026-06-27', 'keterangan' => 'Hari Raya Idul Adha 1447H'],
+            ['tanggal' => '2026-07-17', 'keterangan' => 'Tahun Baru Islam 1448H'],
+            ['tanggal' => '2026-08-17', 'keterangan' => 'Hari Kemerdekaan Republik Indonesia'],
+            ['tanggal' => '2026-09-25', 'keterangan' => 'Maulid Nabi Muhammad SAW'],
             ['tanggal' => '2026-12-25', 'keterangan' => 'Hari Natal'],
         ];
 
@@ -259,12 +259,16 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // Cuti bersama 2026 (contoh)
+        // Cuti bersama 2026 (sesuai SKB 3 Menteri)
         $cutiBersama = [
-            ['tanggal' => '2026-04-17', 'keterangan' => 'Cuti Bersama Idul Fitri'],
-            ['tanggal' => '2026-04-22', 'keterangan' => 'Cuti Bersama Idul Fitri'],
-            ['tanggal' => '2026-04-23', 'keterangan' => 'Cuti Bersama Idul Fitri'],
-            ['tanggal' => '2026-12-24', 'keterangan' => 'Cuti Bersama Natal'],
+            // Cuti bersama Idul Fitri: Jum'at sebelum + hari setelah Idul Fitri
+            ['tanggal' => '2026-04-17', 'keterangan' => 'Cuti Bersama Hari Raya Idul Fitri'],
+            ['tanggal' => '2026-04-22', 'keterangan' => 'Cuti Bersama Hari Raya Idul Fitri'],
+            ['tanggal' => '2026-04-23', 'keterangan' => 'Cuti Bersama Hari Raya Idul Fitri'],
+            ['tanggal' => '2026-04-24', 'keterangan' => 'Cuti Bersama Hari Raya Idul Fitri'],
+            // Cuti bersama Natal
+            ['tanggal' => '2026-12-24', 'keterangan' => 'Cuti Bersama Hari Natal'],
+            ['tanggal' => '2026-12-26', 'keterangan' => 'Cuti Bersama Hari Natal'],
         ];
 
         foreach ($cutiBersama as $cb) {

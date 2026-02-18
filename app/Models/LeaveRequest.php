@@ -160,4 +160,20 @@ class LeaveRequest extends Model
     {
         return $this->belongsTo(User::class, 'pejabat_id');
     }
+
+    /**
+     * Get amendments for this leave request
+     */
+    public function amendments()
+    {
+        return $this->hasMany(LeaveAmendment::class);
+    }
+
+    /**
+     * Get appeals for this leave request
+     */
+    public function appeals()
+    {
+        return $this->hasMany(LeaveAppeal::class);
+    }
 }

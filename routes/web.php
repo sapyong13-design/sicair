@@ -1,11 +1,19 @@
 <?php
 
+use App\Http\Controllers\AdminLeaveController;
+use App\Http\Controllers\AmendmentController;
+use App\Http\Controllers\AppealController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BalanceAdjustmentController;
+use App\Http\Controllers\BalanceHistoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\HariLiburController;
 use App\Http\Controllers\KalenderController;
 use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PdfExportController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -40,10 +48,45 @@ Route::middleware('auth')->group(function () {
     Route::get('/leave/create', [LeaveRequestController::class, 'create'])->name('leave.create');
     Route::post('/leave', [LeaveRequestController::class, 'store'])->name('leave.store');
     Route::get('/leave/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave.show');
+    Route::get('/leave/{leaveRequest}/export-pdf', [LeaveRequestController::class, 'exportPdf'])->name('leave.export-pdf');
+    Route::get('/leave/export/summary', [LeaveRequestController::class, 'exportSummaryPdf'])->name('leave.export-summary');
+
+    // === Riwayat Saldo Cuti ===
+    Route::prefix('balance-history')->name('balance-history.')->group(function () {
+        Route::get('/', [BalanceHistoryController::class, 'index'])->name('index');
+        Route::get('/{user}', [BalanceHistoryController::class, 'show'])->name('show')->middleware('auth');
+        Route::get('/{user}/export', [BalanceHistoryController::class, 'export'])->name('export');
+    });
+
+    // === Dokumen ===
+    Route::get('/documents/{leaveRequest}', [DocumentController::class, 'list'])->name('document.list');
+    Route::get('/documents/{leaveRequest}/api', [DocumentController::class, 'getDocuments'])->name('document.api');
+    Route::get('/documents/{leaveRequest}/view/{documentType?}', [DocumentController::class, 'view'])->name('document.view');
+    Route::get('/documents/{leaveRequest}/download/{documentType?}', [DocumentController::class, 'download'])->name('document.download');
+    Route::post('/documents/{leaveRequest}/upload', [DocumentController::class, 'upload'])->name('document.upload');
+
+    // === Amendments ===
+    Route::prefix('amendments')->name('amendment.')->group(function () {
+        Route::get('/create/{leaveRequest}', [AmendmentController::class, 'create'])->name('create');
+        Route::post('/{leaveRequest}', [AmendmentController::class, 'store'])->name('store');
+        Route::get('/{amendment}', [AmendmentController::class, 'show'])->name('show');
+        Route::post('/{amendment}/approve', [AmendmentController::class, 'approve'])->name('approve');
+        Route::post('/{amendment}/reject', [AmendmentController::class, 'reject'])->name('reject');
+    });
+
+    // === Appeals ===
+    Route::prefix('appeals')->name('appeal.')->group(function () {
+        Route::get('/', [AppealController::class, 'index'])->name('index');
+        Route::get('/create/{leaveRequest}', [AppealController::class, 'create'])->name('create');
+        Route::post('/{leaveRequest}', [AppealController::class, 'store'])->name('store');
+        Route::get('/{appeal}', [AppealController::class, 'show'])->name('show');
+        Route::post('/{appeal}/approve', [AppealController::class, 'approve'])->name('approve');
+        Route::post('/{appeal}/deny', [AppealController::class, 'deny'])->name('deny');
+    });
 
     // === Approval Workflow ===
     // Atasan: pertimbangan level 1
-    Route::middleware('role:atasan,ketua,admin')->group(function () {
+    Route::middleware('role:atasan,panitera,sekretaris,ketua,admin')->group(function () {
         Route::post('/leave/{leaveRequest}/review', [LeaveRequestController::class, 'reviewAtasan'])->name('leave.review');
     });
 
@@ -56,6 +99,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('admin')->group(function () {
         Route::post('/leave/{leaveRequest}/approve', [LeaveRequestController::class, 'approve'])->name('leave.approve');
         Route::post('/leave/{leaveRequest}/reject', [LeaveRequestController::class, 'reject'])->name('leave.reject');
+        Route::get('/leave/export/all-pdf', [LeaveRequestController::class, 'exportAllPdf'])->name('leave.export-all-pdf');
     });
 
     // === Manajemen Pegawai (admin only) ===
@@ -69,6 +113,15 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{pegawai}', [PegawaiController::class, 'destroy'])->name('destroy');
     });
 
+    // === Admin: Manajemen Cuti Pegawai (manual entry) ===
+    Route::middleware('role:admin')->prefix('admin/leave')->name('admin.leave.')->group(function () {
+        Route::get('/create/{user}', [AdminLeaveController::class, 'create'])->name('create');
+        Route::post('/create/{user}', [AdminLeaveController::class, 'store'])->name('store');
+        Route::get('/{leaveRequest}/edit', [AdminLeaveController::class, 'edit'])->name('edit');
+        Route::put('/{leaveRequest}', [AdminLeaveController::class, 'update'])->name('update');
+        Route::delete('/{leaveRequest}', [AdminLeaveController::class, 'destroy'])->name('destroy');
+    });
+
     // === Hari Libur (admin only) ===
     Route::middleware('role:admin')->prefix('hari-libur')->name('hari-libur.')->group(function () {
         Route::get('/', [HariLiburController::class, 'index'])->name('index');
@@ -77,5 +130,43 @@ Route::middleware('auth')->group(function () {
         Route::get('/{hariLibur}/edit', [HariLiburController::class, 'edit'])->name('edit');
         Route::put('/{hariLibur}', [HariLiburController::class, 'update'])->name('update');
         Route::delete('/{hariLibur}', [HariLiburController::class, 'destroy'])->name('destroy');
+    });
+
+    // === Audit Log (admin only) ===
+    Route::middleware('role:admin')->prefix('admin/audit-logs')->name('admin.audit-logs.')->group(function () {
+        Route::get('/', [AuditLogController::class, 'index'])->name('index');
+        Route::get('/{auditLog}', [AuditLogController::class, 'show'])->name('show');
+    });
+
+    // === Balance Adjustments (admin only) ===
+    Route::middleware('role:admin')->prefix('balance-adjustments')->name('balance-adjustment.')->group(function () {
+        Route::get('/', [BalanceAdjustmentController::class, 'index'])->name('index');
+        Route::get('/create/{user}', [BalanceAdjustmentController::class, 'create'])->name('create');
+        Route::post('/{user}', [BalanceAdjustmentController::class, 'store'])->name('store');
+        Route::get('/{balanceAdjustment}', [BalanceAdjustmentController::class, 'show'])->name('show');
+        Route::post('/{balanceAdjustment}/approve', [BalanceAdjustmentController::class, 'approve'])->name('approve');
+        Route::post('/{balanceAdjustment}/reject', [BalanceAdjustmentController::class, 'reject'])->name('reject');
+    });
+
+    // === PDF Export ===
+    Route::prefix('pdf-export')->name('pdf-export.')->group(function () {
+        Route::get('/leave/{leaveRequest}', [PdfExportController::class, 'leaveRequest'])->name('leave-request');
+        Route::get('/balance/{user}', [PdfExportController::class, 'balanceReport'])->name('balance-report');
+
+        // Admin only
+        Route::middleware('role:admin')->group(function () {
+            Route::get('/all-leaves', [PdfExportController::class, 'allLeaveRequests'])->name('all-leaves');
+            Route::get('/statistics', [PdfExportController::class, 'statistics'])->name('statistics');
+        });
+    });
+
+    // === Debug: Test masa kerja format ===
+    Route::get('/debug/masa-kerja', function () {
+        $users = \App\Models\User::whereNotNull('masa_kerja_mulai')->take(3)->get();
+        foreach ($users as $u) {
+            echo "<div><strong>{$u->name}</strong><br>";
+            echo "masa_kerja_format: {$u->masa_kerja_format}<br>";
+            echo "masa_kerja_mulai: {$u->masa_kerja_mulai}<br></div>";
+        }
     });
 });

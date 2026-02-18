@@ -43,10 +43,14 @@
                     </label>
                     <select name="role" class="form-select" style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
                         <option value="">Semua Role</option>
-                        <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
-                        <option value="ketua" {{ request('role') === 'ketua' ? 'selected' : '' }}>Ketua</option>
-                        <option value="atasan" {{ request('role') === 'atasan' ? 'selected' : '' }}>Atasan</option>
                         <option value="pegawai" {{ request('role') === 'pegawai' ? 'selected' : '' }}>Pegawai</option>
+                        <option value="hakim" {{ request('role') === 'hakim' ? 'selected' : '' }}>Hakim</option>
+                        <option value="hakim_ad_hoc" {{ request('role') === 'hakim_ad_hoc' ? 'selected' : '' }}>Hakim Ad Hoc</option>
+                        <option value="panitera" {{ request('role') === 'panitera' ? 'selected' : '' }}>Panitera</option>
+                        <option value="sekretaris" {{ request('role') === 'sekretaris' ? 'selected' : '' }}>Sekretaris</option>
+                        <option value="atasan" {{ request('role') === 'atasan' ? 'selected' : '' }}>Atasan Lainnya</option>
+                        <option value="ketua" {{ request('role') === 'ketua' ? 'selected' : '' }}>Ketua Pengadilan</option>
+                        <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
                     </select>
                 </div>
                 <div class="col-6 col-md-3">
@@ -134,12 +138,27 @@
                         $roleBadge = match($p->role) {
                             'admin' => 'background: #f3e8ff; color: #7c3aed;',
                             'ketua' => 'background: var(--sh-primary-light); color: var(--sh-primary);',
-                            'atasan' => 'background: var(--sh-success-light); color: var(--sh-success);',
+                            'panitera' => 'background: var(--sh-success-light); color: var(--sh-success);',
+                            'sekretaris' => 'background: #d1fae5; color: #065f46;',
+                            'atasan' => 'background: #dcfce7; color: #166534;',
+                            'hakim' => 'background: #fef3c7; color: #b45309;',
+                            'hakim_ad_hoc' => 'background: #dbeafe; color: #0c4a6e;',
                             default => 'background: var(--sh-gray-100); color: #64748b;',
+                        };
+                        $roleLabel = match($p->role) {
+                            'admin' => 'Admin',
+                            'ketua' => 'Ketua PN',
+                            'panitera' => 'Panitera',
+                            'sekretaris' => 'Sekretaris',
+                            'atasan' => 'Atasan',
+                            'hakim' => 'Hakim',
+                            'hakim_ad_hoc' => 'Hakim Ad Hoc',
+                            'pegawai' => 'Pegawai',
+                            default => ucfirst($p->role),
                         };
                     @endphp
                     <span class="sh-badge" style="{{ $roleBadge }}">
-                        {{ ucfirst($p->role) }}
+                        {{ $roleLabel }}
                     </span>
                 </div>
 
@@ -183,6 +202,9 @@
                     </a>
                     <a href="{{ route('pegawai.edit', $p) }}" class="btn btn-sm btn-outline-secondary flex-fill" style="border-radius: 8px;">
                         <i class="ti ti-edit me-1"></i> Edit
+                    </a>
+                    <a href="{{ route('balance-adjustment.create', $p) }}" class="btn btn-sm btn-outline-warning" style="border-radius: 8px;" title="Ubah saldo cuti">
+                        <i class="ti ti-calendar-stats"></i>
                     </a>
                     <button class="btn btn-sm btn-outline-danger" style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $p->id }}">
                         <i class="ti ti-trash"></i>
@@ -230,18 +252,37 @@
                             $roleBadge = match($p->role) {
                                 'admin' => 'background: #f3e8ff; color: #7c3aed;',
                                 'ketua' => 'background: var(--sh-primary-light); color: var(--sh-primary);',
-                                'atasan' => 'background: var(--sh-success-light); color: var(--sh-success);',
+                                'panitera' => 'background: var(--sh-success-light); color: var(--sh-success);',
+                                'sekretaris' => 'background: #d1fae5; color: #065f46;',
+                                'atasan' => 'background: #dcfce7; color: #166534;',
+                                'hakim' => 'background: #fef3c7; color: #b45309;',
+                                'hakim_ad_hoc' => 'background: #dbeafe; color: #0c4a6e;',
                                 default => 'background: var(--sh-gray-100); color: #64748b;',
                             };
                             $roleIcon = match($p->role) {
                                 'admin' => 'ti-shield-check',
                                 'ketua' => 'ti-crown',
-                                'atasan' => 'ti-user-star',
+                                'panitera' => 'ti-user-star',
+                                'sekretaris' => 'ti-user-edit',
+                                'atasan' => 'ti-user-check',
+                                'hakim' => 'ti-gavel',
+                                'hakim_ad_hoc' => 'ti-scale',
                                 default => 'ti-user',
+                            };
+                            $roleLabel = match($p->role) {
+                                'admin' => 'Admin',
+                                'ketua' => 'Ketua PN',
+                                'panitera' => 'Panitera',
+                                'sekretaris' => 'Sekretaris',
+                                'atasan' => 'Atasan',
+                                'hakim' => 'Hakim',
+                                'hakim_ad_hoc' => 'Hakim Ad Hoc',
+                                'pegawai' => 'Pegawai',
+                                default => ucfirst($p->role),
                             };
                         @endphp
                         <span class="sh-badge" style="{{ $roleBadge }}">
-                            <i class="ti {{ $roleIcon }}"></i> {{ ucfirst($p->role) }}
+                            <i class="ti {{ $roleIcon }}"></i> {{ $roleLabel }}
                         </span>
                     </td>
                     <td>
@@ -272,6 +313,9 @@
                             </a>
                             <a href="{{ route('pegawai.edit', $p) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;" title="Edit">
                                 <i class="ti ti-edit"></i>
+                            </a>
+                            <a href="{{ route('balance-adjustment.create', $p) }}" class="btn btn-sm btn-outline-warning" style="border-radius: 8px;" title="Ubah saldo cuti">
+                                <i class="ti ti-calendar-stats"></i>
                             </a>
                             <button class="btn btn-sm btn-outline-danger" style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $p->id }}" title="Hapus">
                                 <i class="ti ti-trash"></i>

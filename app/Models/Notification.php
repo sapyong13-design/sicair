@@ -2,8 +2,14 @@
 
 namespace App\Models;
 
+use App\Mail\LeaveRequestApprovedMail;
+use App\Mail\LeaveRequestNeedsConsiderationMail;
+use App\Mail\LeaveRequestRejectedMail;
+use App\Mail\LeaveRequestSubmittedMail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 
 class Notification extends Model
 {
@@ -35,14 +41,39 @@ class Notification extends Model
         return $query->where('is_read', false);
     }
 
-    public static function kirim(int $userId, string $title, string $message, string $type = 'info', ?string $link = null): self
+    public static function kirim(int $userId, string $title, string $message, string $type = 'info', ?string $link = null, ?LeaveRequest $leaveRequest = null): self
     {
-        return self::create([
+        $notification = self::create([
             'user_id' => $userId,
             'title' => $title,
             'message' => $message,
             'type' => $type,
             'link' => $link,
         ]);
+
+        // Trigger email notification if user has email and LeaveRequest is provided
+        if ($leaveRequest && $notification->user?->email) {
+            self::sendEmailNotification($notification->user->email, $type, $leaveRequest);
+        }
+
+        return $notification;
+    }
+
+    /**
+     * Send email notification based on type
+     */
+    private static function sendEmailNotification(string $email, string $type, LeaveRequest $leaveRequest): void
+    {
+        $mailable = match ($type) {
+            self::TYPE_CUTI_DIAJUKAN => new LeaveRequestSubmittedMail($leaveRequest),
+            self::TYPE_CUTI_DISETUJUI => new LeaveRequestApprovedMail($leaveRequest, auth()->user()->name ?? 'Admin'),
+            self::TYPE_CUTI_DITOLAK => new LeaveRequestRejectedMail($leaveRequest, auth()->user()->name ?? 'Admin', $leaveRequest->catatan_atasan),
+            self::TYPE_CUTI_PERTIMBANGAN => new LeaveRequestNeedsConsiderationMail($leaveRequest),
+            default => null,
+        };
+
+        if ($mailable) {
+            Mail::queue($mailable->to($email));
+        }
     }
 }

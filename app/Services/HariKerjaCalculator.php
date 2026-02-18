@@ -76,7 +76,7 @@ class HariKerjaCalculator
     public static function hitungPersentaseCutiSaatIni(Carbon $start, Carbon $end, string $unitKerja): float
     {
         $totalPegawai = \App\Models\User::where('unit_kerja', $unitKerja)
-            ->whereIn('role', ['pegawai', 'atasan'])
+            ->whereIn('role', ['pegawai', 'atasan', 'panitera', 'sekretaris', 'hakim', 'hakim_ad_hoc'])
             ->count();
 
         if ($totalPegawai === 0) {
