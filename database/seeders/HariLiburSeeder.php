@@ -74,23 +74,26 @@ class HariLiburSeeder extends Seeder
 
         // =====================================================
         // HARI LIBUR NASIONAL 2026
+        // Sumber: SKB 3 Menteri No. 1497/2025, No. 2/2025,
+        //         No. 5/2025 — 17 Hari Libur Nasional
         // =====================================================
         $libur2026 = [
             ['tanggal' => '2026-01-01', 'keterangan' => 'Tahun Baru Masehi 2026'],
-            // Isra Miraj dan Tahun Baru Imlek jatuh bersamaan: 17 Februari 2026
-            ['tanggal' => '2026-02-17', 'keterangan' => 'Isra Miraj Nabi Muhammad SAW & Tahun Baru Imlek 2577'],
+            ['tanggal' => '2026-01-16', 'keterangan' => 'Isra Mikraj Nabi Muhammad SAW'],
+            ['tanggal' => '2026-02-17', 'keterangan' => 'Tahun Baru Imlek 2577 Kongzili'],
             ['tanggal' => '2026-03-19', 'keterangan' => 'Hari Suci Nyepi (Tahun Baru Saka 1948)'],
+            ['tanggal' => '2026-03-21', 'keterangan' => 'Hari Raya Idul Fitri 1 Syawal 1447H'],
+            ['tanggal' => '2026-03-22', 'keterangan' => 'Hari Raya Idul Fitri 2 Syawal 1447H'],
             ['tanggal' => '2026-04-03', 'keterangan' => 'Wafat Isa Al-Masih'],
-            ['tanggal' => '2026-04-20', 'keterangan' => 'Hari Raya Idul Fitri 1 Syawal 1447H'],
-            ['tanggal' => '2026-04-21', 'keterangan' => 'Hari Raya Idul Fitri 2 Syawal 1447H'],
+            ['tanggal' => '2026-04-05', 'keterangan' => 'Hari Raya Paskah'],
             ['tanggal' => '2026-05-01', 'keterangan' => 'Hari Buruh Internasional'],
             ['tanggal' => '2026-05-14', 'keterangan' => 'Kenaikan Isa Al-Masih'],
+            ['tanggal' => '2026-05-27', 'keterangan' => 'Hari Raya Idul Adha 1447H'],
             ['tanggal' => '2026-05-31', 'keterangan' => 'Hari Raya Waisak 2570 BE'],
             ['tanggal' => '2026-06-01', 'keterangan' => 'Hari Lahir Pancasila'],
-            ['tanggal' => '2026-06-27', 'keterangan' => 'Hari Raya Idul Adha 1447H'],
-            ['tanggal' => '2026-07-17', 'keterangan' => 'Tahun Baru Islam 1448H'],
+            ['tanggal' => '2026-06-16', 'keterangan' => 'Tahun Baru Islam 1448H'],
             ['tanggal' => '2026-08-17', 'keterangan' => 'Hari Kemerdekaan Republik Indonesia'],
-            ['tanggal' => '2026-09-25', 'keterangan' => 'Maulid Nabi Muhammad SAW 1448H'],
+            ['tanggal' => '2026-08-25', 'keterangan' => 'Maulid Nabi Muhammad SAW 1448H'],
             ['tanggal' => '2026-12-25', 'keterangan' => 'Hari Raya Natal'],
         ];
 
@@ -101,23 +104,27 @@ class HariLiburSeeder extends Seeder
             );
         }
 
-        // CUTI BERSAMA 2026
+        // CUTI BERSAMA 2026 — 8 Hari
         $cutiBersama2026 = [
-            // Seputar Imlek/Isra Miraj (17 Feb - Selasa)
+            // Seputar Imlek (17 Feb - Selasa)
             ['tanggal' => '2026-02-16', 'keterangan' => 'Cuti Bersama Tahun Baru Imlek 2577'],
 
             // Seputar Nyepi (19 Mar - Kamis)
-            ['tanggal' => '2026-03-20', 'keterangan' => 'Cuti Bersama Nyepi'],
+            ['tanggal' => '2026-03-18', 'keterangan' => 'Cuti Bersama Hari Suci Nyepi'],
 
-            // Seputar Idul Fitri (20-21 Apr - Senin-Selasa)
-            ['tanggal' => '2026-04-17', 'keterangan' => 'Cuti Bersama Idul Fitri 1447H'],
-            ['tanggal' => '2026-04-22', 'keterangan' => 'Cuti Bersama Idul Fitri 1447H'],
-            ['tanggal' => '2026-04-23', 'keterangan' => 'Cuti Bersama Idul Fitri 1447H'],
-            ['tanggal' => '2026-04-24', 'keterangan' => 'Cuti Bersama Idul Fitri 1447H'],
+            // Seputar Idul Fitri (21-22 Mar - Sabtu-Minggu)
+            ['tanggal' => '2026-03-20', 'keterangan' => 'Cuti Bersama Idul Fitri 1447H'],
+            ['tanggal' => '2026-03-23', 'keterangan' => 'Cuti Bersama Idul Fitri 1447H'],
+            ['tanggal' => '2026-03-24', 'keterangan' => 'Cuti Bersama Idul Fitri 1447H'],
+
+            // Seputar Kenaikan Isa Al-Masih (14 May - Kamis)
+            ['tanggal' => '2026-05-15', 'keterangan' => 'Cuti Bersama Kenaikan Isa Al-Masih'],
+
+            // Seputar Idul Adha (27 May - Rabu)
+            ['tanggal' => '2026-05-28', 'keterangan' => 'Cuti Bersama Idul Adha 1447H'],
 
             // Seputar Natal (25 Des - Jumat)
             ['tanggal' => '2026-12-24', 'keterangan' => 'Cuti Bersama Hari Raya Natal'],
-            ['tanggal' => '2026-12-26', 'keterangan' => 'Cuti Bersama Hari Raya Natal'],
         ];
 
         foreach ($cutiBersama2026 as $cb) {
