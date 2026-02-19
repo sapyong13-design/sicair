@@ -62,10 +62,22 @@ class AuditLog extends Model
     public function getActionLabelAttribute(): string
     {
         return match ($this->action) {
-            'create' => 'Dibuat',
-            'update' => 'Diubah',
-            'delete' => 'Dihapus',
-            default => ucfirst($this->action),
+            'create'                       => 'Dibuat',
+            'update'                       => 'Diubah',
+            'delete'                       => 'Dihapus',
+            'approve'                      => 'Disetujui',
+            'reject'                       => 'Ditolak',
+            'login'                        => 'Login',
+            'logout'                       => 'Logout',
+            'approve_appeal'               => 'Setujui Banding',
+            'reject_appeal'                => 'Tolak Banding',
+            'approve_amendment'            => 'Setujui Perubahan Cuti',
+            'reject_amendment'             => 'Tolak Perubahan Cuti',
+            'approve_balance_adjustment'   => 'Setujui Penyesuaian Saldo',
+            'reject_balance_adjustment'    => 'Tolak Penyesuaian Saldo',
+            'balance_deducted'             => 'Saldo Dikurangi',
+            'balance_restored'             => 'Saldo Dipulihkan',
+            default                        => ucwords(str_replace('_', ' ', $this->action)),
         };
     }
 }

@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\CutiRecord;
-use App\Models\HariLibur;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -227,60 +226,8 @@ class DatabaseSeeder extends Seeder
             'atasan_id' => $ketua->id,
         ]);
 
-        // ===== HARI LIBUR NASIONAL 2026 =====
-        // Sumber: SKB 3 Menteri tentang Hari Libur Nasional dan Cuti Bersama 2026
-        $hariLibur2026 = [
-            ['tanggal' => '2026-01-01', 'keterangan' => 'Tahun Baru Masehi'],
-            // Tahun Baru Imlek 2577 & Isra Miraj jatuh pada hari yang sama: 17 Februari 2026
-            ['tanggal' => '2026-02-17', 'keterangan' => 'Isra Miraj Nabi Muhammad SAW & Tahun Baru Imlek 2577'],
-            ['tanggal' => '2026-03-19', 'keterangan' => 'Hari Raya Nyepi (Tahun Baru Saka 1948)'],
-            ['tanggal' => '2026-04-03', 'keterangan' => 'Wafat Isa Al-Masih'],
-            ['tanggal' => '2026-04-20', 'keterangan' => 'Hari Raya Idul Fitri 1 Syawal 1447H'],
-            ['tanggal' => '2026-04-21', 'keterangan' => 'Hari Raya Idul Fitri 2 Syawal 1447H'],
-            ['tanggal' => '2026-05-01', 'keterangan' => 'Hari Buruh Internasional'],
-            ['tanggal' => '2026-05-14', 'keterangan' => 'Kenaikan Isa Al-Masih'],
-            ['tanggal' => '2026-05-31', 'keterangan' => 'Hari Raya Waisak 2570 BE'],
-            ['tanggal' => '2026-06-01', 'keterangan' => 'Hari Lahir Pancasila'],
-            ['tanggal' => '2026-06-27', 'keterangan' => 'Hari Raya Idul Adha 1447H'],
-            ['tanggal' => '2026-07-17', 'keterangan' => 'Tahun Baru Islam 1448H'],
-            ['tanggal' => '2026-08-17', 'keterangan' => 'Hari Kemerdekaan Republik Indonesia'],
-            ['tanggal' => '2026-09-25', 'keterangan' => 'Maulid Nabi Muhammad SAW'],
-            ['tanggal' => '2026-12-25', 'keterangan' => 'Hari Natal'],
-        ];
-
-        foreach ($hariLibur2026 as $hl) {
-            HariLibur::updateOrCreate(
-                ['tanggal' => $hl['tanggal']],
-                [
-                    'keterangan' => $hl['keterangan'],
-                    'tahun' => 2026,
-                    'is_cuti_bersama' => false,
-                ]
-            );
-        }
-
-        // Cuti bersama 2026 (sesuai SKB 3 Menteri)
-        $cutiBersama = [
-            // Cuti bersama Idul Fitri: Jum'at sebelum + hari setelah Idul Fitri
-            ['tanggal' => '2026-04-17', 'keterangan' => 'Cuti Bersama Hari Raya Idul Fitri'],
-            ['tanggal' => '2026-04-22', 'keterangan' => 'Cuti Bersama Hari Raya Idul Fitri'],
-            ['tanggal' => '2026-04-23', 'keterangan' => 'Cuti Bersama Hari Raya Idul Fitri'],
-            ['tanggal' => '2026-04-24', 'keterangan' => 'Cuti Bersama Hari Raya Idul Fitri'],
-            // Cuti bersama Natal
-            ['tanggal' => '2026-12-24', 'keterangan' => 'Cuti Bersama Hari Natal'],
-            ['tanggal' => '2026-12-26', 'keterangan' => 'Cuti Bersama Hari Natal'],
-        ];
-
-        foreach ($cutiBersama as $cb) {
-            HariLibur::updateOrCreate(
-                ['tanggal' => $cb['tanggal']],
-                [
-                    'keterangan' => $cb['keterangan'],
-                    'tahun' => 2026,
-                    'is_cuti_bersama' => true,
-                ]
-            );
-        }
+        // ===== HARI LIBUR NASIONAL 2025 & 2026 =====
+        $this->call(HariLiburSeeder::class);
 
         // ===== CUTI RECORDS (contoh riwayat tahun lalu) =====
         // Budi Santoso - punya sisa 4 hari dari tahun lalu

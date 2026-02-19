@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
 
     // === Kalender Cuti ===
     Route::get('/kalender', [KalenderController::class, 'index'])->name('kalender');
+    Route::get('/kalender/leaves-for-day', [KalenderController::class, 'leavesForDay'])->name('kalender.leaves-for-day');
 
     // === Pengajuan Cuti (semua pegawai termasuk atasan/ketua) ===
     Route::get('/leave/select-type', [LeaveRequestController::class, 'selectType'])->name('leave.select-type');
