@@ -229,16 +229,49 @@ class DatabaseSeeder extends Seeder
         // ===== HARI LIBUR NASIONAL 2025 & 2026 =====
         $this->call(HariLiburSeeder::class);
 
-        // ===== CUTI RECORDS (contoh riwayat tahun lalu) =====
-        // Budi Santoso - punya sisa 4 hari dari tahun lalu
-        CutiRecord::create([
-            'user_id' => 7, // Budi
-            'tahun' => 2025,
-            'hak_cuti' => 12,
-            'cuti_diambil' => 8,
-            'sisa_cuti' => 4,
-            'carry_over' => 0,
-            'tambahan_terpencil' => 12,
-        ]);
+        // ===== CUTI RECORDS 2025 (riwayat tahun lalu, untuk carry-over) =====
+        $cutiRecords2025 = [
+            ['user_id' => $ketua->id,      'cuti_diambil' => 5,  'sisa_cuti' => 7,  'carry_over' => 0, 'tambahan_terpencil' => 0],
+            ['user_id' => $panitera->id,    'cuti_diambil' => 6,  'sisa_cuti' => 6,  'carry_over' => 0, 'tambahan_terpencil' => 0],
+            ['user_id' => $sekretaris->id,  'cuti_diambil' => 4,  'sisa_cuti' => 8,  'carry_over' => 0, 'tambahan_terpencil' => 0],
+            ['user_id' => 4,  'cuti_diambil' => 3,  'sisa_cuti' => 9,  'carry_over' => 0, 'tambahan_terpencil' => 0], // Admin
+            ['user_id' => 5,  'cuti_diambil' => 7,  'sisa_cuti' => 5,  'carry_over' => 0, 'tambahan_terpencil' => 0], // Hakim 1
+            ['user_id' => 6,  'cuti_diambil' => 2,  'sisa_cuti' => 10, 'carry_over' => 0, 'tambahan_terpencil' => 0], // Hakim 2
+            ['user_id' => 7,  'cuti_diambil' => 8,  'sisa_cuti' => 4,  'carry_over' => 0, 'tambahan_terpencil' => 0], // Panitera Pengganti
+            ['user_id' => 8,  'cuti_diambil' => 10, 'sisa_cuti' => 2,  'carry_over' => 0, 'tambahan_terpencil' => 0], // Jurusita
+            ['user_id' => 9,  'cuti_diambil' => 1,  'sisa_cuti' => 11, 'carry_over' => 0, 'tambahan_terpencil' => 0], // Staf TU
+            ['user_id' => 10, 'cuti_diambil' => 6,  'sisa_cuti' => 6,  'carry_over' => 0, 'tambahan_terpencil' => 0], // Staf Keuangan
+            ['user_id' => 12, 'cuti_diambil' => 3,  'sisa_cuti' => 9,  'carry_over' => 0, 'tambahan_terpencil' => 0], // Cakim
+        ];
+
+        foreach ($cutiRecords2025 as $rec) {
+            CutiRecord::create(array_merge($rec, ['tahun' => 2025, 'hak_cuti' => 12]));
+        }
+
+        // ===== CUTI RECORDS 2026 (tahun berjalan) =====
+        // carry_over = min(sisa_cuti_2025, 6) sesuai SE MA 13/2019
+        $cutiRecords2026 = [
+            ['user_id' => $ketua->id,      'cuti_diambil' => 0, 'carry_over' => 6, 'tambahan_terpencil' => 0], // sisa 2025: 7 → carry 6
+            ['user_id' => $panitera->id,    'cuti_diambil' => 0, 'carry_over' => 6, 'tambahan_terpencil' => 0], // sisa 2025: 6 → carry 6
+            ['user_id' => $sekretaris->id,  'cuti_diambil' => 0, 'carry_over' => 6, 'tambahan_terpencil' => 0], // sisa 2025: 8 → carry 6
+            ['user_id' => 4,  'cuti_diambil' => 0, 'carry_over' => 6, 'tambahan_terpencil' => 0], // Admin, sisa 2025: 9 → carry 6
+            ['user_id' => 5,  'cuti_diambil' => 0, 'carry_over' => 5, 'tambahan_terpencil' => 0], // Hakim 1, sisa 2025: 5 → carry 5
+            ['user_id' => 6,  'cuti_diambil' => 0, 'carry_over' => 6, 'tambahan_terpencil' => 0], // Hakim 2, sisa 2025: 10 → carry 6
+            ['user_id' => 7,  'cuti_diambil' => 0, 'carry_over' => 4, 'tambahan_terpencil' => 0], // PP, sisa 2025: 4 → carry 4
+            ['user_id' => 8,  'cuti_diambil' => 0, 'carry_over' => 2, 'tambahan_terpencil' => 0], // Jurusita, sisa 2025: 2 → carry 2
+            ['user_id' => 9,  'cuti_diambil' => 0, 'carry_over' => 6, 'tambahan_terpencil' => 0], // Staf TU, sisa 2025: 11 → carry 6
+            ['user_id' => 10, 'cuti_diambil' => 0, 'carry_over' => 6, 'tambahan_terpencil' => 0], // Staf Keuangan, sisa 2025: 6 → carry 6
+            ['user_id' => 12, 'cuti_diambil' => 0, 'carry_over' => 6, 'tambahan_terpencil' => 0], // Cakim, sisa 2025: 9 → carry 6
+        ];
+
+        foreach ($cutiRecords2026 as $rec) {
+            $hakCuti = 12;
+            $sisa = $hakCuti + $rec['carry_over'] + $rec['tambahan_terpencil'] - $rec['cuti_diambil'];
+            CutiRecord::create(array_merge($rec, [
+                'tahun' => 2026,
+                'hak_cuti' => $hakCuti,
+                'sisa_cuti' => $sisa,
+            ]));
+        }
     }
 }
