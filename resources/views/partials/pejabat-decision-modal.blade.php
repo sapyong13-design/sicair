@@ -76,6 +76,16 @@
                             @endif
                         </div>
                     </div>
+                    @else
+                    <div class="mb-3" style="background: #ecfdf5; border-radius: 12px; padding: 0.85rem 1rem;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="ti ti-arrow-forward" style="color: var(--sh-success);"></i>
+                            <span class="fw-bold" style="font-size: 0.85rem; color: var(--sh-success);">Pengajuan Langsung</span>
+                        </div>
+                        <div class="text-muted mt-1" style="font-size: 0.82rem;">
+                            {{ $req->user->jabatan }} &mdash; langsung ke Pejabat Berwenang tanpa pertimbangan atasan
+                        </div>
+                    </div>
                     @endif
 
                     {{-- Keputusan Options --}}

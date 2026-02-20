@@ -361,14 +361,14 @@
 
     {{-- Stats --}}
     <div class="row g-3 mb-4">
-        <div class="col-sm-6 col-lg-4 animate-in">
+        <div class="col-sm-6 animate-in">
             <div class="card sh-stat-card stat-warning">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="sh-stat-label mb-2">Perlu Keputusan</div>
                             <div class="sh-stat-number" style="color: var(--sh-warning);">{{ $needsDecision->count() }}</div>
-                            <div class="text-muted mt-1" style="font-size: 0.8rem;">sudah dipertimbangkan atasan</div>
+                            <div class="text-muted mt-1" style="font-size: 0.8rem;">menunggu keputusan Anda</div>
                         </div>
                         <div class="sh-stat-icon icon-warning">
                             <i class="ti ti-gavel"></i>
@@ -377,23 +377,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-lg-4 animate-in">
-            <div class="card sh-stat-card stat-primary">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="sh-stat-label mb-2">Pengajuan Langsung</div>
-                            <div class="sh-stat-number" style="color: var(--sh-primary);">{{ $directRequests->count() }}</div>
-                            <div class="text-muted mt-1" style="font-size: 0.8rem;">bawahan langsung</div>
-                        </div>
-                        <div class="sh-stat-icon icon-primary">
-                            <i class="ti ti-file-text"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-12 col-lg-4 animate-in">
+        <div class="col-sm-6 animate-in">
             <div class="card sh-stat-card stat-success">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center justify-content-between">
@@ -475,6 +459,11 @@
                             &mdash; {{ Str::limit($req->catatan_atasan, 80) }}
                         @endif
                     </div>
+                    @else
+                    <div class="mb-2" style="background: #ecfdf5; border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.82rem;">
+                        <i class="ti ti-arrow-forward me-1" style="color: var(--sh-success);"></i>
+                        <strong>Pengajuan Langsung</strong> &mdash; tanpa pertimbangan atasan
+                    </div>
                     @endif
                     <div class="d-flex gap-2 mt-2">
                         <button class="btn btn-sm sh-btn-primary flex-fill" data-bs-toggle="modal" data-bs-target="#decisionModal{{ $req->id }}">
@@ -491,46 +480,6 @@
         </div>
         @endif
     </div>
-
-    {{-- Direct Requests (bawahan langsung ketua) --}}
-    @if($directRequests->isNotEmpty())
-    <div class="card sh-card mb-4">
-        <div class="card-header d-flex align-items-center justify-content-between">
-            <h3 class="card-title mb-0">
-                <i class="ti ti-file-text me-2" style="color: var(--sh-primary);"></i>
-                Pengajuan Bawahan Langsung
-            </h3>
-            <span class="sh-badge sh-badge-pending">{{ $directRequests->count() }}</span>
-        </div>
-        <div class="card-body p-3">
-            @foreach($directRequests as $req)
-            <div class="card sh-history-card status-{{ $req->status }} mb-3" data-request-id="{{ $req->id }}">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <div class="fw-bold" style="font-size: 0.95rem;">{{ $req->user->name }}</div>
-                            <div class="text-muted" style="font-size: 0.78rem;">{{ $req->type_label }} &middot; {{ $req->total_days }} hari</div>
-                        </div>
-                    </div>
-                    <div class="text-muted mb-2" style="font-size: 0.82rem;">
-                        <i class="ti ti-calendar me-1"></i>
-                        {{ $req->start_date->format('d M Y') }} &mdash; {{ $req->end_date->format('d M Y') }}
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm sh-btn-primary flex-fill" onclick="openReviewModal{{ $req->id }}()">
-                            <i class="ti ti-checklist me-1"></i> Pertimbangan
-                        </button>
-                        <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">
-                            <i class="ti ti-eye"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            @include('partials.atasan-review-modal', ['req' => $req])
-            @endforeach
-        </div>
-    </div>
-    @endif
 
     {{-- Ketua's Own Leave --}}
     @if(isset($leaveRequests) && $leaveRequests->isNotEmpty())

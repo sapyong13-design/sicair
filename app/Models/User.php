@@ -96,6 +96,43 @@ class User extends Authenticatable
             && in_array($this->unit_kerja, ['kepegawaian', 'Kepegawaian', 'KEPEGAWAIAN']);
     }
 
+    // ===== Approval Flow =====
+
+    /**
+     * Cuti user ini langsung ke Ketua tanpa review atasan?
+     *
+     * True jika:
+     * - atasan_id user merujuk ke user ber-role ketua, ATAU
+     * - user sendiri adalah Ketua/Panitera/Sekretaris
+     *
+     * Alur Pengadilan:
+     * - Hakim/Cakim/Panitera/Sekretaris/Ketua → langsung Ketua (1 level)
+     * - Staff Kepaniteraan (atasan=Panitera) → Panitera → Ketua (2 level)
+     * - Staff Kesekretariatan (atasan=Sekretaris) → Sekretaris → Ketua (2 level)
+     */
+    public function skipAtasanReview(): bool
+    {
+        // Ketua sendiri — langsung ke admin/sistem
+        if ($this->isKetua()) {
+            return true;
+        }
+
+        // Panitera/Sekretaris — atasan mereka adalah Ketua
+        if ($this->isPanitera() || $this->isSekretaris()) {
+            return true;
+        }
+
+        // Pegawai (hakim, cakim, dll) yang atasannya langsung Ketua
+        if ($this->atasan_id) {
+            $atasan = $this->relationLoaded('atasan')
+                ? $this->atasan
+                : User::find($this->atasan_id);
+            return $atasan && $atasan->isKetua();
+        }
+
+        return false;
+    }
+
     // ===== Masa Kerja =====
 
     public function getMasaKerjaTahunAttribute(): ?float

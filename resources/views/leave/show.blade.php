@@ -209,6 +209,9 @@
                     </div>
 
                     {{-- Step 2: Pertimbangan Atasan --}}
+                    @php
+                        $isDirectToKetua = $leaveRequest->user->skipAtasanReview();
+                    @endphp
                     @if($leaveRequest->atasanReviewer)
                     <div class="sh-timeline-item">
                         @php
@@ -240,6 +243,19 @@
                                 <i class="ti ti-message me-1"></i> {{ $leaveRequest->catatan_atasan }}
                             </div>
                             @endif
+                        </div>
+                    </div>
+                    @elseif($isDirectToKetua)
+                    {{-- Alur langsung ke Ketua (Hakim/Panitera/Sekretaris/Ketua) --}}
+                    <div class="sh-timeline-item">
+                        <div class="sh-timeline-dot" style="background: var(--sh-success);"></div>
+                        <div class="sh-timeline-content">
+                            <div class="fw-bold" style="font-size: 0.9rem;">
+                                <span style="color: var(--sh-success);">Langsung ke Pejabat Berwenang</span>
+                            </div>
+                            <div class="text-muted" style="font-size: 0.8rem;">
+                                Tanpa pertimbangan atasan &mdash; {{ $leaveRequest->user->jabatan }}
+                            </div>
                         </div>
                     </div>
                     @else

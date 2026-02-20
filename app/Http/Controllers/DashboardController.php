@@ -75,17 +75,11 @@ class DashboardController extends Controller
 
     private function ketuaDashboard(User $user)
     {
+        // Semua pengajuan yang perlu keputusan Ketua:
+        // - Dari bawahan langsung (Hakim/Panitera/Sekretaris) → langsung STATUS_PERTIMBANGAN
+        // - Dari staff yang sudah di-review atasan → juga STATUS_PERTIMBANGAN
         $needsDecision = LeaveRequest::with(['user', 'atasanReviewer'])
             ->where('status', LeaveRequest::STATUS_PERTIMBANGAN)
-            ->distinct()
-            ->latest()
-            ->get();
-
-        $directRequests = LeaveRequest::with('user')
-            ->where('status', LeaveRequest::STATUS_DIAJUKAN)
-            ->whereHas('user', function ($q) use ($user) {
-                $q->where('atasan_id', $user->id);
-            })
             ->distinct()
             ->latest()
             ->get();
@@ -98,7 +92,7 @@ class DashboardController extends Controller
 
         $leaveRequests = $user->leaveRequests()->latest()->get();
 
-        return view('dashboard', compact('user', 'needsDecision', 'directRequests', 'recentDecisions', 'leaveRequests'));
+        return view('dashboard', compact('user', 'needsDecision', 'recentDecisions', 'leaveRequests'));
     }
 
     private function atasanDashboard(User $user, Request $request)

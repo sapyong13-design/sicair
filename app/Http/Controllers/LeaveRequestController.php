@@ -117,6 +117,15 @@ class LeaveRequestController extends Controller
             $dokumenPath = $request->file('dokumen_pendukung')->store('dokumen-cuti', 'public');
         }
 
+        // Tentukan alur approval berdasarkan posisi pemohon:
+        // - Hakim/Panitera/Sekretaris/Ketua (atasan = Ketua) → langsung ke Ketua
+        // - Staff Kepaniteraan (atasan = Panitera) → Panitera → Ketua
+        // - Staff Kesekretariatan (atasan = Sekretaris) → Sekretaris → Ketua
+        $skipAtasan = $user->skipAtasanReview();
+        $initialStatus = $skipAtasan
+            ? LeaveRequest::STATUS_PERTIMBANGAN
+            : LeaveRequest::STATUS_DIAJUKAN;
+
         $leaveRequest = LeaveRequest::create([
             'user_id' => $user->id,
             'type' => $type,
@@ -129,21 +138,39 @@ class LeaveRequestController extends Controller
             'kelahiran_ke' => $request->kelahiran_ke,
             'dokumen_pendukung' => $dokumenPath,
             'total_hari_kerja' => $hariKerja,
-            'status' => LeaveRequest::STATUS_DIAJUKAN,
+            'status' => $initialStatus,
         ]);
 
         // Kirim email ke pemohon
         Mail::queue(new LeaveRequestSubmitted($leaveRequest));
 
-        // Kirim notifikasi ke atasan
-        if ($user->atasan_id) {
-            Notification::kirim(
-                $user->atasan_id,
-                'Pengajuan Cuti Baru',
-                "{$user->name} mengajukan " . LeaveRequest::typeLabels()[$type],
-                Notification::TYPE_CUTI_DIAJUKAN,
-                '/dashboard#pending-review'
-            );
+        if ($skipAtasan) {
+            // Langsung ke Ketua/Admin (tanpa review atasan)
+            // Kirim email ke pejabat berwenang
+            Mail::queue(new LeaveRequestNeedsConsideration($leaveRequest));
+
+            // Notifikasi ke semua pejabat (ketua + admin)
+            $pejabatIds = \App\Models\User::whereIn('role', ['ketua', 'admin'])->pluck('id');
+            foreach ($pejabatIds as $pejabatId) {
+                Notification::kirim(
+                    $pejabatId,
+                    'Pengajuan Cuti Baru — Perlu Keputusan',
+                    "{$user->name} ({$user->jabatan}) mengajukan " . LeaveRequest::typeLabels()[$type],
+                    Notification::TYPE_CUTI_PERTIMBANGAN,
+                    '/dashboard#needs-decision'
+                );
+            }
+        } else {
+            // Alur normal: kirim ke atasan langsung (Panitera/Sekretaris)
+            if ($user->atasan_id) {
+                Notification::kirim(
+                    $user->atasan_id,
+                    'Pengajuan Cuti Baru',
+                    "{$user->name} mengajukan " . LeaveRequest::typeLabels()[$type],
+                    Notification::TYPE_CUTI_DIAJUKAN,
+                    '/dashboard#pending-review'
+                );
+            }
         }
 
         return redirect('/dashboard')->with('success', 'Pengajuan ' . LeaveRequest::typeLabels()[$type] . ' berhasil dikirim.');
