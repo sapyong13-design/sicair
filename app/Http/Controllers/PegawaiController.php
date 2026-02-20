@@ -138,7 +138,7 @@ class PegawaiController extends Controller
 
     public function destroy(User $pegawai)
     {
-        // FIX #18: Prevent deletion if pegawai has active/pending leave requests
+        // Prevent deletion if pegawai has active/pending leave requests
         $activeLeavesCount = $pegawai->leaveRequests()
             ->whereIn('status', ['diajukan', 'pertimbangan_atasan'])
             ->count();
@@ -146,6 +146,13 @@ class PegawaiController extends Controller
         if ($activeLeavesCount > 0) {
             return redirect()->route('pegawai.index')
                 ->with('error', "Pegawai {$pegawai->name} memiliki {$activeLeavesCount} pengajuan cuti aktif. Selesaikan terlebih dahulu sebelum menghapus.");
+        }
+
+        // FIX #5/#11: Cegah penghapusan jika pegawai ini masih menjadi atasan langsung
+        $bawahanCount = $pegawai->bawahan()->count();
+        if ($bawahanCount > 0) {
+            return redirect()->route('pegawai.index')
+                ->with('error', "Pegawai {$pegawai->name} masih menjadi atasan langsung dari {$bawahanCount} pegawai lain. Pindahkan bawahan mereka ke atasan lain terlebih dahulu.");
         }
 
         $pegawai->delete();

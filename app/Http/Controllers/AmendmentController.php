@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\LeaveAmendment;
 use App\Models\LeaveRequest;
 use App\Models\Notification;
+use App\Services\BalanceAuditService;
 use App\Services\HariKerjaCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AmendmentController extends Controller
 {
@@ -131,33 +133,89 @@ class AmendmentController extends Controller
 
         $user = Auth::user();
 
-        // Update amendment status
-        $amendment->update([
-            'status' => LeaveAmendment::STATUS_APPROVED,
-            'approved_by' => $user->id,
-            'approval_note' => $request->approval_note,
-            'approved_at' => now(),
-        ]);
+        // FIX #1 #8 #9: Wrap in transaction, check balance, adjust balance, log impact
+        $error = DB::transaction(function () use ($amendment, $user, $request) {
+            // Re-fetch with lock to prevent concurrent approvals
+            $locked = LeaveAmendment::lockForUpdate()->find($amendment->id);
+            if (!$locked->isPending()) {
+                return 'Perubahan ini sudah diproses oleh pihak lain.';
+            }
 
-        // FIX #6: Update leave request dates AND recalculate total_hari_kerja
+            $leaveRequest = $locked->leaveRequest;
+            $newStart = Carbon::parse($locked->requested_start_date);
+            $newEnd = Carbon::parse($locked->requested_end_date);
+            $newHariKerja = HariKerjaCalculator::hitungHariKerja($newStart, $newEnd);
+            $oldHariKerja = $leaveRequest->total_hari_kerja ?? 0;
+            $selisih = $newHariKerja - $oldHariKerja;
+
+            // FIX #9: Validate balance before approval if TAHUNAN and days increase
+            if ($leaveRequest->type === LeaveRequest::TYPE_TAHUNAN && $selisih > 0) {
+                $leaveUser = \App\Models\User::lockForUpdate()->find($leaveRequest->user_id);
+                if ($selisih > $leaveUser->leave_balance) {
+                    return "Sisa cuti {$leaveUser->name} tidak mencukupi untuk menambah {$selisih} hari kerja (sisa: {$leaveUser->leave_balance} hari).";
+                }
+
+                // Deduct additional days
+                $previousBalance = $leaveUser->leave_balance;
+                $leaveUser->decrement('leave_balance', $selisih);
+
+                BalanceAuditService::logBalanceChange(
+                    $leaveUser,
+                    $previousBalance,
+                    $previousBalance - $selisih,
+                    "Perubahan tanggal cuti disetujui — tambah {$selisih} hari",
+                    $leaveRequest->id
+                );
+            } elseif ($leaveRequest->type === LeaveRequest::TYPE_TAHUNAN && $selisih < 0) {
+                // Days decreased — restore balance
+                $leaveUser = \App\Models\User::lockForUpdate()->find($leaveRequest->user_id);
+                $previousBalance = $leaveUser->leave_balance;
+                $leaveUser->increment('leave_balance', abs($selisih));
+
+                BalanceAuditService::logBalanceChange(
+                    $leaveUser,
+                    $previousBalance,
+                    $previousBalance + abs($selisih),
+                    "Perubahan tanggal cuti disetujui — kurang " . abs($selisih) . " hari",
+                    $leaveRequest->id
+                );
+            }
+
+            // Update amendment status
+            $locked->update([
+                'status' => LeaveAmendment::STATUS_APPROVED,
+                'approved_by' => $user->id,
+                'approval_note' => $request->approval_note,
+                'approved_at' => now(),
+            ]);
+
+            // Update leave request dates and recalculate
+            $leaveRequest->update([
+                'start_date' => $locked->requested_start_date,
+                'end_date' => $locked->requested_end_date,
+                'total_hari_kerja' => $newHariKerja,
+            ]);
+
+            // FIX #8: Audit log with balance impact
+            $balanceNote = $leaveRequest->type === LeaveRequest::TYPE_TAHUNAN && $selisih !== 0
+                ? " (saldo cuti: " . ($selisih > 0 ? "-{$selisih}" : "+" . abs($selisih)) . " hari)"
+                : '';
+            \App\Models\AuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'approve_amendment',
+                'description' => "Persetujuan perubahan tanggal cuti untuk {$leaveRequest->user->name}{$balanceNote}",
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+
+            return null;
+        });
+
+        if ($error) {
+            return back()->with('error', $error);
+        }
+
         $leaveRequest = $amendment->leaveRequest;
-        $newStart = Carbon::parse($amendment->requested_start_date);
-        $newEnd = Carbon::parse($amendment->requested_end_date);
-        $newHariKerja = HariKerjaCalculator::hitungHariKerja($newStart, $newEnd);
-        $leaveRequest->update([
-            'start_date' => $amendment->requested_start_date,
-            'end_date' => $amendment->requested_end_date,
-            'total_hari_kerja' => $newHariKerja,
-        ]);
-
-        // Create audit log
-        \App\Models\AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'approve_amendment',
-            'description' => "Persetujuan perubahan tanggal cuti untuk {$leaveRequest->user->name}",
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-        ]);
 
         // Notify requester
         Notification::kirim(

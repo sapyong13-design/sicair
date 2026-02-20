@@ -82,6 +82,13 @@ class BalanceAdjustmentController extends Controller
             $adjustmentDays = -$adjustmentDays; // Make it negative
         }
 
+        // FIX #4: Pastikan saldo tidak akan negatif jika adjustment ini disetujui
+        if ($adjustmentDays < 0 && ($user->leave_balance + $adjustmentDays) < 0) {
+            return back()->withErrors([
+                'adjustment_days' => "Pengurangan {$request->adjustment_days} hari akan membuat saldo cuti {$user->name} menjadi negatif (saldo saat ini: {$user->leave_balance} hari).",
+            ])->withInput();
+        }
+
         // Create adjustment
         $adjustment = BalanceAdjustment::create([
             'user_id' => $user->id,
@@ -142,13 +149,16 @@ class BalanceAdjustmentController extends Controller
 
         $admin = Auth::user();
         $approvalNote = $request->approval_note;
+        $alreadyProcessed = false;
 
-        // FIX #5/#28: Use DB transaction with lock to prevent concurrent double-approval
-        DB::transaction(function () use ($adjustment, $admin, $approvalNote) {
+        // Use DB transaction with lock to prevent concurrent double-approval
+        DB::transaction(function () use ($adjustment, $admin, $approvalNote, &$alreadyProcessed) {
             // Re-fetch inside transaction with lock to check status again
             $locked = BalanceAdjustment::lockForUpdate()->find($adjustment->id);
             if (!$locked->isPending()) {
-                return; // Already processed by another request
+                // FIX #10: Flag so caller can return explicit error instead of silent skip
+                $alreadyProcessed = true;
+                return;
             }
 
             // Update adjustment
@@ -172,15 +182,29 @@ class BalanceAdjustmentController extends Controller
             $newSisa = ($cutiRecord->sisa ?? 0) + $locked->adjustment_days;
             $cutiRecord->update(['sisa' => $newSisa]);
 
+            // FIX KRITIKAL: Juga update users.leave_balance karena validasi pengajuan cuti
+            // menggunakan $user->leave_balance, bukan cuti_records.sisa
+            $lockedUser = User::lockForUpdate()->find($locked->user_id);
+            if ($locked->adjustment_days > 0) {
+                $lockedUser->increment('leave_balance', $locked->adjustment_days);
+            } elseif ($locked->adjustment_days < 0) {
+                $lockedUser->decrement('leave_balance', abs($locked->adjustment_days));
+            }
+
             // Create audit log
             \App\Models\AuditLog::create([
                 'user_id' => $admin->id,
                 'action' => 'approve_balance_adjustment',
-                'description' => "Approve balance adjustment for {$locked->user->name}: {$locked->adjustment_days} days",
+                'description' => "Approve balance adjustment for {$locked->user->name}: {$locked->adjustment_days} days (leave_balance updated)",
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
             ]);
         });
+
+        // FIX #10: Return explicit error if already processed during race condition
+        if ($alreadyProcessed) {
+            return back()->with('error', 'Perubahan saldo ini sudah diproses oleh admin lain.');
+        }
 
         // Notify user
         Notification::kirim(

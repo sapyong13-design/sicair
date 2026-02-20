@@ -27,10 +27,13 @@ class AppealController extends Controller
             return back()->with('error', 'Anda hanya dapat mengajukan banding untuk pengajuan cuti Anda sendiri.');
         }
 
-        // Check if appeal already exists
-        $existingAppeal = $leaveRequest->appeals()->where('status', LeaveAppeal::STATUS_PENDING)->first();
+        // FIX #3/#16: Cegah lebih dari 1 appeal per leave (apapun statusnya)
+        $existingAppeal = $leaveRequest->appeals()->first();
         if ($existingAppeal) {
-            return back()->with('error', 'Sudah ada banding yang menunggu pertimbangan untuk pengajuan ini.');
+            $statusLabel = $existingAppeal->status === LeaveAppeal::STATUS_PENDING
+                ? 'menunggu pertimbangan'
+                : ($existingAppeal->status === LeaveAppeal::STATUS_APPROVED ? 'sudah disetujui' : 'sudah ditolak');
+            return back()->with('error', "Pengajuan ini sudah memiliki banding yang {$statusLabel}. Hanya 1 banding diperbolehkan per pengajuan cuti.");
         }
 
         return view('appeals.create', compact('leaveRequest'));
@@ -48,6 +51,11 @@ class AppealController extends Controller
 
         if (Auth::id() !== $leaveRequest->user_id) {
             abort(403);
+        }
+
+        // FIX #3/#16: Double-check — prevent any second appeal (race condition guard)
+        if ($leaveRequest->appeals()->exists()) {
+            return back()->with('error', 'Pengajuan ini sudah memiliki banding. Hanya 1 banding diperbolehkan per pengajuan cuti.');
         }
 
         $request->validate([

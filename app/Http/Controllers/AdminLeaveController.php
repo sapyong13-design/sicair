@@ -74,9 +74,12 @@ class AdminLeaveController extends Controller
             $data['pertimbangan_atasan']  = 'setuju';
             $data['reviewed_at']          = now();
 
-            // Kurangi leave_balance jika cuti tahunan
+            // FIX #20: Kurangi leave_balance dengan transaction + lock untuk cegah race condition
             if ($request->type === LeaveRequest::TYPE_TAHUNAN) {
-                $user->decrement('leave_balance', $hariKerja);
+                DB::transaction(function () use ($user, $hariKerja) {
+                    $lockedUser = \App\Models\User::lockForUpdate()->find($user->id);
+                    $lockedUser->decrement('leave_balance', $hariKerja);
+                });
             }
         }
 
@@ -208,11 +211,16 @@ class AdminLeaveController extends Controller
         $admin = Auth::user();
         $user  = $leaveRequest->user;
 
-        // Kembalikan saldo jika cuti tahunan disetujui
+        // FIX #19: Kembalikan saldo dengan transaction + lock untuk cegah race condition
         if ($leaveRequest->status === LeaveRequest::STATUS_DISETUJUI
             && $leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
             $hari = $leaveRequest->total_hari_kerja ?? 0;
-            $user->increment('leave_balance', $hari);
+            if ($hari > 0) {
+                DB::transaction(function () use ($leaveRequest, $hari) {
+                    $lockedUser = \App\Models\User::lockForUpdate()->find($leaveRequest->user_id);
+                    $lockedUser->increment('leave_balance', $hari);
+                });
+            }
         }
 
         AuditLog::log(

@@ -80,10 +80,36 @@ class LeaveRequestController extends Controller
             return back()->withErrors(['reason' => $error])->withInput();
         }
 
+        // FIX #18: Cegah pengajuan cuti yang tanggalnya overlap dengan cuti aktif
+        $overlapExists = \App\Models\LeaveRequest::where('user_id', $user->id)
+            ->whereIn('status', [
+                LeaveRequest::STATUS_DIAJUKAN,
+                LeaveRequest::STATUS_PERTIMBANGAN,
+                LeaveRequest::STATUS_DISETUJUI,
+            ])
+            ->where(function ($q) use ($request) {
+                $q->whereBetween('start_date', [$request->start_date, $request->end_date])
+                  ->orWhereBetween('end_date', [$request->start_date, $request->end_date])
+                  ->orWhere(function ($q2) use ($request) {
+                      $q2->where('start_date', '<=', $request->start_date)
+                         ->where('end_date', '>=', $request->end_date);
+                  });
+            })
+            ->exists();
+
+        if ($overlapExists) {
+            return back()->withErrors(['start_date' => 'Anda sudah memiliki pengajuan cuti aktif atau yang telah disetujui pada rentang tanggal tersebut.'])->withInput();
+        }
+
         // Hitung hari kerja
         $startDate = Carbon::parse($request->start_date);
         $endDate = Carbon::parse($request->end_date);
         $hariKerja = HariKerjaCalculator::hitungHariKerja($startDate, $endDate);
+
+        // FIX #18: Validate hariKerja > 0 (prevent all-holiday ranges)
+        if ($hariKerja < 1) {
+            return back()->withErrors(['start_date' => 'Rentang tanggal yang dipilih tidak mengandung hari kerja. Semua tanggal adalah hari libur atau akhir pekan.'])->withInput();
+        }
 
         // Upload dokumen jika ada
         $dokumenPath = null;

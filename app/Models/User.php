@@ -46,6 +46,10 @@ class User extends Authenticatable
         return $this->role === 'ketua';
     }
 
+    /**
+     * True jika user berperan sebagai atasan langsung (supervisor).
+     * Note: ketua & admin juga bisa approve sebagai atasan via canApproveAsAtasan().
+     */
     public function isAtasan(): bool
     {
         return in_array($this->role, ['atasan', 'panitera', 'sekretaris']);
