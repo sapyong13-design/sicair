@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\LeaveRequest;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class PdfExportService
@@ -75,24 +76,23 @@ class PdfExportService
     }
 
     /**
-     * Export 3-copy leave form for PPPK employees (Lembar 1: Pegawai, 2: Sekretaris, 3: Ketua)
+     * Export Surat Permohonan Cuti (formal leave request letter)
      */
-    public static function exportPppkTripleForms(LeaveRequest $leaveRequest)
+    public static function exportSuratPermohonan(LeaveRequest $leaveRequest)
     {
-        $leaveRequest->load(['user', 'atasanReviewer', 'pejabat']);
+        $leaveRequest->load('user');
 
-        $pdf = Pdf::loadView('pdfs.leave-request-pppk-triple', [
+        $ketua = User::where('role', 'ketua')->first();
+
+        $pdf = Pdf::loadView('pdfs.surat-permohonan-cuti', [
             'leaveRequest' => $leaveRequest,
+            'ketua' => $ketua,
             'generatedAt' => now(),
         ]);
 
         $pdf->setPaper('A4');
-        $pdf->setOption('margin-top', 10);
-        $pdf->setOption('margin-bottom', 10);
-        $pdf->setOption('margin-left', 12);
-        $pdf->setOption('margin-right', 12);
 
-        $filename = "Izin-Cuti-PPPK-{$leaveRequest->user->nip}-{$leaveRequest->start_date->format('Ymd')}.pdf";
+        $filename = "Surat-Permohonan-Cuti-{$leaveRequest->user->nip}-{$leaveRequest->start_date->format('Ymd')}.pdf";
 
         return $pdf->download($filename);
     }

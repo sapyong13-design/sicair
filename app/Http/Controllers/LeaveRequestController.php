@@ -466,29 +466,25 @@ class LeaveRequestController extends Controller
     }
 
     /**
-     * Export 3-lembar PDF untuk pegawai PPPK (Pegawai / Sekretaris / Ketua PN)
+     * Export Surat Permohonan Cuti (formal letter PDF)
      */
-    public function exportPppkForms(LeaveRequest $leaveRequest)
+    public function exportSuratPermohonan(LeaveRequest $leaveRequest)
     {
         $user = Auth::user();
 
-        // Hanya pemohon, sekretaris, ketua, atau admin yang bisa download
-        $isSekretaris = $user->isSekretaris();
+        // Pemohon, atasan langsung, panitera, sekretaris, ketua, atau admin
         if (
             $leaveRequest->user_id !== $user->id
             && !$user->isAdmin()
             && !$user->isKetua()
-            && !$isSekretaris
+            && !$user->isPanitera()
+            && !$user->isSekretaris()
+            && $leaveRequest->user->atasan_id !== $user->id
         ) {
-            return back()->with('error', 'Anda tidak memiliki akses untuk export dokumen PPPK ini.');
+            return back()->with('error', 'Anda tidak memiliki akses untuk export surat ini.');
         }
 
-        // Pastikan cuti sudah disetujui
-        if (!$leaveRequest->isApproved()) {
-            return back()->with('error', 'Form 3 lembar hanya tersedia setelah cuti disetujui.');
-        }
-
-        return PdfExportService::exportPppkTripleForms($leaveRequest);
+        return PdfExportService::exportSuratPermohonan($leaveRequest);
     }
 
     /**

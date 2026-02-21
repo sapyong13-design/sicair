@@ -24,16 +24,13 @@
                 </div>
             </div>
         </div>
-        {{-- Tombol 3 Form PPPK (hanya tampil jika PPPK & sudah disetujui) --}}
-        @if($leaveRequest->user->status_pegawai === 'pppk' && $leaveRequest->isApproved())
-        <a href="{{ route('leave.export-pppk-forms', $leaveRequest) }}"
+        <a href="{{ route('leave.surat-permohonan', $leaveRequest) }}"
            class="btn sh-btn-primary"
            style="border-radius: 10px; font-size: 0.85rem;"
-           title="Download 3 lembar form cuti PPPK (Pegawai / Sekretaris / Ketua)">
-            <i class="ti ti-file-certificate me-1"></i>
-            Download 3 Form PPPK
+           title="Download Surat Permohonan Cuti (PDF)">
+            <i class="ti ti-file-text me-1"></i>
+            Surat Permohonan
         </a>
-        @endif
     </div>
 </div>
 
