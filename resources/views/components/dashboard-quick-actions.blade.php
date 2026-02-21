@@ -1,6 +1,7 @@
 {{-- Dashboard Quick Actions Component --}}
 <div class="quick-actions-grid">
-    {{-- Action 1: Ajukan Cuti --}}
+    {{-- Action 1: Ajukan Cuti (hanya jika boleh cuti) --}}
+    @if(Auth::user()->bolehCuti())
     <a href="{{ route('leave.select-type') }}" class="quick-action-card">
         <div class="action-icon" style="background: var(--sh-primary-light); color: var(--sh-primary);">
             <i class="ti ti-file-plus"></i>
@@ -11,6 +12,7 @@
         </div>
         <i class="ti ti-chevron-right action-arrow"></i>
     </a>
+    @endif
 
     {{-- Action 2: Sisa Cuti --}}
     <a href="#balanceModal" class="quick-action-card" data-bs-toggle="modal">

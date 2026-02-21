@@ -162,6 +162,26 @@ class User extends Authenticatable
         return $this->masaKerjaTahun !== null && $this->masaKerjaTahun >= 1;
     }
 
+    /**
+     * Apakah pegawai ini berhak mengajukan cuti?
+     *
+     * Semua pegawai berhak KECUALI:
+     * - CPNS (belum diangkat penuh)
+     * - PPPK yang baru dilantik (masa kerja < 1 tahun)
+     */
+    public function bolehCuti(): bool
+    {
+        if ($this->status_pegawai === 'cpns') {
+            return false;
+        }
+
+        if ($this->status_pegawai === 'pppk' && !$this->sudahBekerjaSatuTahun()) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function sudahBekerjaLimaTahun(): bool
     {
         return $this->masaKerjaTahun !== null && $this->masaKerjaTahun >= 5;

@@ -1113,8 +1113,8 @@
                             </a>
                         </li>
 
-                        {{-- Ajukan Cuti: pegawai, atasan, ketua --}}
-                        @if(!Auth::user()->isAdmin())
+                        {{-- Ajukan Cuti: pegawai, atasan, ketua (kecuali CPNS & PPPK baru dilantik) --}}
+                        @if(!Auth::user()->isAdmin() && Auth::user()->bolehCuti())
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('leave/create') || request()->is('leave/select-type') ? 'active' : '' }}" href="{{ route('leave.create') }}">
                                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-file-plus"></i></span>

@@ -25,6 +25,14 @@ class LeaveRequestController extends Controller
      */
     public function selectType()
     {
+        $user = Auth::user();
+        if (!$user->bolehCuti()) {
+            $pesan = $user->status_pegawai === 'cpns'
+                ? 'CPNS belum berhak mengajukan cuti.'
+                : 'PPPK yang baru dilantik (masa kerja < 1 tahun) belum berhak mengajukan cuti.';
+            return redirect('/dashboard')->with('error', $pesan);
+        }
+
         return view('leave.select-type');
     }
 
@@ -35,6 +43,13 @@ class LeaveRequestController extends Controller
     {
         $type = $request->query('type', LeaveRequest::TYPE_TAHUNAN);
         $user = Auth::user();
+
+        if (!$user->bolehCuti()) {
+            $pesan = $user->status_pegawai === 'cpns'
+                ? 'CPNS belum berhak mengajukan cuti.'
+                : 'PPPK yang baru dilantik (masa kerja < 1 tahun) belum berhak mengajukan cuti.';
+            return redirect('/dashboard')->with('error', $pesan);
+        }
 
         // Validasi tipe cuti
         if (!array_key_exists($type, LeaveRequest::typeLabels())) {
@@ -57,6 +72,14 @@ class LeaveRequestController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+
+        if (!$user->bolehCuti()) {
+            $pesan = $user->status_pegawai === 'cpns'
+                ? 'CPNS belum berhak mengajukan cuti.'
+                : 'PPPK yang baru dilantik (masa kerja < 1 tahun) belum berhak mengajukan cuti.';
+            return redirect('/dashboard')->with('error', $pesan);
+        }
+
         $type = $request->input('type', LeaveRequest::TYPE_TAHUNAN);
 
         // Validasi umum

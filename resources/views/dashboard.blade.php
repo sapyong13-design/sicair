@@ -19,7 +19,7 @@
                 </span>
             </div>
         </div>
-        @if(!$user->isAdmin())
+        @if(!$user->isAdmin() && $user->bolehCuti())
         <a href="{{ route('leave.select-type') }}" class="btn btn-primary sh-btn-primary">
             <i class="ti ti-file-plus me-1"></i> Ajukan Cuti
         </a>
@@ -900,10 +900,20 @@
             <div class="text-center">
                 <div class="sh-empty-icon"><i class="ti ti-calendar-off"></i></div>
                 <h4 class="fw-bold text-dark mb-1">Belum Ada Pengajuan</h4>
+                @if($user->bolehCuti())
                 <p class="text-muted mb-3">Anda belum pernah mengajukan cuti. Mulai dengan klik tombol di bawah.</p>
                 <a href="{{ route('leave.select-type') }}" class="btn btn-primary sh-btn-primary">
                     <i class="ti ti-file-plus me-1"></i> Ajukan Cuti Pertama Anda
                 </a>
+                @else
+                <p class="text-muted mb-3">
+                    @if($user->status_pegawai === 'cpns')
+                        CPNS belum berhak mengajukan cuti.
+                    @else
+                        PPPK yang baru dilantik (masa kerja &lt; 1 tahun) belum berhak mengajukan cuti.
+                    @endif
+                </p>
+                @endif
             </div>
         </div>
         @else
