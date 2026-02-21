@@ -371,7 +371,7 @@ class DatabaseSeeder extends Seeder
             'atasan_id'        => $panitera->id,
         ]);
 
-        // No. 23
+        // No. 23 — CPNS
         User::create([
             'name'             => 'MUHAMMAD FARIS AKBAR, A.Md.',
             'nip'              => '199412162025061006',
@@ -382,14 +382,14 @@ class DatabaseSeeder extends Seeder
             'golongan_ruang'   => 'II/c',
             'unit_kerja'       => 'Panitera Muda Pidana Pengadilan Negeri Natuna',
             'masa_kerja_mulai' => '2025-06-01',
-            'status_pegawai'   => 'aparatur',
+            'status_pegawai'   => 'cpns',
             'jenis_kelamin'    => 'L',
             'jumlah_anak'      => 0,
             'lokasi_terpencil' => false,
             'atasan_id'        => $panitera->id,
         ]);
 
-        // No. 24
+        // No. 24 — CPNS
         User::create([
             'name'             => 'ASTURI PERIYADI, A.Md.A.B.',
             'nip'              => '199705062025061012',
@@ -400,14 +400,14 @@ class DatabaseSeeder extends Seeder
             'golongan_ruang'   => 'II/c',
             'unit_kerja'       => 'Panitera Muda Perdata Pengadilan Negeri Natuna',
             'masa_kerja_mulai' => '2025-06-01',
-            'status_pegawai'   => 'aparatur',
+            'status_pegawai'   => 'cpns',
             'jenis_kelamin'    => 'L',
             'jumlah_anak'      => 0,
             'lokasi_terpencil' => false,
             'atasan_id'        => $panitera->id,
         ]);
 
-        // No. 25
+        // No. 25 — CPNS
         User::create([
             'name'             => 'DION BOY ARDITA, A.Md.A.B.',
             'nip'              => '200104212025061010',
@@ -418,14 +418,14 @@ class DatabaseSeeder extends Seeder
             'golongan_ruang'   => 'II/c',
             'unit_kerja'       => 'Panitera Muda Khusus HAM Pengadilan Negeri Natuna',
             'masa_kerja_mulai' => '2025-06-01',
-            'status_pegawai'   => 'aparatur',
+            'status_pegawai'   => 'cpns',
             'jenis_kelamin'    => 'L',
             'jumlah_anak'      => 0,
             'lokasi_terpencil' => false,
             'atasan_id'        => $panitera->id,
         ]);
 
-        // No. 26
+        // No. 26 — CPNS
         User::create([
             'name'             => 'JUPRIZAL, A.Md.A.B.',
             'nip'              => '199510102025061005',
@@ -436,7 +436,7 @@ class DatabaseSeeder extends Seeder
             'golongan_ruang'   => 'II/c',
             'unit_kerja'       => 'Panitera Muda Khusus Perikanan Pengadilan Negeri Natuna',
             'masa_kerja_mulai' => '2025-06-01',
-            'status_pegawai'   => 'aparatur',
+            'status_pegawai'   => 'cpns',
             'jenis_kelamin'    => 'L',
             'jumlah_anak'      => 0,
             'lokasi_terpencil' => false,
@@ -483,7 +483,7 @@ class DatabaseSeeder extends Seeder
             'atasan_id'        => $sekretaris->id,
         ]);
 
-        // No. 21
+        // No. 21 — CPNS
         User::create([
             'name'             => 'FRANS ALBERTO SIREGAR, S.T.',
             'nip'              => '199808202025061008',
@@ -494,7 +494,7 @@ class DatabaseSeeder extends Seeder
             'golongan_ruang'   => 'III/a',
             'unit_kerja'       => 'Subbagian Umum dan Keuangan',
             'masa_kerja_mulai' => '2025-06-01',
-            'status_pegawai'   => 'aparatur',
+            'status_pegawai'   => 'cpns',
             'jenis_kelamin'    => 'L',
             'jumlah_anak'      => 0,
             'lokasi_terpencil' => false,
