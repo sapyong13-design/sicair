@@ -70,6 +70,7 @@
                         <option value="aparatur" {{ request('status_pegawai') === 'aparatur' ? 'selected' : '' }}>Aparatur</option>
                         <option value="cpns" {{ request('status_pegawai') === 'cpns' ? 'selected' : '' }}>CPNS</option>
                         <option value="cakim" {{ request('status_pegawai') === 'cakim' ? 'selected' : '' }}>Cakim</option>
+                        <option value="pppk" {{ request('status_pegawai') === 'pppk' ? 'selected' : '' }}>PPPK</option>
                     </select>
                 </div>
                 <div class="col-12 col-md-3">
@@ -299,6 +300,7 @@
                                 'aparatur' => 'background: var(--sh-success-light); color: var(--sh-success);',
                                 'cpns' => 'background: var(--sh-warning-light); color: var(--sh-warning);',
                                 'cakim' => 'background: #fef9c3; color: #a16207;',
+                                'pppk' => 'background: #ede9fe; color: #7c3aed;',
                                 default => 'background: var(--sh-gray-100); color: #64748b;',
                             };
                         @endphp

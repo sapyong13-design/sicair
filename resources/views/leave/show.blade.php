@@ -12,16 +12,28 @@
 
 {{-- Page Header --}}
 <div class="sh-page-header">
-    <div class="d-flex align-items-center gap-3">
-        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;" aria-label="Kembali ke dashboard">
-            <i class="ti ti-arrow-left" style="font-size: 1.2rem;" aria-hidden="true"></i>
-        </a>
-        <div>
-            <h2 class="sh-page-title mb-0">Detail Pengajuan Cuti</h2>
-            <div class="text-muted" style="font-size: 0.85rem;">
-                {{ $leaveRequest->type_label }} &mdash; {{ $leaveRequest->user->name }}
+    <div class="d-flex align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;" aria-label="Kembali ke dashboard">
+                <i class="ti ti-arrow-left" style="font-size: 1.2rem;" aria-hidden="true"></i>
+            </a>
+            <div>
+                <h2 class="sh-page-title mb-0">Detail Pengajuan Cuti</h2>
+                <div class="text-muted" style="font-size: 0.85rem;">
+                    {{ $leaveRequest->type_label }} &mdash; {{ $leaveRequest->user->name }}
+                </div>
             </div>
         </div>
+        {{-- Tombol 3 Form PPPK (hanya tampil jika PPPK & sudah disetujui) --}}
+        @if($leaveRequest->user->status_pegawai === 'pppk' && $leaveRequest->isApproved())
+        <a href="{{ route('leave.export-pppk-forms', $leaveRequest) }}"
+           class="btn sh-btn-primary"
+           style="border-radius: 10px; font-size: 0.85rem;"
+           title="Download 3 lembar form cuti PPPK (Pegawai / Sekretaris / Ketua)">
+            <i class="ti ti-file-certificate me-1"></i>
+            Download 3 Form PPPK
+        </a>
+        @endif
     </div>
 </div>
 

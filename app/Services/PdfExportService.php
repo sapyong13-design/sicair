@@ -75,6 +75,29 @@ class PdfExportService
     }
 
     /**
+     * Export 3-copy leave form for PPPK employees (Lembar 1: Pegawai, 2: Sekretaris, 3: Ketua)
+     */
+    public static function exportPppkTripleForms(LeaveRequest $leaveRequest)
+    {
+        $leaveRequest->load(['user', 'atasanReviewer', 'pejabat']);
+
+        $pdf = Pdf::loadView('pdfs.leave-request-pppk-triple', [
+            'leaveRequest' => $leaveRequest,
+            'generatedAt' => now(),
+        ]);
+
+        $pdf->setPaper('A4');
+        $pdf->setOption('margin-top', 10);
+        $pdf->setOption('margin-bottom', 10);
+        $pdf->setOption('margin-left', 12);
+        $pdf->setOption('margin-right', 12);
+
+        $filename = "Izin-Cuti-PPPK-{$leaveRequest->user->nip}-{$leaveRequest->start_date->format('Ymd')}.pdf";
+
+        return $pdf->download($filename);
+    }
+
+    /**
      * Export leave statistics for period
      */
     public static function exportLeaveStatistics($startDate, $endDate)

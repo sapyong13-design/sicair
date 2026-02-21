@@ -171,6 +171,7 @@
                                 <option value="aparatur" {{ old('status_pegawai', $pegawai->status_pegawai ?? '') === 'aparatur' ? 'selected' : '' }}>Aparatur (PNS)</option>
                                 <option value="cpns" {{ old('status_pegawai', $pegawai->status_pegawai ?? '') === 'cpns' ? 'selected' : '' }}>CPNS</option>
                                 <option value="cakim" {{ old('status_pegawai', $pegawai->status_pegawai ?? '') === 'cakim' ? 'selected' : '' }}>Calon Hakim</option>
+                                <option value="pppk" {{ old('status_pegawai', $pegawai->status_pegawai ?? '') === 'pppk' ? 'selected' : '' }}>PPPK</option>
                             </select>
                             @error('status_pegawai') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>

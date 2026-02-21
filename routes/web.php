@@ -50,6 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/leave', [LeaveRequestController::class, 'store'])->name('leave.store');
     Route::get('/leave/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave.show');
     Route::get('/leave/{leaveRequest}/export-pdf', [LeaveRequestController::class, 'exportPdf'])->name('leave.export-pdf');
+    Route::get('/leave/{leaveRequest}/export-pppk-forms', [LeaveRequestController::class, 'exportPppkForms'])->name('leave.export-pppk-forms');
     Route::get('/leave/export/summary', [LeaveRequestController::class, 'exportSummaryPdf'])->name('leave.export-summary');
 
     // === Riwayat Saldo Cuti ===
