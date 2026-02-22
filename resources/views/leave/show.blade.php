@@ -24,13 +24,22 @@
                 </div>
             </div>
         </div>
-        <a href="{{ route('leave.surat-permohonan', $leaveRequest) }}"
-           class="btn sh-btn-primary"
-           style="border-radius: 10px; font-size: 0.85rem;"
-           title="Download Surat Permohonan Cuti (PDF)">
-            <i class="ti ti-file-text me-1"></i>
-            Surat Permohonan
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('leave.surat-permohonan', $leaveRequest) }}"
+               class="btn sh-btn-primary"
+               style="border-radius: 10px; font-size: 0.85rem;"
+               title="Download Surat Permohonan Cuti (PDF)">
+                <i class="ti ti-file-text me-1"></i>
+                Surat Permohonan
+            </a>
+            <a href="{{ route('leave.form-cuti', $leaveRequest) }}"
+               class="btn sh-btn-primary"
+               style="border-radius: 10px; font-size: 0.85rem;"
+               title="Download Form Permintaan dan Pemberian Cuti (PDF)">
+                <i class="ti ti-clipboard-text me-1"></i>
+                Form Cuti
+            </a>
+        </div>
     </div>
 </div>
 

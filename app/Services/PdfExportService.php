@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CutiRecord;
 use App\Models\LeaveRequest;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -93,6 +94,38 @@ class PdfExportService
         $pdf->setPaper('A4');
 
         $filename = "Surat-Permohonan-Cuti-{$leaveRequest->user->nip}-{$leaveRequest->start_date->format('Ymd')}.pdf";
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Export Form Permintaan dan Pemberian Cuti (Anak Lampiran I-b BKN)
+     */
+    public static function exportFormPermintaanCuti(LeaveRequest $leaveRequest)
+    {
+        $leaveRequest->load(['user', 'atasanReviewer', 'pejabat']);
+
+        $user = $leaveRequest->user;
+        $ketua = User::where('role', 'ketua')->first();
+
+        // Catatan cuti: query CutiRecord untuk 3 tahun terakhir
+        $tahun = $leaveRequest->created_at->year;
+        $catatanCuti = CutiRecord::where('user_id', $user->id)
+            ->whereIn('tahun', [$tahun - 2, $tahun - 1, $tahun])
+            ->get()
+            ->keyBy('tahun');
+
+        $pdf = Pdf::loadView('pdfs.form-permintaan-cuti', [
+            'leaveRequest' => $leaveRequest,
+            'ketua' => $ketua,
+            'catatanCuti' => $catatanCuti,
+            'generatedAt' => now(),
+        ]);
+
+        // Folio / F4: 210mm x 330mm
+        $pdf->setPaper([0, 0, 595.28, 935.43]);
+
+        $filename = "Form-Cuti-{$user->nip}-{$leaveRequest->start_date->format('Ymd')}.pdf";
 
         return $pdf->download($filename);
     }

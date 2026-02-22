@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/leave/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave.show');
     Route::get('/leave/{leaveRequest}/export-pdf', [LeaveRequestController::class, 'exportPdf'])->name('leave.export-pdf');
     Route::get('/leave/{leaveRequest}/surat-permohonan', [LeaveRequestController::class, 'exportSuratPermohonan'])->name('leave.surat-permohonan');
+    Route::get('/leave/{leaveRequest}/form-cuti', [LeaveRequestController::class, 'exportFormPermintaanCuti'])->name('leave.form-cuti');
     Route::get('/leave/export/summary', [LeaveRequestController::class, 'exportSummaryPdf'])->name('leave.export-summary');
 
     // === Riwayat Saldo Cuti ===

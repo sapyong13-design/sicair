@@ -488,6 +488,27 @@ class LeaveRequestController extends Controller
     }
 
     /**
+     * Export Form Permintaan dan Pemberian Cuti (Anak Lampiran I-b)
+     */
+    public function exportFormPermintaanCuti(LeaveRequest $leaveRequest)
+    {
+        $user = Auth::user();
+
+        if (
+            $leaveRequest->user_id !== $user->id
+            && !$user->isAdmin()
+            && !$user->isKetua()
+            && !$user->isPanitera()
+            && !$user->isSekretaris()
+            && $leaveRequest->user->atasan_id !== $user->id
+        ) {
+            return back()->with('error', 'Anda tidak memiliki akses untuk export form ini.');
+        }
+
+        return PdfExportService::exportFormPermintaanCuti($leaveRequest);
+    }
+
+    /**
      * Export all leave requests as PDF report
      */
     public function exportAllPdf(Request $request)
