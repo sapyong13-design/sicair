@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <style>
         @page {
-            size: 210mm 330mm;
-            margin: 15mm 15mm 12mm 15mm;
+            size: legal;
+            margin: 15mm 20mm 15mm 20mm;
         }
         body {
             font-family: 'Bookman Old Style', 'URW Bookman L', 'Bookman', 'Georgia', serif;
@@ -18,85 +18,156 @@
         .header-right {
             text-align: right;
             font-size: 8pt;
-            line-height: 1.4;
-            margin-bottom: 10pt;
+            line-height: 1.2;
+            margin-bottom: 8pt;
+            font-weight: normal;
+        }
+        .header-right div:first-child {
+            text-decoration: underline;
+            font-weight: bold;
+        }
+        .surat-header {
+            margin-bottom: 8pt;
+            font-size: 9pt;
+        }
+        .surat-date {
+            text-align: right;
+            margin-bottom: 3pt;
+        }
+        .surat-kepada {
+            margin-bottom: 3pt;
         }
         .judul {
             text-align: center;
             font-weight: bold;
-            font-size: 10pt;
-            margin-bottom: 6pt;
-            text-transform: uppercase;
+            font-size: 9pt;
+            margin-bottom: 2pt;
+            text-decoration: underline;
         }
         .nomor-surat {
+            text-align: center;
+            font-weight: bold;
             margin-bottom: 8pt;
             font-size: 9pt;
         }
+
+        /* Tabel utama */
         table.form-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 0;
+            margin-bottom: 6pt;
         }
         table.form-table td, table.form-table th {
             border: 1px solid #000;
-            padding: 3pt 5pt;
+            padding: 2pt 4pt;
             vertical-align: top;
             font-size: 9pt;
+            line-height: 1.2;
         }
         table.form-table th {
             font-weight: bold;
             text-align: left;
         }
-        table.catatan-table {
+
+        /* Section headers */
+        .section-header {
+            font-weight: bold;
+            background-color: transparent;
+            text-align: left;
+        }
+
+        /* Data pegawai table */
+        table.data-pegawai {
             width: 100%;
             border-collapse: collapse;
         }
-        table.catatan-table td, table.catatan-table th {
+        table.data-pegawai td {
             border: 1px solid #000;
             padding: 2pt 4pt;
-            vertical-align: middle;
-            font-size: 8pt;
-            text-align: center;
+            vertical-align: top;
+            font-size: 9pt;
+            line-height: 1.2;
         }
-        table.catatan-table th {
+        table.data-pegawai .label-cell {
+            width: 60pt;
             font-weight: bold;
-            font-size: 8pt;
         }
-        .section-header {
-            font-weight: bold;
-            background-color: #f0f0f0;
+        table.data-pegawai .value-cell {
+            width: auto;
         }
+
+        /* Jenis cuti */
         .checkbox {
             font-family: DejaVu Sans, sans-serif;
             font-size: 9pt;
         }
-        .ttd-table {
+
+        /* Catatan cuti table */
+        table.catatan-cuti {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 0;
+            margin: 0;
         }
-        .ttd-table td {
+        table.catatan-cuti td {
             border: 1px solid #000;
-            padding: 4pt 6pt;
-            vertical-align: top;
-            font-size: 8.5pt;
-            width: 33.33%;
+            padding: 2pt 3pt;
+            font-size: 8pt;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 1.2;
+        }
+        table.catatan-cuti .header-col {
+            font-weight: bold;
+        }
+
+        /* Alamat section */
+        .alamat-section {
+            padding: 4pt;
+            min-height: 70pt;
+            position: relative;
+        }
+        .ttd-pemohon {
+            position: absolute;
+            right: 10pt;
+            bottom: 8pt;
+            text-align: center;
+            width: 150pt;
+            font-size: 9pt;
         }
         .ttd-nama {
             font-weight: bold;
             text-decoration: underline;
+            margin-top: 40pt;
         }
+
+        /* Pertimbangan & Keputusan */
+        .approval-section {
+            padding: 4pt;
+            min-height: 100pt;
+            position: relative;
+        }
+        .approval-options {
+            margin-bottom: 8pt;
+            font-size: 9pt;
+        }
+        .ttd-approval {
+            position: absolute;
+            right: 10pt;
+            bottom: 8pt;
+            text-align: center;
+            width: 150pt;
+            font-size: 9pt;
+        }
+
+        /* Catatan kaki */
+        .footer-notes {
+            font-size: 8pt;
+            margin-top: 4pt;
+            line-height: 1.2;
+        }
+
         .no-border {
             border: none !important;
-        }
-        .text-center {
-            text-align: center;
-        }
-        .field-label {
-            width: 100pt;
-        }
-        .field-sep {
-            width: 8pt;
         }
     </style>
 </head>
@@ -122,26 +193,14 @@
         return $date->day . ' ' . $bulanIndo[$date->month] . ' ' . $date->year;
     };
 
-    // Nomor surat
+    // Nomor surat dengan format xxx/KPN.W32.04/KP5.3/[Bulan]/[Tahun]
     $bulanRM = $bulanRomawi[$leaveRequest->created_at->month - 1];
     $tahunSurat = $leaveRequest->created_at->year;
-    $nomorSurat = "___/PP/OT.01.2/{$bulanRM}/{$tahunSurat}";
+    // Format: 700/KPN.W32.04/KP5.3/XII/2025
+    $nomorSurat = "700/KPN.W32.04/KP5.3/{$bulanRM}/{$tahunSurat}";
 
-    // Terbilang (1-999)
-    $satuan = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'];
-    $terbilangFn = function($n) use (&$terbilangFn, $satuan) {
-        $n = abs((int) $n);
-        if ($n < 12) return $satuan[$n];
-        if ($n < 20) return $satuan[$n - 10] . ' belas';
-        if ($n < 100) return $satuan[(int)($n / 10)] . ' puluh' . ($n % 10 ? ' ' . $satuan[$n % 10] : '');
-        if ($n < 200) return 'seratus' . ($n - 100 ? ' ' . $terbilangFn($n - 100) : '');
-        if ($n < 1000) return $satuan[(int)($n / 100)] . ' ratus' . ($n % 100 ? ' ' . $terbilangFn($n % 100) : '');
-        return (string) $n;
-    };
-    $terbilang = $terbilangFn($hariKerja);
-
-    // Masa kerja format singkat (XX tahun XX bulan)
-    $masaKerjaText = '-';
+    // Masa kerja
+    $masaKerjaText = '0 Tahun 0 Bulan';
     if ($user->masa_kerja_mulai) {
         $now = $leaveRequest->created_at ?? now();
         $years = (int) $user->masa_kerja_mulai->diffInYears($now);
@@ -151,13 +210,13 @@
     }
 
     // Jenis cuti mapping
-    $jenisCutiList = [
-        \App\Models\LeaveRequest::TYPE_TAHUNAN => 'Cuti Tahunan',
-        \App\Models\LeaveRequest::TYPE_BESAR => 'Cuti Besar',
-        \App\Models\LeaveRequest::TYPE_SAKIT => 'Cuti Sakit',
-        \App\Models\LeaveRequest::TYPE_MELAHIRKAN => 'Cuti Melahirkan',
-        \App\Models\LeaveRequest::TYPE_ALASAN_PENTING => 'Cuti Karena Alasan Penting',
-        \App\Models\LeaveRequest::TYPE_LUAR_TANGGUNGAN => 'Cuti di Luar Tanggungan Negara',
+    $jenisCutiOptions = [
+        [\App\Models\LeaveRequest::TYPE_TAHUNAN, '1. Cuti Tahunan'],
+        [\App\Models\LeaveRequest::TYPE_BESAR, '2. Cuti Besar'],
+        [\App\Models\LeaveRequest::TYPE_SAKIT, '3. Cuti Sakit'],
+        [\App\Models\LeaveRequest::TYPE_MELAHIRKAN, '4. Cuti Melahirkan'],
+        [\App\Models\LeaveRequest::TYPE_ALASAN_PENTING, '5. Cuti Karena Alasan Penting'],
+        [\App\Models\LeaveRequest::TYPE_LUAR_TANGGUNGAN, '6. Cuti di Luar Tanggungan Negara'],
     ];
 
     // Alasan cuti
@@ -172,298 +231,231 @@
         $alasan .= ' (kelahiran anak ke-' . $leaveRequest->kelahiran_ke . ')';
     }
 
-    // Alamat selama cuti
-    $alamatCuti = $leaveRequest->alamat_cuti ?? $user->alamat ?? '......................................................................';
-    $teleponCuti = $leaveRequest->telepon_cuti ?? $user->telepon ?? '.....................';
+    // Alamat & telepon
+    $alamatCuti = $leaveRequest->alamat_cuti ?? $user->alamat ?? '';
+    $teleponCuti = $leaveRequest->telepon_cuti ?? $user->telepon ?? '';
 
     // Atasan & pejabat
     $atasan = $leaveRequest->atasanReviewer;
     $pejabat = $leaveRequest->pejabat ?? $ketua;
     $isDirectToKetua = $user->skipAtasanReview();
 
-    // Pertimbangan atasan mapping
-    $pertimbanganMap = [
-        'setuju' => 'DISETUJUI',
-        'ubah' => 'PERUBAHAN',
-        'tangguhkan' => 'DITANGGUHKAN',
-        'tolak' => 'TIDAK DISETUJUI',
-    ];
+    // Catatan cuti tahun berjalan
+    $tahunSekarang = $leaveRequest->created_at->year;
+    $cutiRecord = \App\Models\CutiRecord::where('user_id', $user->id)
+        ->where('tahun', $tahunSekarang)
+        ->first();
 
-    // Keputusan pejabat mapping
-    $keputusanMap = [
-        'setuju' => 'DISETUJUI',
-        'ubah' => 'PERUBAHAN',
-        'tangguhkan' => 'DITANGGUHKAN',
-        'tolak' => 'TIDAK DISETUJUI',
-    ];
-
-    // Tahun untuk catatan cuti
-    $tahunN = $leaveRequest->created_at->year;
-    $tahunN1 = $tahunN - 1;
-    $tahunN2 = $tahunN - 2;
-
-    // Jenis cuti label untuk catatan
-    $jenisCutiCatatan = [
-        'Cuti Tahunan',
-        'Cuti Besar',
-        'Cuti Sakit',
-        'Cuti Melahirkan',
-        'Cuti Karena Alasan Penting',
-        'Cuti di Luar Tanggungan Negara',
-    ];
+    $sisaCuti = $cutiRecord ? $cutiRecord->sisa_cuti : $user->leave_balance;
 @endphp
 
 {{-- Header kanan atas --}}
 <div class="header-right">
-    Anak Lampiran I-b<br>
-    Peraturan Badan Kepegawaian Negara<br>
-    Republik Indonesia<br>
-    Nomor 24 Tahun 2017<br>
-    Tanggal 17 Oktober 2017
+    <div>LAMPIRAN II</div>
+    SURAT EDARAN SEKRETARIS MAHKAMAH AGUNG<br>
+    REPUBLIK INDONESIA NOMOR 13 TAHUN 2019
+</div>
+
+{{-- Surat header --}}
+<div class="surat-header">
+    <div class="surat-date">Ranai, {{ $formatTanggal($leaveRequest->created_at) }}</div>
+    <div class="surat-kepada">
+        Kepada Yth.<br>
+        Ketua Pengadilan Negeri Natuna<br>
+        Di-<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ranai
+    </div>
 </div>
 
 {{-- Judul --}}
 <div class="judul">FORMULIR PERMINTAAN DAN PEMBERIAN CUTI</div>
 
 {{-- Nomor Surat --}}
-<div class="nomor-surat">
-    Nomor : {{ $nomorSurat }}
-</div>
+<div class="nomor-surat">NOMOR: {{ $nomorSurat }}</div>
 
-{{-- TABEL UTAMA --}}
+{{-- I. DATA PEGAWAI --}}
+<table class="data-pegawai">
+    <tr>
+        <td colspan="4" class="section-header">I. DATA PEGAWAI</td>
+    </tr>
+    <tr>
+        <td class="label-cell">Nama</td>
+        <td class="value-cell">{{ $user->name }}</td>
+        <td class="label-cell">NIP</td>
+        <td class="value-cell">{{ $user->nip }}</td>
+    </tr>
+    <tr>
+        <td class="label-cell">Jabatan</td>
+        <td class="value-cell">{{ $user->jabatan ?? '-' }}</td>
+        <td class="label-cell">Masa Kerja</td>
+        <td class="value-cell">{{ $masaKerjaText }}</td>
+    </tr>
+    <tr>
+        <td class="label-cell">Unit Kerja</td>
+        <td colspan="3">{{ $user->unit_kerja ?? 'Pengadilan Negeri Natuna' }}</td>
+    </tr>
+</table>
+
+{{-- II. JENIS CUTI YANG DIAMBIL --}}
 <table class="form-table">
-    {{-- I. DATA PEGAWAI --}}
     <tr>
-        <td colspan="2" class="section-header">I. DATA PEGAWAI</td>
+        <td colspan="2" class="section-header">II. JENIS CUTI YANG DIAMBIL *</td>
     </tr>
     <tr>
-        <td colspan="2" style="padding: 4pt 5pt;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                    <td class="field-label no-border">Nama</td>
-                    <td class="field-sep no-border">:</td>
-                    <td class="no-border">{{ $user->name }}</td>
-                </tr>
-                <tr>
-                    <td class="field-label no-border">NIP</td>
-                    <td class="field-sep no-border">:</td>
-                    <td class="no-border">{{ $user->nip }}</td>
-                </tr>
-                <tr>
-                    <td class="field-label no-border">Jabatan</td>
-                    <td class="field-sep no-border">:</td>
-                    <td class="no-border">{{ $user->jabatan ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="field-label no-border">Masa Kerja</td>
-                    <td class="field-sep no-border">:</td>
-                    <td class="no-border">{{ $masaKerjaText }}</td>
-                </tr>
-                <tr>
-                    <td class="field-label no-border">Unit Kerja</td>
-                    <td class="field-sep no-border">:</td>
-                    <td class="no-border">{{ $user->unit_kerja ?? 'Pengadilan Negeri Natuna' }}</td>
-                </tr>
-            </table>
+        @foreach($jenisCutiOptions as $idx => $option)
+            @if($idx % 2 === 0 && $idx > 0)</tr><tr>@endif
+            <td style="width: 50%; padding: 2pt 4pt;">
+                <span class="checkbox">{{ $leaveRequest->type === $option[0] ? '√' : '-' }}</span>
+                &nbsp;&nbsp;{{ $option[1] }}
+            </td>
+        @endforeach
+    </tr>
+</table>
+
+{{-- III. ALASAN CUTI --}}
+<table class="form-table">
+    <tr>
+        <td class="section-header">III. ALASAN CUTI</td>
+    </tr>
+    <tr>
+        <td style="padding: 4pt;">{{ $alasan }}</td>
+    </tr>
+</table>
+
+{{-- IV. LAMANYA CUTI --}}
+<table class="form-table">
+    <tr>
+        <td class="section-header">IV. LAMANYA CUTI</td>
+    </tr>
+    <tr>
+        <td style="padding: 4pt;">
+            Selama <u>&nbsp;&nbsp;{{ $hariKerja }}&nbsp;&nbsp;</u> Hari/<del>bulan</del>/<del>tahun</del>**
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            Mulai Tanggal <u>&nbsp;&nbsp;{{ $formatTanggal($leaveRequest->start_date) }}&nbsp;&nbsp;</u>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            s/d <u>&nbsp;&nbsp;{{ $formatTanggal($leaveRequest->end_date) }}&nbsp;&nbsp;</u>
         </td>
     </tr>
+</table>
 
-    {{-- II. JENIS CUTI YANG DIAMBIL --}}
+{{-- V. CATATAN CUTI --}}
+<table class="form-table">
     <tr>
-        <td colspan="2" class="section-header">II. JENIS CUTI YANG DIAMBIL **)</td>
+        <td class="section-header">V. CATATAN CUTI ***</td>
     </tr>
     <tr>
-        <td colspan="2" style="padding: 4pt 5pt;">
-            <table style="width: 100%; border-collapse: collapse;">
-                @php $cutiIdx = 0; @endphp
-                @foreach($jenisCutiList as $typeKey => $typeLabel)
-                    @if($cutiIdx % 2 === 0)<tr>@endif
-                    <td class="no-border" style="width: 50%; padding: 1pt 0;">
-                        <span class="checkbox">{{ $leaveRequest->type === $typeKey ? '☑' : '☐' }}</span>
-                        {{ ($cutiIdx + 1) }}. {{ $typeLabel }}
-                    </td>
-                    @if($cutiIdx % 2 === 1)</tr>@endif
-                    @php $cutiIdx++; @endphp
-                @endforeach
-                @if($cutiIdx % 2 !== 0)</tr>@endif
-            </table>
-        </td>
-    </tr>
-
-    {{-- III. ALASAN CUTI --}}
-    <tr>
-        <td colspan="2" class="section-header">III. ALASAN CUTI</td>
-    </tr>
-    <tr>
-        <td colspan="2" style="padding: 4pt 5pt; min-height: 20pt;">
-            {{ $alasan }}
-        </td>
-    </tr>
-
-    {{-- IV. LAMANYA CUTI --}}
-    <tr>
-        <td colspan="2" class="section-header">IV. LAMANYA CUTI</td>
-    </tr>
-    <tr>
-        <td colspan="2" style="padding: 4pt 5pt;">
-            Selama {{ $terbilang }} ({{ $hariKerja }}) hari kerja,<br>
-            mulai tanggal {{ $formatTanggal($leaveRequest->start_date) }} s/d {{ $formatTanggal($leaveRequest->end_date) }}
-        </td>
-    </tr>
-
-    {{-- V. CATATAN CUTI --}}
-    <tr>
-        <td colspan="2" class="section-header">V. CATATAN CUTI ***)</td>
-    </tr>
-    <tr>
-        <td colspan="2" style="padding: 0;">
-            <table class="catatan-table">
+        <td style="padding: 0;">
+            <table class="catatan-cuti">
                 <tr>
-                    <th style="width: 25pt;" rowspan="2">No.</th>
-                    <th rowspan="2">Jenis Cuti</th>
-                    <th colspan="3">Catatan Cuti</th>
-                    <th rowspan="2" style="width: 45pt;">Sisa</th>
-                    <th rowspan="2" style="width: 60pt;">Keterangan</th>
+                    <td class="header-col" style="width: 15%;">CUTI TAHUNAN</td>
+                    <td class="header-col" style="width: 20%;">PAFAF PETUGAS CUTI</td>
+                    <td class="header-col" style="width: 15%;">CUTI BESAR</td>
+                    <td class="header-col" style="width: 50%;"></td>
                 </tr>
-                <tr>
-                    <th style="width: 55pt;">Tahun {{ $tahunN2 }}</th>
-                    <th style="width: 55pt;">Tahun {{ $tahunN1 }}</th>
-                    <th style="width: 55pt;">Tahun {{ $tahunN }}</th>
-                </tr>
-                @foreach($jenisCutiCatatan as $idx => $namaJenis)
+                @php
+                    $catatanRows = [
+                        [$tahunSekarang - 2, 'Sisa 0', 'Sisa gaji', '-'],
+                        [$tahunSekarang - 1, ($cutiRecord && $cutiRecord->carry_over > 0) ? $cutiRecord->carry_over : '0', 'Sisa 0', 'CUTI MELAHIRKAN', '-'],
+                        [$tahunSekarang - 1, '0', 'Sisa 0', 'CUTI KARENA ALASAN PENTING', '-'],
+                        [$tahunSekarang, $cutiRecord ? $cutiRecord->hak_cuti : '12', 'Sisa ' . $sisaCuti, 'CUTI DILUAR TANGGUNGAN NEGARA', '-'],
+                    ];
+                @endphp
+                @foreach($catatanRows as $idx => $row)
                     <tr>
-                        <td>{{ $idx + 1 }}.</td>
-                        <td style="text-align: left; font-size: 7.5pt;">{{ $namaJenis }}</td>
-                        @if($namaJenis === 'Cuti Tahunan')
-                            {{-- Cuti tahunan: tampilkan data dari CutiRecord --}}
-                            <td>{{ isset($catatanCuti[$tahunN2]) ? $catatanCuti[$tahunN2]->cuti_diambil . ' hari' : '-' }}</td>
-                            <td>{{ isset($catatanCuti[$tahunN1]) ? $catatanCuti[$tahunN1]->cuti_diambil . ' hari' : '-' }}</td>
-                            <td>{{ isset($catatanCuti[$tahunN]) ? $catatanCuti[$tahunN]->cuti_diambil . ' hari' : '-' }}</td>
-                            <td>{{ isset($catatanCuti[$tahunN]) ? $catatanCuti[$tahunN]->sisa_cuti . ' hari' : ($user->leave_balance . ' hari') }}</td>
-                            <td style="font-size: 7pt;">
-                                @if(isset($catatanCuti[$tahunN]) && $catatanCuti[$tahunN]->keterangan)
-                                    {{ $catatanCuti[$tahunN]->keterangan }}
-                                @else
-                                    -
-                                @endif
-                            </td>
+                        <td style="text-align: left;">{{ $row[0] }}</td>
+                        <td style="text-align: left;">{{ $row[1] }}</td>
+                        <td style="text-align: left;">{{ $row[2] }}</td>
+                        @if($idx === 0)
+                            <td style="text-align: left;">{{ $row[3] }}</td>
                         @else
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
+                            <td style="text-align: left;">{{ $row[3] }}</td>
                         @endif
                     </tr>
                 @endforeach
             </table>
         </td>
     </tr>
+</table>
 
-    {{-- VI. ALAMAT SELAMA MENJALANKAN CUTI --}}
+{{-- VI. ALAMAT SELAMA MENJALANKAN CUTI --}}
+<table class="form-table">
     <tr>
-        <td colspan="2" class="section-header">VI. ALAMAT SELAMA MENJALANKAN CUTI</td>
+        <td class="section-header">VI. ALAMAT SELAMA MENJALANKAN CUTI</td>
     </tr>
     <tr>
-        <td colspan="2" style="padding: 4pt 5pt; min-height: 24pt;">
+        <td class="alamat-section">
             {{ $alamatCuti }}<br>
-            Telp. {{ $teleponCuti }}
+            @if($teleponCuti)
+                TELP. {{ $teleponCuti }}
+            @endif
+
+            <div class="ttd-pemohon">
+                Hormat Saya,<br>
+                <div class="ttd-nama">{{ $user->name }}</div>
+                NIP. {{ $user->nip }}
+            </div>
         </td>
     </tr>
 </table>
 
-{{-- TANDA TANGAN (3 kolom) --}}
-<table class="ttd-table">
-    {{-- Header row --}}
+{{-- VII. PERTIMBANGAN ATASAN LANGSUNG --}}
+<table class="form-table">
     <tr>
-        <td class="text-center" style="font-weight: bold; font-size: 8pt;">
-            Hormat saya,
-        </td>
-        <td class="text-center" style="font-weight: bold; font-size: 8pt;">
-            PERTIMBANGAN ATASAN LANGSUNG
-        </td>
-        <td class="text-center" style="font-weight: bold; font-size: 8pt;">
-            KEPUTUSAN PEJABAT YANG BERWENANG<br>MEMBERIKAN CUTI
-        </td>
+        <td class="section-header">VII. PERTIMBANGAN ATASAN LANGSUNG **</td>
     </tr>
-
-    {{-- Content row --}}
     <tr>
-        {{-- Kolom 1: Pemohon --}}
-        <td style="height: 120pt;">
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <div style="text-align: center;">
-                <span class="ttd-nama">{{ $user->name }}</span><br>
-                NIP. {{ $user->nip }}
-            </div>
-        </td>
-
-        {{-- Kolom 2: Pertimbangan Atasan --}}
-        <td style="height: 120pt;">
+        <td class="approval-section">
             @if($isDirectToKetua && !$atasan)
-                <div style="text-align: center; padding-top: 20pt; font-style: italic; font-size: 8pt;">
-                    LANGSUNG KE PEJABAT<br>BERWENANG
+                <div style="text-align: center; padding-top: 25pt; font-style: italic; font-size: 8pt;">
+                    LANGSUNG KE PEJABAT BERWENANG
                 </div>
             @else
-                @php
-                    $pertimbanganOptions = ['DISETUJUI', 'PERUBAHAN *)', 'DITANGGUHKAN *)', 'TIDAK DISETUJUI *)'];
-                    $pertimbanganValues = ['setuju', 'ubah', 'tangguhkan', 'tolak'];
-                @endphp
-                @foreach($pertimbanganOptions as $pIdx => $pOption)
-                    <span class="checkbox">{{ $leaveRequest->pertimbangan_atasan === $pertimbanganValues[$pIdx] ? '☑' : '☐' }}</span> {{ $pOption }}<br>
-                @endforeach
-                <br>
-                @if($atasan)
-                    <div style="text-align: center; margin-top: 10pt;">
-                        {{ $formatTanggal($leaveRequest->reviewed_at) }}<br>
-                        <br>
-                        <span class="ttd-nama">{{ $atasan->name }}</span><br>
+                <div class="approval-options">
+                    <span class="checkbox">{{ $leaveRequest->pertimbangan_atasan === 'setuju' ? '√' : '' }}</span> DISETUJUI
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="checkbox">{{ $leaveRequest->pertimbangan_atasan === 'ubah' ? '√' : '' }}</span> PERUBAHAN****
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="checkbox">{{ $leaveRequest->pertimbangan_atasan === 'tangguhkan' ? '√' : '' }}</span> DITANGGUHKAN****
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="checkbox">{{ $leaveRequest->pertimbangan_atasan === 'tolak' ? '√' : '' }}</span> TIDAK DISETUJUI ****
+                </div>
+
+                @if($atasan && $leaveRequest->reviewed_at)
+                    <div class="ttd-approval">
+                        Sekretaris Pengadilan Negeri Natuna,<br>
+                        <br><br><br>
+                        <div class="ttd-nama">{{ $atasan->name }}</div>
                         NIP. {{ $atasan->nip }}
-                    </div>
-                @else
-                    <div style="text-align: center; margin-top: 10pt;">
-                        ......................................<br>
-                        <br>
-                        ......................................<br>
-                        NIP. ......................................
                     </div>
                 @endif
             @endif
         </td>
+    </tr>
+</table>
 
-        {{-- Kolom 3: Keputusan Pejabat --}}
-        <td style="height: 120pt;">
-            @php
-                $keputusanOptions = ['DISETUJUI', 'PERUBAHAN *)', 'DITANGGUHKAN *)', 'TIDAK DISETUJUI *)'];
-                $keputusanValues = ['setuju', 'ubah', 'tangguhkan', 'tolak'];
-            @endphp
-            @foreach($keputusanOptions as $kIdx => $kOption)
-                <span class="checkbox">{{ $leaveRequest->keputusan_pejabat === $keputusanValues[$kIdx] ? '☑' : '☐' }}</span> {{ $kOption }}<br>
-            @endforeach
-            <br>
-            @if($pejabat)
-                <div style="text-align: center; margin-top: 10pt;">
-                    @if($leaveRequest->decided_at)
-                        {{ $formatTanggal($leaveRequest->decided_at) }}<br>
-                    @else
-                        ......................................<br>
-                    @endif
-                    <br>
-                    <span class="ttd-nama">{{ $pejabat->name }}</span><br>
+{{-- VIII. KEPUTUSAN PEJABAT YANG BERWENANG MEMBERIKAN CUTI --}}
+<table class="form-table">
+    <tr>
+        <td class="section-header">VIII. KEPUTUSAN PEJABAT YANG BERWENANG MEMBERIKAN CUTI**</td>
+    </tr>
+    <tr>
+        <td class="approval-section">
+            <div class="approval-options">
+                <span class="checkbox">{{ $leaveRequest->keputusan_pejabat === 'setuju' ? '√' : '' }}</span> DISETUJUI
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="checkbox">{{ $leaveRequest->keputusan_pejabat === 'ubah' ? '√' : '' }}</span> PERUBAHAN****
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="checkbox">{{ $leaveRequest->keputusan_pejabat === 'tangguhkan' ? '√' : '' }}</span> DITANGGUHKAN****
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="checkbox">{{ $leaveRequest->keputusan_pejabat === 'tolak' ? '√' : '' }}</span> TIDAK DISETUJUI ****
+            </div>
+
+            @if($pejabat && $leaveRequest->decided_at)
+                <div class="ttd-approval">
+                    Ketua Pengadilan Negeri Natuna,<br>
+                    <br><br><br>
+                    <div class="ttd-nama">{{ $pejabat->name }}</div>
                     NIP. {{ $pejabat->nip }}
-                </div>
-            @else
-                <div style="text-align: center; margin-top: 10pt;">
-                    ......................................<br>
-                    <br>
-                    ......................................<br>
-                    NIP. ......................................
                 </div>
             @endif
         </td>
@@ -471,10 +463,16 @@
 </table>
 
 {{-- Catatan kaki --}}
-<div style="font-size: 7pt; margin-top: 6pt; line-height: 1.4;">
-    *) Coret yang tidak perlu<br>
-    **) Pilih salah satu jenis cuti yang diambil, beri tanda centang (✓) pada kotak yang disediakan<br>
-    ***) Diisi oleh pejabat yang menangani bidang kepegawaian
+<div class="footer-notes">
+    <strong>Catatan:</strong><br>
+    * &nbsp;&nbsp;&nbsp;&nbsp; Coret yang tidak perlu.<br>
+    ** &nbsp;&nbsp; Pilih salah satu dengan memberi tanda centang (√).<br>
+    *** &nbsp; Dalam hal permintaan cuti karena alasan penting yang bersangkutan harus menyerahkan cuti<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tahunan terlebih dahulu.<br>
+    **** dibubuhi tanda setang dan ditandai.<br>
+    P-1 &nbsp;&nbsp;= Cuti tahun berjalan.<br>
+    P-2 &nbsp;&nbsp;= Cuti tahun sebelumnya.<br>
+    P+2 &nbsp;= Sisa cuti 2 tahun sebelumnya.
 </div>
 
 </body>

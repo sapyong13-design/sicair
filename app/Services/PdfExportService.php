@@ -122,8 +122,8 @@ class PdfExportService
             'generatedAt' => now(),
         ]);
 
-        // Folio / F4: 210mm x 330mm
-        $pdf->setPaper([0, 0, 595.28, 935.43]);
+        // Legal: 8.5 x 14 inch = 215.9 x 355.6 mm
+        $pdf->setPaper('legal', 'portrait');
 
         $filename = "Form-Cuti-{$user->nip}-{$leaveRequest->start_date->format('Ymd')}.pdf";
 

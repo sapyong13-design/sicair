@@ -10,6 +10,7 @@ use App\Models\LeaveRequest;
 use App\Models\Notification;
 use App\Services\BalanceAuditService;
 use App\Services\CutiTahunanCalculator;
+use App\Services\DocxExportService;
 use App\Services\HariKerjaCalculator;
 use App\Services\PdfExportService;
 use Carbon\Carbon;
@@ -488,7 +489,7 @@ class LeaveRequestController extends Controller
     }
 
     /**
-     * Export Form Permintaan dan Pemberian Cuti (Anak Lampiran I-b)
+     * Export Form Permintaan dan Pemberian Cuti (SEMA No. 13/2019) sebagai DOCX
      */
     public function exportFormPermintaanCuti(LeaveRequest $leaveRequest)
     {
@@ -505,7 +506,7 @@ class LeaveRequestController extends Controller
             return back()->with('error', 'Anda tidak memiliki akses untuk export form ini.');
         }
 
-        return PdfExportService::exportFormPermintaanCuti($leaveRequest);
+        return DocxExportService::exportFormPermintaanCutiTemplate($leaveRequest);
     }
 
     /**
