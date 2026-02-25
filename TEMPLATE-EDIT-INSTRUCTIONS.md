@@ -61,8 +61,10 @@ storage/app/templates/form-permintaan-cuti-template.docx
 #### Lamanya Cuti
 | Cari | Ganti Dengan |
 |------|--------------|
-| `12` (di baris "Selama ... hari") | `${lama_hari}` |
+| `12 (hari/...` (di baris "Selama") | `${lama_hari} (hari/...` |
 | `15 Desember 2025` | `${tanggal_mulai}` |
+
+**Catatan**: `${lama_hari}` sudah otomatis include kata "hari" (contoh: "3 hari")
 
 #### Catatan Cuti (tabel V)
 

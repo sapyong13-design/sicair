@@ -4,11 +4,13 @@
 
 ### Header & Tanggal
 - `${tanggal}` - Tanggal surat (contoh: "9 Desember 2025")
-- `${bulan_cuti}` - Bulan cuti dalam romawi (contoh: "XII")
-- `${tahun_cuti}` - Tahun cuti (contoh: "2025")
+- `${bulan_cuti}` - Bulan MENGAJUKAN cuti dalam romawi (contoh: "XII")
+- `${tahun_cuti}` - Tahun MENGAJUKAN cuti (contoh: "2025")
 
 **Format nomor surat:** `    /KPN.W32.U4/KP5.3/${bulan_cuti}/${tahun_cuti}`
 (ada 4 spasi di awal untuk diisi manual)
+
+**Catatan**: Bulan dan tahun berdasarkan **tanggal mengajukan** cuti (created_at), bukan tanggal mulai cuti
 
 ### I. Data Pegawai
 - `${nama}` - Nama pegawai
@@ -30,7 +32,7 @@
 - `${alasan}` - Alasan cuti
 
 ### IV. Lamanya Cuti
-- `${lama_hari}` - Jumlah hari (angka)
+- `${lama_hari}` - Jumlah hari dengan kata "hari" (contoh: "3 hari", "12 hari")
 - `${tanggal_mulai}` - Tanggal mulai (contoh: "15 Desember 2025")
 - `${tanggal_selesai}` - Tanggal selesai (contoh: "2 Januari 2026")
 

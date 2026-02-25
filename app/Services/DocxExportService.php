@@ -63,9 +63,13 @@ class DocxExportService
         $bulanRomawi = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
         $fmt = function($d) use ($bulanIndo) { return $d ? ($d->day . ' ' . $bulanIndo[$d->month] . ' ' . $d->year) : '...'; };
 
-        // Bulan dan tahun untuk nomor surat (berdasarkan tanggal mulai cuti)
-        $bulanCuti = $bulanRomawi[$leaveRequest->start_date->month - 1];
-        $tahunCuti = $leaveRequest->start_date->year;
+        // Bulan dan tahun untuk nomor surat (berdasarkan tanggal mengajukan cuti)
+        $bulanCuti = $bulanRomawi[$leaveRequest->created_at->month - 1];
+        $tahunCuti = $leaveRequest->created_at->year;
+
+        // Format lama cuti dengan kata "hari"
+        $hari = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days;
+        $lamaHari = $hari . ' hari';
 
         // Masa kerja
         $mk = '0 Tahun 0 Bulan';
@@ -100,7 +104,7 @@ class DocxExportService
         $template->setValue('cuti_luar_tanggungan', $leaveRequest->type === LeaveRequest::TYPE_LUAR_TANGGUNGAN ? '√' : '-');
 
         $template->setValue('alasan', $leaveRequest->reason);
-        $template->setValue('lama_hari', $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days);
+        $template->setValue('lama_hari', $lamaHari);
         $template->setValue('tanggal_mulai', $fmt($leaveRequest->start_date));
         $template->setValue('tanggal_selesai', $fmt($leaveRequest->end_date));
 
