@@ -246,7 +246,9 @@
         ->where('tahun', $tahunSekarang)
         ->first();
 
-    $sisaCuti = $cutiRecord ? $cutiRecord->sisa_cuti : $user->leave_balance;
+    $sisaSebelum = $cutiRecord ? $cutiRecord->sisa_cuti : $user->leave_balance;
+    $hariCuti = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days ?? 0;
+    $sisaCuti = max(0, $sisaSebelum - $hariCuti);
 @endphp
 
 {{-- Header kanan atas --}}

@@ -121,7 +121,8 @@ class DocxExportService
         $template->setValue('tahun_n', $tahun);
         $hak_n = $cr ? $cr->hak_cuti : 12;
         $template->setValue('sisa_n', (string)$hak_n);
-        $template->setValue('keterangan_n', 'Sisa ' . $sisa);
+        $sisa_setelah = max(0, $sisa - $hari);
+        $template->setValue('keterangan_n', 'Sisa ' . $sisa_setelah);
 
         $template->setValue('alamat', $leaveRequest->alamat_cuti ?? $user->alamat ?? '');
         $template->setValue('telepon', $leaveRequest->telepon_cuti ?? $user->telepon ?? '');
@@ -463,7 +464,7 @@ class DocxExportService
         $dt = [
             [$tahun - 2, 0, 'Sisa 0', 'III. CUTI MELAHIRKAN'],
             [$tahun - 1, ($cr && $cr->carry_over > 0) ? $cr->carry_over : 6, 'Sisa 0', 'IV. CUTI KARENA ALASAN PENTING'],
-            [$tahun, $cr ? $cr->hak_cuti : 12, 'Sisa ' . $sisa, 'V. CUTI DILUAR TANGGUNGAN NEGARA'],
+            [$tahun, $cr ? $cr->hak_cuti : 12, 'Sisa ' . max(0, $sisa - $hari), 'V. CUTI DILUAR TANGGUNGAN NEGARA'],
         ];
         foreach ($dt as $d) {
             $t->addRow(150, ['exactHeight' => true]);
