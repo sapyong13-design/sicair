@@ -131,4 +131,3 @@
 }
 </style>
 
-@include('components.onboarding-modals')

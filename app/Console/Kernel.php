@@ -19,6 +19,15 @@ class Kernel extends ConsoleKernel
             ->onOneServer()
             ->withoutOverlapping();
 
+        // Rekonsiliasi CutiRecord setiap Minggu pukul 02:00
+        $schedule->command('app:sync-cuti-records')
+            ->weekly()
+            ->sundays()
+            ->at('02:00')
+            ->onOneServer()
+            ->withoutOverlapping()
+            ->runInBackground();
+
         // Auto carry-over unused leave days every January 1st at 01:00
         $schedule->command('app:carry-over-unused-leave')
             ->yearlyOn(1, 1, '01:00')
