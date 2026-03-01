@@ -4,6 +4,21 @@
 
 @section('content')
 {{-- Page Header --}}
+@php
+    $hour = (int)\Carbon\Carbon::now()->format('H');
+    $greeting = match(true) {
+        $hour >= 5  && $hour < 11 => 'Selamat pagi',
+        $hour >= 11 && $hour < 15 => 'Selamat siang',
+        $hour >= 15 && $hour < 18 => 'Selamat sore',
+        default => 'Selamat malam',
+    };
+    $greetingIcon = match(true) {
+        $hour >= 5  && $hour < 11 => 'sun',
+        $hour >= 11 && $hour < 15 => 'sun-high',
+        $hour >= 15 && $hour < 18 => 'sunset',
+        default => 'moon',
+    };
+@endphp
 <div class="sh-page-header">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div>
@@ -12,7 +27,8 @@
                 Dashboard
             </h2>
             <div class="text-muted" style="font-size: 0.85rem;">
-                Selamat datang kembali, <strong class="text-dark">{{ $user->name }}</strong>
+                <i class="ti ti-{{ $greetingIcon }} me-1" style="color:var(--sh-accent);"></i>
+                {{ $greeting }}, <strong class="text-dark">{{ $user->name }}</strong>
 @php
     $roleLabels = [
         'admin' => 'Admin', 'ketua' => 'Ketua', 'atasan' => 'Atasan',
@@ -1034,33 +1050,57 @@
 
     {{-- Hero Balance Card --}}
     <div class="card sh-hero-balance mb-4 animate-in">
-        <div class="card-body p-4">
+        <div class="card-body p-3 p-md-4">
             <div class="hero-content">
                 <div class="row align-items-center">
                     <div class="col">
-                        <div style="font-size: 0.85rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 0.5rem;">
+                        @if($cutiInfo)
+                        {{-- User sudah bekerja ≥ 1 tahun, cutiInfo tersedia --}}
+                        <div style="font-size: 0.82rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 0.5rem;">
                             <i class="ti ti-calendar-stats me-1"></i> Sisa Cuti Tahunan
                         </div>
-                        @if($cutiInfo)
                         <div class="d-flex align-items-baseline gap-2 mb-2">
-                            <span class="sh-hero-number">{{ $cutiInfo['sisa'] ?? $user->leave_balance }}</span>
-                            <span style="font-size: 1.1rem; opacity: 0.8;">/ {{ $cutiInfo['total_hak'] ?? 12 }} hari</span>
+                            <span class="sh-hero-number">{{ $cutiInfo['sisa'] }}</span>
+                            <span style="font-size: 1.1rem; opacity: 0.8;">/ {{ $cutiInfo['total_hak'] }} hari</span>
                         </div>
                         <div class="sh-hero-progress mb-2" style="max-width: 280px;">
-                            @php $hakTotal = $cutiInfo['total_hak'] ?? 12; @endphp
-                            <div class="sh-hero-progress-bar" style="width: {{ $hakTotal > 0 ? (($cutiInfo['sisa'] ?? $user->leave_balance) / $hakTotal) * 100 : 0 }}%;"></div>
+                            @php $hakTotal = $cutiInfo['total_hak'] > 0 ? $cutiInfo['total_hak'] : 1; @endphp
+                            <div class="sh-hero-progress-bar" style="width: {{ min(100, ($cutiInfo['sisa'] / $hakTotal) * 100) }}%;"></div>
                         </div>
-                        <div style="font-size: 0.82rem; opacity: 0.7;">
-                            Hak: {{ $cutiInfo['hak_dasar'] ?? 12 }} hari
-                            @if(($cutiInfo['carry_over'] ?? 0) > 0)
-                                + Carry Over: {{ $cutiInfo['carry_over'] }} hari
-                            @endif
-                            @if(($cutiInfo['tambahan_terpencil'] ?? 0) > 0)
-                                + Terpencil: {{ $cutiInfo['tambahan_terpencil'] }} hari
-                            @endif
-                            &mdash; Terpakai: {{ $cutiInfo['cuti_diambil'] ?? 0 }} hari
+                        <div style="font-size: 0.8rem; opacity: 0.75;" class="mb-3">
+                            Hak: {{ $cutiInfo['hak_dasar'] }} hari
+                            @if($cutiInfo['carry_over'] > 0) + Carry Over: {{ $cutiInfo['carry_over'] }} hari @endif
+                            @if($cutiInfo['tambahan_terpencil'] > 0) + Terpencil: {{ $cutiInfo['tambahan_terpencil'] }} hari @endif
+                            &mdash; Terpakai: {{ $cutiInfo['cuti_diambil'] }} hari
+                        </div>
+                        @elseif(!$user->sudahBekerjaSatuTahun())
+                        {{-- Belum bekerja 1 tahun — tampilkan status jelas tanpa angka menyesatkan --}}
+                        <div style="font-size: 0.82rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 0.75rem;">
+                            <i class="ti ti-calendar-stats me-1"></i> Status Cuti Tahunan
+                        </div>
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div style="width:52px;height:52px;border-radius:12px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="ti ti-hourglass-high" style="font-size:1.6rem;"></i>
+                            </div>
+                            <div>
+                                <div style="font-size:1.05rem;font-weight:700;margin-bottom:0.2rem;">Belum Berhak Cuti Tahunan</div>
+                                <div style="font-size:0.8rem;opacity:0.75;">
+                                    @php
+                                        $mk = $user->masaKerjaTahun ?? 0;
+                                        $mkBulan = $user->tgl_sk_cpns
+                                            ? \Carbon\Carbon::parse($user->tgl_sk_cpns)->diffInMonths(\Carbon\Carbon::now()) % 12
+                                            : null;
+                                    @endphp
+                                    Masa kerja saat ini: {{ $mk }} tahun{{ $mkBulan !== null ? ' ' . $mkBulan . ' bulan' : '' }}.
+                                    Diperlukan minimal 1 tahun.
+                                </div>
+                            </div>
                         </div>
                         @else
+                        {{-- Sudah 1 tahun tapi cutiInfo null (fallback) --}}
+                        <div style="font-size: 0.82rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 0.5rem;">
+                            <i class="ti ti-calendar-stats me-1"></i> Sisa Cuti Tahunan
+                        </div>
                         <div class="d-flex align-items-baseline gap-2 mb-2">
                             <span class="sh-hero-number">{{ $user->leave_balance }}</span>
                             <span style="font-size: 1.1rem; opacity: 0.8;">/ 12 hari</span>
@@ -1068,17 +1108,25 @@
                         <div class="sh-hero-progress mb-2" style="max-width: 280px;">
                             <div class="sh-hero-progress-bar" style="width: {{ ($user->leave_balance / 12) * 100 }}%;"></div>
                         </div>
-                        <div style="font-size: 0.82rem; opacity: 0.7;">
-                            @if(!$user->sudahBekerjaSatuTahun())
-                                <i class="ti ti-alert-triangle me-1"></i> Anda belum bekerja 1 tahun. Belum berhak cuti tahunan.
-                            @else
-                                Terpakai {{ 12 - $user->leave_balance }} hari dari total 12 hari jatah cuti tahunan
-                            @endif
+                        <div style="font-size: 0.8rem; opacity: 0.75;" class="mb-3">
+                            Terpakai {{ 12 - $user->leave_balance }} hari dari 12 hari
                         </div>
+                        @endif
+
+                        {{-- CTA: Ajukan Cuti --}}
+                        @if($user->bolehCuti())
+                        <a href="{{ route('leave.create') }}"
+                           class="d-inline-flex align-items-center gap-2 d-block d-sm-inline-flex"
+                           style="background:rgba(255,255,255,0.2);color:#fff;border:2px solid rgba(255,255,255,0.45);border-radius:10px;font-weight:700;font-size:0.88rem;padding:0.5rem 1.25rem;text-decoration:none;transition:all 0.2s;max-width:100%;"
+                           onmouseover="this.style.background='rgba(255,255,255,0.32)'"
+                           onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                            <i class="ti ti-file-plus"></i>
+                            <span>Ajukan Cuti</span>
+                        </a>
                         @endif
                     </div>
                     <div class="col-auto d-none d-sm-block">
-                        <i class="ti ti-beach" style="font-size: 5rem; opacity: 0.2;"></i>
+                        <i class="ti ti-beach" style="font-size: 5rem; opacity: 0.15;"></i>
                     </div>
                 </div>
             </div>
@@ -1086,46 +1134,46 @@
     </div>
 
     {{-- Mini Stats --}}
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-lg-4 animate-in">
-            <div class="card sh-stat-card stat-warning">
-                <div class="card-body p-3">
+    <div class="row g-2 g-md-3 mb-4 sh-pegawai-stats">
+        <div class="col-4 animate-in">
+            <div class="card sh-stat-card stat-warning h-100">
+                <div class="card-body p-2 p-md-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="sh-stat-label mb-1">Diproses</div>
-                            <div class="sh-stat-number" style="color: var(--sh-warning);">{{ $leaveRequests->filter(fn($r) => $r->isPending())->count() }}</div>
+                            <div class="sh-stat-label mb-1" style="font-size:clamp(0.62rem,2vw,0.78rem);">Diproses</div>
+                            <div class="sh-stat-number" style="color:var(--sh-warning);font-size:clamp(1.3rem,5vw,2rem);">{{ $leaveRequests->filter(fn($r) => $r->isPending())->count() }}</div>
                         </div>
-                        <div class="sh-stat-icon icon-warning">
+                        <div class="sh-stat-icon icon-warning d-none d-sm-flex">
                             <i class="ti ti-clock-hour-4"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-6 col-lg-4 animate-in">
-            <div class="card sh-stat-card stat-success">
-                <div class="card-body p-3">
+        <div class="col-4 animate-in">
+            <div class="card sh-stat-card stat-success h-100">
+                <div class="card-body p-2 p-md-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="sh-stat-label mb-1">Disetujui</div>
-                            <div class="sh-stat-number" style="color: var(--sh-success);">{{ $leaveRequests->filter(fn($r) => $r->isApproved())->count() }}</div>
+                            <div class="sh-stat-label mb-1" style="font-size:clamp(0.62rem,2vw,0.78rem);">Disetujui</div>
+                            <div class="sh-stat-number" style="color:var(--sh-success);font-size:clamp(1.3rem,5vw,2rem);">{{ $leaveRequests->filter(fn($r) => $r->isApproved())->count() }}</div>
                         </div>
-                        <div class="sh-stat-icon icon-success">
+                        <div class="sh-stat-icon icon-success d-none d-sm-flex">
                             <i class="ti ti-circle-check"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-lg-4 animate-in">
-            <div class="card sh-stat-card stat-danger">
-                <div class="card-body p-3">
+        <div class="col-4 animate-in">
+            <div class="card sh-stat-card stat-danger h-100">
+                <div class="card-body p-2 p-md-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="sh-stat-label mb-1">Ditolak</div>
-                            <div class="sh-stat-number" style="color: var(--sh-danger);">{{ $leaveRequests->filter(fn($r) => $r->isRejected())->count() }}</div>
+                            <div class="sh-stat-label mb-1" style="font-size:clamp(0.62rem,2vw,0.78rem);">Ditolak</div>
+                            <div class="sh-stat-number" style="color:var(--sh-danger);font-size:clamp(1.3rem,5vw,2rem);">{{ $leaveRequests->filter(fn($r) => $r->isRejected())->count() }}</div>
                         </div>
-                        <div class="sh-stat-icon icon-danger">
+                        <div class="sh-stat-icon icon-danger d-none d-sm-flex">
                             <i class="ti ti-circle-x"></i>
                         </div>
                     </div>

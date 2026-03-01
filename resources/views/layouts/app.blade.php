@@ -913,14 +913,21 @@
 
         /* --- Mobile optimizations --- */
         @media (max-width: 767.98px) {
-            .sh-hero-number { font-size: 3.5rem; }
-            .sh-stat-number { font-size: 1.5rem; }
-            .sh-page-title { font-size: 1.2rem; }
-            .container-xl { padding-left: 1rem; padding-right: 1rem; }
+            .sh-hero-number { font-size: 3rem; }
+            .sh-stat-number { font-size: 1.4rem; }
+            .sh-page-title { font-size: 1.15rem; }
+            .container-xl { padding-left: 0.875rem; padding-right: 0.875rem; }
             .sh-chart-container { height: 200px; }
             .sh-history-card .card-body { padding: 0.75rem !important; }
             .sh-toast-container { right: 10px; left: 10px; }
             .sh-toast { max-width: 100%; }
+            /* Hero card tighter on mobile */
+            .sh-hero-balance .card-body { padding: 1rem !important; }
+            /* Stat cards: 3 equal columns on mobile */
+            .sh-pegawai-stats .col-6 { flex: 0 0 33.333%; max-width: 33.333%; }
+            .sh-stat-card .sh-stat-icon { width: 36px; height: 36px; font-size: 1rem; }
+            /* Greeting icon on mobile */
+            .sh-greeting-icon { display: none; }
 
             /* Taller navbar on mobile with proper vertical spacing */
             .sh-navbar {
@@ -1406,6 +1413,27 @@
         .sh-font-btn:hover { background: rgba(255,255,255,0.3); }
         .sh-font-size-group { display: flex; align-items: center; gap: 2px; }
 
+        /* Accessibility popover dropdown */
+        .sh-a11y-size-btn {
+            background: var(--sh-bg, #f8fafc);
+            color: var(--sh-text);
+            border: 1.5px solid rgba(0,0,0,0.08);
+            border-radius: 7px;
+            padding: 0.25rem 0.4rem;
+            font-weight: 700;
+            cursor: pointer;
+            line-height: 1.2;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+            text-align: center;
+        }
+        .sh-a11y-size-btn:hover { background: var(--sh-primary-light); color: var(--sh-primary); border-color: var(--sh-primary); }
+        .sh-a11y-size-btn.sh-size-active { background: var(--sh-primary-light); color: var(--sh-primary); border-color: var(--sh-primary); }
+        [data-bs-theme="dark"] .sh-a11y-size-btn { background: #1e293b; color: #94a3b8; border-color: #334155; }
+        [data-bs-theme="dark"] .sh-a11y-size-btn:hover,
+        [data-bs-theme="dark"] .sh-a11y-size-btn.sh-size-active { background: #064e3b; color: #4ade80; border-color: #166534; }
+        .sh-a11y-dropdown { min-width: 170px; border-radius: 12px; padding: 0.75rem; }
+        .sh-a11y-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--sh-text-muted); margin-bottom: 0.35rem; }
+
         /* ===== Sprint 9 #48: Export Progress Overlay ===== */
         .sh-export-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 9999;
@@ -1451,20 +1479,26 @@
                 </span>
             </a>
             <div class="navbar-nav flex-row order-md-last align-items-center">
-                {{-- Sprint 8 #42: Font Size Adjuster --}}
-                <div class="nav-item me-1 d-none d-md-flex align-items-center">
-                    <div class="sh-font-size-group" title="Ukuran teks">
-                        <button class="sh-font-btn" id="fontSmall" aria-label="Perkecil teks" title="Perkecil teks" style="font-size:0.7rem;">A</button>
-                        <button class="sh-font-btn" id="fontNormal" aria-label="Ukuran normal" title="Ukuran normal" style="font-size:0.85rem;">A</button>
-                        <button class="sh-font-btn" id="fontLarge" aria-label="Perbesar teks" title="Perbesar teks" style="font-size:1rem;">A</button>
-                    </div>
-                </div>
-
-                {{-- Sprint 8 #43: High Contrast Toggle --}}
-                <div class="nav-item me-2 d-none d-md-flex align-items-center">
-                    <button class="sh-dark-toggle" id="contrastToggle" title="Toggle High Contrast" aria-label="Toggle mode kontras tinggi" style="font-size:0.85rem;">
-                        <i class="ti ti-contrast" id="contrastIcon" aria-hidden="true"></i>
+                {{-- Sprint 8 #42 & #43: Accessibility Menu (Font Size + Contrast) --}}
+                <div class="nav-item dropdown me-2 d-none d-md-flex align-items-center">
+                    <button class="sh-dark-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside"
+                            title="Aksesibilitas" aria-label="Menu aksesibilitas" aria-expanded="false">
+                        <span style="font-size:0.78rem;font-weight:800;line-height:1;letter-spacing:-0.5px;font-family:inherit;">Aa</span>
                     </button>
+                    <div class="dropdown-menu dropdown-menu-end sh-a11y-dropdown">
+                        <div class="sh-a11y-label">Ukuran Teks</div>
+                        <div class="d-flex gap-1 mb-3">
+                            <button class="sh-a11y-size-btn flex-fill" id="fontSmall" aria-label="Teks kecil" style="font-size:0.7rem;">A</button>
+                            <button class="sh-a11y-size-btn flex-fill" id="fontNormal" aria-label="Teks normal" style="font-size:0.85rem;">A</button>
+                            <button class="sh-a11y-size-btn flex-fill" id="fontLarge" aria-label="Teks besar" style="font-size:1rem;">A</button>
+                        </div>
+                        <div class="sh-a11y-label">Tampilan</div>
+                        <button id="contrastToggle" class="sh-a11y-size-btn w-100 d-flex align-items-center gap-2"
+                                style="font-size:0.78rem;padding:0.35rem 0.6rem;" aria-label="Toggle kontras tinggi">
+                            <i class="ti ti-contrast" id="contrastIcon"></i>
+                            <span id="contrastLabel">Kontras Tinggi</span>
+                        </button>
+                    </div>
                 </div>
 
                 {{-- Dark Mode Toggle (#6, #7) --}}
@@ -2084,9 +2118,19 @@
         function setSize(key) {
             document.documentElement.style.fontSize = sizes[key];
             localStorage.setItem('sh-font-size', key);
+            updateActiveBtn(key);
+        }
+
+        function updateActiveBtn(key) {
+            var map = { small: 'fontSmall', normal: 'fontNormal', large: 'fontLarge' };
+            Object.keys(map).forEach(function(k) {
+                var el = document.getElementById(map[k]);
+                if (el) el.classList.toggle('sh-size-active', k === key);
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            updateActiveBtn(saved);
             var s = document.getElementById('fontSmall');
             var n = document.getElementById('fontNormal');
             var l = document.getElementById('fontLarge');
@@ -2111,6 +2155,9 @@
                 var isHigh = document.documentElement.getAttribute('data-contrast') === 'high';
                 if (icon) icon.className = isHigh ? 'ti ti-contrast-2' : 'ti ti-contrast';
                 btn.title = isHigh ? 'Mode Kontras Normal' : 'Mode Kontras Tinggi';
+                var lbl = document.getElementById('contrastLabel');
+                if (lbl) lbl.textContent = isHigh ? 'Kontras Normal' : 'Kontras Tinggi';
+                btn.classList.toggle('sh-size-active', isHigh);
             }
             updateIcon();
             btn.addEventListener('click', function() {
