@@ -113,16 +113,19 @@ class DocxExportService
         $template->setValue('sisa_n2', '0');
         $template->setValue('keterangan_n2', 'Sisa 0');
 
+        // Cascade deduction: carry-over dari tahun lalu habis dulu, baru potong tahun ini
+        $carry_n1     = ($cr && $cr->carry_over > 0) ? (int)$cr->carry_over : 0;
+        $hak_n        = $cr ? (int)$cr->hak_cuti : 12;
+        $deduct_n1    = min($carry_n1, $hari);          // berapa dikurangi dari carry-over
+        $deduct_n     = max(0, $hari - $deduct_n1);     // sisanya potong tahun ini
+
         $template->setValue('tahun_n1', $tahun - 1);
-        $sisa_n1 = ($cr && $cr->carry_over > 0) ? $cr->carry_over : 6;
-        $template->setValue('sisa_n1', (string)$sisa_n1);
-        $template->setValue('keterangan_n1', 'Sisa 0');
+        $template->setValue('sisa_n1', (string)$carry_n1);
+        $template->setValue('keterangan_n1', 'Sisa ' . ($carry_n1 - $deduct_n1));
 
         $template->setValue('tahun_n', $tahun);
-        $hak_n = $cr ? $cr->hak_cuti : 12;
         $template->setValue('sisa_n', (string)$hak_n);
-        $sisa_setelah = max(0, $sisa - $hari);
-        $template->setValue('keterangan_n', 'Sisa ' . $sisa_setelah);
+        $template->setValue('keterangan_n', 'Sisa ' . max(0, $hak_n - $deduct_n));
 
         $template->setValue('alamat', $leaveRequest->alamat_cuti ?? $user->alamat ?? '');
         $template->setValue('telepon', $leaveRequest->telepon_cuti ?? $user->telepon ?? '');
@@ -461,10 +464,15 @@ class DocxExportService
         $t->addCell(1600)->addText('Keterangan', ['name' => 'Bookman Old Style', 'size' => 8, 'bold' => true], $sp);
         $t->addCell(6200)->addText('II. CUTI SAKIT', ['name' => 'Bookman Old Style', 'size' => 8, 'bold' => true], $sp);
         $t->addCell(400)->addText('-', ['name' => 'Bookman Old Style', 'size' => 8], ['alignment' => Jc::CENTER, 'spaceAfter' => 0, 'lineHeight' => 0.85]);
+        // Cascade: potong carry-over dulu, baru tahun ini
+        $carry_n1b  = ($cr && $cr->carry_over > 0) ? (int)$cr->carry_over : 0;
+        $hak_nb     = $cr ? (int)$cr->hak_cuti : 12;
+        $deduct_n1b = min($carry_n1b, $hari);
+        $deduct_nb  = max(0, $hari - $deduct_n1b);
         $dt = [
             [$tahun - 2, 0, 'Sisa 0', 'III. CUTI MELAHIRKAN'],
-            [$tahun - 1, ($cr && $cr->carry_over > 0) ? $cr->carry_over : 6, 'Sisa 0', 'IV. CUTI KARENA ALASAN PENTING'],
-            [$tahun, $cr ? $cr->hak_cuti : 12, 'Sisa ' . max(0, $sisa - $hari), 'V. CUTI DILUAR TANGGUNGAN NEGARA'],
+            [$tahun - 1, $carry_n1b, 'Sisa ' . ($carry_n1b - $deduct_n1b), 'IV. CUTI KARENA ALASAN PENTING'],
+            [$tahun, $hak_nb, 'Sisa ' . max(0, $hak_nb - $deduct_nb), 'V. CUTI DILUAR TANGGUNGAN NEGARA'],
         ];
         foreach ($dt as $d) {
             $t->addRow(150, ['exactHeight' => true]);

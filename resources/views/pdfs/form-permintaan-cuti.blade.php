@@ -246,9 +246,14 @@
         ->where('tahun', $tahunSekarang)
         ->first();
 
-    $sisaSebelum = $cutiRecord ? $cutiRecord->sisa_cuti : $user->leave_balance;
-    $hariCuti = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days ?? 0;
-    $sisaCuti = max(0, $sisaSebelum - $hariCuti);
+    // Cascade: carry-over dari tahun lalu dulu, baru potong tahun ini
+    $hariCuti    = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days ?? 0;
+    $carryN1     = ($cutiRecord && $cutiRecord->carry_over > 0) ? (int)$cutiRecord->carry_over : 0;
+    $hakN        = $cutiRecord ? (int)$cutiRecord->hak_cuti : 12;
+    $deductN1    = min($carryN1, $hariCuti);
+    $deductN     = max(0, $hariCuti - $deductN1);
+    $sisaN1Sisa  = $carryN1 - $deductN1;       // sisa carry-over setelah cuti ini
+    $sisaCuti    = max(0, $hakN - $deductN);    // sisa tahun ini setelah cuti ini
 @endphp
 
 {{-- Header kanan atas --}}
@@ -356,10 +361,9 @@
                 </tr>
                 @php
                     $catatanRows = [
-                        [$tahunSekarang - 2, 'Sisa 0', 'Sisa gaji', '-'],
-                        [$tahunSekarang - 1, ($cutiRecord && $cutiRecord->carry_over > 0) ? $cutiRecord->carry_over : '0', 'Sisa 0', 'CUTI MELAHIRKAN', '-'],
-                        [$tahunSekarang - 1, '0', 'Sisa 0', 'CUTI KARENA ALASAN PENTING', '-'],
-                        [$tahunSekarang, $cutiRecord ? $cutiRecord->hak_cuti : '12', 'Sisa ' . $sisaCuti, 'CUTI DILUAR TANGGUNGAN NEGARA', '-'],
+                        [$tahunSekarang - 2, 0, 'Sisa 0', 'CUTI MELAHIRKAN', '-'],
+                        [$tahunSekarang - 1, $carryN1, 'Sisa ' . $sisaN1Sisa, 'CUTI KARENA ALASAN PENTING', '-'],
+                        [$tahunSekarang, $hakN, 'Sisa ' . $sisaCuti, 'CUTI DILUAR TANGGUNGAN NEGARA', '-'],
                     ];
                 @endphp
                 @foreach($catatanRows as $idx => $row)
