@@ -43,7 +43,7 @@ class DocxExportService
      */
     public static function exportFormPermintaanCutiTemplate(LeaveRequest $leaveRequest)
     {
-        $leaveRequest->load(['user', 'atasanReviewer', 'pejabat']);
+        $leaveRequest->load(['user', 'atasanReviewer', 'pejabat', 'user.atasan']);
         $user = $leaveRequest->user;
         $ketua = User::where('role', 'ketua')->first();
 
@@ -128,26 +128,33 @@ class DocxExportService
         $template->setValue('nama_pemohon', $user->name);
         $template->setValue('nip_pemohon', $user->nip);
 
-        // Atasan
-        $atasan = $leaveRequest->atasanReviewer;
-        if ($atasan && $leaveRequest->reviewed_at) {
-            $template->setValue('jabatan_atasan', self::getPositionTitle($atasan));
-            $template->setValue('nama_atasan', $atasan->name);
-            $template->setValue('nip_atasan', $atasan->nip);
-        } else {
+        // Atasan - pre-fill dari user->atasan jika belum di-review
+        // Untuk alur skip (langsung ke Ketua), section VII dikosongkan
+        if ($user->skipAtasanReview()) {
             $template->setValue('jabatan_atasan', '');
             $template->setValue('nama_atasan', '');
             $template->setValue('nip_atasan', '');
+        } else {
+            $atasan = $leaveRequest->atasanReviewer ?? $user->atasan;
+            if ($atasan) {
+                $template->setValue('jabatan_atasan', self::getPositionTitle($atasan));
+                $template->setValue('nama_atasan', $atasan->name);
+                $template->setValue('nip_atasan', $atasan->nip);
+            } else {
+                $template->setValue('jabatan_atasan', '');
+                $template->setValue('nama_atasan', '');
+                $template->setValue('nip_atasan', '');
+            }
         }
 
-        // Pejabat
+        // Pejabat - selalu pre-fill dengan data Ketua
         $pejabat = $leaveRequest->pejabat ?? $ketua;
-        if ($pejabat && $leaveRequest->decided_at) {
+        if ($pejabat) {
             $template->setValue('jabatan_pejabat', self::getPositionTitle($pejabat));
             $template->setValue('nama_pejabat', $pejabat->name);
             $template->setValue('nip_pejabat', $pejabat->nip);
         } else {
-            $template->setValue('jabatan_pejabat', self::getPositionTitle($ketua));
+            $template->setValue('jabatan_pejabat', '');
             $template->setValue('nama_pejabat', '');
             $template->setValue('nip_pejabat', '');
         }
@@ -157,6 +164,156 @@ class DocxExportService
         $template->saveAs($outputFile);
 
         return response()->download($outputFile, $filename)->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Export Surat Permohonan Cuti sebagai DOCX (kertas folio/F4)
+     */
+    public static function exportSuratPermohonanDocx(LeaveRequest $leaveRequest)
+    {
+        $leaveRequest->load('user');
+        $user = $leaveRequest->user;
+        $ketua = User::where('role', 'ketua')->first();
+
+        $phpWord = new PhpWord();
+        $phpWord->setDefaultFontName('Times New Roman');
+        $phpWord->setDefaultFontSize(12);
+
+        // Folio F4: 21.5cm x 33cm, margin: atas/kanan/bawah 2cm, kiri 2.5cm
+        $section = $phpWord->addSection([
+            'pageSizeW'    => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(21.5),
+            'pageSizeH'    => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(33),
+            'marginTop'    => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2),
+            'marginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2),
+            'marginLeft'   => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2.5),
+            'marginRight'  => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2),
+        ]);
+
+        // Helper
+        $bulanIndo = [1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',
+                      7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'];
+        $fmt = fn($d) => $d->day . ' ' . $bulanIndo[$d->month] . ' ' . $d->year;
+
+        // Terbilang
+        $satuan = ['','satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan','sepuluh','sebelas'];
+        $terbilangFn = function(int $n) use (&$terbilangFn, $satuan): string {
+            $n = abs($n);
+            if ($n < 12) return $satuan[$n];
+            if ($n < 20) return $satuan[$n - 10] . ' belas';
+            if ($n < 100) return $satuan[(int)($n/10)] . ' puluh' . ($n%10 ? ' '.$satuan[$n%10] : '');
+            if ($n < 200) return 'seratus' . ($n-100 ? ' '.$terbilangFn($n-100) : '');
+            return $satuan[(int)($n/100)] . ' ratus' . ($n%100 ? ' '.$terbilangFn($n%100) : '');
+        };
+
+        $hari = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days;
+        $terbilang = $terbilangFn((int)$hari);
+
+        // Alasan lengkap
+        $alasan = $leaveRequest->reason;
+        if ($leaveRequest->type === LeaveRequest::TYPE_ALASAN_PENTING && $leaveRequest->alasan_cap) {
+            $capLabel = LeaveRequest::capLabels()[$leaveRequest->alasan_cap] ?? '';
+            if ($capLabel) $alasan .= ' (' . strtolower($capLabel) . ')';
+        }
+        if ($leaveRequest->type === LeaveRequest::TYPE_MELAHIRKAN && $leaveRequest->kelahiran_ke) {
+            $alasan .= ' (kelahiran anak ke-' . $leaveRequest->kelahiran_ke . ')';
+        }
+
+        $sapaanKetua = ($ketua && $ketua->jenis_kelamin === 'P') ? 'Ibu' : 'Bapak';
+
+        $fnt  = ['name' => 'Times New Roman', 'size' => 12];
+        $fntB = ['name' => 'Times New Roman', 'size' => 12, 'bold' => true];
+        $ls   = ['lineHeight' => 1.8, 'spaceAfter' => 0, 'spaceBefore' => 0];
+        $lsAf = ['lineHeight' => 1.8, 'spaceAfter' => 160, 'spaceBefore' => 0];
+
+        // Tanggal (rata kanan)
+        $section->addText('Natuna, ' . $fmt($leaveRequest->created_at), $fnt,
+            array_merge($ls, ['alignment' => Jc::END, 'spaceAfter' => 320]));
+
+        // Tujuan
+        $section->addText('Kepada Yth.', $fnt, $ls);
+        $section->addText($sapaanKetua . ' Ketua Pengadilan Negeri Natuna', $fnt, $ls);
+        $section->addText('Di-', $fnt, $ls);
+        $section->addText('        Ranai', $fnt, ['lineHeight' => 1.8, 'spaceAfter' => 320, 'spaceBefore' => 0]);
+
+        // Perihal
+        $perihalRun = $section->addTextRun(['lineHeight' => 1.8, 'spaceAfter' => 320, 'spaceBefore' => 0]);
+        $perihalRun->addText('Perihal : ', $fnt);
+        $perihalRun->addText('Permohonan ' . $leaveRequest->type_label, $fntB);
+
+        // Pembuka
+        $section->addText('Dengan hormat,', $fnt, $lsAf);
+
+        // Yang bertanda tangan (rata kiri, sama dengan "Dengan hormat")
+        $section->addText('Yang bertanda tangan di bawah ini:', $fnt, $lsAf);
+
+        // Tabel data pemohon (tanpa indent)
+        $tbl = $section->addTable([
+            'borderSize' => 0,
+            'borderColor' => 'FFFFFF',
+            'cellMarginTop' => 0,
+            'cellMarginBottom' => 0,
+            'cellMarginLeft' => 0,
+            'cellMarginRight' => 0,
+        ]);
+        $sp = ['lineHeight' => 1.8, 'spaceAfter' => 0, 'spaceBefore' => 0];
+        $rows = [
+            ['Nama',               $user->name],
+            ['NIP',                $user->nip],
+            ['Pangkat/Gol. Ruang', $user->golongan_ruang ?? '-'],
+            ['Jabatan',            $user->jabatan ?? '-'],
+            ['Satuan Organisasi',  $user->unit_kerja ?? 'Pengadilan Negeri Natuna'],
+        ];
+        foreach ($rows as $row) {
+            $tbl->addRow();
+            $tbl->addCell(2900)->addText($row[0], $fnt, $sp);
+            $tbl->addCell(300)->addText(':', $fnt, $sp);
+            $tbl->addCell(7100)->addText($row[1], $fnt, $sp);
+        }
+
+        $section->addText('', $fnt, ['spaceAfter' => 160]);
+
+        // Isi permohonan (rata kiri, sama dengan "Dengan hormat")
+        $section->addText(
+            'Dengan ini mengajukan permohonan ' . $leaveRequest->type_label .
+            ' selama ' . $terbilang . ' (' . $hari . ') hari kerja, terhitung mulai tanggal ' .
+            $fmt($leaveRequest->start_date) . ' sampai dengan tanggal ' .
+            $fmt($leaveRequest->end_date) . ', dikarenakan ' . $alasan . '.',
+            $fnt,
+            ['lineHeight' => 1.8, 'spaceAfter' => 320, 'spaceBefore' => 0, 'alignment' => Jc::BOTH]
+        );
+
+        // Penutup (rata kiri, sama dengan "Dengan hormat")
+        $section->addText(
+            'Demikian permohonan ini saya buat untuk dapat dipertimbangkan sebagaimana mestinya.',
+            $fnt,
+            ['lineHeight' => 1.8, 'spaceAfter' => 640, 'spaceBefore' => 0, 'alignment' => Jc::BOTH]
+        );
+
+        // TTD — tabel 2 kolom: kiri kosong, kanan berisi tanda tangan (teks center)
+        // agar posisi "Hormat saya" sama dengan PDF (center dalam kotak kanan)
+        $ttdTbl = $section->addTable([
+            'borderSize' => 0, 'borderColor' => 'FFFFFF',
+            'cellMarginTop' => 0, 'cellMarginBottom' => 0,
+            'cellMarginLeft' => 0, 'cellMarginRight' => 0,
+        ]);
+        $ttdTbl->addRow();
+        $ttdTbl->addCell(5150); // kolom kiri kosong
+        $ttdKanan = $ttdTbl->addCell(5150);
+        $ttdKanan->addText('Hormat saya,', $fnt,
+            ['alignment' => Jc::CENTER, 'spaceAfter' => 1200, 'spaceBefore' => 0, 'lineHeight' => 1.8]);
+        $ttdTbl->addRow();
+        $ttdTbl->addCell(5150);
+        $ttdKanan2 = $ttdTbl->addCell(5150);
+        $ttdKanan2->addText($user->name,
+            array_merge($fntB, ['underline' => Font::UNDERLINE_SINGLE]),
+            ['alignment' => Jc::CENTER, 'spaceAfter' => 0, 'spaceBefore' => 0, 'lineHeight' => 1.8]);
+
+        $filename = "Surat-Permohonan-Cuti-{$user->nip}-{$leaveRequest->start_date->format('Ymd')}.docx";
+        $tempFile = tempnam(sys_get_temp_dir(), 'surat_cuti_');
+        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+        $objWriter->save($tempFile);
+
+        return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
     }
 
     public static function exportFormPermintaanCuti(LeaveRequest $leaveRequest)

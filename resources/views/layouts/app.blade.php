@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
     <title>@yield('title', 'SiHEALING - PN Natuna')</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/favicon-pn.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
     <!-- Tabler CSS CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
@@ -19,6 +21,15 @@
             --sh-success: #059669;
             --sh-success-light: #d1fae5;
             --sh-warning: #d97706;
+            /* Calendar palette */
+            --sh-cal-holiday-bg: #fef2f2;
+            --sh-cal-cb-bg: #eff6ff;
+            --sh-cal-cb-border: #1d4ed8;
+            --sh-cal-cb-text: #1d4ed8;
+            --sh-cal-cb-event-bg: #dbeafe;
+            --sh-cal-cb-badge-bg: #1d4ed8;
+            --sh-cal-dinas-bg: #fff7ed;
+            --sh-cal-legend-bg: #ffffff;
             --sh-warning-light: #fef3c7;
             --sh-danger: #dc2626;
             --sh-danger-light: #fee2e2;
@@ -45,6 +56,15 @@
             --sh-warning-light: #451a03;
             --sh-danger-light: #450a0a;
             --sh-accent-light: #422006;
+            /* Calendar palette — dark */
+            --sh-cal-holiday-bg: rgba(239, 68, 68, 0.12);
+            --sh-cal-cb-bg: rgba(59, 130, 246, 0.12);
+            --sh-cal-cb-border: #60a5fa;
+            --sh-cal-cb-text: #93c5fd;
+            --sh-cal-cb-event-bg: rgba(59, 130, 246, 0.2);
+            --sh-cal-cb-badge-bg: #1d4ed8;
+            --sh-cal-dinas-bg: rgba(234, 88, 12, 0.12);
+            --sh-cal-legend-bg: var(--sh-card-bg);
         }
         [data-bs-theme="dark"] body {
             background-color: var(--sh-body-bg) !important;
@@ -90,6 +110,11 @@
         [data-bs-theme="dark"] .sh-page-title { color: #4ade80 !important; }
         [data-bs-theme="dark"] .sh-history-card { background: var(--sh-card-bg) !important; }
         [data-bs-theme="dark"] .table { color: var(--sh-text) !important; }
+        /* Calendar dark mode table border */
+        [data-bs-theme="dark"] .sh-card .table-bordered td,
+        [data-bs-theme="dark"] .sh-card .table-bordered th { border-color: var(--sh-border) !important; }
+        [data-bs-theme="dark"] .sh-cal-dinas-luar { color: #fb923c; }
+        [data-bs-theme="dark"] .sh-cal-dinas-luar { border-left-color: #fb923c; }
         [data-bs-theme="dark"] .table-bordered td,
         [data-bs-theme="dark"] .table-bordered th { border-color: var(--sh-border) !important; }
 
@@ -137,9 +162,8 @@
             width: 36px;
             height: 36px;
             border-radius: 8px;
-            object-fit: contain;
-            background: rgba(255,255,255,0.15);
-            padding: 2px;
+            object-fit: cover;
+            object-position: center;
         }
         .sh-navbar .navbar-brand-text .brand-icon {
             background: rgba(255,255,255,0.15);
@@ -162,6 +186,83 @@
         .sh-navbar .nav-link.active {
             color: #fff !important;
             background: rgba(255,255,255,0.15);
+        }
+
+        /* --- Nav Dropdown (Manajemen) --- */
+        .sh-nav-dropdown .dropdown-toggle::after {
+            display: inline-block;
+            margin-left: 0.3rem;
+            vertical-align: middle;
+            border: none;
+            content: "";
+            font-family: 'tabler-icons';
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+        .sh-nav-dropdown-menu {
+            min-width: 220px;
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10);
+            padding: 0.5rem;
+            margin-top: 0.5rem !important;
+            background: #fff;
+            overflow: hidden;
+        }
+        [data-bs-theme="dark"] .sh-nav-dropdown-menu {
+            background: #1e293b;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .sh-nav-dropdown-section {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #94a3b8;
+            padding: 0.5rem 0.75rem 0.25rem;
+            margin-top: 0.2rem;
+        }
+        .sh-nav-dropdown-section:first-child { margin-top: 0; }
+        .sh-nav-dropdown-menu .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1e293b;
+            transition: background 0.15s, color 0.15s;
+        }
+        [data-bs-theme="dark"] .sh-nav-dropdown-menu .dropdown-item { color: #e2e8f0; }
+        .sh-nav-dropdown-menu .dropdown-item i {
+            font-size: 1rem;
+            color: #64748b;
+            flex-shrink: 0;
+            width: 18px;
+            text-align: center;
+        }
+        .sh-nav-dropdown-menu .dropdown-item:hover,
+        .sh-nav-dropdown-menu .dropdown-item:focus {
+            background: #f0fdf4;
+            color: #166534;
+        }
+        .sh-nav-dropdown-menu .dropdown-item:hover i,
+        .sh-nav-dropdown-menu .dropdown-item:focus i { color: #166534; }
+        [data-bs-theme="dark"] .sh-nav-dropdown-menu .dropdown-item:hover,
+        [data-bs-theme="dark"] .sh-nav-dropdown-menu .dropdown-item:focus {
+            background: #064e3b;
+            color: #4ade80;
+        }
+        .sh-nav-dropdown-menu .dropdown-item.active {
+            background: #dcfce7;
+            color: #166534;
+            font-weight: 700;
+        }
+        .sh-nav-dropdown-menu .dropdown-item.active i { color: #166534; }
+        [data-bs-theme="dark"] .sh-nav-dropdown-menu .dropdown-item.active {
+            background: #064e3b;
+            color: #4ade80;
         }
         .sh-user-avatar {
             width: 38px;
@@ -641,10 +742,17 @@
             font-weight: 600;
         }
         .sh-cal-cuti-bersama {
-            background: var(--sh-primary-light);
-            color: var(--sh-primary);
+            background: var(--sh-cal-cb-event-bg);
+            color: var(--sh-cal-cb-text);
             font-weight: 600;
-            border-left: 3px solid var(--sh-primary);
+            border-left: 3px solid var(--sh-cal-cb-border);
+        }
+        .sh-cal-dinas-luar {
+            background: var(--sh-cal-dinas-bg);
+            color: #ea580c;
+            border-left: 3px solid #ea580c;
+            font-size: 0.65rem;
+            font-weight: 600;
         }
 
         /* ===== Fitur 7: Chart container ===== */
@@ -960,6 +1068,46 @@
                 color: #fff;
             }
 
+            /* Mobile: Manajemen dropdown inline */
+            #navbar-menu .sh-nav-dropdown-menu {
+                position: static !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                background: #f8fafb !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100%;
+            }
+            [data-bs-theme="dark"] #navbar-menu .sh-nav-dropdown-menu {
+                background: #0f172a !important;
+            }
+            #navbar-menu .sh-nav-dropdown-menu .dropdown-item {
+                border-radius: 0 !important;
+                padding: 0.75rem 1.25rem 0.75rem 2.5rem !important;
+                border-bottom: 1px solid #f1f5f9;
+                font-size: 0.88rem;
+                color: #1e293b !important;
+            }
+            [data-bs-theme="dark"] #navbar-menu .sh-nav-dropdown-menu .dropdown-item { color: #cbd5e1 !important; border-bottom-color: #334155; }
+            #navbar-menu .sh-nav-dropdown-menu .dropdown-item:hover,
+            #navbar-menu .sh-nav-dropdown-menu .dropdown-item:focus {
+                background: var(--sh-primary-light) !important;
+                color: var(--sh-primary) !important;
+            }
+            #navbar-menu .sh-nav-dropdown-menu .dropdown-item.active {
+                background: var(--sh-primary-light) !important;
+                color: var(--sh-primary) !important;
+                font-weight: 700;
+                border-left: 4px solid var(--sh-primary);
+            }
+            #navbar-menu .sh-nav-dropdown-section {
+                padding-left: 2.5rem !important;
+                background: #f0fdf4;
+                border-bottom: 1px solid #dcfce7;
+            }
+            [data-bs-theme="dark"] #navbar-menu .sh-nav-dropdown-section { background: #064e3b; border-bottom-color: #065f46; }
+
             /* Bottom action buttons (Profil, Keluar) */
             .sh-mobile-nav-footer {
                 padding: 0.75rem 1.25rem;
@@ -1001,8 +1149,8 @@
                 <i class="ti ti-menu-2" style="font-size: 1.4rem;" aria-hidden="true"></i>
             </button>
             <a href="/dashboard" class="navbar-brand-text">
-                @if(file_exists(public_path('images/logo-pn-natuna.png')))
-                    <img src="{{ asset('images/logo-pn-natuna.png') }}" alt="Logo PN Natuna" class="brand-logo">
+                @if(file_exists(public_path('images/favicon-pn.png')))
+                    <img src="{{ asset('images/favicon-pn.png') }}" alt="Logo PN Natuna" class="brand-logo">
                 @else
                     <span class="brand-icon"><i class="ti ti-scale"></i></span>
                 @endif
@@ -1161,19 +1309,41 @@
                         </li>
                         @endif
 
-                        {{-- Admin: Kelola Pegawai --}}
+                        {{-- Admin: Dropdown Manajemen --}}
                         @if(Auth::user()->isAdmin())
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->is('pegawai*') ? 'active' : '' }}" href="{{ route('pegawai.index') }}">
-                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-users"></i></span>
-                                <span class="nav-link-title">Kelola Pegawai</span>
+                        @php
+                            $isManajemenActive = request()->is('pegawai*') || request()->is('hari-libur*') || request()->is('dinas-luar*') || request()->is('laporan-bulanan*') || request()->is('admin/*') || request()->is('balance-adjustments*');
+                        @endphp
+                        <li class="nav-item dropdown sh-nav-dropdown">
+                            <a class="nav-link dropdown-toggle {{ $isManajemenActive ? 'active' : '' }}"
+                               href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside"
+                               aria-expanded="false" aria-haspopup="true">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-settings"></i></span>
+                                <span class="nav-link-title">Manajemen</span>
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->is('hari-libur*') ? 'active' : '' }}" href="{{ route('hari-libur.index') }}">
-                                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-calendar-off"></i></span>
-                                <span class="nav-link-title">Hari Libur</span>
-                            </a>
+                            <div class="dropdown-menu sh-nav-dropdown-menu">
+                                <div class="sh-nav-dropdown-section">Kepegawaian</div>
+                                <a class="dropdown-item {{ request()->is('pegawai*') ? 'active' : '' }}" href="{{ route('pegawai.index') }}">
+                                    <i class="ti ti-users"></i> Kelola Pegawai
+                                </a>
+                                <a class="dropdown-item {{ request()->is('balance-adjustments*') ? 'active' : '' }}" href="{{ route('balance-adjustment.index') }}">
+                                    <i class="ti ti-adjustments-horizontal"></i> Penyesuaian Saldo
+                                </a>
+                                <div class="sh-nav-dropdown-section">Kalender & Kehadiran</div>
+                                <a class="dropdown-item {{ request()->is('hari-libur*') ? 'active' : '' }}" href="{{ route('hari-libur.index') }}">
+                                    <i class="ti ti-calendar-off"></i> Hari Libur
+                                </a>
+                                <a class="dropdown-item {{ request()->is('dinas-luar*') ? 'active' : '' }}" href="{{ route('dinas-luar.index') }}">
+                                    <i class="ti ti-briefcase"></i> Dinas Luar
+                                </a>
+                                <div class="sh-nav-dropdown-section">Laporan</div>
+                                <a class="dropdown-item {{ request()->is('laporan-bulanan*') ? 'active' : '' }}" href="{{ route('laporan-bulanan.index') }}">
+                                    <i class="ti ti-file-spreadsheet"></i> Laporan Bulanan
+                                </a>
+                                <a class="dropdown-item {{ request()->is('admin/audit-logs*') ? 'active' : '' }}" href="{{ route('admin.audit-logs.index') }}">
+                                    <i class="ti ti-clipboard-list"></i> Audit Log
+                                </a>
+                            </div>
                         </li>
                         @endif
                     </ul>

@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\HariLibur;
+use App\Models\LeaveRequest;
+use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 
@@ -70,23 +72,66 @@ class HariKerjaCalculator
     }
 
     /**
-     * Hitung persentase pegawai yang cuti pada rentang tanggal tertentu
-     * untuk validasi kuota 30%.
+     * Ambil user ID berdasarkan bagian menggunakan query DB langsung.
      */
-    public static function hitungPersentaseCutiSaatIni(Carbon $start, Carbon $end, string $unitKerja): float
+    private static function getUserIdsByBagian(string $bagian): array
     {
-        $totalPegawai = \App\Models\User::where('unit_kerja', $unitKerja)
-            ->whereIn('role', ['pegawai', 'atasan', 'panitera', 'sekretaris', 'hakim', 'hakim_ad_hoc'])
-            ->count();
+        $base = User::whereIn('role', ['pegawai', 'atasan', 'panitera', 'sekretaris', 'hakim', 'hakim_ad_hoc']);
+
+        if ($bagian === 'hakim') {
+            return $base->where('role', 'hakim')->pluck('id')->toArray();
+        }
+        if ($bagian === 'hakim_ad_hoc') {
+            return $base->where('role', 'hakim_ad_hoc')->pluck('id')->toArray();
+        }
+        if ($bagian === 'kepaniteraan') {
+            return $base->where(function ($q) {
+                $q->where('role', 'panitera')
+                  ->orWhere(function ($q2) {
+                      $q2->whereIn('role', ['pegawai', 'atasan'])
+                         ->where(function ($q3) {
+                             $q3->whereRaw("LOWER(unit_kerja) LIKE '%panitera%'")
+                                ->orWhereRaw("LOWER(unit_kerja) LIKE '%kepaniteraan%'");
+                         });
+                  });
+            })->pluck('id')->toArray();
+        }
+        if ($bagian === 'kesekretariatan') {
+            return $base->where(function ($q) {
+                $q->where('role', 'sekretaris')
+                  ->orWhere(function ($q2) {
+                      $q2->whereIn('role', ['pegawai', 'atasan'])
+                         ->where(function ($q3) {
+                             $q3->whereRaw("LOWER(unit_kerja) LIKE '%sekretariat%'")
+                                ->orWhereRaw("LOWER(unit_kerja) LIKE '%subbagian%'");
+                         });
+                  });
+            })->pluck('id')->toArray();
+        }
+        // Fallback: filter di PHP untuk 'umum' dan lainnya
+        return User::whereIn('role', ['pegawai', 'atasan', 'panitera', 'sekretaris', 'hakim', 'hakim_ad_hoc'])
+            ->get()->filter(fn($u) => $u->getBagian() === $bagian)->pluck('id')->toArray();
+    }
+
+    /**
+     * Hitung persentase pegawai yang cuti pada rentang tanggal tertentu
+     * untuk validasi kuota 30% per bagian (hakim/kepaniteraan/kesekretariatan).
+     */
+    public static function hitungPersentaseCutiSaatIni(Carbon $start, Carbon $end, User $user): float
+    {
+        $bagian = $user->getBagian();
+
+        // Bangun query berdasarkan bagian menggunakan DB (hindari memuat semua user ke PHP)
+        $userIdsBagian = self::getUserIdsByBagian($bagian);
+
+        $totalPegawai = count($userIdsBagian);
 
         if ($totalPegawai === 0) {
             return 0;
         }
 
-        $pegawaiCuti = \App\Models\LeaveRequest::whereHas('user', function ($q) use ($unitKerja) {
-                $q->where('unit_kerja', $unitKerja);
-            })
-            ->whereIn('status', ['disetujui', 'approved', 'pertimbangan_atasan', 'diajukan', 'pending'])
+        $pegawaiCuti = LeaveRequest::whereIn('user_id', $userIdsBagian)
+            ->whereIn('status', ['disetujui', 'approved'])
             ->where(function ($q) use ($start, $end) {
                 $q->whereBetween('start_date', [$start, $end])
                   ->orWhereBetween('end_date', [$start, $end])

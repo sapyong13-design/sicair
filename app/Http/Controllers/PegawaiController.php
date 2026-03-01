@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class PegawaiController extends Controller
 {
@@ -51,7 +52,7 @@ class PegawaiController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'nip' => 'required|string|size:18|unique:users,nip',
-            'email' => 'nullable|email|max:255|unique:users,email', // FIX #17: Add email validation
+            'email' => 'nullable|email|max:255|unique:users,email',
             'password' => 'required|string|min:8',
             'role' => 'required|in:admin,ketua,atasan,panitera,sekretaris,pegawai,hakim,hakim_ad_hoc',
             'jabatan' => 'nullable|string|max:255',
@@ -117,7 +118,7 @@ class PegawaiController extends Controller
             'jenis_kelamin' => 'required|in:L,P',
             'jumlah_anak' => 'nullable|integer|min:0',
             'lokasi_terpencil' => 'nullable|boolean',
-            'atasan_id' => 'nullable|exists:users,id',
+            'atasan_id' => ['nullable', 'exists:users,id', Rule::notIn([$pegawai->id])],
             'telepon' => 'nullable|string|max:20',
             'alamat' => 'nullable|string',
             'leave_balance' => 'nullable|integer|min:0',

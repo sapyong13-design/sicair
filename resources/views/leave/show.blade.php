@@ -28,20 +28,41 @@
             <a href="{{ route('leave.surat-permohonan', $leaveRequest) }}"
                class="btn sh-btn-primary"
                style="border-radius: 10px; font-size: 0.85rem;"
-               title="Download Surat Permohonan Cuti (PDF)">
+               title="Download Surat Permohonan Cuti (PDF)"
+               target="_blank">
                 <i class="ti ti-file-text me-1"></i>
                 Surat Permohonan
+            </a>
+            <a href="{{ route('leave.surat-permohonan-docx', $leaveRequest) }}"
+               class="btn sh-btn-primary"
+               style="border-radius: 10px; font-size: 0.85rem;"
+               title="Download Surat Permohonan Cuti (DOCX Folio)"
+               target="_blank">
+                <i class="ti ti-file-word me-1"></i>
+                Surat Permohonan (DOCX)
             </a>
             <a href="{{ route('leave.form-cuti', $leaveRequest) }}"
                class="btn sh-btn-primary"
                style="border-radius: 10px; font-size: 0.85rem;"
-               title="Download Form Permintaan dan Pemberian Cuti (PDF)">
+               title="Download Form Permintaan dan Pemberian Cuti (PDF)"
+               target="_blank">
                 <i class="ti ti-clipboard-text me-1"></i>
                 Form Cuti
             </a>
         </div>
     </div>
 </div>
+
+@if(session('success'))
+<div class="alert mb-4" style="background: var(--sh-success-light); color: var(--sh-success); border-radius: 12px; border: none;">
+    <i class="ti ti-circle-check me-2"></i> {{ session('success') }}
+</div>
+@endif
+@if(session('error'))
+<div class="alert mb-4" style="background: var(--sh-danger-light); color: var(--sh-danger); border-radius: 12px; border: none;">
+    <i class="ti ti-alert-circle me-2"></i> {{ session('error') }}
+</div>
+@endif
 
 <div class="row g-4 justify-content-center">
     <div class="col-lg-8">

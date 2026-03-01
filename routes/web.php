@@ -9,6 +9,8 @@ use App\Http\Controllers\BalanceAdjustmentController;
 use App\Http\Controllers\BalanceHistoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\DinasLuarController;
+use App\Http\Controllers\LaporanBulananController;
 use App\Http\Controllers\HariLiburController;
 use App\Http\Controllers\KalenderController;
 use App\Http\Controllers\LeaveRequestController;
@@ -51,6 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/leave/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave.show');
     Route::get('/leave/{leaveRequest}/export-pdf', [LeaveRequestController::class, 'exportPdf'])->name('leave.export-pdf');
     Route::get('/leave/{leaveRequest}/surat-permohonan', [LeaveRequestController::class, 'exportSuratPermohonan'])->name('leave.surat-permohonan');
+    Route::get('/leave/{leaveRequest}/surat-permohonan-docx', [LeaveRequestController::class, 'exportSuratPermohonanDocx'])->name('leave.surat-permohonan-docx');
     Route::get('/leave/{leaveRequest}/form-cuti', [LeaveRequestController::class, 'exportFormPermintaanCuti'])->name('leave.form-cuti');
     Route::get('/leave/export/summary', [LeaveRequestController::class, 'exportSummaryPdf'])->name('leave.export-summary');
 
@@ -133,6 +136,24 @@ Route::middleware('auth')->group(function () {
         Route::get('/{hariLibur}/edit', [HariLiburController::class, 'edit'])->name('edit');
         Route::put('/{hariLibur}', [HariLiburController::class, 'update'])->name('update');
         Route::delete('/{hariLibur}', [HariLiburController::class, 'destroy'])->name('destroy');
+    });
+
+    // === Dinas Luar (admin only) ===
+    Route::middleware('role:admin')->prefix('dinas-luar')->name('dinas-luar.')->group(function () {
+        Route::get('/', [DinasLuarController::class, 'index'])->name('index');
+        Route::get('/create', [DinasLuarController::class, 'create'])->name('create');
+        Route::post('/', [DinasLuarController::class, 'store'])->name('store');
+        Route::get('/{dinasLuar}/edit', [DinasLuarController::class, 'edit'])->name('edit');
+        Route::put('/{dinasLuar}', [DinasLuarController::class, 'update'])->name('update');
+        Route::delete('/{dinasLuar}', [DinasLuarController::class, 'destroy'])->name('destroy');
+    });
+    // Download dokumen: accessible by admin + ketua + pemilik record
+    Route::get('/dinas-luar/{dinasLuar}/dokumen', [DinasLuarController::class, 'downloadDokumen'])->name('dinas-luar.dokumen');
+
+    // === Laporan Bulanan (admin only) ===
+    Route::middleware('role:admin')->prefix('laporan-bulanan')->name('laporan-bulanan.')->group(function () {
+        Route::get('/', [LaporanBulananController::class, 'index'])->name('index');
+        Route::get('/export', [LaporanBulananController::class, 'export'])->name('export');
     });
 
     // === Audit Log (admin only) ===

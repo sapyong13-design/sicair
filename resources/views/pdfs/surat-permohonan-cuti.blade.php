@@ -34,12 +34,12 @@
             padding-left: 40pt;
         }
         table.data-pemohon {
-            margin-left: 40pt;
+            margin-left: 0;
             margin-bottom: 12pt;
             border-collapse: collapse;
         }
         table.data-pemohon td {
-            padding: 1pt 6pt;
+            padding: 1pt 6pt 1pt 0;
             vertical-align: top;
         }
         table.data-pemohon td.label {
@@ -139,9 +139,7 @@
     Dengan hormat,
     <br><br>
 
-    <div class="indent">
-        Yang bertanda tangan di bawah ini:
-    </div>
+    Yang bertanda tangan di bawah ini:
 
     <br>
 
@@ -173,15 +171,11 @@
         </tr>
     </table>
 
-    <div class="indent">
-        Dengan ini mengajukan permohonan {{ $leaveRequest->type_label }} selama {{ $terbilang }} ({{ $hariKerja }}) hari kerja, terhitung mulai tanggal {{ $tanggalMulai }} sampai dengan tanggal {{ $tanggalSelesai }}, dikarenakan {{ $alasan }}.
-    </div>
+    Dengan ini mengajukan permohonan {{ $leaveRequest->type_label }} selama {{ $terbilang }} ({{ $hariKerja }}) hari kerja, terhitung mulai tanggal {{ $tanggalMulai }} sampai dengan tanggal {{ $tanggalSelesai }}, dikarenakan {{ $alasan }}.
 
-    <br>
+    <br><br>
 
-    <div class="indent">
-        Demikian permohonan ini saya buat untuk dapat dipertimbangkan sebagaimana mestinya.
-    </div>
+    Demikian permohonan ini saya buat untuk dapat dipertimbangkan sebagaimana mestinya.
 </div>
 
 {{-- Tanda tangan --}}
@@ -189,7 +183,6 @@
     <div class="ttd-box">
         Hormat saya,
         <div class="ttd-nama">{{ $user->name }}</div>
-        <div class="ttd-nip">NIP. {{ $user->nip }}</div>
     </div>
 </div>
 

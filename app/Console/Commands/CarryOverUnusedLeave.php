@@ -115,18 +115,17 @@ class CarryOverUnusedLeave extends Command
             [
                 'user_id' => $user->id,
                 'tahun' => $year,
-                'jenis_cuti' => 'Cuti Tahunan',
             ],
             [
-                'alokasi_awal' => 12, // Default allocation
+                'hak_cuti' => 12,
             ]
         );
 
         // Calculate total used leave
-        $usedDays = $cutiRecord->digunakan ?? 0;
+        $usedDays = $cutiRecord->cuti_diambil ?? 0;
 
         // Calculate remaining days
-        $allocated = $cutiRecord->alokasi_awal ?? 12;
+        $allocated = $cutiRecord->hak_cuti ?? 12;
         $carryOver = $cutiRecord->carry_over ?? 0;
         $totalAvailable = $allocated + $carryOver;
         $remaining = $totalAvailable - $usedDays;

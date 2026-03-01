@@ -96,6 +96,35 @@ class User extends Authenticatable
             && in_array($this->unit_kerja, ['kepegawaian', 'Kepegawaian', 'KEPEGAWAIAN']);
     }
 
+    /**
+     * Bagian utama pegawai: 'hakim', 'kepaniteraan', atau 'kesekretariatan'.
+     * Digunakan untuk kuota cuti bersamaan 30% per bagian.
+     */
+    public function getBagian(): string
+    {
+        if ($this->role === 'hakim') {
+            return 'hakim';
+        }
+        if ($this->role === 'hakim_ad_hoc') {
+            return 'hakim_ad_hoc';
+        }
+        if ($this->role === 'panitera') {
+            return 'kepaniteraan';
+        }
+        if ($this->role === 'sekretaris') {
+            return 'kesekretariatan';
+        }
+        // Pegawai — tentukan dari unit_kerja
+        $uk = strtolower($this->unit_kerja ?? '');
+        if (str_contains($uk, 'panitera') || str_contains($uk, 'kepaniteraan')) {
+            return 'kepaniteraan';
+        }
+        if (str_contains($uk, 'sekretariat') || str_contains($uk, 'subbagian')) {
+            return 'kesekretariatan';
+        }
+        return 'umum';
+    }
+
     // ===== Approval Flow =====
 
     /**

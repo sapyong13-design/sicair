@@ -75,24 +75,6 @@ class DatabaseSeeder extends Seeder
         // GRUP 2 — HAKIM AD HOC PERIKANAN (tanpa golongan)
         // =========================================================
 
-        // No. 3
-        User::create([
-            'name'             => 'H. M. MEISON AZIS, S.E., S.H.',
-            'nip'              => '195905040220121002',
-            'password'         => $pass,
-            'role'             => 'hakim_ad_hoc',
-            'leave_balance'    => 12,
-            'jabatan'          => 'Hakim Ad Hoc Perikanan',
-            'golongan_ruang'   => null,
-            'unit_kerja'       => 'Pengadilan Negeri Natuna',
-            'masa_kerja_mulai' => '2012-11-06',
-            'status_pegawai'   => 'hakim',
-            'jenis_kelamin'    => 'L',
-            'jumlah_anak'      => 0,
-            'lokasi_terpencil' => false,
-            'atasan_id'        => $ketua->id,
-        ]);
-
         // No. 4
         User::create([
             'name'             => 'SUTRIYADI, S.H., M.Si',
@@ -103,7 +85,7 @@ class DatabaseSeeder extends Seeder
             'jabatan'          => 'Hakim Ad Hoc Perikanan',
             'golongan_ruang'   => null,
             'unit_kerja'       => 'Pengadilan Negeri Natuna',
-            'masa_kerja_mulai' => '2025-04-29',
+            'masa_kerja_mulai' => '2020-02-04',
             'status_pegawai'   => 'hakim',
             'jenis_kelamin'    => 'L',
             'jumlah_anak'      => 0,
@@ -139,7 +121,7 @@ class DatabaseSeeder extends Seeder
             'jabatan'          => 'Hakim Ad Hoc Perikanan',
             'golongan_ruang'   => null,
             'unit_kerja'       => 'Pengadilan Negeri Natuna',
-            'masa_kerja_mulai' => '2021-02-26',
+            'masa_kerja_mulai' => '2021-01-14',
             'status_pegawai'   => 'hakim',
             'jenis_kelamin'    => 'L',
             'jumlah_anak'      => 0,

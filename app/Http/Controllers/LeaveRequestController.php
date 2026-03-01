@@ -489,6 +489,27 @@ class LeaveRequestController extends Controller
     }
 
     /**
+     * Export Surat Permohonan Cuti sebagai DOCX (folio)
+     */
+    public function exportSuratPermohonanDocx(LeaveRequest $leaveRequest)
+    {
+        $user = Auth::user();
+
+        if (
+            $leaveRequest->user_id !== $user->id
+            && !$user->isAdmin()
+            && !$user->isKetua()
+            && !$user->isPanitera()
+            && !$user->isSekretaris()
+            && $leaveRequest->user->atasan_id !== $user->id
+        ) {
+            return back()->with('error', 'Anda tidak memiliki akses untuk export surat ini.');
+        }
+
+        return DocxExportService::exportSuratPermohonanDocx($leaveRequest);
+    }
+
+    /**
      * Export Form Permintaan dan Pemberian Cuti (SEMA No. 13/2019) sebagai DOCX
      */
     public function exportFormPermintaanCuti(LeaveRequest $leaveRequest)
@@ -611,7 +632,7 @@ class LeaveRequestController extends Controller
                     return "Jumlah hari kerja ($hariKerja hari) melebihi sisa cuti Anda ($user->leave_balance hari).";
                 }
                 // Kuota 30%
-                $persen = HariKerjaCalculator::hitungPersentaseCutiSaatIni($startDate, $endDate, $user->unit_kerja);
+                $persen = HariKerjaCalculator::hitungPersentaseCutiSaatIni($startDate, $endDate, $user);
                 if ($persen >= 30) {
                     return 'Kuota cuti bersamaan sudah mencapai 30% di unit kerja Anda. Silakan pilih tanggal lain.';
                 }

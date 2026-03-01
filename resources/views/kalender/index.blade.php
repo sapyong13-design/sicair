@@ -60,6 +60,12 @@
             <span style="font-size:0.82rem;"><strong>{{ $hariLiburNasional->count() }}</strong> hari libur nasional</span>
         </div>
     </div>
+    <div class="col-auto">
+        <div class="d-flex align-items-center gap-2 px-3 py-2 sh-card" style="border-radius: 10px;">
+            <span style="width:10px;height:10px;border-radius:50%;background:#ea580c;flex-shrink:0;"></span>
+            <span style="font-size:0.82rem;"><strong>{{ $dinasLuarList->count() }}</strong> dinas luar</span>
+        </div>
+    </div>
 </div>
 
 {{-- Month Navigator --}}
@@ -97,6 +103,16 @@
                 $e = min(strtotime($endOfMonth), strtotime($leave->end_date));
                 for ($d = $s; $d <= $e; $d += 86400) {
                     $leaveMap[date('j', $d)][] = $leave;
+                }
+            }
+
+            // Build dinas luar map: day => [DinasLuar]
+            $dinasLuarMap = [];
+            foreach ($dinasLuarList as $dl) {
+                $s = max(strtotime($startOfMonth), strtotime($dl->start_date));
+                $e = min(strtotime($endOfMonth), strtotime($dl->end_date));
+                for ($d = $s; $d <= $e; $d += 86400) {
+                    $dinasLuarMap[date('j', $d)][] = $dl;
                 }
             }
 
@@ -139,12 +155,13 @@
                                         $isHoliday = $holiday !== null;
                                         $isCutiBersama = $isHoliday && $holiday->is_cuti_bersama;
                                         $dayLeaves = $leaveMap[$dayCount] ?? [];
-                                        $hasEvents = $isHoliday || count($dayLeaves) > 0;
+                                        $dayDinasLuar = $dinasLuarMap[$dayCount] ?? [];
+                                        $hasEvents = $isHoliday || count($dayLeaves) > 0 || count($dayDinasLuar) > 0;
 
                                         // Cell background
                                         if ($isToday) $cellBg = 'background: var(--sh-primary-light);';
-                                        elseif ($isCutiBersama) $cellBg = 'background: #eff6ff;'; // light blue for cuti bersama
-                                        elseif ($isWeekend || $isHoliday) $cellBg = 'background: #fef2f2;';
+                                        elseif ($isCutiBersama) $cellBg = 'background: var(--sh-cal-cb-bg);';
+                                        elseif ($isWeekend || $isHoliday) $cellBg = 'background: var(--sh-cal-holiday-bg);';
                                         else $cellBg = '';
                                     @endphp
                                     <td onclick="openDayModal('{{ $dateStr }}')"
@@ -153,32 +170,49 @@
                                         title="Klik untuk detail {{ $dayCount }} {{ $months[$month-1] }} {{ $year }}">
                                         <div class="d-flex justify-content-between align-items-start mb-1">
                                             <span class="fw-bold {{ $isToday ? 'sh-cal-today' : '' }}"
-                                                  style="font-size: 0.85rem; {{ ($isWeekend || $isHoliday) && !$isCutiBersama ? 'color: var(--sh-danger);' : ($isCutiBersama ? 'color: #1d4ed8;' : 'color: #1e293b;') }}">
+                                                  style="font-size: 0.85rem; {{ ($isWeekend || $isHoliday) && !$isCutiBersama ? 'color: var(--sh-danger);' : ($isCutiBersama ? 'color: var(--sh-cal-cb-text);' : 'color: var(--sh-text);') }}">
                                                 {{ $dayCount }}
                                             </span>
                                             @if($hasEvents)
                                             <span style="width: 6px; height: 6px; border-radius: 50%; margin-top: 4px; flex-shrink: 0;
-                                                  background: {{ count($dayLeaves) > 0 ? 'var(--sh-success)' : ($isCutiBersama ? '#1d4ed8' : 'var(--sh-danger)') }};"></span>
+                                                  background: {{ count($dayLeaves) > 0 ? 'var(--sh-success)' : ($isCutiBersama ? 'var(--sh-cal-cb-border)' : 'var(--sh-danger)') }};"></span>
                                             @endif
                                         </div>
                                         {{-- Holiday badge --}}
                                         @if($isHoliday)
                                         <div class="sh-cal-event {{ $isCutiBersama ? 'sh-cal-cuti-bersama' : 'sh-cal-holiday' }}"
-                                             style="{{ $isCutiBersama ? 'background:#dbeafe;color:#1d4ed8;border-left:3px solid #1d4ed8;' : '' }}"
                                              title="{{ $holiday->keterangan }}">
                                             <i class="ti {{ $isCutiBersama ? 'ti-calendar-check' : 'ti-flag-filled' }}" style="font-size: 0.65rem;"></i>
                                             {{ Str::limit($holiday->keterangan, 14) }}
                                         </div>
                                         @endif
                                         {{-- Leave events (max 2 shown) --}}
+                                        @php $shownSlots = 0; @endphp
                                         @foreach(array_slice($dayLeaves, 0, 2) as $lv)
                                         <div class="sh-cal-event sh-cal-leave" title="{{ $lv->user->name }} — {{ $lv->type_label }}">
                                             {{ Str::limit($lv->user->name, 12) }}
                                         </div>
+                                        @php $shownSlots++; @endphp
                                         @endforeach
                                         @if(count($dayLeaves) > 2)
                                         <div class="sh-cal-event" style="background: var(--sh-gray-100); color: #64748b; font-size: 0.65rem; text-align:center;">
                                             +{{ count($dayLeaves) - 2 }} lagi
+                                        </div>
+                                        @php $shownSlots++; @endphp
+                                        @endif
+                                        {{-- Dinas luar events --}}
+                                        @if($shownSlots < 2)
+                                            @foreach(array_slice($dayDinasLuar, 0, 2 - $shownSlots) as $dl)
+                                            <div class="sh-cal-event sh-cal-dinas-luar"
+                                                 title="{{ $dl->user->name }} — Dinas Luar: {{ $dl->tujuan }}">
+                                                <i class="ti ti-briefcase" style="font-size:0.6rem;"></i>
+                                                {{ Str::limit($dl->user->name, 10) }}
+                                            </div>
+                                            @endforeach
+                                        @endif
+                                        @if(count($dayDinasLuar) > (2 - $shownSlots) && $shownSlots < 2)
+                                        <div class="sh-cal-event" style="background: var(--sh-gray-100); color: #64748b; font-size: 0.65rem; text-align:center;">
+                                            +{{ count($dayDinasLuar) - max(0, 2 - $shownSlots) }} lagi
                                         </div>
                                         @endif
                                     </td>
@@ -214,17 +248,20 @@
                                 $isHoliday     = $holiday !== null;
                                 $isCutiBersama = $isHoliday && $holiday->is_cuti_bersama;
                                 $hasLeave      = isset($leaveMap[$dayCount]);
+                                $hasDinasLuar  = isset($dinasLuarMap[$dayCount]);
                             @endphp
                             <div class="col text-center" style="min-height: 36px;" onclick="openDayModal('{{ $dateStr }}')">
                                 <div class="d-flex flex-column align-items-center" style="cursor: pointer;">
                                     <span style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: {{ $isToday ? '800' : '500' }};
-                                        {{ $isToday ? 'background: var(--sh-primary); color: #fff;' : ($isCutiBersama ? 'color: #1d4ed8;' : (($isWeekend || $isHoliday) ? 'color: var(--sh-danger);' : 'color: #1e293b;')) }}">
+                                        {{ $isToday ? 'background: var(--sh-primary); color: #fff;' : ($isCutiBersama ? 'color: var(--sh-cal-cb-text);' : (($isWeekend || $isHoliday) ? 'color: var(--sh-danger);' : 'color: var(--sh-text);')) }}">
                                         {{ $dayCount }}
                                     </span>
                                     @if($hasLeave)
                                     <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--sh-success); margin-top: 2px;"></span>
+                                    @elseif($hasDinasLuar)
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #ea580c; margin-top: 2px;"></span>
                                     @elseif($isCutiBersama)
-                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #1d4ed8; margin-top: 2px;"></span>
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--sh-cal-cb-border); margin-top: 2px;"></span>
                                     @elseif($isHoliday)
                                     <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--sh-danger); margin-top: 2px;"></span>
                                     @endif
@@ -240,8 +277,8 @@
             @php
                 $monthEvents = [];
                 for ($d = 1; $d <= $daysInMonth; $d++) {
-                    if (isset($leaveMap[$d]) || isset($holidayMap[$d])) {
-                        $monthEvents[$d] = ['leaves' => $leaveMap[$d] ?? [], 'holiday' => $holidayMap[$d] ?? null];
+                    if (isset($leaveMap[$d]) || isset($holidayMap[$d]) || isset($dinasLuarMap[$d])) {
+                        $monthEvents[$d] = ['leaves' => $leaveMap[$d] ?? [], 'holiday' => $holidayMap[$d] ?? null, 'dinasLuar' => $dinasLuarMap[$d] ?? []];
                     }
                 }
             @endphp
@@ -253,19 +290,25 @@
                 @foreach($monthEvents as $d => $ev)
                 <div class="mb-2 p-2" style="background: var(--sh-gray-50); border-radius: 8px; font-size: 0.82rem; cursor: pointer;"
                      onclick="openDayModal('{{ sprintf('%04d-%02d-%02d', $year, $month, $d) }}')">
-                    <div class="fw-bold" style="color: #1e293b;">{{ $d }} {{ $months[$month - 1] }}</div>
+                    <div class="fw-bold" style="color: var(--sh-text);">{{ $d }} {{ $months[$month - 1] }}</div>
                     @if($ev['holiday'])
                     @php $cb = $ev['holiday']->is_cuti_bersama; @endphp
-                    <div style="color: {{ $cb ? '#1d4ed8' : 'var(--sh-danger)' }};">
+                    <div style="color: {{ $cb ? 'var(--sh-cal-cb-text)' : 'var(--sh-danger)' }};">
                         <i class="ti {{ $cb ? 'ti-calendar-check' : 'ti-flag-filled' }} me-1" style="font-size: 0.7rem;"></i>
                         {{ $ev['holiday']->keterangan }}
-                        @if($cb)<span class="badge ms-1" style="background:#1d4ed8;font-size:0.65rem;">Cuti Bersama</span>@endif
+                        @if($cb)<span class="badge ms-1" style="background: var(--sh-cal-cb-badge-bg); font-size:0.65rem;">Cuti Bersama</span>@endif
                     </div>
                     @endif
                     @foreach($ev['leaves'] as $lv)
                     <div style="color: var(--sh-success);">
                         <i class="ti ti-beach me-1" style="font-size: 0.7rem;"></i>
                         {{ $lv->user->name }} — {{ $lv->type_label }}
+                    </div>
+                    @endforeach
+                    @foreach($ev['dinasLuar'] as $dl)
+                    <div style="color: #ea580c;">
+                        <i class="ti ti-briefcase me-1" style="font-size: 0.7rem;"></i>
+                        {{ $dl->user->name }} — Dinas Luar: {{ $dl->tujuan }}
                     </div>
                     @endforeach
                 </div>
@@ -276,8 +319,8 @@
     </div>
 
     {{-- Legend --}}
-    <div class="card-footer" style="background: #fff; border-top: 2px solid var(--sh-gray-100);">
-        <div class="d-flex flex-wrap gap-3" style="font-size: 0.78rem;">
+    <div class="card-footer" style="background: var(--sh-cal-legend-bg); border-top: 2px solid var(--sh-gray-100);">
+        <div class="d-flex flex-wrap gap-3" style="font-size: 0.78rem; color: var(--sh-text);">
             <div class="d-flex align-items-center gap-1">
                 <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-primary);"></span>
                 Hari Ini
@@ -287,7 +330,7 @@
                 Cuti Disetujui
             </div>
             <div class="d-flex align-items-center gap-1">
-                <span style="width: 12px; height: 12px; border-radius: 3px; background: #dbeafe; border-left: 3px solid #1d4ed8;"></span>
+                <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-cal-cb-event-bg); border-left: 3px solid var(--sh-cal-cb-border);"></span>
                 Cuti Bersama
             </div>
             <div class="d-flex align-items-center gap-1">
@@ -295,7 +338,11 @@
                 Hari Libur Nasional
             </div>
             <div class="d-flex align-items-center gap-1">
-                <span style="width: 12px; height: 12px; border-radius: 3px; background: #fef2f2; border: 1px solid #fca5a5;"></span>
+                <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-cal-dinas-bg); border-left: 3px solid #ea580c;"></span>
+                Dinas Luar
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-cal-holiday-bg); border: 1px solid var(--sh-danger);"></span>
                 Weekend / Libur
             </div>
             <div class="d-flex align-items-center gap-1 ms-auto text-muted">
@@ -317,14 +364,14 @@
     </div>
     <div class="card-body p-3">
         @foreach($cutiBersamaBulanIni as $h)
-        <div class="d-flex align-items-center gap-3 mb-2 p-2" style="background: #eff6ff; border-radius: 10px; border-left: 4px solid #1d4ed8;">
-            <div style="width: 40px; text-align: center; font-weight: 800; color: #1d4ed8; font-size: 1.1rem;">
+        <div class="d-flex align-items-center gap-3 mb-2 p-2" style="background: var(--sh-cal-cb-bg); border-radius: 10px; border-left: 4px solid var(--sh-cal-cb-border);">
+            <div style="width: 40px; text-align: center; font-weight: 800; color: var(--sh-cal-cb-text); font-size: 1.1rem;">
                 {{ \Carbon\Carbon::parse($h->tanggal)->day }}
             </div>
             <div class="flex-fill">
-                <div class="fw-bold" style="font-size: 0.85rem; color: #1d4ed8;">{{ $h->keterangan }}</div>
-                <div style="font-size: 0.75rem; color: #3b82f6;">
-                    <span class="badge" style="background: #1d4ed8; font-size: 0.7rem;">Cuti Bersama</span>
+                <div class="fw-bold" style="font-size: 0.85rem; color: var(--sh-cal-cb-text);">{{ $h->keterangan }}</div>
+                <div style="font-size: 0.75rem; color: var(--sh-cal-cb-text);">
+                    <span class="badge" style="background: var(--sh-cal-cb-badge-bg); font-size: 0.7rem;">Cuti Bersama</span>
                     &middot; {{ \Carbon\Carbon::parse($h->tanggal)->isoFormat('dddd, D MMMM Y') }}
                 </div>
             </div>
@@ -380,8 +427,38 @@
 </div>
 @endif
 
+{{-- Dinas Luar list --}}
+@if($dinasLuarList->isNotEmpty())
+<div class="card sh-card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">
+            <i class="ti ti-briefcase me-2" style="color: #ea580c;" aria-hidden="true"></i>
+            Dinas Luar Bulan {{ $months[$month - 1] }} {{ $year }}
+        </h3>
+        <span class="badge" style="background: #ea580c; font-size: 0.78rem;">{{ $dinasLuarList->count() }} pegawai</span>
+    </div>
+    <div class="card-body p-3">
+        @foreach($dinasLuarList->sortBy('start_date') as $dl)
+        <div class="d-flex align-items-center gap-3 mb-2 p-2" style="background: var(--sh-cal-dinas-bg); border-radius: 10px; border-left: 4px solid #ea580c;">
+            <div class="sh-user-avatar" style="width: 36px; height: 36px; font-size: 0.7rem; background: #ea580c; color: #fff; border: none; border-radius: 8px; flex-shrink: 0;">
+                {{ strtoupper(substr($dl->user->name, 0, 2)) }}
+            </div>
+            <div class="flex-fill min-width-0">
+                <div class="fw-bold" style="font-size: 0.85rem;">{{ $dl->user->name }}</div>
+                <div class="text-muted" style="font-size: 0.75rem;">
+                    <i class="ti ti-map-pin me-1" style="font-size: 0.7rem;"></i>{{ $dl->tujuan }}
+                    &middot; {{ $dl->start_date->format('d M') }}{{ $dl->start_date->ne($dl->end_date) ? ' – ' . $dl->end_date->format('d M Y') : ' ' . $dl->start_date->format('Y') }}
+                    &middot; {{ $dl->durasi }} hari
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
 {{-- Empty state --}}
-@if($leaves->isEmpty() && $holidays->isEmpty())
+@if($leaves->isEmpty() && $holidays->isEmpty() && $dinasLuarList->isEmpty())
 <div class="card sh-card mt-4">
     <div class="card-body py-4 text-center">
         <div class="sh-empty-icon" style="width: 60px; height: 60px; font-size: 1.5rem;">
@@ -472,14 +549,50 @@ function renderDayModal(data) {
         </div>`;
     }
 
+    // Dinas Luar section
+    if (data.dinasLuar && data.dinasLuar.length > 0) {
+        html += `<div class="fw-bold mb-2 mt-1" style="color:#ea580c;font-size:0.88rem;">
+            <i class="ti ti-briefcase me-1"></i>${data.dinasLuar.length} Pegawai Dinas Luar
+        </div>`;
+        data.dinasLuar.forEach(dl => {
+            html += `
+            <div style="display:flex;gap:0.75rem;padding:0.75rem;background:#fff7ed;border-radius:10px;margin-bottom:0.6rem;align-items:center;border-left:3px solid #ea580c;">
+                <div style="width:40px;height:40px;border-radius:10px;background:#ea580c;color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;">
+                    ${escHtml(dl.initials)}
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:700;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        ${escHtml(dl.name)}
+                    </div>
+                    <div style="color:#9a3412;font-size:0.78rem;">
+                        ${escHtml(dl.jabatan)}
+                    </div>
+                    <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
+                        <span class="badge" style="background:#ea580c;font-size:0.72rem;"><i class="ti ti-map-pin me-1" style="font-size:0.65rem;"></i>${escHtml(dl.tujuan)}</span>
+                        <span style="color:#9a3412;font-size:0.75rem;">
+                            ${escHtml(dl.start_date)} – ${escHtml(dl.end_date)}
+                        </span>
+                        <span style="color:#9a3412;font-size:0.75rem;">(${dl.durasi} hari)</span>
+                    </div>
+                    <div style="color:#9a3412;font-size:0.75rem;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        ${escHtml(dl.keperluan)}
+                    </div>
+                </div>
+            </div>`;
+        });
+        if (data.leaves.length > 0) {
+            html += `<hr style="margin:0.75rem 0;">`;
+        }
+    }
+
     // Leave list
     if (data.leaves.length === 0) {
-        if (!data.holiday) {
+        if (!data.holiday && !(data.dinasLuar && data.dinasLuar.length > 0)) {
             html += `<div class="text-center py-3 text-muted">
                 <i class="ti ti-beach" style="font-size:2rem;opacity:0.3;display:block;margin-bottom:0.5rem;"></i>
                 Tidak ada cuti pada hari ini
             </div>`;
-        } else {
+        } else if (!data.dinasLuar || data.dinasLuar.length === 0) {
             html += `<div class="text-muted small text-center py-2">
                 Tidak ada pegawai yang cuti pada hari ini
             </div>`;

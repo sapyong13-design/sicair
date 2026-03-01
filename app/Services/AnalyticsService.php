@@ -51,7 +51,6 @@ class AnalyticsService
         ])
             ->whereYear('created_at', $year)
             ->get()
-            // FIX #21: number_of_days doesn't exist; use total_hari_kerja or total_days accessor
             ->sum(fn($lr) => $lr->total_hari_kerja ?? $lr->total_days ?? 0);
 
         return [
@@ -99,8 +98,9 @@ class AnalyticsService
             'cuti_luar_tanggungan' => '#06b6d4',
         ];
 
+        $typeDisplayNames = LeaveRequest::typeLabels();
         foreach ($data as $item) {
-            $labels[] = str_replace('cuti_', '', $item->type);
+            $labels[] = $typeDisplayNames[$item->type] ?? ucfirst(str_replace('_', ' ', $item->type));
             $values[] = $item->total;
             $colors[] = $colorMap[$item->type] ?? '#6366f1';
         }
@@ -140,64 +140,51 @@ class AnalyticsService
     }
 
     /**
-     * Get monthly trend
+     * Get monthly trend — uses a single query grouped by month instead of 36 queries.
      */
     private function getMonthlyTrend(int $year): array
     {
+        $rows = LeaveRequest::selectRaw('CAST(strftime(\'%m\', created_at) AS INTEGER) as month, status, count(*) as total')
+            ->whereYear('created_at', $year)
+            ->groupBy('month', 'status')
+            ->get()
+            ->groupBy('month');
+
+        $approvedStatuses = [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED];
+        $pendingStatuses  = [LeaveRequest::STATUS_DIAJUKAN, LeaveRequest::STATUS_PERTIMBANGAN, LeaveRequest::STATUS_PENDING];
+        $rejectedStatuses = [LeaveRequest::STATUS_DITOLAK, LeaveRequest::STATUS_REJECTED];
+
         $months = [];
         $approved = [];
         $pending = [];
         $rejected = [];
 
-        for ($month = 1; $month <= 12; $month++) {
-            $months[] = Carbon::createFromDate($year, $month, 1)->format('M');
+        for ($m = 1; $m <= 12; $m++) {
+            $months[] = Carbon::createFromDate($year, $m, 1)->locale('id')->isoFormat('MMM');
+            $monthRows = $rows->get($m, collect());
 
-            $approvedCount = LeaveRequest::whereIn('status', [
-                LeaveRequest::STATUS_DISETUJUI,
-                LeaveRequest::STATUS_APPROVED,
-            ])
-                ->whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
-                ->count();
-
-            $pendingCount = LeaveRequest::whereIn('status', [
-                LeaveRequest::STATUS_DIAJUKAN,
-                LeaveRequest::STATUS_PERTIMBANGAN,
-            ])
-                ->whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
-                ->count();
-
-            $rejectedCount = LeaveRequest::whereIn('status', [
-                LeaveRequest::STATUS_DITOLAK,
-                LeaveRequest::STATUS_REJECTED,
-            ])
-                ->whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
-                ->count();
-
-            $approved[] = $approvedCount;
-            $pending[] = $pendingCount;
-            $rejected[] = $rejectedCount;
+            $approved[] = $monthRows->whereIn('status', $approvedStatuses)->sum('total');
+            $pending[]  = $monthRows->whereIn('status', $pendingStatuses)->sum('total');
+            $rejected[] = $monthRows->whereIn('status', $rejectedStatuses)->sum('total');
         }
 
         return compact('months', 'approved', 'pending', 'rejected');
     }
 
     /**
-     * Get leaves by department
+     * Get leaves by department — group by unit_kerja via join.
      */
     private function getLeavesByDepartment(int $year): array
     {
-        $data = LeaveRequest::with('user')
-            ->whereYear('created_at', $year)
-            ->get()
-            // FIX #16: 'department' column doesn't exist; use unit_kerja
-            ->groupBy(fn($lr) => $lr->user->unit_kerja ?? 'Tidak Diketahui')
-            ->map(fn($group) => $group->count());
+        $data = LeaveRequest::join('users', 'leave_requests.user_id', '=', 'users.id')
+            ->selectRaw('COALESCE(users.unit_kerja, \'Tidak Diketahui\') as dept, count(*) as total')
+            ->whereYear('leave_requests.created_at', $year)
+            ->groupBy('dept')
+            ->orderByDesc('total')
+            ->pluck('total', 'dept');
 
-        $labels = array_keys($data->toArray());
-        $values = array_values($data->toArray());
+        $labels = $data->keys()->toArray();
+        $values = $data->values()->toArray();
 
         return compact('labels', 'values');
     }
@@ -251,6 +238,7 @@ class AnalyticsService
                 'end_date' => $lr->end_date->format('d M Y'),
                 // FIX #21: Use correct column/accessor
                 'days' => $lr->total_hari_kerja ?? $lr->total_days ?? 0,
+
             ])
             ->toArray();
     }
@@ -262,35 +250,31 @@ class AnalyticsService
     {
         $year = $year ?? date('Y');
 
-        // FIX #20: 'status' column doesn't exist in users; filter by status_pegawai instead
         $users = User::where('status_pegawai', '!=', 'cpns')
-            ->with('cutiRecords')
+            ->with(['cutiRecords' => fn($q) => $q->where('tahun', $year)])
             ->get()
             ->map(function ($user) use ($year) {
-                $cutiRecord = $user->cutiRecords()
-                    ->where('tahun', $year)
-                    ->where('jenis_cuti', 'Cuti Tahunan')
-                    ->first();
+                $cutiRecord = $user->cutiRecords->first();
 
                 if (!$cutiRecord) {
                     return null;
                 }
 
-                $allocated = $cutiRecord->alokasi_awal ?? 12;
+                $allocated = $cutiRecord->hak_cuti ?? 12;
                 $carryOver = $cutiRecord->carry_over ?? 0;
-                $used = $cutiRecord->digunakan ?? 0;
+                $used = $cutiRecord->cuti_diambil ?? 0;
                 $total = $allocated + $carryOver;
                 $remaining = $total - $used;
 
                 return [
                     'name' => $user->name,
-                    'email' => $user->email,
+                    'nip' => $user->nip,
                     'allocated' => $allocated,
                     'carry_over' => $carryOver,
                     'total' => $total,
                     'used' => $used,
                     'remaining' => $remaining,
-                    'usage_percentage' => round(($used / $total) * 100),
+                    'usage_percentage' => $total > 0 ? round(($used / $total) * 100) : 0,
                 ];
             })
             ->filter(fn($item) => $item !== null)

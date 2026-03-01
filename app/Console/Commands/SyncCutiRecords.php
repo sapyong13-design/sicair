@@ -103,12 +103,12 @@ class SyncCutiRecords extends Command
         foreach ($approvedLeaves as $leave) {
             // Only count cuti tahunan (regular leave)
             if ($leave->type === LeaveRequest::TYPE_TAHUNAN) {
-                $totalDaysUsed += $leave->total_hari_kerja ?? $leave->number_of_days;
+                $totalDaysUsed += $leave->total_hari_kerja ?? $leave->total_days ?? 0;
             }
         }
 
         // Check if sync is needed
-        $currentUsed = $cutiRecord->digunakan ?? 0;
+        $currentUsed = $cutiRecord->cuti_diambil ?? 0;
         if ($currentUsed === $totalDaysUsed) {
             return false; // No sync needed
         }
@@ -116,8 +116,8 @@ class SyncCutiRecords extends Command
         // Update cuti record
         if (!$dryRun) {
             $cutiRecord->update([
-                'digunakan' => $totalDaysUsed,
-                'sisa' => ($cutiRecord->alokasi_awal ?? 12) + ($cutiRecord->carry_over ?? 0) - $totalDaysUsed,
+                'cuti_diambil' => $totalDaysUsed,
+                'sisa_cuti' => ($cutiRecord->hak_cuti ?? 12) + ($cutiRecord->carry_over ?? 0) - $totalDaysUsed,
             ]);
 
             // Create audit log

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DinasLuar;
 use App\Models\HariLibur;
 use App\Models\LeaveRequest;
 use Illuminate\Http\Request;
@@ -41,7 +42,14 @@ class KalenderController extends Controller
         $leaves   = $query->get();
         $holidays = HariLibur::where('tahun', $year)->orderBy('tanggal')->get();
 
-        return view('kalender.index', compact('year', 'month', 'leaves', 'holidays', 'user', 'startOfMonth', 'endOfMonth'));
+        // Dinas Luar: visible to all users (public announcement)
+        $dinasLuarList = DinasLuar::with('user')
+            ->where('start_date', '<=', $endOfMonth)
+            ->where('end_date', '>=', $startOfMonth)
+            ->orderBy('start_date')
+            ->get();
+
+        return view('kalender.index', compact('year', 'month', 'leaves', 'holidays', 'user', 'startOfMonth', 'endOfMonth', 'dinasLuarList'));
     }
 
     /**
@@ -75,13 +83,18 @@ class KalenderController extends Controller
         $leaves  = $query->get();
         $holiday = HariLibur::whereDate('tanggal', $date)->first();
 
+        $dinasLuar = DinasLuar::with('user')
+            ->where('start_date', '<=', $date)
+            ->where('end_date', '>=', $date)
+            ->get();
+
         return response()->json([
-            'date'    => $date,
-            'holiday' => $holiday ? [
+            'date'      => $date,
+            'holiday'   => $holiday ? [
                 'keterangan'      => $holiday->keterangan,
                 'is_cuti_bersama' => (bool) $holiday->is_cuti_bersama,
             ] : null,
-            'leaves'  => $leaves->map(fn($lv) => [
+            'leaves'    => $leaves->map(fn($lv) => [
                 'name'       => $lv->user->name,
                 'jabatan'    => $lv->user->jabatan ?? '-',
                 'unit_kerja' => $lv->user->unit_kerja ?? '-',
@@ -90,6 +103,16 @@ class KalenderController extends Controller
                 'end_date'   => $lv->end_date->format('d M Y'),
                 'total_hari' => $lv->total_hari_kerja,
                 'initials'   => strtoupper(substr($lv->user->name, 0, 2)),
+            ]),
+            'dinasLuar' => $dinasLuar->map(fn($dl) => [
+                'name'       => $dl->user->name,
+                'jabatan'    => $dl->user->jabatan ?? '-',
+                'tujuan'     => $dl->tujuan,
+                'keperluan'  => $dl->keperluan,
+                'start_date' => $dl->start_date->format('d M Y'),
+                'end_date'   => $dl->end_date->format('d M Y'),
+                'durasi'     => $dl->durasi,
+                'initials'   => strtoupper(substr($dl->user->name, 0, 2)),
             ]),
         ]);
     }

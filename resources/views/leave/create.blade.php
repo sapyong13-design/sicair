@@ -112,7 +112,7 @@
                 </div>
                 @endif
 
-                <form method="POST" action="{{ route('leave.store') }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('leave.store') }}" enctype="multipart/form-data" id="leave-form">
                     @csrf
                     <input type="hidden" name="type" value="{{ $type }}">
 
@@ -275,8 +275,9 @@
 
                     {{-- Actions --}}
                     <div class="d-flex gap-2 flex-column flex-sm-row">
-                        <button type="submit" class="btn btn-primary sh-btn-primary btn-lg flex-fill">
-                            <i class="ti ti-send me-2"></i> Kirim Pengajuan
+                        <button type="submit" id="submit-btn" class="btn btn-primary sh-btn-primary btn-lg flex-fill">
+                            <span id="submit-label"><i class="ti ti-send me-2"></i> Kirim Pengajuan</span>
+                            <span id="submit-loading" class="d-none"><span class="spinner-border spinner-border-sm me-2" role="status"></span> Mengirim...</span>
                         </button>
                         <a href="{{ route('leave.select-type') }}" class="btn btn-outline-secondary btn-lg" style="border-radius: 10px;">
                             Batal
@@ -347,9 +348,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     iconBox.style.background = 'var(--sh-primary)';
                     durationLabel.style.color = 'var(--sh-primary)';
                     if (type === 'cuti_tahunan') {
-                        durationSub.innerHTML = 'Sisa cuti setelah ini: <strong>' + Math.max(0, balance - diff) + '</strong> hari';
+                        durationSub.innerHTML = 'Estimasi <strong>' + diff + '</strong> hari kalender &mdash; hari kerja dihitung otomatis oleh sistem';
                     } else {
-                        durationSub.innerHTML = diff + ' hari kalender';
+                        durationSub.innerHTML = diff + ' hari kalender &mdash; hari kerja dihitung otomatis';
                     }
                     isValid = true;
                 }
@@ -425,6 +426,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 markValid(input);
             }
         });
+    });
+
+    // Trigger initial calculation if dates pre-filled (e.g. after validation error)
+    if (startDate.value && endDate.value) {
+        validateDates();
+        calcDays();
+    }
+
+    // Prevent double-submit: show loading state on submit
+    document.getElementById('leave-form').addEventListener('submit', function() {
+        var btn = document.getElementById('submit-btn');
+        if (btn && !btn.disabled) {
+            btn.disabled = true;
+            document.getElementById('submit-label').classList.add('d-none');
+            document.getElementById('submit-loading').classList.remove('d-none');
+        }
     });
 
     // Character counter for reason textarea (#14)

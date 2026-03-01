@@ -13,9 +13,18 @@
             </h2>
             <div class="text-muted" style="font-size: 0.85rem;">
                 Selamat datang kembali, <strong class="text-dark">{{ $user->name }}</strong>
-                <span class="sh-badge sh-badge-{{ $user->isAdmin() ? 'approved' : ($user->isKetua() ? 'rejected' : ($user->isAtasan() ? 'pending' : 'approved')) }} ms-1" style="font-size: 0.7rem;">
-                    <i class="ti ti-{{ $user->isAdmin() ? 'shield-check' : ($user->isKetua() ? 'gavel' : ($user->isAtasan() ? 'user-check' : 'user')) }}"></i>
-                    {{ ucfirst($user->role) }}
+@php
+    $roleLabels = [
+        'admin' => 'Admin', 'ketua' => 'Ketua', 'atasan' => 'Atasan',
+        'panitera' => 'Panitera', 'sekretaris' => 'Sekretaris',
+        'pegawai' => 'Pegawai', 'hakim' => 'Hakim', 'hakim_ad_hoc' => 'Hakim Ad Hoc',
+    ];
+    $roleBadge = $user->isAdmin() ? 'approved' : ($user->isKetua() ? 'pending' : ($user->isAtasan() ? 'pending' : 'approved'));
+    $roleIcon  = $user->isAdmin() ? 'shield-check' : ($user->isKetua() ? 'gavel' : ($user->isAtasan() ? 'user-check' : 'user'));
+@endphp
+                <span class="sh-badge sh-badge-{{ $roleBadge }} ms-1" style="font-size: 0.7rem;">
+                    <i class="ti ti-{{ $roleIcon }}"></i>
+                    {{ $roleLabels[$user->role] ?? ucfirst($user->role) }}
                 </span>
             </div>
         </div>

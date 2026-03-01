@@ -55,7 +55,6 @@ class BalanceAdjustmentController extends Controller
         $currentYear = date('Y');
         $cutiRecord = CutiRecord::where('user_id', $user->id)
             ->where('tahun', $currentYear)
-            ->where('jenis_cuti', 'Cuti Tahunan')
             ->first();
 
         return view('balance-adjustments.create', compact('user', 'cutiRecord', 'currentYear'));
@@ -101,13 +100,14 @@ class BalanceAdjustmentController extends Controller
         ]);
 
         // Create audit log
-        \App\Models\AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'create_balance_adjustment',
-            'description' => "Create balance adjustment for {$user->name}: {$adjustmentDays} days ({$request->type})",
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-        ]);
+        \App\Models\AuditLog::log(
+            'create_balance_adjustment',
+            'BalanceAdjustment',
+            $adjustment->id,
+            null,
+            ['days' => $adjustmentDays, 'type' => $request->type],
+            "Create balance adjustment for {$user->name}: {$adjustmentDays} days ({$request->type})"
+        );
 
         // Send notification to user
         Notification::kirim(
@@ -174,13 +174,12 @@ class BalanceAdjustmentController extends Controller
                 [
                     'user_id' => $locked->user_id,
                     'tahun' => $locked->year,
-                    'jenis_cuti' => 'Cuti Tahunan',
                 ],
-                ['alokasi_awal' => 12]
+                ['hak_cuti' => 12]
             );
 
-            $newSisa = ($cutiRecord->sisa ?? 0) + $locked->adjustment_days;
-            $cutiRecord->update(['sisa' => $newSisa]);
+            $newSisa = ($cutiRecord->sisa_cuti ?? 0) + $locked->adjustment_days;
+            $cutiRecord->update(['sisa_cuti' => $newSisa]);
 
             // FIX KRITIKAL: Juga update users.leave_balance karena validasi pengajuan cuti
             // menggunakan $user->leave_balance, bukan cuti_records.sisa
@@ -192,13 +191,14 @@ class BalanceAdjustmentController extends Controller
             }
 
             // Create audit log
-            \App\Models\AuditLog::create([
-                'user_id' => $admin->id,
-                'action' => 'approve_balance_adjustment',
-                'description' => "Approve balance adjustment for {$locked->user->name}: {$locked->adjustment_days} days (leave_balance updated)",
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
+            \App\Models\AuditLog::log(
+                'approve_balance_adjustment',
+                'BalanceAdjustment',
+                $locked->id,
+                ['status' => 'pending'],
+                ['status' => 'approved', 'days' => $locked->adjustment_days],
+                "Approve balance adjustment for {$locked->user->name}: {$locked->adjustment_days} days (leave_balance updated)"
+            );
         });
 
         // FIX #10: Return explicit error if already processed during race condition
@@ -244,13 +244,14 @@ class BalanceAdjustmentController extends Controller
         ]);
 
         // Create audit log
-        \App\Models\AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'reject_balance_adjustment',
-            'description' => "Reject balance adjustment for {$adjustment->user->name}",
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-        ]);
+        \App\Models\AuditLog::log(
+            'reject_balance_adjustment',
+            'BalanceAdjustment',
+            $adjustment->id,
+            ['status' => 'pending'],
+            ['status' => 'rejected'],
+            "Reject balance adjustment for {$adjustment->user->name}"
+        );
 
         // Notify user
         Notification::kirim(
