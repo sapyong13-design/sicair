@@ -1085,13 +1085,7 @@
                             <div>
                                 <div style="font-size:1.05rem;font-weight:700;margin-bottom:0.2rem;">Belum Berhak Cuti Tahunan</div>
                                 <div style="font-size:0.8rem;opacity:0.75;">
-                                    @php
-                                        $mk = $user->masaKerjaTahun ?? 0;
-                                        $mkBulan = $user->tgl_sk_cpns
-                                            ? \Carbon\Carbon::parse($user->tgl_sk_cpns)->diffInMonths(\Carbon\Carbon::now()) % 12
-                                            : null;
-                                    @endphp
-                                    Masa kerja saat ini: {{ $mk }} tahun{{ $mkBulan !== null ? ' ' . $mkBulan . ' bulan' : '' }}.
+                                    Masa kerja saat ini: {{ $user->masaKerjaFormat ?? '-' }}.
                                     Diperlukan minimal 1 tahun.
                                 </div>
                             </div>
