@@ -42,9 +42,43 @@
         </div>
         @endif
 
-        <form method="POST" action="{{ $pegawai ? route('pegawai.update', $pegawai) : route('pegawai.store') }}">
+        <form method="POST" action="{{ $pegawai ? route('pegawai.update', $pegawai) : route('pegawai.store') }}" enctype="multipart/form-data">
             @csrf
             @if($pegawai) @method('PUT') @endif
+
+            {{-- #27 Photo/Avatar Upload --}}
+            @if($pegawai)
+            <div class="card sh-card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="ti ti-camera me-2" style="color: var(--sh-primary);"></i>
+                        Foto / Avatar
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-4 flex-wrap">
+                        <div id="photoPreviewWrap" style="flex-shrink:0;">
+                            @if($pegawai->photo)
+                            <img id="photoPreview" src="{{ Storage::url($pegawai->photo) }}" alt="{{ $pegawai->name }}"
+                                 style="width:80px;height:80px;border-radius:14px;object-fit:cover;border:3px solid var(--sh-primary);">
+                            @else
+                            <div id="photoPreview" class="sh-user-avatar" style="width:80px;height:80px;font-size:1.4rem;font-weight:800;background:var(--sh-primary-light);color:var(--sh-primary);border:none;border-radius:14px;border:3px solid var(--sh-gray-100);">
+                                {{ strtoupper(substr($pegawai->name,0,2)) }}
+                            </div>
+                            @endif
+                        </div>
+                        <div class="flex-fill">
+                            <label class="form-label" style="font-weight:600;font-size:0.85rem;">Unggah Foto Baru</label>
+                            <input type="file" name="photo" id="photoInput" accept="image/*" class="form-control @error('photo') is-invalid @enderror"
+                                   style="border-radius:10px;border:2px solid #e2e8f0;"
+                                   onchange="previewPhoto(this)">
+                            @error('photo') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <div class="text-muted mt-1" style="font-size:0.75rem;">JPG/PNG/WEBP, maks. 2MB. Biarkan kosong jika tidak ingin mengubah foto.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
 
             {{-- Section 1: Data Pribadi --}}
             <div class="card sh-card mb-4">
@@ -278,4 +312,20 @@
         </form>
     </div>
 </div>
+@push('scripts')
+<script>
+// #27 Photo preview
+function previewPhoto(input) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const wrap = document.getElementById('photoPreviewWrap');
+        if (!wrap) return;
+        wrap.innerHTML = `<img id="photoPreview" src="${e.target.result}"
+            style="width:80px;height:80px;border-radius:14px;object-fit:cover;border:3px solid var(--sh-primary);">`;
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+</script>
+@endpush
 @endsection

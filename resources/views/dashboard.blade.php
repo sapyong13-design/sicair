@@ -394,7 +394,12 @@
         @if($pendingRequests->isEmpty())
         <div class="card-body py-5">
             <div class="text-center">
-                <div class="sh-empty-icon"><i class="ti ti-mood-happy"></i></div>
+                {{-- #46 Empty state SVG: no-data --}}
+                <svg width="88" height="88" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-3" aria-hidden="true">
+                    <circle cx="44" cy="44" r="40" fill="var(--sh-success-light)"/>
+                    <path d="M28 44L38 54L60 32" stroke="var(--sh-success)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="44" cy="44" r="18" stroke="var(--sh-success)" stroke-width="2.5" fill="none" opacity="0.3"/>
+                </svg>
                 <h4 class="fw-bold text-dark mb-1">Semua Beres!</h4>
                 <p class="text-muted mb-0">Tidak ada pengajuan cuti yang menunggu proses saat ini.</p>
             </div>

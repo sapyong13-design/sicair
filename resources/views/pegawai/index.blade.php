@@ -308,8 +308,20 @@
                         </div>
                     </td>
                     <td>
-                        <div class="fw-semibold" style="font-size: 0.88rem;">{{ $p->jabatan ?? '-' }}</div>
+                        {{-- #31 Inline edit jabatan --}}
+                        <div class="fw-semibold sh-inline-edit" style="font-size: 0.88rem; border-radius:6px; padding:2px 4px; cursor:text;"
+                             contenteditable="true"
+                             data-pegawai-id="{{ $p->id }}"
+                             data-field="jabatan"
+                             title="Klik untuk edit jabatan"
+                             spellcheck="false">{{ $p->jabatan ?? '' }}</div>
                         <div class="text-muted" style="font-size: 0.78rem;">{{ $p->golongan_ruang ?? '-' }}</div>
+                        <div class="text-muted sh-inline-edit" style="font-size: 0.75rem; border-radius:6px; padding:2px 4px; cursor:text; margin-top:2px;"
+                             contenteditable="true"
+                             data-pegawai-id="{{ $p->id }}"
+                             data-field="unit_kerja"
+                             title="Klik untuk edit unit kerja"
+                             spellcheck="false">{{ $p->unit_kerja ?? '' }}</div>
                     </td>
                     <td>
                         @php
@@ -612,6 +624,71 @@ document.addEventListener('DOMContentLoaded', function() {
         if (icon) icon.className = 'ti ti-layout-list';
     }
 });
+
+// #31 Inline edit jabatan / unit_kerja
+(function() {
+    var INLINE_URL = '/pegawai/';
+    var CSRF = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').content : '';
+
+    // Hover styles
+    document.querySelectorAll('.sh-inline-edit').forEach(function(el) {
+        el.addEventListener('mouseenter', function() {
+            this.style.background = 'var(--sh-primary-light)';
+            this.style.outline = '1px dashed var(--sh-primary)';
+        });
+        el.addEventListener('mouseleave', function() {
+            if (document.activeElement !== this) {
+                this.style.background = '';
+                this.style.outline = '';
+            }
+        });
+        el.addEventListener('focus', function() {
+            this._originalValue = this.textContent.trim();
+            this.style.background = 'var(--sh-primary-light)';
+            this.style.outline = '2px solid var(--sh-primary)';
+        });
+        el.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
+            if (e.key === 'Escape') {
+                this.textContent = this._originalValue || '';
+                this.blur();
+            }
+        });
+        el.addEventListener('blur', function() {
+            this.style.background = '';
+            this.style.outline = '';
+            var newVal = this.textContent.trim();
+            if (newVal === (this._originalValue || '')) return;
+            var pid = this.dataset.pegawaiId;
+            var field = this.dataset.field;
+            var self = this;
+            fetch(INLINE_URL + pid + '/inline', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ field: field, value: newVal })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    self._originalValue = newVal;
+                    self.style.color = 'var(--sh-success)';
+                    setTimeout(function() { self.style.color = ''; }, 1200);
+                } else {
+                    self.textContent = self._originalValue || '';
+                    if (typeof shToast === 'function') shToast('Gagal menyimpan perubahan.', 'danger');
+                }
+            })
+            .catch(function() {
+                self.textContent = self._originalValue || '';
+            });
+        });
+    });
+})();
 
 // #38 Quick View Riwayat Cuti
 document.querySelectorAll('.sh-quick-view-btn').forEach(function(btn) {

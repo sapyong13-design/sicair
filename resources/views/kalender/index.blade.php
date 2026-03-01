@@ -622,9 +622,16 @@
 @if($leaves->isEmpty() && $holidays->isEmpty() && $dinasLuarList->isEmpty())
 <div class="card sh-card mt-4">
     <div class="card-body py-4 text-center">
-        <div class="sh-empty-icon" style="width: 60px; height: 60px; font-size: 1.5rem;">
-            <i class="ti ti-calendar-off" aria-hidden="true"></i>
-        </div>
+        {{-- #46 Empty state SVG: no-leaves --}}
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-3" aria-hidden="true">
+            <circle cx="40" cy="40" r="36" fill="var(--sh-primary-light)"/>
+            <rect x="16" y="22" width="48" height="38" rx="5" fill="none" stroke="var(--sh-primary)" stroke-width="2.5" opacity="0.35"/>
+            <rect x="16" y="22" width="48" height="38" rx="5" stroke="var(--sh-primary)" stroke-width="2.5" fill="none"/>
+            <path d="M16 32H64" stroke="var(--sh-primary)" stroke-width="2"/>
+            <rect x="27" y="14" width="4" height="10" rx="2" fill="var(--sh-primary)" opacity="0.6"/>
+            <rect x="49" y="14" width="4" height="10" rx="2" fill="var(--sh-primary)" opacity="0.6"/>
+            <path d="M28 48L52 36M28 36L52 48" stroke="var(--sh-danger)" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+        </svg>
         <h5 class="fw-bold text-dark mb-1">Tidak Ada Event</h5>
         <p class="text-muted mb-0" style="font-size: 0.85rem;">Tidak ada jadwal cuti atau hari libur pada bulan {{ $months[$month - 1] }} {{ $year }}.</p>
     </div>

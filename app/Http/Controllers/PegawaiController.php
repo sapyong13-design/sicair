@@ -196,6 +196,7 @@ class PegawaiController extends Controller
             'telepon' => 'nullable|string|max:20',
             'alamat' => 'nullable|string',
             'leave_balance' => 'nullable|integer|min:0',
+            'photo' => 'nullable|image|max:2048|mimes:jpg,jpeg,png,webp',
         ]);
 
         $validated['lokasi_terpencil'] = $request->boolean('lokasi_terpencil');
@@ -204,6 +205,16 @@ class PegawaiController extends Controller
             $request->validate(['password' => 'string|min:8']);
             // FIX #2: Explicitly hash password to ensure it's never stored as plaintext
             $validated['password'] = Hash::make($request->password);
+        }
+
+        // #27 Photo upload
+        if ($request->hasFile('photo')) {
+            if ($pegawai->photo) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($pegawai->photo);
+            }
+            $validated['photo'] = $request->file('photo')->store('avatars', 'public');
+        } else {
+            unset($validated['photo']);
         }
 
         $pegawai->update($validated);

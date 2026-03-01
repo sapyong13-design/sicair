@@ -51,7 +51,14 @@
                         <div class="text-muted mt-1" style="font-size: 0.78rem;">
                             Hak: {{ $cutiInfo['hak_cuti'] ?? 12 }}
                             @if(($cutiInfo['carry_over'] ?? 0) > 0) + CO: {{ $cutiInfo['carry_over'] }} @endif
-                            @if(($cutiInfo['tambahan_terpencil'] ?? 0) > 0) + Terpencil: {{ $cutiInfo['tambahan_terpencil'] }} @endif
+                            @if(($cutiInfo['tambahan_terpencil'] ?? 0) > 0)
+                            + Terpencil: {{ $cutiInfo['tambahan_terpencil'] }}
+                            <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                  title="Tambahan cuti tahunan bagi pegawai yang bertugas di daerah terpencil: 10 hari untuk sangat terpencil, 6 hari untuk terpencil."
+                                  style="cursor:help;">
+                                <i class="ti ti-info-circle" style="font-size:0.75rem;color:var(--sh-primary);"></i>
+                            </span>
+                            @endif
                         </div>
                     </div>
                     <div class="sh-stat-icon icon-primary">

@@ -36,7 +36,14 @@
     @if($notifications->isEmpty())
     <div class="card-body py-5">
         <div class="text-center">
-            <div class="sh-empty-icon"><i class="ti ti-bell-off"></i></div>
+            {{-- #46 Empty state SVG: no-notifications --}}
+            <svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-3" aria-hidden="true">
+                <circle cx="48" cy="48" r="44" fill="var(--sh-primary-light)"/>
+                <path d="M48 22C38.06 22 30 30.06 30 40V56L24 62V65H72V62L66 56V40C66 30.06 57.94 22 48 22Z" fill="var(--sh-primary)" opacity="0.25"/>
+                <path d="M48 26C39.16 26 32 33.16 32 42V56L26 62H70L64 56V42C64 33.16 56.84 26 48 26Z" stroke="var(--sh-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <path d="M44 66C44 68.21 45.79 70 48 70C50.21 70 52 68.21 52 66H44Z" fill="var(--sh-primary)" opacity="0.6"/>
+                <path d="M38 28L58 68" stroke="var(--sh-danger)" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+            </svg>
             <h4 class="fw-bold text-dark mb-1">Belum Ada Notifikasi</h4>
             <p class="text-muted mb-0">Anda belum memiliki notifikasi apapun.</p>
         </div>
