@@ -62,8 +62,12 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="5" class="text-center text-secondary">
-                                        <i class="ti ti-inbox"></i> Belum ada riwayat perubahan saldo
+                                    <td colspan="5" class="py-5">
+                                        <div class="text-center">
+                                            <div class="sh-empty-icon mb-3"><i class="ti ti-history"></i></div>
+                                            <div class="fw-semibold mb-1" style="color:var(--sh-text);">Belum ada riwayat perubahan saldo</div>
+                                            <div class="text-muted" style="font-size:0.85rem;">Riwayat akan muncul di sini setelah ada penyesuaian saldo</div>
+                                        </div>
                                     </td>
                                 </tr>
                                 @endforelse

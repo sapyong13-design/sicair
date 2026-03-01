@@ -15,7 +15,7 @@ class User extends Authenticatable
         'name', 'nip', 'email', 'password', 'role', 'leave_balance',
         'jabatan', 'golongan_ruang', 'unit_kerja', 'masa_kerja_mulai',
         'status_pegawai', 'jenis_kelamin', 'jumlah_anak', 'lokasi_terpencil',
-        'atasan_id', 'telepon', 'alamat',
+        'atasan_id', 'telepon', 'alamat', 'notification_preferences',
     ];
 
     protected $hidden = [
@@ -31,7 +31,18 @@ class User extends Authenticatable
             'masa_kerja_mulai' => 'date',
             'jumlah_anak' => 'integer',
             'lokasi_terpencil' => 'boolean',
+            'notification_preferences' => 'array',
         ];
+    }
+
+    /**
+     * #48: Check if user wants to receive a particular email notification.
+     * Defaults to true for all if no preference saved.
+     */
+    public function wantsEmailNotification(string $key): bool
+    {
+        $prefs = $this->notification_preferences ?? [];
+        return $prefs[$key] ?? true;
     }
 
     // ===== Role Checks =====

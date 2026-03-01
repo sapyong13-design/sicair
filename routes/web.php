@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminLeaveController;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AmendmentController;
 use App\Http\Controllers\AppealController;
 use App\Http\Controllers\AuditLogController;
@@ -36,6 +37,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::put('/profile/notifications', [ProfileController::class, 'updateNotificationPreferences'])->name('profile.notifications');
 
     // === Notifikasi ===
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
@@ -45,6 +47,7 @@ Route::middleware('auth')->group(function () {
     // === Kalender Cuti ===
     Route::get('/kalender', [KalenderController::class, 'index'])->name('kalender');
     Route::get('/kalender/leaves-for-day', [KalenderController::class, 'leavesForDay'])->name('kalender.leaves-for-day');
+    Route::get('/kalender/export-ics', [KalenderController::class, 'exportIcs'])->name('kalender.export-ics');
 
     // === Pengajuan Cuti (semua pegawai termasuk atasan/ketua) ===
     Route::get('/leave/select-type', [LeaveRequestController::class, 'selectType'])->name('leave.select-type');
@@ -111,8 +114,12 @@ Route::middleware('auth')->group(function () {
     // === Manajemen Pegawai (admin only) ===
     Route::middleware('role:admin')->prefix('pegawai')->name('pegawai.')->group(function () {
         Route::get('/', [PegawaiController::class, 'index'])->name('index');
+        Route::get('/import-template', [PegawaiController::class, 'importTemplate'])->name('import-template');
+        Route::post('/import', [PegawaiController::class, 'import'])->name('import');
         Route::get('/create', [PegawaiController::class, 'create'])->name('create');
         Route::post('/', [PegawaiController::class, 'store'])->name('store');
+        Route::get('/{pegawai}/riwayat-cuti', [PegawaiController::class, 'riwayatCuti'])->name('riwayat-cuti');
+        Route::post('/{pegawai}/saldo-cuti/{year}', [PegawaiController::class, 'updateSaldoCuti'])->name('saldo-cuti');
         Route::get('/{pegawai}', [PegawaiController::class, 'show'])->name('show');
         Route::get('/{pegawai}/edit', [PegawaiController::class, 'edit'])->name('edit');
         Route::put('/{pegawai}', [PegawaiController::class, 'update'])->name('update');
@@ -182,6 +189,12 @@ Route::middleware('auth')->group(function () {
             Route::get('/all-leaves', [PdfExportController::class, 'allLeaveRequests'])->name('all-leaves');
             Route::get('/statistics', [PdfExportController::class, 'statistics'])->name('statistics');
         });
+    });
+
+    // === Analytics (#40, #41, #42, #43) ===
+    Route::middleware('role:admin')->prefix('analytics')->name('analytics.')->group(function () {
+        Route::get('/', [AnalyticsController::class, 'index'])->name('index');
+        Route::get('/export-annual', [AnalyticsController::class, 'exportAnnual'])->name('export-annual');
     });
 
     // FIX #3: Debug endpoint removed — was publicly accessible and leaked user data

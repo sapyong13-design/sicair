@@ -90,6 +90,36 @@
             </div>
         </div>
 
+        {{-- #22 Personal Usage Summary --}}
+        <div class="mb-4 p-3" style="background: var(--sh-gray-50); border-radius: 14px; border: 1px solid var(--sh-border);">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="ti ti-chart-bar" style="color: var(--sh-primary);"></i>
+                <span class="fw-bold" style="font-size: 0.85rem;">Riwayat Penggunaan Cuti Anda</span>
+            </div>
+            <div class="row g-2">
+                <div class="col-6">
+                    <div style="font-size: 0.78rem; color: var(--sh-text-muted);">Tahun {{ date('Y') }}</div>
+                    <div class="fw-bold" style="color: var(--sh-primary);">{{ $thisYearDays ?? 0 }} hari</div>
+                </div>
+                <div class="col-6">
+                    <div style="font-size: 0.78rem; color: var(--sh-text-muted);">Tahun {{ date('Y') - 1 }}</div>
+                    <div class="fw-bold" style="color: var(--sh-text-muted);">{{ $lastYearDays ?? 0 }} hari</div>
+                </div>
+            </div>
+        </div>
+
+        {{-- #21 Re-apply Notice --}}
+        @if(isset($reapplyData))
+        <div class="mb-4 p-3" style="background: var(--sh-warning-light); border-radius: 14px; border: 1px solid var(--sh-warning);">
+            <div class="d-flex align-items-center gap-2">
+                <i class="ti ti-refresh" style="color: var(--sh-warning);"></i>
+                <div style="font-size: 0.85rem; color: var(--sh-warning);">
+                    <strong>Pengajuan Ulang</strong> — Data dari pengajuan sebelumnya sudah diisi ulang. Silakan periksa dan sesuaikan.
+                </div>
+            </div>
+        </div>
+        @endif
+
         {{-- Form Card --}}
         <div class="card sh-card">
             <div class="card-header">
@@ -125,7 +155,8 @@
                             </label>
                             <input type="date" name="start_date"
                                    class="form-control @error('start_date') is-invalid @enderror"
-                                   value="{{ old('start_date') }}" min="{{ date('Y-m-d') }}" required
+                                   value="{{ old('start_date', isset($reapplyData) ? $reapplyData->start_date->format('Y-m-d') : '') }}"
+                                   min="{{ date('Y-m-d') }}" required
                                    style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
                             @error('start_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
@@ -136,7 +167,8 @@
                             </label>
                             <input type="date" name="end_date"
                                    class="form-control @error('end_date') is-invalid @enderror"
-                                   value="{{ old('end_date') }}" min="{{ date('Y-m-d') }}" required
+                                   value="{{ old('end_date', isset($reapplyData) ? $reapplyData->end_date->format('Y-m-d') : '') }}"
+                                   min="{{ date('Y-m-d') }}" required
                                    style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
                             @error('end_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
@@ -214,7 +246,7 @@
                                       'cuti_luar_tanggungan' => 'Contoh: Menemani suami/istri tugas di luar negeri...',
                                       default => 'Jelaskan alasan cuti Anda...',
                                   } }}"
-                                  style="border-radius: 12px; border: 2px solid #e2e8f0; resize: vertical;">{{ old('reason') }}</textarea>
+                                  style="border-radius: 12px; border: 2px solid #e2e8f0; resize: vertical;">{{ old('reason', isset($reapplyData) ? $reapplyData->reason : '') }}</textarea>
                         @error('reason') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         {{-- Character counter (#14) --}}
                         <div class="d-flex justify-content-between mt-1">

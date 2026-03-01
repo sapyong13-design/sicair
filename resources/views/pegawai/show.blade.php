@@ -161,13 +161,12 @@
 
     {{-- Right Column: Records --}}
     <div class="col-lg-7">
-        {{-- Cuti Records per Year --}}
-        @if($pegawai->cutiRecords->isNotEmpty())
+        {{-- Kelola Saldo Cuti (3 tahun, inline edit untuk admin) --}}
         <div class="card sh-card mb-4">
-            <div class="card-header">
+            <div class="card-header d-flex align-items-center justify-content-between">
                 <h3 class="card-title mb-0">
                     <i class="ti ti-chart-bar me-2" style="color: #7c3aed;"></i>
-                    Rekap Cuti Tahunan
+                    Kelola Saldo Cuti
                 </h3>
             </div>
             <div class="table-responsive">
@@ -179,25 +178,122 @@
                             <th>Diambil</th>
                             <th>Sisa</th>
                             <th>Carry Over</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                    @foreach($pegawai->cutiRecords as $record)
+                    @foreach($saldoYears as $yr => $data)
                         <tr>
-                            <td class="fw-bold">{{ $record->tahun }}</td>
-                            <td>{{ $record->total_hak }} hari</td>
-                            <td>{{ $record->cuti_diambil }} hari</td>
-                            <td>
-                                <span class="fw-bold" style="color: var(--sh-primary);">{{ $record->sisa_cuti }} hari</span>
+                            <td class="fw-bold">
+                                {{ $yr }}
+                                @if($data['is_current'])
+                                <span class="badge ms-1" style="background: var(--sh-primary-light); color: var(--sh-primary); font-size: 0.7rem; border-radius: 50px; padding: 0.2rem 0.55rem;">Saat Ini</span>
+                                @endif
                             </td>
-                            <td>{{ $record->carry_over ?? 0 }} hari</td>
+                            <td>{{ $data['hak_cuti'] + $data['carry_over'] + $data['tambahan_terpencil'] }} hari</td>
+                            <td>{{ $data['cuti_diambil'] }} hari</td>
+                            <td><span class="fw-bold" style="color: var(--sh-primary);">{{ $data['sisa_cuti'] }} hari</span></td>
+                            <td>{{ $data['carry_over'] > 0 ? '+' . $data['carry_over'] : '—' }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                    style="border-radius: 7px; font-size: 0.78rem; padding: 0.2rem 0.65rem;"
+                                    onclick="openSaldoModal({{ $yr }})">
+                                    <i class="ti ti-edit me-1"></i>Edit
+                                </button>
+                            </td>
                         </tr>
                     @endforeach
                     </tbody>
                 </table>
             </div>
+            @php
+                $currentYear = (int) date('Y');
+                $olderRecords = $pegawai->cutiRecords->filter(fn($r) => $r->tahun < $currentYear - 2);
+            @endphp
+            @if($olderRecords->isNotEmpty())
+            <div class="px-3 pb-3">
+                <details>
+                    <summary class="text-muted" style="font-size: 0.82rem; cursor: pointer;">Lihat rekap tahun sebelumnya ({{ $olderRecords->count() }} tahun)</summary>
+                    <table class="table table-sm mt-2 mb-0" style="font-size: 0.82rem;">
+                        <thead><tr><th>Tahun</th><th>Hak</th><th>Diambil</th><th>Sisa</th></tr></thead>
+                        <tbody>
+                        @foreach($olderRecords as $rec)
+                            <tr>
+                                <td>{{ $rec->tahun }}</td>
+                                <td>{{ $rec->total_hak }}</td>
+                                <td>{{ $rec->cuti_diambil }}</td>
+                                <td>{{ $rec->sisa_cuti }}</td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </details>
+            </div>
+            @endif
+            <div class="px-3 pb-3">
+                <small class="text-muted"><i class="ti ti-info-circle me-1"></i>Gunakan Edit untuk koreksi langsung. Untuk audit trail formal, gunakan <a href="{{ route('balance-adjustment.create', $pegawai) }}">Penyesuaian Saldo</a>.</small>
+            </div>
         </div>
-        @endif
+
+        {{-- Modal Edit Saldo Cuti --}}
+        <div class="modal fade" id="saldoEditModal" tabindex="-1" aria-labelledby="saldoEditModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 16px; border: none;">
+                    <div class="modal-header" style="border-bottom: 1px solid var(--sh-gray-100);">
+                        <h5 class="modal-title fw-bold" id="saldoEditModalLabel">
+                            <i class="ti ti-edit me-2" style="color: var(--sh-primary);"></i>
+                            Edit Saldo Cuti <span id="saldoModalYear"></span>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    </div>
+                    <form id="saldoEditForm" method="POST">
+                        @csrf
+                        <div class="modal-body">
+                            <div id="saldoCurrentYearWarning" class="alert alert-warning d-none" style="border-radius: 10px; font-size: 0.85rem;">
+                                <i class="ti ti-alert-triangle me-1"></i>
+                                Ini adalah tahun berjalan. Perubahan sisa cuti juga akan memperbarui saldo cuti aktif pegawai.
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Hak Cuti Dasar <span class="text-muted fw-normal">(hari)</span></label>
+                                <input type="number" id="saldo_hak" name="hak_cuti" class="form-control" min="0" max="60" oninput="autoHitungSisa()">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Carry Over <span class="text-muted fw-normal">(hari)</span></label>
+                                <input type="number" id="saldo_co" name="carry_over" class="form-control" min="0" max="24" oninput="autoHitungSisa()">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Tambahan Terpencil <span class="text-muted fw-normal">(0–12 hari)</span></label>
+                                <input type="number" id="saldo_tp" name="tambahan_terpencil" class="form-control" min="0" max="12" oninput="autoHitungSisa()">
+                            </div>
+                            <hr style="border-color: var(--sh-gray-100);">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-muted">Cuti Diambil (aktual, read-only)</label>
+                                <div class="form-control bg-light" id="saldo_diambil_display" data-val="0" style="color: #64748b;">0 hari</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Sisa Cuti <span class="text-muted fw-normal">(hari)</span></label>
+                                <div class="input-group">
+                                    <input type="number" id="saldo_sisa" name="sisa_cuti" class="form-control" min="0" max="60">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="autoHitungSisa()" title="Auto-hitung sisa">
+                                        <i class="ti ti-refresh"></i> Auto
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-1">
+                                <label class="form-label fw-semibold">Keterangan <span class="text-muted fw-normal">(opsional)</span></label>
+                                <textarea id="saldo_keterangan" name="keterangan" class="form-control" rows="2" maxlength="500" placeholder="Catatan koreksi saldo..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="border-top: 1px solid var(--sh-gray-100);">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn sh-btn-primary">
+                                <i class="ti ti-device-floppy me-1"></i>Simpan Perubahan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
         {{-- Leave History --}}
         <div class="card sh-card">
@@ -274,3 +370,43 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+const saldoData = @json($saldoYears);
+const saldoBaseUrl = "{{ route('pegawai.saldo-cuti', [$pegawai, '__YEAR__']) }}";
+const currentYear = {{ (int) date('Y') }};
+
+function openSaldoModal(year) {
+    const d = saldoData[year];
+    if (!d) return;
+
+    document.getElementById('saldoModalYear').textContent = year + ' — {{ $pegawai->name }}';
+    document.getElementById('saldo_hak').value = d.hak_cuti;
+    document.getElementById('saldo_co').value = d.carry_over;
+    document.getElementById('saldo_tp').value = d.tambahan_terpencil;
+    document.getElementById('saldo_sisa').value = d.sisa_cuti;
+    document.getElementById('saldo_keterangan').value = d.keterangan || '';
+
+    const diambilEl = document.getElementById('saldo_diambil_display');
+    diambilEl.dataset.val = d.cuti_diambil;
+    diambilEl.textContent = d.cuti_diambil + ' hari';
+
+    const warning = document.getElementById('saldoCurrentYearWarning');
+    warning.classList.toggle('d-none', year !== currentYear);
+
+    const form = document.getElementById('saldoEditForm');
+    form.action = saldoBaseUrl.replace('__YEAR__', year);
+
+    new bootstrap.Modal(document.getElementById('saldoEditModal')).show();
+}
+
+function autoHitungSisa() {
+    const hak = parseInt(document.getElementById('saldo_hak').value) || 0;
+    const co  = parseInt(document.getElementById('saldo_co').value) || 0;
+    const tp  = parseInt(document.getElementById('saldo_tp').value) || 0;
+    const di  = parseInt(document.getElementById('saldo_diambil_display').dataset.val) || 0;
+    document.getElementById('saldo_sisa').value = Math.max(0, hak + co + tp - di);
+}
+</script>
+@endpush

@@ -27,15 +27,16 @@ class KalenderController extends Controller
 
         // Admin dan Ketua melihat SEMUA cuti
         if ($user->isAdmin() || $user->isKetua()) {
-            // no additional filter
+            // #32 Filter per unit (Admin/Ketua only)
+            if ($request->filled('unit')) {
+                $query->whereHas('user', fn($q) => $q->where('unit_kerja', $request->input('unit')));
+            }
         } elseif ($user->isAtasan() || $user->isPanitera() || $user->isSekretaris()) {
-            // Atasan/Panitera/Sekretaris: lihat milik sendiri + bawahan langsung
             $query->where(function ($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhereHas('user', fn($q2) => $q2->where('atasan_id', $user->id));
             });
         } else {
-            // Pegawai biasa, Hakim, Hakim Ad Hoc: hanya milik sendiri
             $query->where('user_id', $user->id);
         }
 
@@ -49,7 +50,77 @@ class KalenderController extends Controller
             ->orderBy('start_date')
             ->get();
 
-        return view('kalender.index', compact('year', 'month', 'leaves', 'holidays', 'user', 'startOfMonth', 'endOfMonth', 'dinasLuarList'));
+        // #32 List of units for filter dropdown
+        $unitList = ($user->isAdmin() || $user->isKetua())
+            ? \App\Models\User::whereNotNull('unit_kerja')->distinct()->pluck('unit_kerja')->sort()->values()
+            : collect();
+
+        return view('kalender.index', compact('year', 'month', 'leaves', 'holidays', 'user', 'startOfMonth', 'endOfMonth', 'dinasLuarList', 'unitList'));
+    }
+
+    /**
+     * #31 Export calendar as iCal (.ics)
+     */
+    public function exportIcs(Request $request)
+    {
+        $year = (int) $request->input('year', date('Y'));
+        $user = Auth::user();
+
+        $leaves = LeaveRequest::with('user')
+            ->whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+            ->whereYear('start_date', $year)
+            ->when(!$user->isAdmin() && !$user->isKetua(), fn($q) => $q->where('user_id', $user->id))
+            ->get();
+
+        $holidays = HariLibur::where('tahun', $year)->orderBy('tanggal')->get();
+
+        $ics = "BEGIN:VCALENDAR\r\n";
+        $ics .= "VERSION:2.0\r\n";
+        $ics .= "PRODID:-//SiHEALING//PN Natuna//ID\r\n";
+        $ics .= "CALSCALE:GREGORIAN\r\n";
+        $ics .= "METHOD:PUBLISH\r\n";
+        $ics .= "X-WR-CALNAME:Kalender Cuti " . $year . "\r\n";
+        $ics .= "X-WR-CALDESC:Jadwal Cuti & Hari Libur SiHEALING - PN Natuna\r\n";
+
+        foreach ($leaves as $leave) {
+            $uid = 'leave-' . $leave->id . '@sihealing.pn-natuna';
+            $start = $leave->start_date->format('Ymd');
+            $end   = $leave->end_date->copy()->addDay()->format('Ymd'); // iCal end is exclusive
+            $ics .= "BEGIN:VEVENT\r\n";
+            $ics .= "UID:{$uid}\r\n";
+            $ics .= "DTSTART;VALUE=DATE:{$start}\r\n";
+            $ics .= "DTEND;VALUE=DATE:{$end}\r\n";
+            $ics .= "SUMMARY:[Cuti] " . $this->escapeIcs($leave->user->name) . " - " . $this->escapeIcs($leave->type_label) . "\r\n";
+            $ics .= "DESCRIPTION:" . $this->escapeIcs($leave->reason ?? '') . "\r\n";
+            $ics .= "CATEGORIES:CUTI\r\n";
+            $ics .= "END:VEVENT\r\n";
+        }
+
+        foreach ($holidays as $holiday) {
+            $uid = 'holiday-' . $holiday->id . '@sihealing.pn-natuna';
+            $date = \Carbon\Carbon::parse($holiday->tanggal)->format('Ymd');
+            $nextDate = \Carbon\Carbon::parse($holiday->tanggal)->addDay()->format('Ymd');
+            $prefix = $holiday->is_cuti_bersama ? '[Cuti Bersama]' : '[Libur Nasional]';
+            $ics .= "BEGIN:VEVENT\r\n";
+            $ics .= "UID:{$uid}\r\n";
+            $ics .= "DTSTART;VALUE=DATE:{$date}\r\n";
+            $ics .= "DTEND;VALUE=DATE:{$nextDate}\r\n";
+            $ics .= "SUMMARY:{$prefix} " . $this->escapeIcs($holiday->keterangan) . "\r\n";
+            $ics .= "CATEGORIES:" . ($holiday->is_cuti_bersama ? 'CUTI BERSAMA' : 'HARI LIBUR') . "\r\n";
+            $ics .= "END:VEVENT\r\n";
+        }
+
+        $ics .= "END:VCALENDAR\r\n";
+
+        return response($ics, 200, [
+            'Content-Type' => 'text/calendar; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="kalender-cuti-' . $year . '.ics"',
+        ]);
+    }
+
+    private function escapeIcs(string $str): string
+    {
+        return str_replace(["\r\n", "\n", "\r", ',', ';', '\\'], ['\\n', '\\n', '\\n', '\\,', '\\;', '\\\\'], $str);
     }
 
     /**

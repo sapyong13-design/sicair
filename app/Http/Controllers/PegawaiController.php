@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
+use App\Models\CutiRecord;
+use App\Models\LeaveRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -87,7 +90,69 @@ class PegawaiController extends Controller
             $q->orderByDesc('tahun');
         }]);
 
-        return view('pegawai.show', compact('pegawai'));
+        $currentYear = (int) date('Y');
+        $saldoYears = [];
+        for ($i = 0; $i <= 2; $i++) {
+            $yr = $currentYear - $i;
+            $record = $pegawai->cutiRecords->firstWhere('tahun', $yr);
+            $diambilAktual = $pegawai->leaveRequests()
+                ->where('type', 'cuti_tahunan')
+                ->whereIn('status', ['disetujui', 'approved'])
+                ->whereYear('start_date', $yr)
+                ->get()
+                ->sum(fn($l) => $l->total_hari_kerja ?? $l->total_days ?? 0);
+            $saldoYears[$yr] = [
+                'year'               => $yr,
+                'hak_cuti'           => $record->hak_cuti ?? 12,
+                'carry_over'         => $record->carry_over ?? 0,
+                'tambahan_terpencil' => $record->tambahan_terpencil ?? 0,
+                'cuti_diambil'       => $record ? $record->cuti_diambil : (int) $diambilAktual,
+                'sisa_cuti'          => $record->sisa_cuti ?? 0,
+                'keterangan'         => $record->keterangan ?? '',
+                'is_current'         => $yr === $currentYear,
+            ];
+        }
+
+        return view('pegawai.show', compact('pegawai', 'saldoYears'));
+    }
+
+    public function updateSaldoCuti(Request $request, User $pegawai, int $year)
+    {
+        abort_if(!auth()->user()->isAdmin(), 403);
+
+        $currentYear = (int) date('Y');
+        abort_if($year < $currentYear - 2 || $year > $currentYear, 422, 'Tahun tidak valid.');
+
+        $validated = $request->validate([
+            'hak_cuti'           => 'required|integer|min:0|max:60',
+            'carry_over'         => 'required|integer|min:0|max:24',
+            'tambahan_terpencil' => 'required|integer|min:0|max:12',
+            'sisa_cuti'          => 'required|integer|min:0|max:60',
+            'keterangan'         => 'nullable|string|max:500',
+        ]);
+
+        $existing = CutiRecord::where('user_id', $pegawai->id)->where('tahun', $year)->first();
+        $beforeData = $existing ? $existing->toArray() : null;
+
+        $record = CutiRecord::updateOrCreate(
+            ['user_id' => $pegawai->id, 'tahun' => $year],
+            $validated
+        );
+
+        if ($year === $currentYear) {
+            $pegawai->update(['leave_balance' => $validated['sisa_cuti']]);
+        }
+
+        AuditLog::log(
+            'update_saldo_cuti',
+            'CutiRecord',
+            $record->id,
+            $beforeData,
+            $validated,
+            "Admin memperbarui saldo cuti {$pegawai->name} tahun {$year}"
+        );
+
+        return back()->with('success', "Saldo cuti tahun {$year} untuk {$pegawai->name} berhasil diperbarui.");
     }
 
     public function edit(User $pegawai)
@@ -159,5 +224,94 @@ class PegawaiController extends Controller
         $pegawai->delete();
 
         return redirect()->route('pegawai.index')->with('success', 'Pegawai berhasil dihapus.');
+    }
+
+    /**
+     * #38 Quick View: Riwayat Cuti Pegawai (AJAX JSON)
+     */
+    public function riwayatCuti(User $pegawai)
+    {
+        $leaves = $pegawai->leaveRequests()
+            ->whereYear('created_at', date('Y'))
+            ->orWhereYear('created_at', date('Y') - 1)
+            ->latest()
+            ->take(20)
+            ->get()
+            ->map(fn($l) => [
+                'type_label' => $l->type_label,
+                'start_date' => $l->start_date->format('d M Y'),
+                'end_date'   => $l->end_date->format('d M Y'),
+                'total_days' => $l->total_days,
+                'status'     => $l->status,
+                'status_label' => $l->status_label,
+            ]);
+
+        return response()->json(['leaves' => $leaves]);
+    }
+
+    /**
+     * #36 Import Pegawai from Excel/CSV
+     */
+    public function importTemplate()
+    {
+        // Return a simple CSV template
+        $headers = ['nama', 'nip', 'jabatan', 'golongan_ruang', 'unit_kerja', 'role', 'tanggal_mulai_kerja', 'status_pegawai', 'email'];
+        $csv = implode(',', $headers) . "\n";
+        $csv .= '"Contoh Nama","199001012010011001","Pranata Komputer","III/b","Kepaniteraan","pegawai","2010-01-01","aparatur","contoh@example.com"' . "\n";
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="template-import-pegawai.csv"',
+        ]);
+    }
+
+    /**
+     * #36 Process Import
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'import_file' => 'required|file|mimes:csv,xlsx,xls|max:2048',
+        ]);
+
+        $file = $request->file('import_file');
+        $ext = strtolower($file->getClientOriginalExtension());
+
+        if ($ext === 'csv') {
+            $rows = array_map('str_getcsv', file($file->getRealPath()));
+            $header = array_shift($rows);
+
+            $imported = 0;
+            $skipped = 0;
+            foreach ($rows as $row) {
+                if (count($row) < count($header)) continue;
+                $data = array_combine($header, $row);
+                if (empty($data['nip']) || empty($data['nama'])) { $skipped++; continue; }
+
+                $exists = \App\Models\User::where('nip', $data['nip'])->exists();
+                if ($exists) { $skipped++; continue; }
+
+                \App\Models\User::create([
+                    'name' => $data['nama'],
+                    'nip'  => $data['nip'],
+                    'jabatan' => $data['jabatan'] ?? null,
+                    'golongan_ruang' => $data['golongan_ruang'] ?? null,
+                    'unit_kerja' => $data['unit_kerja'] ?? null,
+                    'role' => $data['role'] ?? 'pegawai',
+                    'tanggal_mulai_kerja' => !empty($data['tanggal_mulai_kerja']) ? $data['tanggal_mulai_kerja'] : null,
+                    'status_pegawai' => $data['status_pegawai'] ?? 'aparatur',
+                    'email' => !empty($data['email']) ? $data['email'] : $data['nip'] . '@pn-natuna.go.id',
+                    'password' => bcrypt($data['nip']),
+                    'leave_balance' => 12,
+                ]);
+                $imported++;
+            }
+
+            return redirect()->route('pegawai.index')
+                ->with('success', "Import berhasil: {$imported} pegawai ditambahkan. {$skipped} baris dilewati (duplikat/kosong).");
+        }
+
+        return redirect()->route('pegawai.index')
+            ->with('error', 'Saat ini hanya format CSV yang didukung. Silakan gunakan template CSV.');
     }
 }

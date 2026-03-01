@@ -36,6 +36,22 @@ class ProfileController extends Controller
         return back()->with('success', 'Profil berhasil diperbarui.');
     }
 
+    /**
+     * #48: Save notification preferences
+     */
+    public function updateNotificationPreferences(Request $request)
+    {
+        $keys = ['email_on_approve', 'email_on_reject', 'email_on_pending', 'email_on_decision'];
+        $prefs = [];
+        foreach ($keys as $key) {
+            $prefs[$key] = $request->boolean($key);
+        }
+
+        Auth::user()->update(['notification_preferences' => $prefs]);
+
+        return back()->with('success', 'Preferensi notifikasi berhasil disimpan.');
+    }
+
     public function updatePassword(Request $request)
     {
         $request->validate([

@@ -10,6 +10,8 @@
     <!-- Tabler CSS CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+    <!-- NProgress (#2) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
     <style>
         /* ===== SiHEALING - Tema Pengadilan Negeri Natuna ===== */
         :root {
@@ -1137,6 +1139,197 @@
             .sh-mobile-user-strip,
             .sh-mobile-nav-footer { display: none !important; }
         }
+
+        /* ===== #2 NProgress Custom ===== */
+        #nprogress .bar {
+            background: var(--sh-accent) !important;
+            height: 3px !important;
+        }
+        #nprogress .peg {
+            box-shadow: 0 0 10px var(--sh-accent), 0 0 5px var(--sh-accent) !important;
+        }
+        #nprogress .spinner-icon {
+            border-top-color: var(--sh-accent) !important;
+            border-left-color: var(--sh-accent) !important;
+        }
+
+        /* ===== #6 Mobile Bottom Navigation ===== */
+        .sh-bottom-nav {
+            display: none;
+        }
+        @media (max-width: 767.98px) {
+            .sh-bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 1040;
+                background: var(--sh-card-bg);
+                border-top: 2px solid var(--sh-accent);
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+                padding: 0.3rem 0 calc(0.3rem + env(safe-area-inset-bottom));
+            }
+            .sh-bottom-nav-item {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 0.3rem 0.5rem;
+                color: var(--sh-text-muted);
+                text-decoration: none;
+                font-size: 0.6rem;
+                font-weight: 600;
+                gap: 2px;
+                border-radius: 8px;
+                transition: color 0.15s, background 0.15s;
+                position: relative;
+            }
+            .sh-bottom-nav-item i {
+                font-size: 1.25rem;
+                line-height: 1;
+            }
+            .sh-bottom-nav-item.active {
+                color: var(--sh-primary);
+            }
+            .sh-bottom-nav-item:hover {
+                color: var(--sh-primary);
+                background: var(--sh-primary-light);
+            }
+            [data-bs-theme="dark"] .sh-bottom-nav-item.active {
+                color: #4ade80;
+            }
+            [data-bs-theme="dark"] .sh-bottom-nav-item:hover {
+                background: #064e3b;
+                color: #4ade80;
+            }
+            .sh-bottom-nav-badge {
+                position: absolute;
+                top: 2px;
+                right: calc(50% - 18px);
+                min-width: 16px;
+                height: 16px;
+                border-radius: 50px;
+                background: var(--sh-danger);
+                color: #fff;
+                font-size: 0.6rem;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 3px;
+                border: 2px solid var(--sh-card-bg);
+            }
+            /* Add bottom padding to page for bottom nav */
+            .sh-page-wrapper {
+                padding-bottom: calc(4.5rem + env(safe-area-inset-bottom)) !important;
+            }
+        }
+
+        /* ===== #14 Quick Actions Floating Panel ===== */
+        .sh-quick-actions {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 1030;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+        @media (max-width: 767.98px) {
+            .sh-quick-actions { display: none; }
+        }
+        .sh-qa-toggle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #166534, #15803d);
+            color: #fff;
+            border: none;
+            box-shadow: 0 4px 16px rgba(22,101,52,0.4);
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .sh-qa-toggle:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 20px rgba(22,101,52,0.5);
+        }
+        .sh-qa-toggle.active { background: linear-gradient(135deg, #14532d, #166534); }
+        .sh-qa-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            opacity: 0;
+            transform: translateY(10px) scale(0.95);
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .sh-qa-menu.open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        .sh-qa-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.5rem 1rem 0.5rem 0.6rem;
+            border-radius: 50px;
+            background: var(--sh-card-bg);
+            color: var(--sh-text);
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--sh-border);
+            white-space: nowrap;
+            transition: background 0.15s, transform 0.15s;
+        }
+        .sh-qa-btn:hover {
+            background: var(--sh-primary-light);
+            color: var(--sh-primary);
+            transform: translateX(-3px);
+        }
+        .sh-qa-btn i {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--sh-primary-light);
+            color: var(--sh-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        [data-bs-theme="dark"] .sh-qa-btn:hover {
+            background: #064e3b;
+            color: #4ade80;
+        }
+        [data-bs-theme="dark"] .sh-qa-btn i {
+            background: #064e3b;
+            color: #4ade80;
+        }
+
+        /* ===== #47 Saldo Warning Badge ===== */
+        .sh-saldo-warn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 50px;
+            background: var(--sh-warning);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            animation: notifPulse 2s ease infinite;
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -1165,6 +1358,21 @@
                         <i class="ti ti-moon" id="darkModeIcon" aria-hidden="true"></i>
                     </button>
                 </div>
+
+                {{-- #47 Saldo Hampir Habis Warning --}}
+                @auth
+                @if(!Auth::user()->isAdmin() && Auth::user()->bolehCuti())
+                @php $navLeaveBalance = Auth::user()->leave_balance ?? 0; @endphp
+                @if($navLeaveBalance <= 3 && $navLeaveBalance >= 0)
+                <div class="nav-item me-2 d-none d-md-flex align-items-center">
+                    <a href="{{ route('dashboard') }}" class="sh-saldo-warn" title="Saldo cuti Anda tinggal {{ $navLeaveBalance }} hari">
+                        <i class="ti ti-alert-triangle"></i>
+                        <span>Saldo: {{ $navLeaveBalance }}h</span>
+                    </a>
+                </div>
+                @endif
+                @endif
+                @endauth
 
                 {{-- Notification Bell (#8) --}}
                 @auth
@@ -1312,7 +1520,7 @@
                         {{-- Admin: Dropdown Manajemen --}}
                         @if(Auth::user()->isAdmin())
                         @php
-                            $isManajemenActive = request()->is('pegawai*') || request()->is('hari-libur*') || request()->is('dinas-luar*') || request()->is('laporan-bulanan*') || request()->is('admin/*') || request()->is('balance-adjustments*');
+                            $isManajemenActive = request()->is('pegawai*') || request()->is('hari-libur*') || request()->is('dinas-luar*') || request()->is('laporan-bulanan*') || request()->is('admin/*') || request()->is('balance-adjustments*') || request()->is('analytics*');
                         @endphp
                         <li class="nav-item dropdown sh-nav-dropdown">
                             <a class="nav-link dropdown-toggle {{ $isManajemenActive ? 'active' : '' }}"
@@ -1336,9 +1544,12 @@
                                 <a class="dropdown-item {{ request()->is('dinas-luar*') ? 'active' : '' }}" href="{{ route('dinas-luar.index') }}">
                                     <i class="ti ti-briefcase"></i> Dinas Luar
                                 </a>
-                                <div class="sh-nav-dropdown-section">Laporan</div>
+                                <div class="sh-nav-dropdown-section">Laporan & Analytics</div>
                                 <a class="dropdown-item {{ request()->is('laporan-bulanan*') ? 'active' : '' }}" href="{{ route('laporan-bulanan.index') }}">
                                     <i class="ti ti-file-spreadsheet"></i> Laporan Bulanan
+                                </a>
+                                <a class="dropdown-item {{ request()->is('analytics*') ? 'active' : '' }}" href="{{ route('analytics.index') }}">
+                                    <i class="ti ti-chart-bar"></i> Analytics Cuti
                                 </a>
                                 <a class="dropdown-item {{ request()->is('admin/audit-logs*') ? 'active' : '' }}" href="{{ route('admin.audit-logs.index') }}">
                                     <i class="ti ti-clipboard-list"></i> Audit Log
@@ -1410,6 +1621,67 @@
         </div>
     </div>
 
+    {{-- #6 Mobile Bottom Navigation --}}
+    @auth
+    <nav class="sh-bottom-nav d-print-none" aria-label="Navigasi bawah mobile">
+        <a href="{{ route('dashboard') }}" class="sh-bottom-nav-item {{ request()->is('dashboard') ? 'active' : '' }}" aria-label="Dashboard">
+            <i class="ti ti-layout-dashboard"></i>
+            <span>Dashboard</span>
+        </a>
+        @if(!Auth::user()->isAdmin() && Auth::user()->bolehCuti())
+        <a href="{{ route('leave.create') }}" class="sh-bottom-nav-item {{ request()->is('leave/create') || request()->is('leave/select-type') ? 'active' : '' }}" aria-label="Ajukan Cuti">
+            <i class="ti ti-file-plus"></i>
+            <span>Ajukan</span>
+        </a>
+        @endif
+        <a href="{{ route('kalender') }}" class="sh-bottom-nav-item {{ request()->is('kalender*') ? 'active' : '' }}" aria-label="Kalender">
+            <i class="ti ti-calendar"></i>
+            <span>Kalender</span>
+        </a>
+        <a href="{{ route('notifications') }}" class="sh-bottom-nav-item {{ request()->is('notifications*') ? 'active' : '' }}" aria-label="Notifikasi" style="position:relative;">
+            <i class="ti ti-bell"></i>
+            @php $bottomUnread = \App\Models\Notification::where('user_id', Auth::id())->where('is_read', false)->count(); @endphp
+            @if($bottomUnread > 0)
+            <span class="sh-bottom-nav-badge">{{ $bottomUnread > 9 ? '9+' : $bottomUnread }}</span>
+            @endif
+            <span>Notifikasi</span>
+        </a>
+        @if(Auth::user()->isAdmin())
+        <a href="{{ route('pegawai.index') }}" class="sh-bottom-nav-item {{ request()->is('pegawai*') ? 'active' : '' }}" aria-label="Pegawai">
+            <i class="ti ti-users"></i>
+            <span>Pegawai</span>
+        </a>
+        @endif
+    </nav>
+    @endauth
+
+    {{-- #14 Quick Actions Floating Panel (Desktop) --}}
+    @auth
+    <div class="sh-quick-actions d-print-none">
+        <div class="sh-qa-menu" id="shQaMenu">
+            @if(!Auth::user()->isAdmin() && Auth::user()->bolehCuti())
+            <a href="{{ route('leave.create') }}" class="sh-qa-btn">
+                <i class="ti ti-file-plus"></i> Ajukan Cuti
+            </a>
+            @endif
+            <a href="{{ route('kalender') }}" class="sh-qa-btn">
+                <i class="ti ti-calendar"></i> Lihat Kalender
+            </a>
+            @if(Auth::user()->isAdmin())
+            <a href="{{ route('laporan-bulanan.index') }}" class="sh-qa-btn">
+                <i class="ti ti-file-spreadsheet"></i> Laporan Bulanan
+            </a>
+            <a href="{{ route('analytics.index') }}" class="sh-qa-btn">
+                <i class="ti ti-chart-bar"></i> Analytics
+            </a>
+            @endif
+        </div>
+        <button class="sh-qa-toggle" id="shQaToggle" aria-label="Quick Actions" title="Aksi Cepat">
+            <i class="ti ti-bolt" id="shQaIcon"></i>
+        </button>
+    </div>
+    @endauth
+
     <footer class="sh-footer d-print-none mt-auto" role="contentinfo">
         <div class="container-xl">
             <div class="text-center">
@@ -1422,6 +1694,8 @@
 
     <!-- Tabler JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/js/tabler.min.js"></script>
+    <!-- NProgress (#2) -->
+    <script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js"></script>
 
     {{-- Dark Mode Toggle JS --}}
     <script>
@@ -1594,6 +1868,59 @@
         // Reset on resize to desktop
         window.addEventListener('resize', function() {
             if (!isMobile()) menu.classList.remove('show');
+        });
+    })();
+    </script>
+
+    {{-- #2 NProgress page load bar --}}
+    <script>
+    (function() {
+        NProgress.configure({ showSpinner: false, speed: 300, minimum: 0.1 });
+        // Start on every link click (not AJAX, not anchor, not logout)
+        document.addEventListener('click', function(e) {
+            var a = e.target.closest('a');
+            if (!a) return;
+            var href = a.getAttribute('href');
+            if (!href || href === '#' || href.startsWith('#') || href.startsWith('javascript') || a.getAttribute('target') === '_blank') return;
+            if (a.getAttribute('data-bs-toggle')) return; // Bootstrap toggles
+            NProgress.start();
+        });
+        document.addEventListener('submit', function() {
+            NProgress.start();
+        });
+        window.addEventListener('pageshow', function() {
+            NProgress.done();
+        });
+        // Fallback done after load
+        window.addEventListener('load', function() {
+            NProgress.done();
+        });
+    })();
+    </script>
+
+    {{-- #14 Quick Actions Panel --}}
+    <script>
+    (function() {
+        var toggle = document.getElementById('shQaToggle');
+        var menu = document.getElementById('shQaMenu');
+        var icon = document.getElementById('shQaIcon');
+        if (!toggle || !menu) return;
+
+        var open = false;
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            open = !open;
+            menu.classList.toggle('open', open);
+            toggle.classList.toggle('active', open);
+            icon.className = open ? 'ti ti-x' : 'ti ti-bolt';
+        });
+        document.addEventListener('click', function() {
+            if (open) {
+                open = false;
+                menu.classList.remove('open');
+                toggle.classList.remove('active');
+                icon.className = 'ti ti-bolt';
+            }
         });
     })();
     </script>

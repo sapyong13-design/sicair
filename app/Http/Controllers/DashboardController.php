@@ -34,6 +34,7 @@ class DashboardController extends Controller
     {
         $analyticsService = new AnalyticsService();
         $year = date('Y');
+        $today = \Carbon\Carbon::today();
 
         $totalPegawai = User::count();
         $pendingRequests = LeaveRequest::with('user')
@@ -56,6 +57,22 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
+        // #10 Widget: Who's on leave today
+        $todayOnLeave = LeaveRequest::with('user')
+            ->whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+            ->where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->get();
+
+        // #11 Widget: Upcoming leaves in 7 days
+        $upcomingLeaves7Days = LeaveRequest::with('user')
+            ->whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+            ->where('start_date', '>', $today)
+            ->where('start_date', '<=', $today->copy()->addDays(7))
+            ->orderBy('start_date')
+            ->take(5)
+            ->get();
+
         // Get comprehensive analytics
         $analytics = $analyticsService->getDashboardAnalytics($year);
         $leaveBalances = $analyticsService->getLeaveBalanceOverview($year);
@@ -69,7 +86,8 @@ class DashboardController extends Controller
         return view('dashboard', compact(
             'user', 'pendingRequests', 'recentDecisions', 'totalPegawai',
             'analytics', 'leaveBalances', 'year',
-            'chartByType', 'chartByStatus', 'chartMonthly', 'chartByDepartment'
+            'chartByType', 'chartByStatus', 'chartMonthly', 'chartByDepartment',
+            'todayOnLeave', 'upcomingLeaves7Days'
         ));
     }
 

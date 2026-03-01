@@ -24,7 +24,15 @@
                 </div>
             </div>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap gap-2">
+            {{-- #28 Print Preview --}}
+            <button type="button" class="btn btn-outline-secondary"
+               style="border-radius: 10px; font-size: 0.85rem;"
+               onclick="document.getElementById('printPreviewModal').classList.add('show'); document.getElementById('printPreviewModal').style.display='block';"
+               title="Preview sebelum cetak">
+                <i class="ti ti-printer me-1"></i>
+                Preview
+            </button>
             <a href="{{ route('leave.surat-permohonan', $leaveRequest) }}"
                class="btn sh-btn-primary"
                style="border-radius: 10px; font-size: 0.85rem;"
@@ -39,7 +47,7 @@
                title="Download Surat Permohonan Cuti (DOCX Folio)"
                target="_blank">
                 <i class="ti ti-file-word me-1"></i>
-                Surat Permohonan (DOCX)
+                DOCX
             </a>
             <a href="{{ route('leave.form-cuti', $leaveRequest) }}"
                class="btn sh-btn-primary"
@@ -49,6 +57,16 @@
                 <i class="ti ti-clipboard-text me-1"></i>
                 Form Cuti
             </a>
+            {{-- #21 Re-apply button (only for rejected/cancelled) --}}
+            @if(auth()->id() === $leaveRequest->user_id && $leaveRequest->isRejected())
+            <a href="{{ route('leave.create', ['reapply' => $leaveRequest->id]) }}"
+               class="btn btn-outline-warning"
+               style="border-radius: 10px; font-size: 0.85rem;"
+               title="Ajukan ulang dengan data yang sama">
+                <i class="ti ti-refresh me-1"></i>
+                Ajukan Ulang
+            </a>
+            @endif
         </div>
     </div>
 </div>
@@ -226,7 +244,7 @@
             </div>
         </div>
 
-        {{-- Approval Timeline --}}
+        {{-- #24 Enhanced Approval Timeline --}}
         <div class="card sh-card">
             <div class="card-header">
                 <h3 class="card-title mb-0">
@@ -235,77 +253,106 @@
                 </h3>
             </div>
             <div class="card-body p-4">
-                <div class="sh-timeline">
+                <div class="sh-timeline-v2">
                     {{-- Step 1: Pengajuan --}}
-                    <div class="sh-timeline-item">
-                        <div class="sh-timeline-dot" style="background: var(--sh-success);"></div>
-                        <div class="sh-timeline-content">
-                            <div class="fw-bold" style="font-size: 0.9rem;">Pengajuan Diajukan</div>
-                            <div class="text-muted" style="font-size: 0.8rem;">
-                                {{ $leaveRequest->created_at->format('d M Y, H:i') }} &mdash; {{ $leaveRequest->user->name }}
+                    <div class="sh-tl-item sh-tl-done">
+                        <div class="sh-tl-icon" style="background: var(--sh-success-light); color: var(--sh-success);">
+                            <i class="ti ti-send"></i>
+                        </div>
+                        <div class="sh-tl-card">
+                            <div class="sh-tl-header">
+                                <div>
+                                    <div class="sh-tl-title">Pengajuan Dikirim</div>
+                                    <div class="sh-tl-meta">
+                                        <i class="ti ti-user me-1"></i>{{ $leaveRequest->user->name }}
+                                        &bull; {{ $leaveRequest->created_at->format('d M Y, H:i') }}
+                                    </div>
+                                </div>
+                                <span class="sh-badge sh-badge-approved">Selesai</span>
                             </div>
                         </div>
                     </div>
 
                     {{-- Step 2: Pertimbangan Atasan --}}
-                    @php
-                        $isDirectToKetua = $leaveRequest->user->skipAtasanReview();
-                    @endphp
+                    @php $isDirectToKetua = $leaveRequest->user->skipAtasanReview(); @endphp
                     @if($leaveRequest->atasanReviewer)
-                    <div class="sh-timeline-item">
-                        @php
-                            $atasanColor = match($leaveRequest->pertimbangan_atasan) {
-                                'setuju' => 'var(--sh-success)',
-                                'tolak' => 'var(--sh-danger)',
-                                'tangguhkan' => 'var(--sh-warning)',
-                                'ubah' => 'var(--sh-primary)',
-                                default => '#94a3b8',
-                            };
-                            $atasanLabel = match($leaveRequest->pertimbangan_atasan) {
-                                'setuju' => 'Disetujui',
-                                'tolak' => 'Tidak Disetujui',
-                                'tangguhkan' => 'Ditangguhkan',
-                                'ubah' => 'Perubahan',
-                                default => $leaveRequest->pertimbangan_atasan,
-                            };
-                        @endphp
-                        <div class="sh-timeline-dot" style="background: {{ $atasanColor }};"></div>
-                        <div class="sh-timeline-content">
-                            <div class="fw-bold" style="font-size: 0.9rem;">
-                                Pertimbangan Atasan: <span style="color: {{ $atasanColor }};">{{ $atasanLabel }}</span>
+                    @php
+                        $atasanColor = match($leaveRequest->pertimbangan_atasan) {
+                            'setuju' => 'var(--sh-success)', 'tolak' => 'var(--sh-danger)',
+                            'tangguhkan' => 'var(--sh-warning)', 'ubah' => 'var(--sh-primary)',
+                            default => '#94a3b8',
+                        };
+                        $atasanBgColor = match($leaveRequest->pertimbangan_atasan) {
+                            'setuju' => 'var(--sh-success-light)', 'tolak' => 'var(--sh-danger-light)',
+                            'tangguhkan' => 'var(--sh-warning-light)', 'ubah' => 'var(--sh-primary-light)',
+                            default => 'var(--sh-gray-100)',
+                        };
+                        $atasanLabel = match($leaveRequest->pertimbangan_atasan) {
+                            'setuju' => 'Disetujui', 'tolak' => 'Tidak Disetujui',
+                            'tangguhkan' => 'Ditangguhkan', 'ubah' => 'Diubah',
+                            default => $leaveRequest->pertimbangan_atasan ?? 'Diproses',
+                        };
+                        $atasanIcon = match($leaveRequest->pertimbangan_atasan) {
+                            'setuju' => 'ti-circle-check', 'tolak' => 'ti-circle-x',
+                            'tangguhkan' => 'ti-clock-pause', default => 'ti-user-check',
+                        };
+                    @endphp
+                    <div class="sh-tl-item sh-tl-done">
+                        <div class="sh-tl-icon" style="background: {{ $atasanBgColor }}; color: {{ $atasanColor }};">
+                            <i class="ti {{ $atasanIcon }}"></i>
+                        </div>
+                        <div class="sh-tl-card">
+                            <div class="sh-tl-header">
+                                <div>
+                                    <div class="sh-tl-title">Pertimbangan Atasan Langsung</div>
+                                    <div class="sh-tl-meta">
+                                        <i class="ti ti-user-check me-1"></i>{{ $leaveRequest->atasanReviewer->name }}
+                                        @if($leaveRequest->reviewed_at)
+                                        &bull; {{ $leaveRequest->reviewed_at->format('d M Y, H:i') }}
+                                        @endif
+                                    </div>
+                                </div>
+                                <span class="sh-badge" style="background:{{ $atasanBgColor }};color:{{ $atasanColor }};">{{ $atasanLabel }}</span>
                             </div>
-                            <div class="text-muted" style="font-size: 0.8rem;">
-                                {{ $leaveRequest->reviewed_at?->format('d M Y, H:i') }} &mdash; {{ $leaveRequest->atasanReviewer->name }}
-                            </div>
+                            {{-- #25 Speech bubble notes --}}
                             @if($leaveRequest->catatan_atasan)
-                            <div style="margin-top: 0.4rem; padding: 0.5rem 0.75rem; background: var(--sh-gray-50); border-radius: 8px; font-size: 0.82rem; color: #475569;">
-                                <i class="ti ti-message me-1"></i> {{ $leaveRequest->catatan_atasan }}
+                            <div class="sh-speech-bubble mt-2">
+                                <i class="ti ti-message-circle me-1" style="color: var(--sh-primary);"></i>
+                                {{ $leaveRequest->catatan_atasan }}
                             </div>
                             @endif
                         </div>
                     </div>
                     @elseif($isDirectToKetua)
-                    {{-- Alur langsung ke Ketua (Hakim/Panitera/Sekretaris/Ketua) --}}
-                    <div class="sh-timeline-item">
-                        <div class="sh-timeline-dot" style="background: var(--sh-success);"></div>
-                        <div class="sh-timeline-content">
-                            <div class="fw-bold" style="font-size: 0.9rem;">
-                                <span style="color: var(--sh-success);">Langsung ke Pejabat Berwenang</span>
-                            </div>
-                            <div class="text-muted" style="font-size: 0.8rem;">
-                                Tanpa pertimbangan atasan &mdash; {{ $leaveRequest->user->jabatan }}
+                    <div class="sh-tl-item sh-tl-done">
+                        <div class="sh-tl-icon" style="background: var(--sh-primary-light); color: var(--sh-primary);">
+                            <i class="ti ti-arrow-right"></i>
+                        </div>
+                        <div class="sh-tl-card">
+                            <div class="sh-tl-header">
+                                <div>
+                                    <div class="sh-tl-title">Langsung ke Pejabat Berwenang</div>
+                                    <div class="sh-tl-meta">Tanpa pertimbangan atasan &mdash; {{ $leaveRequest->user->jabatan }}</div>
+                                </div>
+                                <span class="sh-badge sh-badge-approved">Otomatis</span>
                             </div>
                         </div>
                     </div>
                     @else
-                    <div class="sh-timeline-item">
-                        <div class="sh-timeline-dot" style="background: {{ $leaveRequest->needsAtasanReview() ? '#94a3b8' : '#e2e8f0' }};"></div>
-                        <div class="sh-timeline-content">
-                            <div class="fw-semibold text-muted" style="font-size: 0.9rem;">
-                                Pertimbangan Atasan Langsung
-                            </div>
-                            <div class="text-muted" style="font-size: 0.8rem;">
-                                {{ $leaveRequest->needsAtasanReview() ? 'Menunggu pertimbangan...' : 'Belum diproses' }}
+                    @php $isWaitingAtasan = $leaveRequest->needsAtasanReview(); @endphp
+                    <div class="sh-tl-item {{ $isWaitingAtasan ? 'sh-tl-active' : 'sh-tl-pending' }}">
+                        <div class="sh-tl-icon" style="background: {{ $isWaitingAtasan ? 'var(--sh-warning-light)' : 'var(--sh-gray-100)' }}; color: {{ $isWaitingAtasan ? 'var(--sh-warning)' : '#94a3b8' }};">
+                            <i class="ti {{ $isWaitingAtasan ? 'ti-clock-hour-4' : 'ti-user-check' }}"></i>
+                        </div>
+                        <div class="sh-tl-card">
+                            <div class="sh-tl-header">
+                                <div>
+                                    <div class="sh-tl-title">Pertimbangan Atasan Langsung</div>
+                                    <div class="sh-tl-meta">{{ $isWaitingAtasan ? 'Menunggu pertimbangan atasan...' : 'Belum diproses' }}</div>
+                                </div>
+                                @if($isWaitingAtasan)
+                                <span class="sh-badge sh-badge-pending"><i class="ti ti-clock"></i> Menunggu</span>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -313,47 +360,67 @@
 
                     {{-- Step 3: Keputusan Pejabat --}}
                     @if($leaveRequest->pejabat)
-                    <div class="sh-timeline-item">
-                        @php
-                            $pejabatColor = match($leaveRequest->keputusan_pejabat) {
-                                'setuju' => 'var(--sh-success)',
-                                'tolak' => 'var(--sh-danger)',
-                                'tangguhkan' => 'var(--sh-warning)',
-                                'ubah' => 'var(--sh-primary)',
-                                default => '#94a3b8',
-                            };
-                            $pejabatLabel = match($leaveRequest->keputusan_pejabat) {
-                                'setuju' => 'Disetujui',
-                                'tolak' => 'Tidak Disetujui',
-                                'tangguhkan' => 'Ditangguhkan',
-                                'ubah' => 'Perubahan',
-                                default => $leaveRequest->keputusan_pejabat,
-                            };
-                        @endphp
-                        <div class="sh-timeline-dot" style="background: {{ $pejabatColor }};"></div>
-                        <div class="sh-timeline-content">
-                            <div class="fw-bold" style="font-size: 0.9rem;">
-                                Keputusan Pejabat: <span style="color: {{ $pejabatColor }};">{{ $pejabatLabel }}</span>
+                    @php
+                        $pejabatColor = match($leaveRequest->keputusan_pejabat) {
+                            'setuju' => 'var(--sh-success)', 'tolak' => 'var(--sh-danger)',
+                            'tangguhkan' => 'var(--sh-warning)', 'ubah' => 'var(--sh-primary)',
+                            default => '#94a3b8',
+                        };
+                        $pejabatBgColor = match($leaveRequest->keputusan_pejabat) {
+                            'setuju' => 'var(--sh-success-light)', 'tolak' => 'var(--sh-danger-light)',
+                            'tangguhkan' => 'var(--sh-warning-light)', default => 'var(--sh-primary-light)',
+                        };
+                        $pejabatLabel = match($leaveRequest->keputusan_pejabat) {
+                            'setuju' => 'Disetujui', 'tolak' => 'Tidak Disetujui',
+                            'tangguhkan' => 'Ditangguhkan', 'ubah' => 'Diubah',
+                            default => $leaveRequest->keputusan_pejabat ?? 'Diproses',
+                        };
+                        $pejabatIcon = match($leaveRequest->keputusan_pejabat) {
+                            'setuju' => 'ti-circle-check', 'tolak' => 'ti-circle-x',
+                            'tangguhkan' => 'ti-clock-pause', default => 'ti-gavel',
+                        };
+                    @endphp
+                    <div class="sh-tl-item sh-tl-done">
+                        <div class="sh-tl-icon" style="background: {{ $pejabatBgColor }}; color: {{ $pejabatColor }};">
+                            <i class="ti {{ $pejabatIcon }}"></i>
+                        </div>
+                        <div class="sh-tl-card">
+                            <div class="sh-tl-header">
+                                <div>
+                                    <div class="sh-tl-title">Keputusan Pejabat Berwenang</div>
+                                    <div class="sh-tl-meta">
+                                        <i class="ti ti-gavel me-1"></i>{{ $leaveRequest->pejabat->name }}
+                                        @if($leaveRequest->decided_at)
+                                        &bull; {{ $leaveRequest->decided_at->format('d M Y, H:i') }}
+                                        @endif
+                                    </div>
+                                </div>
+                                <span class="sh-badge" style="background:{{ $pejabatBgColor }};color:{{ $pejabatColor }};">{{ $pejabatLabel }}</span>
                             </div>
-                            <div class="text-muted" style="font-size: 0.8rem;">
-                                {{ $leaveRequest->decided_at?->format('d M Y, H:i') }} &mdash; {{ $leaveRequest->pejabat->name }}
-                            </div>
+                            {{-- #25 Speech bubble notes --}}
                             @if($leaveRequest->catatan_pejabat)
-                            <div style="margin-top: 0.4rem; padding: 0.5rem 0.75rem; background: var(--sh-gray-50); border-radius: 8px; font-size: 0.82rem; color: #475569;">
-                                <i class="ti ti-message me-1"></i> {{ $leaveRequest->catatan_pejabat }}
+                            <div class="sh-speech-bubble mt-2">
+                                <i class="ti ti-message-circle me-1" style="color: #7c3aed;"></i>
+                                {{ $leaveRequest->catatan_pejabat }}
                             </div>
                             @endif
                         </div>
                     </div>
                     @else
-                    <div class="sh-timeline-item">
-                        <div class="sh-timeline-dot" style="background: {{ $leaveRequest->needsPejabatDecision() ? '#94a3b8' : '#e2e8f0' }};"></div>
-                        <div class="sh-timeline-content">
-                            <div class="fw-semibold text-muted" style="font-size: 0.9rem;">
-                                Keputusan Pejabat Berwenang
-                            </div>
-                            <div class="text-muted" style="font-size: 0.8rem;">
-                                {{ $leaveRequest->needsPejabatDecision() ? 'Menunggu keputusan...' : 'Belum diproses' }}
+                    @php $isWaitingPejabat = $leaveRequest->needsPejabatDecision(); @endphp
+                    <div class="sh-tl-item {{ $isWaitingPejabat ? 'sh-tl-active' : 'sh-tl-pending' }}">
+                        <div class="sh-tl-icon" style="background: {{ $isWaitingPejabat ? 'var(--sh-warning-light)' : 'var(--sh-gray-100)' }}; color: {{ $isWaitingPejabat ? 'var(--sh-warning)' : '#94a3b8' }};">
+                            <i class="ti {{ $isWaitingPejabat ? 'ti-clock-hour-4' : 'ti-gavel' }}"></i>
+                        </div>
+                        <div class="sh-tl-card">
+                            <div class="sh-tl-header">
+                                <div>
+                                    <div class="sh-tl-title">Keputusan Pejabat Berwenang</div>
+                                    <div class="sh-tl-meta">{{ $isWaitingPejabat ? 'Menunggu keputusan pejabat berwenang...' : 'Belum diproses' }}</div>
+                                </div>
+                                @if($isWaitingPejabat)
+                                <span class="sh-badge sh-badge-pending"><i class="ti ti-clock"></i> Menunggu</span>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -364,31 +431,158 @@
     </div>
 </div>
 
+{{-- #28 Print Preview Modal --}}
+<div class="modal fade" id="printPreviewModal" tabindex="-1" aria-labelledby="printPreviewModalLabel">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header" style="background: var(--sh-primary); color: #fff; border: none;">
+                <h5 class="modal-title" id="printPreviewModalLabel">
+                    <i class="ti ti-printer me-2"></i> Preview Dokumen Cuti
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" style="min-height: 60vh;">
+                <div class="p-3 border-bottom d-flex gap-2 flex-wrap">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="loadPreview('surat')" id="prevBtnSurat">
+                        <i class="ti ti-file-text me-1"></i> Surat Permohonan
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="loadPreview('form')">
+                        <i class="ti ti-clipboard-text me-1"></i> Form Cuti
+                    </button>
+                </div>
+                <iframe id="previewFrame"
+                    src="{{ route('leave.surat-permohonan', $leaveRequest) }}"
+                    style="width:100%; height:65vh; border:none;"
+                    title="Preview dokumen cuti">
+                </iframe>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <a href="{{ route('leave.surat-permohonan', $leaveRequest) }}" target="_blank" class="btn sh-btn-primary">
+                    <i class="ti ti-download me-1"></i> Download
+                </a>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <style>
-    .sh-timeline { position: relative; padding-left: 28px; }
-    .sh-timeline-item { position: relative; padding-bottom: 1.5rem; }
-    .sh-timeline-item:last-child { padding-bottom: 0; }
-    .sh-timeline-item::before {
+    /* #24 Enhanced Timeline V2 */
+    .sh-timeline-v2 { display: flex; flex-direction: column; gap: 0; }
+    .sh-tl-item {
+        display: flex;
+        gap: 1rem;
+        position: relative;
+        padding-bottom: 1.5rem;
+    }
+    .sh-tl-item:last-child { padding-bottom: 0; }
+    .sh-tl-item::before {
         content: '';
         position: absolute;
-        left: -22px;
-        top: 18px;
-        bottom: -8px;
+        left: 19px;
+        top: 42px;
+        bottom: 0;
         width: 2px;
-        background: #e2e8f0;
+        background: var(--sh-border);
     }
-    .sh-timeline-item:last-child::before { display: none; }
-    .sh-timeline-dot {
-        position: absolute;
-        left: -28px;
-        top: 4px;
-        width: 14px;
-        height: 14px;
+    .sh-tl-item:last-child::before { display: none; }
+    .sh-tl-icon {
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
-        border: 3px solid #fff;
-        box-shadow: 0 0 0 2px #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+        border: 2px solid var(--sh-card-bg);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .sh-tl-card {
+        flex: 1;
+        background: var(--sh-gray-50);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--sh-border);
+        min-width: 0;
+    }
+    .sh-tl-item.sh-tl-active .sh-tl-card {
+        border-color: var(--sh-warning);
+        background: var(--sh-warning-light);
+    }
+    .sh-tl-item.sh-tl-pending .sh-tl-card {
+        opacity: 0.65;
+    }
+    .sh-tl-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .sh-tl-title {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--sh-text);
+    }
+    .sh-tl-meta {
+        font-size: 0.78rem;
+        color: var(--sh-text-muted);
+        margin-top: 0.2rem;
+    }
+
+    /* #25 Speech Bubble Notes */
+    .sh-speech-bubble {
+        position: relative;
+        background: var(--sh-card-bg);
+        border: 1px solid var(--sh-border);
+        border-radius: 0 12px 12px 12px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.82rem;
+        color: var(--sh-text);
+        margin-top: 0.5rem;
+        font-style: italic;
+    }
+    .sh-speech-bubble::before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: 12px;
+        border: 4px solid transparent;
+        border-bottom-color: var(--sh-border);
+    }
+    .sh-speech-bubble::after {
+        content: '';
+        position: absolute;
+        top: -6px;
+        left: 13px;
+        border: 3px solid transparent;
+        border-bottom-color: var(--sh-card-bg);
+    }
+    [data-bs-theme="dark"] .sh-tl-card {
+        background: var(--sh-gray-100);
+    }
+    [data-bs-theme="dark"] .sh-tl-item.sh-tl-active .sh-tl-card {
+        background: rgba(217, 119, 6, 0.15);
     }
 </style>
+<script>
+// #28 Print Preview
+function loadPreview(type) {
+    var frame = document.getElementById('previewFrame');
+    @php
+        $suratUrl = route('leave.surat-permohonan', $leaveRequest);
+        $formUrl = route('leave.form-cuti', $leaveRequest);
+    @endphp
+    if (type === 'surat') {
+        frame.src = @json($suratUrl);
+    } else {
+        frame.src = @json($formUrl);
+    }
+}
+</script>
 @endpush
 @endsection

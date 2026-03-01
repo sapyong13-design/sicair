@@ -174,9 +174,21 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-5">
-                            <i class="ti ti-file-off" style="font-size:2rem;opacity:0.4;"></i>
-                            <div class="mt-2">Tidak ada audit log ditemukan</div>
+                        <td colspan="7" class="py-5">
+                            <div class="text-center">
+                                <div class="sh-empty-icon mb-3"><i class="ti ti-file-off"></i></div>
+                                <div class="fw-semibold mb-1" style="color:var(--sh-text);">
+                                    {{ request()->hasAny(['model','action','user_id','description','from_date','to_date']) ? 'Tidak ada log yang sesuai filter' : 'Belum ada audit log' }}
+                                </div>
+                                <div class="text-muted" style="font-size:0.85rem;">
+                                    {{ request()->hasAny(['model','action','user_id','description','from_date','to_date']) ? 'Coba ubah atau reset filter pencarian' : 'Log aktivitas akan terekam secara otomatis' }}
+                                </div>
+                                @if(request()->hasAny(['model','action','user_id','description','from_date','to_date']))
+                                <a href="{{ route('admin.audit-logs.index') }}" class="btn btn-outline-secondary mt-3" style="border-radius:10px;">
+                                    <i class="ti ti-x me-1"></i> Reset Filter
+                                </a>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @endforelse

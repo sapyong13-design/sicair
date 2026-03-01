@@ -12,6 +12,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        // #46: Reminder approval pending > 2 hari — setiap hari kerja pukul 08:00
+        $schedule->command('app:remind-pending-approvals')
+            ->weekdays()
+            ->at('08:00')
+            ->onOneServer()
+            ->withoutOverlapping();
+
         // Auto carry-over unused leave days every January 1st at 01:00
         $schedule->command('app:carry-over-unused-leave')
             ->yearlyOn(1, 1, '01:00')

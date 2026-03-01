@@ -52,6 +52,18 @@ class LeaveRequestController extends Controller
             return redirect('/dashboard')->with('error', $pesan);
         }
 
+        // #21 Re-apply: pre-fill from rejected leave request
+        $reapplyData = null;
+        if ($request->filled('reapply')) {
+            $reapplySource = LeaveRequest::where('user_id', $user->id)
+                ->where('id', $request->query('reapply'))
+                ->first();
+            if ($reapplySource) {
+                $type = $reapplySource->type;
+                $reapplyData = $reapplySource;
+            }
+        }
+
         // Validasi tipe cuti
         if (!array_key_exists($type, LeaveRequest::typeLabels())) {
             return redirect()->route('leave.select-type')->with('error', 'Jenis cuti tidak valid.');
@@ -64,7 +76,17 @@ class LeaveRequestController extends Controller
             $cutiInfo = $calculator->hitung();
         }
 
-        return view('leave.create', compact('type', 'cutiInfo'));
+        // #22 Personal usage summary
+        $thisYearDays = LeaveRequest::where('user_id', $user->id)
+            ->whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+            ->whereYear('created_at', date('Y'))
+            ->get()->sum(fn($r) => $r->total_hari_kerja ?? $r->total_days ?? 0);
+        $lastYearDays = LeaveRequest::where('user_id', $user->id)
+            ->whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+            ->whereYear('created_at', date('Y') - 1)
+            ->get()->sum(fn($r) => $r->total_hari_kerja ?? $r->total_days ?? 0);
+
+        return view('leave.create', compact('type', 'cutiInfo', 'reapplyData', 'thisYearDays', 'lastYearDays'));
     }
 
     /**

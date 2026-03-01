@@ -21,6 +21,28 @@
                 Visualisasi jadwal cuti &amp; hari libur — klik tanggal untuk melihat detail
             </div>
         </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            {{-- #32 Filter per Unit (Admin/Ketua) --}}
+            @if((Auth::user()->isAdmin() || Auth::user()->isKetua()) && $unitList->isNotEmpty())
+            <form method="GET" action="{{ route('kalender') }}" class="d-flex align-items-center gap-2">
+                <input type="hidden" name="year" value="{{ $year }}">
+                <input type="hidden" name="month" value="{{ $month }}">
+                <select name="unit" class="form-select form-select-sm" style="border-radius: 8px; width: auto; font-size: 0.82rem;" onchange="this.form.submit()">
+                    <option value="">Semua Unit</option>
+                    @foreach($unitList as $unit)
+                    <option value="{{ $unit }}" {{ request('unit') === $unit ? 'selected' : '' }}>{{ $unit }}</option>
+                    @endforeach
+                </select>
+            </form>
+            @endif
+            {{-- #31 Export iCal --}}
+            <a href="{{ route('kalender.export-ics', ['year' => $year]) }}"
+               class="btn btn-sm btn-outline-secondary"
+               style="border-radius: 8px; font-size: 0.82rem;"
+               title="Export kalender ke Google Calendar / Outlook">
+                <i class="ti ti-calendar-export me-1"></i> Export .ics
+            </a>
+        </div>
     </div>
 </div>
 
@@ -640,6 +662,34 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('[data-bs-toggle="tooltip"]')
         .forEach(el => new bootstrap.Tooltip(el));
 });
+
+// #34 Swipe gesture for month navigation (mobile)
+(function() {
+    var calGrid = document.querySelector('.card.sh-card');
+    if (!calGrid) return;
+    var startX = 0, startY = 0;
+    var prevUrl = @json(route('kalender', ['year' => $prevYear, 'month' => $prevMonth]));
+    var nextUrl = @json(route('kalender', ['year' => $nextYear, 'month' => $nextMonth]));
+
+    calGrid.addEventListener('touchstart', function(e) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+    }, { passive: true });
+
+    calGrid.addEventListener('touchend', function(e) {
+        var dx = e.changedTouches[0].clientX - startX;
+        var dy = e.changedTouches[0].clientY - startY;
+        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+            if (dx < 0) {
+                // Swipe left → next month
+                window.location.href = nextUrl;
+            } else {
+                // Swipe right → prev month
+                window.location.href = prevUrl;
+            }
+        }
+    }, { passive: true });
+})();
 </script>
 @endpush
 @endsection

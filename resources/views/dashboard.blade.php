@@ -117,6 +117,80 @@
         </div>
     </div>
 
+    {{-- #10 & #11: Widgets Cuti Hari Ini + Mendatang --}}
+    <div class="row g-3 mb-4">
+        {{-- #10: Siapa Cuti Hari Ini --}}
+        <div class="col-md-6 animate-in">
+            <div class="card sh-card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h3 class="card-title mb-0">
+                        <i class="ti ti-beach me-2" style="color: var(--sh-success);"></i>
+                        Cuti Hari Ini
+                    </h3>
+                    <span class="sh-badge sh-badge-{{ $todayOnLeave->isNotEmpty() ? 'pending' : 'approved' }}">
+                        {{ $todayOnLeave->count() }} pegawai
+                    </span>
+                </div>
+                <div class="card-body p-3" style="max-height: 220px; overflow-y: auto;">
+                    @if($todayOnLeave->isEmpty())
+                    <div class="text-center py-3">
+                        <i class="ti ti-users" style="font-size: 2rem; color: var(--sh-text-muted); opacity: 0.3;"></i>
+                        <p class="text-muted mb-0 mt-2" style="font-size: 0.85rem;">Tidak ada pegawai yang cuti hari ini</p>
+                    </div>
+                    @else
+                    @foreach($todayOnLeave as $req)
+                    <div class="d-flex align-items-center gap-2 py-2 {{ !$loop->last ? 'border-bottom' : '' }}">
+                        <div class="sh-user-avatar" style="width:32px;height:32px;font-size:0.7rem;background:var(--sh-primary-light);color:var(--sh-primary);border:none;border-radius:8px;flex-shrink:0;">
+                            {{ strtoupper(substr($req->user->name, 0, 2)) }}
+                        </div>
+                        <div class="flex-fill" style="min-width:0;">
+                            <div class="fw-semibold" style="font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $req->user->name }}</div>
+                            <div class="text-muted" style="font-size:0.75rem;">{{ $req->type_label }} &bull; s.d. {{ $req->end_date->format('d M') }}</div>
+                        </div>
+                    </div>
+                    @endforeach
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        {{-- #11: Cuti Mendatang 7 Hari --}}
+        <div class="col-md-6 animate-in">
+            <div class="card sh-card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h3 class="card-title mb-0">
+                        <i class="ti ti-calendar-event me-2" style="color: var(--sh-accent);"></i>
+                        Cuti Mendatang (7 Hari)
+                    </h3>
+                    <span class="sh-badge sh-badge-pending">{{ $upcomingLeaves7Days->count() }}</span>
+                </div>
+                <div class="card-body p-3" style="max-height: 220px; overflow-y: auto;">
+                    @if($upcomingLeaves7Days->isEmpty())
+                    <div class="text-center py-3">
+                        <i class="ti ti-calendar" style="font-size: 2rem; color: var(--sh-text-muted); opacity: 0.3;"></i>
+                        <p class="text-muted mb-0 mt-2" style="font-size: 0.85rem;">Tidak ada cuti disetujui dalam 7 hari ke depan</p>
+                    </div>
+                    @else
+                    @foreach($upcomingLeaves7Days as $req)
+                    <div class="d-flex align-items-center gap-2 py-2 {{ !$loop->last ? 'border-bottom' : '' }}">
+                        <div class="sh-user-avatar" style="width:32px;height:32px;font-size:0.7rem;background:var(--sh-accent-light);color:var(--sh-accent);border:none;border-radius:8px;flex-shrink:0;">
+                            {{ strtoupper(substr($req->user->name, 0, 2)) }}
+                        </div>
+                        <div class="flex-fill" style="min-width:0;">
+                            <div class="fw-semibold" style="font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $req->user->name }}</div>
+                            <div class="text-muted" style="font-size:0.75rem;">{{ $req->start_date->format('d M') }} &bull; {{ $req->type_label }}</div>
+                        </div>
+                        <div class="text-end flex-shrink-0">
+                            <span class="badge" style="background:var(--sh-accent-light);color:var(--sh-accent);border-radius:50px;font-size:0.7rem;">{{ $req->start_date->diffInDays(\Carbon\Carbon::today()) }}h lagi</span>
+                        </div>
+                    </div>
+                    @endforeach
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Pending Requests --}}
     <div class="card sh-card mb-4">
         <div class="card-header d-flex align-items-center justify-content-between">
@@ -1036,6 +1110,31 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
+// #12 Count-up animation for stat numbers
+(function() {
+    function countUp(el, target, duration) {
+        var start = 0;
+        var startTime = null;
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var progress = Math.min((timestamp - startTime) / duration, 1);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(start + (target - start) * eased);
+            if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.sh-stat-number').forEach(function(el) {
+            var val = parseInt(el.textContent.trim());
+            if (!isNaN(val) && val > 0) {
+                el.textContent = '0';
+                countUp(el, val, 900);
+            }
+        });
+    });
+})();
+
 document.addEventListener('DOMContentLoaded', function() {
     var isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
     var textColor = isDark ? '#94a3b8' : '#64748b';

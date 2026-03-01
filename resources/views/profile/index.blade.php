@@ -138,6 +138,63 @@
             </div>
         </div>
 
+        {{-- #48: Preferensi Notifikasi --}}
+        <div class="card sh-card mb-4">
+            <div class="card-header">
+                <h3 class="card-title mb-0">
+                    <i class="ti ti-bell me-2" style="color: var(--sh-accent);"></i>
+                    Preferensi Notifikasi Email
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                @php $prefs = auth()->user()->notification_preferences ?? []; @endphp
+                <p class="text-muted mb-3" style="font-size:0.875rem;">
+                    Pilih jenis notifikasi yang ingin Anda terima melalui email. Notifikasi in-app selalu aktif.
+                </p>
+                <form method="POST" action="{{ route('profile.notifications') }}">
+                    @csrf
+                    @method('PUT')
+                    <div class="row g-3">
+                        @php
+                            $notifOptions = [
+                                'email_on_approve'  => ['label' => 'Cuti Disetujui', 'icon' => 'ti-circle-check', 'color' => '#16a34a', 'desc' => 'Email saat pengajuan cuti Anda disetujui'],
+                                'email_on_reject'   => ['label' => 'Cuti Ditolak', 'icon' => 'ti-circle-x', 'color' => '#dc2626', 'desc' => 'Email saat pengajuan cuti Anda ditolak'],
+                                'email_on_pending'  => ['label' => 'Ada Pengajuan Baru', 'icon' => 'ti-file-plus', 'color' => '#d97706', 'desc' => 'Email saat ada bawahan mengajukan cuti (untuk atasan)'],
+                                'email_on_decision' => ['label' => 'Keputusan Pejabat', 'icon' => 'ti-gavel', 'color' => 'var(--sh-primary)', 'desc' => 'Email saat ketua/pejabat memberikan keputusan final'],
+                            ];
+                        @endphp
+                        @foreach($notifOptions as $key => $opt)
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start gap-3 p-3 rounded" style="background:var(--sh-gray-50);border:1px solid var(--sh-border);">
+                                <div style="width:36px;height:36px;border-radius:10px;background:{{ $opt['color'] }}1a;color:{{ $opt['color'] }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <i class="ti {{ $opt['icon'] }}"></i>
+                                </div>
+                                <div class="flex-fill">
+                                    <label class="d-flex align-items-center justify-content-between gap-2 mb-0" style="cursor:pointer;">
+                                        <div>
+                                            <div class="fw-semibold" style="font-size:0.875rem;color:var(--sh-text);">{{ $opt['label'] }}</div>
+                                            <div class="text-muted" style="font-size:0.78rem;">{{ $opt['desc'] }}</div>
+                                        </div>
+                                        <div class="form-check form-switch ms-2 mb-0">
+                                            <input class="form-check-input" type="checkbox" name="{{ $key }}" id="{{ $key }}"
+                                                   value="1" {{ ($prefs[$key] ?? true) ? 'checked' : '' }}
+                                                   style="cursor:pointer;width:2.5em;height:1.25em;">
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn sh-btn-primary">
+                            <i class="ti ti-device-floppy me-1"></i> Simpan Preferensi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         {{-- Ganti Password --}}
         <div class="card sh-card">
             <div class="card-header">

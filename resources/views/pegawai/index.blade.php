@@ -22,9 +22,16 @@
                 Menampilkan <strong class="text-dark">{{ $pegawai->total() }}</strong> pegawai terdaftar
             </div>
         </div>
-        <a href="{{ route('pegawai.create') }}" class="btn btn-primary sh-btn-primary">
-            <i class="ti ti-user-plus me-1"></i> Tambah Pegawai
-        </a>
+        <div class="d-flex gap-2">
+            {{-- #36 Import Excel --}}
+            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#importModal"
+                style="border-radius: 10px;">
+                <i class="ti ti-file-import me-1"></i> Import Excel
+            </button>
+            <a href="{{ route('pegawai.create') }}" class="btn btn-primary sh-btn-primary">
+                <i class="ti ti-user-plus me-1"></i> Tambah Pegawai
+            </a>
+        </div>
     </div>
 </div>
 
@@ -317,6 +324,13 @@
                     </td>
                     <td class="text-end">
                         <div class="d-flex gap-1 justify-content-end">
+                            {{-- #38 Quick View --}}
+                            <button class="btn btn-sm btn-outline-info sh-quick-view-btn" style="border-radius: 8px;"
+                                title="Lihat riwayat cuti {{ $p->name }}"
+                                data-pegawai-id="{{ $p->id }}"
+                                data-pegawai-name="{{ $p->name }}">
+                                <i class="ti ti-history" aria-hidden="true"></i>
+                            </button>
                             <a href="{{ route('pegawai.show', $p) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 8px;" title="Detail {{ $p->name }}" aria-label="Lihat detail {{ $p->name }}">
                                 <i class="ti ti-eye" aria-hidden="true"></i>
                             </a>
@@ -353,6 +367,111 @@
 </div>
 
 {{-- Delete Modals --}}
+{{-- #38 Quick View Riwayat Cuti Modal --}}
+<div class="modal fade" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewModalLabel">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header" style="background: var(--sh-primary); color: #fff; border: none;">
+                <h5 class="modal-title" id="quickViewModalLabel">
+                    <i class="ti ti-history me-2"></i>
+                    Riwayat Cuti: <span id="qvPegawaiName">-</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="qvContent" class="p-4">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-success" style="width: 2rem; height: 2rem;"></div>
+                        <p class="text-muted mt-2 mb-0">Memuat data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- #36 Import Excel Modal --}}
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
+        <div class="modal-content" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="importModalLabel">
+                    <i class="ti ti-file-import me-2" style="color: var(--sh-primary);"></i>
+                    Import Pegawai dari Excel
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ route('pegawai.import') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3 p-3" style="background: var(--sh-primary-light); border-radius: 10px;">
+                        <div style="font-size: 0.85rem; color: var(--sh-primary);">
+                            <i class="ti ti-info-circle me-1"></i>
+                            <strong>Format file:</strong> .xlsx atau .csv<br>
+                            Kolom yang diperlukan: nama, nip, jabatan, golongan_ruang, unit_kerja, role, tanggal_mulai_kerja
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">File Excel / CSV <span class="text-danger">*</span></label>
+                        <input type="file" name="import_file" class="form-control" accept=".xlsx,.xls,.csv" required style="border-radius: 10px;">
+                    </div>
+                    <a href="{{ route('pegawai.import-template') }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">
+                        <i class="ti ti-download me-1"></i> Download Template
+                    </a>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn sh-btn-primary">
+                        <i class="ti ti-upload me-1"></i> Import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+// #38 Quick View Riwayat Cuti
+document.querySelectorAll('.sh-quick-view-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var pid = this.dataset.pegawaiId;
+        var name = this.dataset.pegawaiName;
+        document.getElementById('qvPegawaiName').textContent = name;
+        document.getElementById('qvContent').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success" style="width:2rem;height:2rem;"></div><p class="text-muted mt-2 mb-0">Memuat data...</p></div>';
+        var modal = new bootstrap.Modal(document.getElementById('quickViewModal'));
+        modal.show();
+
+        fetch('/pegawai/' + pid + '/riwayat-cuti', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var html = '';
+            if (!data.leaves || data.leaves.length === 0) {
+                html = '<div class="text-center py-4"><i class="ti ti-calendar-off" style="font-size:3rem;color:var(--sh-text-muted);opacity:0.3;"></i><p class="text-muted mt-2">Tidak ada riwayat cuti dalam 1 tahun terakhir.</p></div>';
+            } else {
+                html = '<div class="table-responsive"><table class="table sh-table mb-0"><thead><tr><th>Jenis</th><th>Periode</th><th>Durasi</th><th>Status</th></tr></thead><tbody>';
+                data.leaves.forEach(function(l) {
+                    var badge = l.status === 'disetujui' || l.status === 'approved'
+                        ? '<span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i> Disetujui</span>'
+                        : l.status === 'ditolak' || l.status === 'rejected'
+                        ? '<span class="sh-badge sh-badge-rejected"><i class="ti ti-circle-x"></i> Ditolak</span>'
+                        : '<span class="sh-badge sh-badge-pending"><i class="ti ti-clock"></i> ' + l.status_label + '</span>';
+                    html += '<tr><td style="font-size:0.85rem;">' + l.type_label + '</td><td style="font-size:0.82rem;">' + l.start_date + ' s.d. ' + l.end_date + '</td><td><span class="badge bg-blue-lt" style="border-radius:50px;">' + l.total_days + ' hari</span></td><td>' + badge + '</td></tr>';
+                });
+                html += '</tbody></table></div>';
+            }
+            document.getElementById('qvContent').innerHTML = html;
+        })
+        .catch(function() {
+            document.getElementById('qvContent').innerHTML = '<div class="text-center py-4 text-danger"><i class="ti ti-alert-triangle" style="font-size:2rem;"></i><p class="mt-2">Gagal memuat data.</p></div>';
+        });
+    });
+});
+</script>
+@endpush
+
 @foreach($pegawai as $p)
 <div class="modal modal-blur fade" id="deleteModal{{ $p->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $p->id }}" aria-modal="true" role="dialog">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">

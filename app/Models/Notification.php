@@ -52,8 +52,18 @@ class Notification extends Model
         ]);
 
         // Trigger email notification if user has email and LeaveRequest is provided
+        // #48: Respect user's notification preferences
         if ($leaveRequest && $notification->user?->email) {
-            self::sendEmailNotification($notification->user->email, $type, $leaveRequest);
+            $prefKey = match ($type) {
+                self::TYPE_CUTI_DISETUJUI    => 'email_on_approve',
+                self::TYPE_CUTI_DITOLAK      => 'email_on_reject',
+                self::TYPE_CUTI_DIAJUKAN     => 'email_on_pending',
+                self::TYPE_CUTI_PERTIMBANGAN => 'email_on_decision',
+                default => null,
+            };
+            if (!$prefKey || $notification->user->wantsEmailNotification($prefKey)) {
+                self::sendEmailNotification($notification->user->email, $type, $leaveRequest);
+            }
         }
 
         return $notification;
