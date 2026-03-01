@@ -1134,6 +1134,79 @@
         </div>
     </div>
 
+    {{-- Widget: Siapa yang Cuti & Dinas Luar Hari Ini --}}
+    <div class="row g-3 mb-4">
+        {{-- Cuti Hari Ini --}}
+        <div class="col-md-6 animate-in">
+            <div class="card sh-card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h3 class="card-title mb-0" style="font-size:0.9rem;">
+                        <i class="ti ti-beach me-2" style="color:var(--sh-success);"></i>
+                        Cuti Hari Ini
+                    </h3>
+                    <span class="sh-badge sh-badge-{{ $todayOnLeave->isNotEmpty() ? 'pending' : 'approved' }}">
+                        {{ $todayOnLeave->count() }} pegawai
+                    </span>
+                </div>
+                <div class="card-body p-3" style="max-height:200px;overflow-y:auto;">
+                    @if($todayOnLeave->isEmpty())
+                    <div class="text-center py-3">
+                        <i class="ti ti-users" style="font-size:1.8rem;color:var(--sh-text-muted);opacity:0.3;"></i>
+                        <p class="text-muted mb-0 mt-2" style="font-size:0.82rem;">Tidak ada pegawai yang cuti hari ini</p>
+                    </div>
+                    @else
+                    @foreach($todayOnLeave as $req)
+                    <div class="d-flex align-items-center gap-2 py-2 {{ !$loop->last ? 'border-bottom' : '' }}">
+                        <div class="sh-user-avatar" style="width:30px;height:30px;font-size:0.65rem;background:var(--sh-primary-light);color:var(--sh-primary);border:none;border-radius:7px;flex-shrink:0;">
+                            {{ strtoupper(substr($req->user->name, 0, 2)) }}
+                        </div>
+                        <div class="flex-fill" style="min-width:0;">
+                            <div class="fw-semibold" style="font-size:0.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $req->user->name }}</div>
+                            <div class="text-muted" style="font-size:0.72rem;">{{ $req->type_label }} &bull; s.d. {{ $req->end_date->format('d M') }}</div>
+                        </div>
+                    </div>
+                    @endforeach
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        {{-- Dinas Luar Hari Ini --}}
+        <div class="col-md-6 animate-in">
+            <div class="card sh-card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h3 class="card-title mb-0" style="font-size:0.9rem;">
+                        <i class="ti ti-map-pin me-2" style="color:var(--sh-accent);"></i>
+                        Dinas Luar Hari Ini
+                    </h3>
+                    <span class="sh-badge" style="background:var(--sh-accent-light);color:var(--sh-accent);">
+                        {{ $todayDinasLuar->count() }} pegawai
+                    </span>
+                </div>
+                <div class="card-body p-3" style="max-height:200px;overflow-y:auto;">
+                    @if($todayDinasLuar->isEmpty())
+                    <div class="text-center py-3">
+                        <i class="ti ti-briefcase" style="font-size:1.8rem;color:var(--sh-text-muted);opacity:0.3;"></i>
+                        <p class="text-muted mb-0 mt-2" style="font-size:0.82rem;">Tidak ada pegawai dinas luar hari ini</p>
+                    </div>
+                    @else
+                    @foreach($todayDinasLuar as $dl)
+                    <div class="d-flex align-items-center gap-2 py-2 {{ !$loop->last ? 'border-bottom' : '' }}">
+                        <div class="sh-user-avatar" style="width:30px;height:30px;font-size:0.65rem;background:var(--sh-accent-light);color:var(--sh-accent);border:none;border-radius:7px;flex-shrink:0;">
+                            {{ strtoupper(substr($dl->user->name, 0, 2)) }}
+                        </div>
+                        <div class="flex-fill" style="min-width:0;">
+                            <div class="fw-semibold" style="font-size:0.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $dl->user->name }}</div>
+                            <div class="text-muted" style="font-size:0.72rem;">{{ Str::limit($dl->tujuan, 30) }} &bull; s.d. {{ $dl->end_date->format('d M') }}</div>
+                        </div>
+                    </div>
+                    @endforeach
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Fitur 6: Search & Filter --}}
     <div class="card sh-card mb-4 animate-in">
         <div class="card-body p-3">

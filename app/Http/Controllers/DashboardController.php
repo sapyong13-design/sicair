@@ -199,6 +199,21 @@ class DashboardController extends Controller
             $cutiInfo = $calculator->hitung();
         }
 
-        return view('dashboard', compact('user', 'leaveRequests', 'cutiInfo'));
+        // Siapa yang cuti & dinas luar hari ini (seluruh pegawai, bukan hanya diri sendiri)
+        $today = \Carbon\Carbon::today()->toDateString();
+        $todayOnLeave = LeaveRequest::with('user')
+            ->whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+            ->where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->orderBy('start_date')
+            ->get();
+
+        $todayDinasLuar = \App\Models\DinasLuar::with('user')
+            ->where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->orderBy('start_date')
+            ->get();
+
+        return view('dashboard', compact('user', 'leaveRequests', 'cutiInfo', 'todayOnLeave', 'todayDinasLuar'));
     }
 }
