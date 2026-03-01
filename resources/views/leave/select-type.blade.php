@@ -28,7 +28,7 @@
 <div class="row g-3">
     {{-- Cuti Tahunan --}}
     <div class="col-md-6 animate-in">
-        <a href="{{ route('leave.create', ['type' => 'cuti_tahunan']) }}" class="text-decoration-none">
+        <a href="{{ route('leave.create', ['type' => 'cuti_tahunan']) }}" class="text-decoration-none" aria-label="Ajukan Cuti Tahunan">
             <div class="card sh-card sh-leave-type-card h-100" style="cursor: pointer;">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3">
@@ -36,7 +36,7 @@
                             <i class="ti ti-calendar-stats"></i>
                         </div>
                         <div class="flex-fill">
-                            <h4 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.05rem;">Cuti Tahunan</h4>
+                            <h4 class="fw-bold mb-1" style="color: var(--sh-text); font-size: 1.05rem;">Cuti Tahunan</h4>
                             <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.5;">
                                 12 hari kerja/tahun. Syarat: bekerja min 1 tahun.
                             </p>
@@ -52,7 +52,7 @@
 
     {{-- Cuti Besar --}}
     <div class="col-md-6 animate-in">
-        <a href="{{ route('leave.create', ['type' => 'cuti_besar']) }}" class="text-decoration-none">
+        <a href="{{ route('leave.create', ['type' => 'cuti_besar']) }}" class="text-decoration-none" aria-label="Ajukan Cuti Besar">
             <div class="card sh-card sh-leave-type-card h-100" style="cursor: pointer;">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3">
@@ -60,7 +60,7 @@
                             <i class="ti ti-calendar-month"></i>
                         </div>
                         <div class="flex-fill">
-                            <h4 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.05rem;">Cuti Besar</h4>
+                            <h4 class="fw-bold mb-1" style="color: var(--sh-text); font-size: 1.05rem;">Cuti Besar</h4>
                             <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.5;">
                                 Max 3 bulan. Syarat: masa kerja 5 tahun.
                             </p>
@@ -76,7 +76,7 @@
 
     {{-- Cuti Sakit --}}
     <div class="col-md-6 animate-in">
-        <a href="{{ route('leave.create', ['type' => 'cuti_sakit']) }}" class="text-decoration-none">
+        <a href="{{ route('leave.create', ['type' => 'cuti_sakit']) }}" class="text-decoration-none" aria-label="Ajukan Cuti Sakit">
             <div class="card sh-card sh-leave-type-card h-100" style="cursor: pointer;">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3">
@@ -84,7 +84,7 @@
                             <i class="ti ti-stethoscope"></i>
                         </div>
                         <div class="flex-fill">
-                            <h4 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.05rem;">Cuti Sakit</h4>
+                            <h4 class="fw-bold mb-1" style="color: var(--sh-text); font-size: 1.05rem;">Cuti Sakit</h4>
                             <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.5;">
                                 Max 1 tahun. Wajib surat dokter.
                             </p>
@@ -100,7 +100,7 @@
 
     {{-- Cuti Melahirkan --}}
     <div class="col-md-6 animate-in">
-        <a href="{{ route('leave.create', ['type' => 'cuti_melahirkan']) }}" class="text-decoration-none">
+        <a href="{{ route('leave.create', ['type' => 'cuti_melahirkan']) }}" class="text-decoration-none" aria-label="Ajukan Cuti Melahirkan">
             <div class="card sh-card sh-leave-type-card h-100" style="cursor: pointer;">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3">
@@ -108,7 +108,7 @@
                             <i class="ti ti-baby-carriage"></i>
                         </div>
                         <div class="flex-fill">
-                            <h4 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.05rem;">Cuti Melahirkan</h4>
+                            <h4 class="fw-bold mb-1" style="color: var(--sh-text); font-size: 1.05rem;">Cuti Melahirkan</h4>
                             <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.5;">
                                 3 bulan kalender. Anak ke-1, 2, 3 saat PNS.
                             </p>
@@ -124,7 +124,7 @@
 
     {{-- Cuti Alasan Penting --}}
     <div class="col-md-6 animate-in">
-        <a href="{{ route('leave.create', ['type' => 'cuti_alasan_penting']) }}" class="text-decoration-none">
+        <a href="{{ route('leave.create', ['type' => 'cuti_alasan_penting']) }}" class="text-decoration-none" aria-label="Ajukan Cuti Alasan Penting">
             <div class="card sh-card sh-leave-type-card h-100" style="cursor: pointer;">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3">
@@ -132,7 +132,7 @@
                             <i class="ti ti-urgent"></i>
                         </div>
                         <div class="flex-fill">
-                            <h4 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.05rem;">Cuti Alasan Penting</h4>
+                            <h4 class="fw-bold mb-1" style="color: var(--sh-text); font-size: 1.05rem;">Cuti Alasan Penting</h4>
                             <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.5;">
                                 Max 1 bulan. Keluarga sakit/meninggal, perkawinan, dll.
                             </p>
@@ -148,7 +148,7 @@
 
     {{-- Cuti di Luar Tanggungan Negara --}}
     <div class="col-md-6 animate-in">
-        <a href="{{ route('leave.create', ['type' => 'cuti_luar_tanggungan']) }}" class="text-decoration-none">
+        <a href="{{ route('leave.create', ['type' => 'cuti_luar_tanggungan']) }}" class="text-decoration-none" aria-label="Ajukan Cuti di Luar Tanggungan Negara">
             <div class="card sh-card sh-leave-type-card h-100" style="cursor: pointer;">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3">
@@ -156,7 +156,7 @@
                             <i class="ti ti-world"></i>
                         </div>
                         <div class="flex-fill">
-                            <h4 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.05rem;">Cuti di Luar Tanggungan Negara</h4>
+                            <h4 class="fw-bold mb-1" style="color: var(--sh-text); font-size: 1.05rem;">Cuti di Luar Tanggungan Negara</h4>
                             <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.5;">
                                 Max 3 tahun. Tanpa penghasilan.
                             </p>
@@ -192,8 +192,8 @@
     .sh-leave-type-card:hover,
     .sh-leave-type-card:focus-within {
         border-color: var(--sh-primary);
-        box-shadow: 0 8px 25px rgba(22, 101, 52, 0.15);
-        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(22, 101, 52, 0.14);
+        transform: translateY(-2px);
     }
     .sh-leave-type-card:hover .sh-leave-type-icon,
     .sh-leave-type-card:focus-within .sh-leave-type-icon {

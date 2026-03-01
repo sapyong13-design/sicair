@@ -267,7 +267,10 @@
                         </div>
                     </div>
                     @empty
-                    <div class="text-center py-3 text-muted" style="font-size:0.82rem;">Belum ada aktivitas.</div>
+                    <div class="text-center py-4">
+                        <i class="ti ti-calendar-off" style="font-size:1.8rem;opacity:0.3;color:var(--sh-primary);"></i>
+                        <div class="text-muted mt-1" style="font-size:0.8rem;">Belum ada aktivitas terbaru.</div>
+                    </div>
                     @endforelse
                 </div>
             </div>
@@ -321,7 +324,7 @@
         $calLeaveDays = \App\Models\LeaveRequest::whereIn('status',['disetujui','approved'])
             ->where(function($q) use ($calYear, $calMonth) {
                 $monthStart = sprintf('%04d-%02d-01', $calYear, $calMonth);
-                $monthEnd   = sprintf('%04d-%02d-%02d', $calYear, $calMonth, cal_days_in_month(CAL_GREGORIAN, $calMonth, $calYear));
+                $monthEnd   = sprintf('%04d-%02d-%02d', $calYear, $calMonth, $calDays);
                 $q->where('start_date', '<=', $monthEnd)->where('end_date', '>=', $monthStart);
             })
             ->get()
@@ -363,8 +366,8 @@
                                 $hasLeave  = in_array($dc, $calLeaveDays);
                                 $isWeekend = ($col >= 6);
                             @endphp
-                            <div class="col d-flex flex-column align-items-center" style="cursor:{{ $hasLeave ? 'pointer' : 'default' }}"
-                                 @if($hasLeave) onclick="window.location='{{ route('kalender', ['year'=>$calYear,'month'=>$calMonth]) }}'" @endif>
+                            <div class="col d-flex flex-column align-items-center sh-cal-day-cell" style="cursor:{{ $hasLeave ? 'pointer' : 'default' }}; border-radius:6px; transition:background 0.15s;"
+                                 @if($hasLeave) onclick="window.location='{{ route('kalender', ['year'=>$calYear,'month'=>$calMonth]) }}'" title="Ada cuti pada tanggal {{ $dc }}" @endif>
                                 <span style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:{{ $isToday ? '800' : '500' }};
                                     {{ $isToday ? 'background:var(--sh-primary);color:#fff;' : ($isWeekend ? 'color:var(--sh-danger);' : 'color:var(--sh-text);') }}">
                                     {{ $dc }}
@@ -1021,15 +1024,15 @@
                         </div>
                         @if($cutiInfo)
                         <div class="d-flex align-items-baseline gap-2 mb-2">
-                            <span class="sh-hero-number">{{ $cutiInfo['sisa_cuti'] ?? $user->leave_balance }}</span>
+                            <span class="sh-hero-number">{{ $cutiInfo['sisa'] ?? $user->leave_balance }}</span>
                             <span style="font-size: 1.1rem; opacity: 0.8;">/ {{ $cutiInfo['total_hak'] ?? 12 }} hari</span>
                         </div>
                         <div class="sh-hero-progress mb-2" style="max-width: 280px;">
                             @php $hakTotal = $cutiInfo['total_hak'] ?? 12; @endphp
-                            <div class="sh-hero-progress-bar" style="width: {{ $hakTotal > 0 ? (($cutiInfo['sisa_cuti'] ?? $user->leave_balance) / $hakTotal) * 100 : 0 }}%;"></div>
+                            <div class="sh-hero-progress-bar" style="width: {{ $hakTotal > 0 ? (($cutiInfo['sisa'] ?? $user->leave_balance) / $hakTotal) * 100 : 0 }}%;"></div>
                         </div>
                         <div style="font-size: 0.82rem; opacity: 0.7;">
-                            Hak: {{ $cutiInfo['hak_cuti'] ?? 12 }} hari
+                            Hak: {{ $cutiInfo['hak_dasar'] ?? 12 }} hari
                             @if(($cutiInfo['carry_over'] ?? 0) > 0)
                                 + Carry Over: {{ $cutiInfo['carry_over'] }} hari
                             @endif
@@ -1305,6 +1308,10 @@
 
 @if($user->isAdmin())
 @push('scripts')
+<style>
+.sh-cal-day-cell[title]:hover { background: var(--sh-primary-light) !important; }
+[data-bs-theme="dark"] .sh-cal-day-cell[title]:hover { background: rgba(34,197,94,0.12) !important; }
+</style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 // #12 Count-up animation for stat numbers

@@ -31,18 +31,19 @@
                data-bs-toggle="modal" data-bs-target="#printPreviewModal"
                title="Preview sebelum cetak">
                 <i class="ti ti-printer me-1"></i>
-                Preview
+                <span class="d-none d-sm-inline">Preview</span>
             </button>
             <a href="{{ route('leave.surat-permohonan', $leaveRequest) }}"
-               class="btn sh-btn-primary"
+               class="btn sh-btn-primary sh-export-trigger"
                style="border-radius: 10px; font-size: 0.85rem;"
                title="Download Surat Permohonan Cuti (PDF)"
                target="_blank">
                 <i class="ti ti-file-text me-1"></i>
-                Surat Permohonan
+                <span class="d-none d-sm-inline">Surat Permohonan</span>
+                <span class="d-sm-none">PDF</span>
             </a>
             <a href="{{ route('leave.surat-permohonan-docx', $leaveRequest) }}"
-               class="btn sh-btn-primary"
+               class="btn sh-btn-primary sh-export-trigger"
                style="border-radius: 10px; font-size: 0.85rem;"
                title="Download Surat Permohonan Cuti (DOCX Folio)"
                target="_blank">
@@ -50,12 +51,13 @@
                 DOCX
             </a>
             <a href="{{ route('leave.form-cuti', $leaveRequest) }}"
-               class="btn sh-btn-primary"
+               class="btn sh-btn-primary sh-export-trigger"
                style="border-radius: 10px; font-size: 0.85rem;"
                title="Download Form Permintaan dan Pemberian Cuti (PDF)"
                target="_blank">
                 <i class="ti ti-clipboard-text me-1"></i>
-                Form Cuti
+                <span class="d-none d-sm-inline">Form Cuti</span>
+                <span class="d-sm-none">Form</span>
             </a>
             {{-- #21 Re-apply button (only for rejected/cancelled) --}}
             @if(auth()->id() === $leaveRequest->user_id && $leaveRequest->isRejected())

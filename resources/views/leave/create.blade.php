@@ -45,11 +45,11 @@
                     <div>
                         <div class="sh-stat-label mb-1">Sisa Cuti Tahunan {{ date('Y') }}</div>
                         <div class="d-flex align-items-baseline gap-1">
-                            <span class="sh-stat-number" style="color: var(--sh-primary);">{{ $cutiInfo['sisa_cuti'] ?? $user->leave_balance }}</span>
+                            <span class="sh-stat-number" style="color: var(--sh-primary);">{{ $cutiInfo['sisa'] ?? $user->leave_balance }}</span>
                             <span class="text-muted" style="font-size: 0.85rem;">/ {{ $cutiInfo['total_hak'] ?? 12 }} hari</span>
                         </div>
                         <div class="text-muted mt-1" style="font-size: 0.78rem;">
-                            Hak: {{ $cutiInfo['hak_cuti'] ?? 12 }}
+                            Hak: {{ $cutiInfo['hak_dasar'] ?? 12 }}
                             @if(($cutiInfo['carry_over'] ?? 0) > 0) + CO: {{ $cutiInfo['carry_over'] }} @endif
                             @if(($cutiInfo['tambahan_terpencil'] ?? 0) > 0)
                             + Terpencil: {{ $cutiInfo['tambahan_terpencil'] }}
@@ -266,7 +266,7 @@
                                       'cuti_luar_tanggungan' => 'Contoh: Menemani suami/istri tugas di luar negeri...',
                                       default => 'Jelaskan alasan cuti Anda...',
                                   } }}"
-                                  style="border-radius: 12px; border: 2px solid #e2e8f0; resize: vertical;">{{ old('reason', isset($reapplyData) ? $reapplyData->reason : '') }}</textarea>
+                                  style="border-radius: 12px; border: 2px solid #e2e8f0; resize: none; max-height: 180px; overflow-y: auto;">{{ old('reason', isset($reapplyData) ? $reapplyData->reason : '') }}</textarea>
                         @error('reason') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         {{-- Character counter (#14) --}}
                         <div class="d-flex justify-content-between mt-1">
@@ -368,15 +368,20 @@ document.addEventListener('DOMContentLoaded', function() {
 // Sprint 2 #10: Handle drag & drop file upload
 function handleFileDrop(event) {
     event.preventDefault();
+    event.currentTarget.style.background = '';
     var files = event.dataTransfer.files;
     if (files.length > 0) {
+        var file = files[0];
+        if (file.size > 5 * 1024 * 1024) {
+            if (window.shToast) shToast('File terlalu besar (maks. 5 MB)', 'error');
+            return;
+        }
         var input = document.getElementById('dokumen-input');
         if (input) {
-            // Create a new DataTransfer to set files on input
             var dt = new DataTransfer();
-            dt.items.add(files[0]);
+            dt.items.add(file);
             input.files = dt.files;
-            document.getElementById('drop-file-name').textContent = '✓ ' + files[0].name;
+            document.getElementById('drop-file-name').textContent = '✓ ' + file.name;
             event.currentTarget.style.background = 'var(--sh-primary-light)';
         }
     }
@@ -384,9 +389,16 @@ function handleFileDrop(event) {
 var dokumenInput = document.getElementById('dokumen-input');
 if (dokumenInput) {
     dokumenInput.addEventListener('change', function() {
-        var name = this.files[0] ? this.files[0].name : '';
+        var file = this.files[0];
         var label = document.getElementById('drop-file-name');
-        if (label) label.textContent = name ? '✓ ' + name : '';
+        if (!file) { if (label) label.textContent = ''; return; }
+        if (file.size > 5 * 1024 * 1024) {
+            if (window.shToast) shToast('File terlalu besar (maks. 5 MB)', 'error');
+            this.value = '';
+            if (label) label.textContent = '';
+            return;
+        }
+        if (label) label.textContent = '✓ ' + file.name;
     });
 }
 
@@ -403,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const conflictMsg = document.getElementById('conflict-message');
     const submitBtn = document.querySelector('button[type="submit"]');
     const type = '{{ $type }}';
-    const balance = {{ $type === 'cuti_tahunan' ? ($cutiInfo['sisa_cuti'] ?? $user->leave_balance) : 0 }};
+    const balance = {{ $type === 'cuti_tahunan' ? ($cutiInfo['sisa'] ?? $user->leave_balance) : 0 }};
 
     let isValid = false;
 
@@ -442,7 +454,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     conflictBanner.classList.add('d-none');
                 }
             })
-            .catch(function() { conflictBanner.classList.add('d-none'); });
+            .catch(function() {
+                conflictBanner.classList.add('d-none');
+                if (window.shToast) shToast('Gagal memeriksa konflik jadwal cuti', 'warning');
+            });
         }, 400);
     }
 
@@ -684,5 +699,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+<style>
+/* Custom invalid-feedback styling */
+.invalid-feedback {
+    background: var(--sh-danger-light, #fee2e2);
+    color: var(--sh-danger, #dc2626);
+    border-radius: 8px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 0.35rem;
+    display: block;
+}
+/* Input transition on focus */
+.form-control, .form-select {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+</style>
 @endpush
 @endsection

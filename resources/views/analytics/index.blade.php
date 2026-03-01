@@ -389,6 +389,8 @@
     const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
     const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
     const tickColor = isDark ? '#94a3b8' : '#64748b';
+    const isMobile = window.innerWidth < 768;
+    const legendPos = isMobile ? 'bottom' : 'top';
 
     // ── Monthly Trend Chart ──────────────────────────────────────────
     @php $cm = $chartMonthly; @endphp
@@ -423,7 +425,7 @@
         options: {
             responsive: true,
             plugins: {
-                legend: { position: 'top', labels: { color: tickColor, boxWidth: 12 } },
+                legend: { position: legendPos, labels: { color: tickColor, boxWidth: 12 } },
                 tooltip: { mode: 'index', intersect: false },
             },
             scales: {
@@ -530,7 +532,7 @@
                 responsive: true,
                 plugins: {
                     legend: { display: false },
-                    tooltip: { mode: 'index', intersect: false },
+                    tooltip: { mode: 'nearest', intersect: false },
                 },
                 scales: {
                     x: { grid: { color: gridColor }, ticks: { color: tickColor } },
@@ -569,7 +571,7 @@
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { position: 'top', labels: { color: tickColor, boxWidth: 12 } },
+                    legend: { position: legendPos, labels: { color: tickColor, boxWidth: 12 } },
                     tooltip: { mode: 'index', intersect: false },
                 },
                 scales: {
@@ -596,4 +598,10 @@
     });
 })();
 </script>
+<style>
+@media (max-width: 767.98px) {
+    .table-responsive table td,
+    .table-responsive table th { font-size: 0.68rem !important; padding: 0.25rem 0.3rem !important; }
+}
+</style>
 @endpush

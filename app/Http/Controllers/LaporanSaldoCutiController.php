@@ -32,12 +32,12 @@ class LaporanSaldoCutiController extends Controller
             $info      = $calc->hitung();
             $saldoData[] = [
                 'user'              => $user,
-                'hak_cuti'          => $info['hak_cuti'] ?? 12,
+                'hak_cuti'          => $info['hak_dasar'] ?? 12,
                 'carry_over'        => $info['carry_over'] ?? 0,
                 'tambahan_terpencil'=> $info['tambahan_terpencil'] ?? 0,
                 'total_hak'         => $info['total_hak'] ?? 12,
                 'cuti_diambil'      => $info['cuti_diambil'] ?? 0,
-                'sisa_cuti'         => $info['sisa_cuti'] ?? 0,
+                'sisa_cuti'         => $info['sisa'] ?? 0,
             ];
         }
 
@@ -71,12 +71,12 @@ class LaporanSaldoCutiController extends Controller
                 '"' . $user->nip . '"',
                 '"' . ($user->jabatan ?? '') . '"',
                 '"' . ($user->unit_kerja ?? '') . '"',
-                $info['hak_cuti'] ?? 12,
+                $info['hak_dasar'] ?? 12,
                 $info['carry_over'] ?? 0,
                 $info['tambahan_terpencil'] ?? 0,
                 $info['total_hak'] ?? 12,
                 $info['cuti_diambil'] ?? 0,
-                $info['sisa_cuti'] ?? 0,
+                $info['sisa'] ?? 0,
             ]) . "\n";
         }
 

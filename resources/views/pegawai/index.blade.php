@@ -104,7 +104,7 @@
                             <i class="ti ti-search me-1"></i>
                         </button>
                         @if(request()->hasAny(['search', 'role', 'status_pegawai', 'active']))
-                        <a href="{{ route('pegawai.index') }}" class="btn btn-outline-secondary" style="border-radius: 10px; height: 46px; display: flex; align-items: center; justify-content: center;" title="Reset filter">
+                        <a href="{{ route('pegawai.index') }}" class="btn btn-outline-secondary" style="border-radius: 10px; height: 46px; display: flex; align-items: center; justify-content: center;" title="Reset semua filter" aria-label="Reset semua filter">
                             <i class="ti ti-x"></i>
                         </a>
                         @endif
@@ -278,7 +278,7 @@
         <table class="table sh-table mb-0">
             <thead>
                 <tr>
-                    <th style="width:36px;"><input type="checkbox" id="checkAll" style="cursor:pointer;" title="Pilih semua" onchange="toggleAllCheckboxes(this)"></th>
+                    <th style="width:36px;"><input type="checkbox" id="checkAll" style="cursor:pointer;" tabindex="0" title="Pilih semua pegawai" aria-label="Pilih semua pegawai" onchange="toggleAllCheckboxes(this)"></th>
                     <th>Pegawai</th>
                     <th>Jabatan / Golongan</th>
                     <th>Role</th>
@@ -380,14 +380,20 @@
                         <span style="font-size: 0.85rem;">{{ $p->masa_kerja_format ?? '-' }}</span>
                     </td>
                     <td class="text-center">
-                        <span class="fw-bold" style="color: var(--sh-primary); font-size: 0.95rem;">{{ $p->leave_balance }}</span>
+                        @php $lb = $p->leave_balance ?? 0; @endphp
+                        <span class="fw-bold" style="color: {{ $lb <= 0 ? 'var(--sh-danger)' : ($lb <= 3 ? 'var(--sh-warning)' : 'var(--sh-primary)') }}; font-size: 0.95rem;"
+                              title="{{ $lb <= 0 ? 'Saldo habis' : ($lb <= 3 ? 'Saldo rendah' : '') }}">{{ $lb }}</span>
                         <span class="text-muted" style="font-size: 0.75rem;">hari</span>
+                        @if($p->is_active === false)
+                        <span class="d-block" style="font-size:0.7rem;color:var(--sh-danger);font-weight:600;margin-top:2px;">Non-aktif</span>
+                        @endif
                     </td>
                     <td class="text-end">
                         <div class="d-flex gap-1 justify-content-end flex-wrap">
                             {{-- #38 Quick View --}}
-                            <button class="btn btn-sm btn-outline-info sh-quick-view-btn" style="border-radius: 8px;"
+                            <button class="btn btn-sm btn-outline-primary sh-quick-view-btn" style="border-radius: 8px;"
                                 title="Lihat riwayat cuti {{ $p->name }}"
+                                aria-label="Riwayat cuti {{ $p->name }}"
                                 data-pegawai-id="{{ $p->id }}"
                                 data-pegawai-name="{{ $p->name }}">
                                 <i class="ti ti-history" aria-hidden="true"></i>
@@ -758,7 +764,7 @@ document.querySelectorAll('.sh-quick-view-btn').forEach(function(btn) {
                         Tindakan ini tidak dapat dibatalkan. Semua data terkait pegawai ini akan ikut terhapus.
                     </div>
                 </div>
-                <div class="modal-footer border-0 pt-0 px-4 pb-4" style="justify-content: center; gap: 0.5rem;">
+                <div class="modal-footer border-0 pt-0 px-4 pb-4" style="justify-content: flex-end; gap: 1rem;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; min-width: 100px;">Batal</button>
                     <button type="submit" class="btn sh-btn-danger" id="deleteBtn{{ $p->id }}" disabled style="min-width: 100px; opacity:0.5;">
                         <i class="ti ti-trash me-1"></i> Hapus

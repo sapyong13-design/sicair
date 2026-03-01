@@ -21,7 +21,7 @@
     <div class="col-lg-4">
         <div class="card sh-card mb-4">
             <div class="card-body p-4 text-center">
-                <div class="sh-user-avatar mx-auto mb-3" style="width: 80px; height: 80px; font-size: 1.8rem; background: var(--sh-primary-light); color: var(--sh-primary); border: 3px solid var(--sh-accent); border-radius: 20px;">
+                <div class="sh-user-avatar mx-auto mb-3" style="width: clamp(64px, 12vw, 96px); height: clamp(64px, 12vw, 96px); font-size: clamp(1.4rem, 4vw, 2rem); background: var(--sh-primary-light); color: var(--sh-primary); border: 3px solid var(--sh-accent); border-radius: 20px; flex-shrink: 0;">
                     {{ strtoupper(substr($user->name, 0, 2)) }}
                 </div>
                 <h3 class="fw-bold mb-1">{{ $user->name }}</h3>
@@ -50,9 +50,15 @@
             </div>
             <div class="card-body p-4">
                 @if($cutiInfo)
+                @php $sisaProfile = $cutiInfo['sisa'] ?? 0; @endphp
                 <div class="d-flex align-items-baseline gap-2 mb-2">
-                    <span style="font-size: 2.5rem; font-weight: 800; color: var(--sh-primary);">{{ $cutiInfo['sisa'] }}</span>
+                    <span style="font-size: 2.5rem; font-weight: 800; color: {{ $sisaProfile <= 0 ? 'var(--sh-danger)' : ($sisaProfile <= 3 ? 'var(--sh-warning)' : 'var(--sh-primary)') }};">{{ $sisaProfile }}</span>
                     <span class="text-muted">/ {{ $cutiInfo['total_hak'] }} hari</span>
+                    @if($sisaProfile <= 0)
+                    <span class="badge" style="background: var(--sh-danger-light); color: var(--sh-danger); border-radius: 50px; font-size: 0.7rem;" title="Tidak ada saldo cuti tersisa">Habis</span>
+                    @elseif($sisaProfile <= 3)
+                    <span class="badge" style="background: var(--sh-warning-light); color: var(--sh-warning); border-radius: 50px; font-size: 0.7rem;">Rendah</span>
+                    @endif
                 </div>
                 <div style="height: 8px; border-radius: 4px; background: var(--sh-gray-100); margin-bottom: 0.75rem;">
                     @php $pct = $cutiInfo['total_hak'] > 0 ? ($cutiInfo['sisa'] / $cutiInfo['total_hak']) * 100 : 0; @endphp
@@ -210,21 +216,33 @@
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">Password Lama <span class="text-danger">*</span></label>
-                            <input type="password" name="current_password" class="form-control @error('current_password') is-invalid @enderror" required
-                                   style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
-                            @error('current_password') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <div style="position:relative;">
+                                <input type="password" name="current_password" id="pw_old" class="form-control @error('current_password') is-invalid @enderror" required
+                                       autocomplete="current-password"
+                                       style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px; padding-right: 44px; transition: border-color 0.2s;">
+                                <button type="button" class="sh-pw-eye" onclick="togglePw('pw_old', this)" title="Tampilkan/sembunyikan" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1.1rem;"><i class="ti ti-eye"></i></button>
+                            </div>
+                            @error('current_password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-md-4">
                             <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">Password Baru <span class="text-danger">*</span></label>
-                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required
-                                   placeholder="Min. 6 karakter"
-                                   style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
-                            @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <div style="position:relative;">
+                                <input type="password" name="password" id="pw_new" class="form-control @error('password') is-invalid @enderror" required
+                                       placeholder="Min. 6 karakter"
+                                       autocomplete="new-password"
+                                       style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px; padding-right: 44px; transition: border-color 0.2s;">
+                                <button type="button" class="sh-pw-eye" onclick="togglePw('pw_new', this)" title="Tampilkan/sembunyikan" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1.1rem;"><i class="ti ti-eye"></i></button>
+                            </div>
+                            @error('password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-md-4">
                             <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">Konfirmasi <span class="text-danger">*</span></label>
-                            <input type="password" name="password_confirmation" class="form-control" required
-                                   style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
+                            <div style="position:relative;">
+                                <input type="password" name="password_confirmation" id="pw_confirm" class="form-control" required
+                                       autocomplete="new-password"
+                                       style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px; padding-right: 44px; transition: border-color 0.2s;">
+                                <button type="button" class="sh-pw-eye" onclick="togglePw('pw_confirm', this)" title="Tampilkan/sembunyikan" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1.1rem;"><i class="ti ti-eye"></i></button>
+                            </div>
                         </div>
                     </div>
                     <div class="mt-3">
@@ -237,4 +255,17 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script>
+function togglePw(inputId, btn) {
+    var input = document.getElementById(inputId);
+    var icon  = btn.querySelector('i');
+    if (!input) return;
+    var show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    icon.className = show ? 'ti ti-eye-off' : 'ti ti-eye';
+    btn.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password');
+}
+</script>
+@endpush
 @endsection

@@ -189,7 +189,7 @@
             align-items: center;
             justify-content: center;
             padding: 2rem 1.5rem;
-            background: #f0f4f1;
+            background: #ffffff;
         }
         @media (min-width: 992px) {
             .login-form-panel { width: 50%; padding: 3rem; }
@@ -312,6 +312,27 @@
             box-shadow: 0 6px 20px rgba(20, 83, 45, 0.45);
             background: linear-gradient(135deg, #0d3320, #14532d, #166534);
         }
+        .sh-login-btn:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow: 0 2px 8px rgba(20, 83, 45, 0.3);
+        }
+
+        /* Password toggle */
+        .sh-pw-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 0;
+            font-size: 1.1rem;
+            z-index: 3;
+            transition: color 0.2s;
+        }
+        .sh-pw-toggle:hover { color: #166534; }
 
         .sh-alert-error {
             background: #fef2f2;
@@ -400,30 +421,38 @@
                 </div>
                 @endif
 
-                <form action="{{ route('login') }}" method="POST" autocomplete="off">
+                <form action="{{ route('login') }}" method="POST" id="loginForm">
                     @csrf
                     <div class="mb-3">
-                        <label class="form-label">NIP (Nomor Induk Pegawai)</label>
+                        <label class="form-label" for="nip_input">NIP (Nomor Induk Pegawai)</label>
                         <div class="sh-input-group">
-                            <i class="ti ti-id-badge input-icon"></i>
+                            <i class="ti ti-id-badge input-icon" aria-hidden="true"></i>
                             <input type="text"
+                                   id="nip_input"
                                    name="nip"
                                    class="form-control"
                                    placeholder="Masukkan NIP Anda"
                                    value="{{ old('nip') }}"
+                                   autocomplete="username"
                                    autofocus
                                    required>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Password</label>
+                        <label class="form-label" for="password_input">Password</label>
                         <div class="sh-input-group">
-                            <i class="ti ti-lock input-icon"></i>
+                            <i class="ti ti-lock input-icon" aria-hidden="true"></i>
                             <input type="password"
+                                   id="password_input"
                                    name="password"
                                    class="form-control"
                                    placeholder="Masukkan password"
+                                   autocomplete="current-password"
+                                   style="padding-right: 44px;"
                                    required>
+                            <button type="button" class="sh-pw-toggle" id="pwToggle" aria-label="Tampilkan password" title="Tampilkan/sembunyikan password">
+                                <i class="ti ti-eye" id="pwToggleIcon"></i>
+                            </button>
                         </div>
                     </div>
                     <div class="mb-4">
@@ -432,8 +461,9 @@
                             <span class="form-check-label" style="font-size: 0.85rem; color: #475569;">Ingat saya di perangkat ini</span>
                         </label>
                     </div>
-                    <button type="submit" class="btn btn-primary sh-login-btn w-100">
-                        <i class="ti ti-login me-2"></i> Masuk
+                    <button type="submit" class="btn btn-primary sh-login-btn w-100" id="loginBtn">
+                        <span id="loginBtnText"><i class="ti ti-login me-2"></i> Masuk</span>
+                        <span id="loginBtnLoading" style="display:none;"><span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Memproses...</span>
                     </button>
                 </form>
             </div>
@@ -445,5 +475,29 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/js/tabler.min.js"></script>
+    <script>
+        // Password show/hide toggle
+        var pwToggle = document.getElementById('pwToggle');
+        var pwInput  = document.getElementById('password_input');
+        var pwIcon   = document.getElementById('pwToggleIcon');
+        if (pwToggle) {
+            pwToggle.addEventListener('click', function() {
+                var isHidden = pwInput.type === 'password';
+                pwInput.type = isHidden ? 'text' : 'password';
+                pwIcon.className = isHidden ? 'ti ti-eye-off' : 'ti ti-eye';
+                pwToggle.setAttribute('aria-label', isHidden ? 'Sembunyikan password' : 'Tampilkan password');
+            });
+        }
+        // Submit loading state
+        var loginForm = document.getElementById('loginForm');
+        var loginBtn  = document.getElementById('loginBtn');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function() {
+                loginBtn.disabled = true;
+                document.getElementById('loginBtnText').style.display    = 'none';
+                document.getElementById('loginBtnLoading').style.display = 'inline-flex';
+            });
+        }
+    </script>
 </body>
 </html>

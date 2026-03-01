@@ -308,12 +308,16 @@
             border: none;
             border-radius: 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
-            transition: box-shadow 0.3s ease;
+            transition: box-shadow 0.25s ease, transform 0.25s ease;
             overflow: hidden;
             background: var(--sh-card-bg);
         }
         .sh-card:hover {
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.09), 0 12px 32px rgba(0,0,0,0.07);
+            transform: translateY(-1px);
+        }
+        [data-bs-theme="dark"] .sh-card {
+            border: 1px solid rgba(255,255,255,0.06);
         }
         .sh-card .card-header {
             background: var(--sh-card-bg);
@@ -330,7 +334,7 @@
             border: none;
             border-radius: 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
-            transition: box-shadow 0.3s ease;
+            transition: box-shadow 0.25s ease, transform 0.25s ease;
             position: relative;
             overflow: hidden;
             background: var(--sh-card-bg);
@@ -586,7 +590,7 @@
         .sh-page-title {
             font-size: 1.5rem;
             font-weight: 800;
-            color: #14532d;
+            color: var(--sh-primary);
             letter-spacing: -0.5px;
         }
 
@@ -801,6 +805,7 @@
         .card-body a:not(.btn):not(.text-decoration-none):not(.nav-link):not(.navbar-brand-text):hover,
         .card-body a:not(.btn):not(.text-decoration-none):not(.nav-link):not(.navbar-brand-text):focus-visible {
             text-decoration: underline !important;
+            text-decoration-color: var(--sh-primary) !important;
         }
 
         /* --- Loading Skeleton (#21) --- */
@@ -846,6 +851,7 @@
         .sh-toast-success { background: var(--sh-success); color: #fff; }
         .sh-toast-error { background: var(--sh-danger); color: #fff; }
         .sh-toast-warning { background: var(--sh-warning); color: #fff; }
+        .sh-toast-info { background: #3b82f6; color: #fff; }
         .sh-toast-out { animation: sh-toast-out 0.3s ease forwards; }
         @keyframes sh-toast-in {
             from { opacity: 0; transform: translateX(40px); }
@@ -871,7 +877,7 @@
         .sh-breadcrumb {
             display: flex;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.6rem;
             font-size: 0.82rem;
             color: var(--sh-text-muted);
             margin-bottom: 0.75rem;
@@ -934,6 +940,7 @@
             /* Consistent layout for page header content */
             .sh-page-header > div {
                 gap: 1rem !important;
+                row-gap: 1.25rem !important;
                 align-items: flex-start !important;
             }
         }
@@ -1369,6 +1376,20 @@
             border-radius: 4px;
         }
         .btn:focus-visible, a:focus-visible { box-shadow: 0 0 0 3px rgba(22,101,52,0.25) !important; }
+
+        /* --- Button active press feedback --- */
+        .btn:not(:disabled):active {
+            transform: scale(0.97) !important;
+            transition: transform 0.08s ease !important;
+        }
+        .sh-card a.text-decoration-none:active .sh-leave-type-card,
+        .sh-leave-type-card:active { transform: translateY(-1px) scale(0.99) !important; }
+
+        /* --- Inline edit dark mode hover fix --- */
+        [data-bs-theme="dark"] .sh-inline-edit:hover,
+        [data-bs-theme="dark"] .sh-inline-edit:focus {
+            background: rgba(34, 197, 94, 0.12) !important;
+        }
 
         /* ===== Sprint 8 #42: Font Size Adjuster ===== */
         .sh-font-btn {
@@ -1881,7 +1902,7 @@
         if (!container) return;
         var toast = document.createElement('div');
         toast.className = 'sh-toast sh-toast-' + type;
-        var icon = type === 'success' ? 'ti-circle-check' : (type === 'error' ? 'ti-alert-triangle' : 'ti-info-circle');
+        var icon = type === 'success' ? 'ti-circle-check' : (type === 'error' ? 'ti-alert-triangle' : (type === 'warning' ? 'ti-alert-circle' : 'ti-info-circle'));
         toast.innerHTML = '<i class="ti ' + icon + '"></i> ' + message;
         container.appendChild(toast);
         setTimeout(function() {

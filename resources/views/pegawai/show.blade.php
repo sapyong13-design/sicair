@@ -120,7 +120,13 @@
                         </tr>
                         <tr>
                             <td class="text-muted" style="padding: 0.75rem 1rem;">Atasan Langsung</td>
-                            <td class="fw-semibold" style="padding: 0.75rem 1rem;">{{ $pegawai->atasan->name ?? '-' }}</td>
+                            <td class="fw-semibold" style="padding: 0.75rem 1rem;">
+                                @if($pegawai->atasan)
+                                    <a href="{{ route('pegawai.show', $pegawai->atasan) }}" style="color: var(--sh-primary);">{{ $pegawai->atasan->name }}</a>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <td class="text-muted" style="padding: 0.75rem 1rem;">Jumlah Anak</td>
@@ -148,12 +154,18 @@
                 </h3>
             </div>
             <div class="card-body p-4">
+                @php $lb = $pegawai->leave_balance ?? 0; @endphp
                 <div class="d-flex align-items-baseline gap-2 mb-2">
-                    <span style="font-size: 2.5rem; font-weight: 800; color: var(--sh-primary);">{{ $pegawai->leave_balance }}</span>
+                    <span style="font-size: 2.5rem; font-weight: 800; color: {{ $lb <= 0 ? 'var(--sh-danger)' : ($lb <= 3 ? 'var(--sh-warning)' : 'var(--sh-primary)') }};">{{ $lb }}</span>
                     <span class="text-muted">hari tersisa</span>
+                    @if($lb <= 0)
+                    <span class="badge" style="background: var(--sh-danger-light); color: var(--sh-danger); font-size: 0.75rem; border-radius: 50px; padding: 0.25rem 0.6rem;">Habis</span>
+                    @elseif($lb <= 3)
+                    <span class="badge" style="background: var(--sh-warning-light); color: var(--sh-warning); font-size: 0.75rem; border-radius: 50px; padding: 0.25rem 0.6rem;">Rendah</span>
+                    @endif
                 </div>
                 <div style="height: 8px; border-radius: 4px; background: var(--sh-gray-100);">
-                    <div style="height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--sh-primary), #22c55e); width: {{ min(100, ($pegawai->leave_balance / 12) * 100) }}%;"></div>
+                    <div style="height: 100%; border-radius: 4px; background: linear-gradient(90deg, {{ $lb <= 3 ? 'var(--sh-danger)' : 'var(--sh-primary)' }}, {{ $lb <= 3 ? '#f87171' : '#22c55e' }}); width: {{ min(100, ($lb / 12) * 100) }}%;"></div>
                 </div>
             </div>
         </div>
