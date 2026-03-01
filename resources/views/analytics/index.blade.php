@@ -28,8 +28,11 @@
                     @endforeach
                 </select>
             </form>
-            <a href="{{ route('analytics.export-annual', ['year' => $year]) }}" class="btn btn-sm sh-btn-primary">
+            <a href="{{ route('analytics.export-annual', ['year' => $year]) }}" class="btn btn-sm sh-btn-primary sh-export-trigger">
                 <i class="ti ti-download me-1"></i> Export CSV {{ $year }}
+            </a>
+            <a href="{{ route('analytics.export-pdf', ['year' => $year]) }}" target="_blank" class="btn btn-sm btn-outline-secondary sh-export-trigger">
+                <i class="ti ti-printer me-1"></i> Export PDF
             </a>
         </div>
     </div>
@@ -234,6 +237,83 @@
 </div>
 @endif
 
+{{-- #38 Line Chart: 12-Month Rolling Trend --}}
+@if(!empty($monthly12))
+<div class="card sh-card mb-4">
+    <div class="card-body p-4">
+        <h6 class="fw-bold mb-3" style="color:var(--sh-text);">
+            <i class="ti ti-chart-line me-1" style="color:var(--sh-primary);"></i>
+            Tren 12 Bulan Terakhir (Rolling)
+            <small class="text-muted fw-normal">(cuti disetujui per bulan)</small>
+        </h6>
+        <canvas id="chartTrend12" height="60"></canvas>
+    </div>
+</div>
+@endif
+
+{{-- #39 Grouped Bar: Comparison 3 Bagian --}}
+@if(!empty($byBagian))
+<div class="card sh-card mb-4">
+    <div class="card-body p-4">
+        <h6 class="fw-bold mb-3" style="color:var(--sh-text);">
+            <i class="ti ti-chart-bar me-1" style="color:var(--sh-accent);"></i>
+            Perbandingan per Bagian {{ $year }}
+            <small class="text-muted fw-normal">(Kepaniteraan · Kesekretariatan · Hakim)</small>
+        </h6>
+        <canvas id="chartBagian" height="80"></canvas>
+    </div>
+</div>
+@endif
+
+{{-- #41 Heatmap per Unit Kerja --}}
+@if(!empty($heatmapByUnit))
+<div class="card sh-card mb-4">
+    <div class="card-body p-4">
+        <h6 class="fw-bold mb-3" style="color:var(--sh-text);">
+            <i class="ti ti-grid-dots me-1" style="color:var(--sh-primary);"></i>
+            Heatmap Cuti per Unit Kerja {{ $year }}
+            <small class="text-muted fw-normal">(pengajuan disetujui per bulan)</small>
+        </h6>
+        <div class="table-responsive">
+            <table class="table table-sm mb-0" style="font-size:0.78rem; min-width:700px;">
+                <thead>
+                    <tr style="background: var(--sh-gray-100);">
+                        <th style="padding:0.4rem 0.6rem; min-width:160px;">Unit Kerja</th>
+                        @foreach(['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'] as $mn)
+                        <th class="text-center" style="padding:0.4rem 0.3rem;">{{ $mn }}</th>
+                        @endforeach
+                        <th class="text-center" style="padding:0.4rem 0.6rem;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($heatmapByUnit as $row)
+                    @php $maxVal = max(max($row['months']), 1); @endphp
+                    <tr>
+                        <td style="padding:0.3rem 0.6rem; font-weight:500; white-space:nowrap;">
+                            {{ $row['unit'] ?? '—' }}
+                        </td>
+                        @foreach($row['months'] as $cnt)
+                        @php
+                            $intensity = $cnt > 0 ? max(0.15, min(1, $cnt / $maxVal)) : 0;
+                            $bg    = $cnt > 0 ? 'rgba(180,83,9,' . $intensity . ')' : 'transparent';
+                            $color = $intensity > 0.5 ? '#ffffff' : ($cnt > 0 ? '#78350f' : 'var(--sh-text-muted)');
+                        @endphp
+                        <td class="text-center" style="padding:0.3rem; background:{{ $bg }}; color:{{ $color }}; border-radius:4px;">
+                            {{ $cnt > 0 ? $cnt : '—' }}
+                        </td>
+                        @endforeach
+                        <td class="text-center fw-bold" style="padding:0.3rem 0.6rem; color:var(--sh-accent);">
+                            {{ $row['total'] }}
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- Top Users + Upcoming Leaves --}}
 <div class="row g-3 mb-4">
     <div class="col-md-6">
@@ -424,6 +504,82 @@
             },
         },
     });
+
+    // ── #38 Trend 12 Months Line Chart ──────────────────────────────
+    @if(!empty($monthly12))
+    @php $m12 = $monthly12; @endphp
+    const el12 = document.getElementById('chartTrend12');
+    if (el12) {
+        new Chart(el12.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: @json(array_column($m12, 'label')),
+                datasets: [{
+                    label: 'Cuti Disetujui',
+                    data: @json(array_column($m12, 'count')),
+                    borderColor: 'rgba(22,101,52,0.85)',
+                    backgroundColor: 'rgba(22,101,52,0.12)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    borderWidth: 2,
+                }],
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { mode: 'index', intersect: false },
+                },
+                scales: {
+                    x: { grid: { color: gridColor }, ticks: { color: tickColor } },
+                    y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, stepSize: 1 } },
+                },
+            },
+        });
+    }
+    @endif
+
+    // ── #39 By Bagian Grouped Bar Chart ─────────────────────────────
+    @if(!empty($byBagian))
+    @php $bb = $byBagian; @endphp
+    const elBagian = document.getElementById('chartBagian');
+    if (elBagian) {
+        const bagianLabels = @json(array_column($bb, 'bagian'));
+        new Chart(elBagian.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: bagianLabels,
+                datasets: [
+                    {
+                        label: 'Total Pengajuan',
+                        data: @json(array_column($bb, 'total_requests')),
+                        backgroundColor: 'rgba(22,101,52,0.75)',
+                        borderRadius: 4,
+                    },
+                    {
+                        label: 'Total Hari Kerja',
+                        data: @json(array_column($bb, 'total_days')),
+                        backgroundColor: 'rgba(180,83,9,0.7)',
+                        borderRadius: 4,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top', labels: { color: tickColor, boxWidth: 12 } },
+                    tooltip: { mode: 'index', intersect: false },
+                },
+                scales: {
+                    x: { grid: { color: gridColor }, ticks: { color: tickColor } },
+                    y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, stepSize: 1 } },
+                },
+            },
+        });
+    }
+    @endif
 
     // ── Count-up animation for stat cards ───────────────────────────
     document.querySelectorAll('.sh-stat-number').forEach(el => {

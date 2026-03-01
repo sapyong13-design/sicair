@@ -36,13 +36,19 @@ class AnalyticsController extends Controller
         // #42 Heatmap data: per user per month
         $heatmapData = $this->getHeatmapData($year);
 
+        // Sprint 7: extra charts
+        $monthly12       = $analyticsService->getMonthlyTrend12();
+        $byBagian        = $analyticsService->getByBagian($year);
+        $heatmapByUnit   = $analyticsService->getHeatmapByUnit($year);
+
         // Available years for filter
         $availableYears = range(date('Y'), date('Y') - 3);
 
         return view('analytics.index', compact(
             'year', 'prevYear', 'analytics', 'leaveBalances',
             'chartByType', 'chartByStatus', 'chartMonthly', 'chartByDepartment',
-            'topUsers', 'upcomingLeaves', 'prevSummary', 'heatmapData', 'availableYears'
+            'topUsers', 'upcomingLeaves', 'prevSummary', 'heatmapData', 'availableYears',
+            'monthly12', 'byBagian', 'heatmapByUnit'
         ));
     }
 
@@ -78,6 +84,25 @@ class AnalyticsController extends Controller
         return response($csv, 200, [
             'Content-Type' => 'text/csv; charset=utf-8',
             'Content-Disposition' => "attachment; filename=\"laporan-cuti-{$year}.csv\"",
+        ]);
+    }
+
+    /**
+     * Sprint 7 #40: Export analytics as simple PDF (table-based, no charts)
+     */
+    public function exportPdf(Request $request)
+    {
+        $year             = (int) $request->input('year', date('Y'));
+        $analyticsService = new AnalyticsService();
+        $analytics        = $analyticsService->getDashboardAnalytics($year);
+        $leaveBalances    = $analyticsService->getLeaveBalanceOverview($year);
+        $byBagian         = $analyticsService->getByBagian($year);
+        $monthly12        = $analyticsService->getMonthlyTrend12();
+
+        $html = view('pdfs.analytics-report', compact('year', 'analytics', 'leaveBalances', 'byBagian', 'monthly12'))->render();
+
+        return response($html, 200, [
+            'Content-Type' => 'text/html; charset=utf-8',
         ]);
     }
 

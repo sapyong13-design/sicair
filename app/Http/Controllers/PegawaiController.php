@@ -33,6 +33,15 @@ class PegawaiController extends Controller
             $query->where('status_pegawai', $request->status_pegawai);
         }
 
+        // Sprint 5 #32: Filter by active status
+        if ($request->filled('active') && $request->active !== '') {
+            if ($request->active === '1') {
+                $query->where(fn($q) => $q->where('is_active', true)->orWhereNull('is_active'));
+            } else {
+                $query->where('is_active', false);
+            }
+        }
+
         $pegawai = $query->paginate(15)->withQueryString();
 
         return view('pegawai.index', compact('pegawai'));
@@ -313,5 +322,117 @@ class PegawaiController extends Controller
 
         return redirect()->route('pegawai.index')
             ->with('error', 'Saat ini hanya format CSV yang didukung. Silakan gunakan template CSV.');
+    }
+
+    /**
+     * Sprint 5 #29: Export pegawai as CSV
+     */
+    public function export(Request $request)
+    {
+        $query = User::query()->orderBy('name');
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(fn($q) => $q->where('name','like',"%{$s}%")->orWhere('nip','like',"%{$s}%"));
+        }
+        if ($request->filled('role')) $query->where('role', $request->role);
+        if ($request->filled('status_pegawai')) $query->where('status_pegawai', $request->status_pegawai);
+        if ($request->boolean('active_only')) $query->where(fn($q) => $q->where('is_active', true)->orWhereNull('is_active'));
+
+        $rows = $query->get();
+        $csv  = "\xEF\xBB\xBF"; // UTF-8 BOM for Excel
+        $csv .= "Nama,NIP,Jabatan,Golongan,Unit Kerja,Role,Status Pegawai,Masa Kerja,Sisa Cuti,Aktif\n";
+        foreach ($rows as $p) {
+            $aktif = ($p->is_active ?? true) ? 'Ya' : 'Tidak';
+            $csv .= implode(',', [
+                '"' . str_replace('"', '""', $p->name) . '"',
+                '"' . $p->nip . '"',
+                '"' . ($p->jabatan ?? '') . '"',
+                '"' . ($p->golongan_ruang ?? '') . '"',
+                '"' . ($p->unit_kerja ?? '') . '"',
+                '"' . $p->role . '"',
+                '"' . ($p->status_pegawai ?? '') . '"',
+                '"' . ($p->masa_kerja_format ?? '') . '"',
+                $p->leave_balance,
+                $aktif,
+            ]) . "\n";
+        }
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="pegawai-' . date('Y-m-d') . '.csv"',
+        ]);
+    }
+
+    /**
+     * Sprint 5 #28: Bulk actions
+     */
+    public function bulkAction(Request $request)
+    {
+        $ids    = $request->input('ids', []);
+        $action = $request->input('action');
+        if (empty($ids)) return back()->with('error', 'Pilih pegawai terlebih dahulu.');
+
+        switch ($action) {
+            case 'reset-password':
+                foreach ($ids as $id) {
+                    $p = User::find($id);
+                    if ($p) $p->update(['password' => Hash::make($p->nip)]);
+                }
+                return back()->with('success', count($ids) . ' password direset ke NIP masing-masing.');
+
+            case 'pindah-unit':
+                $unit = $request->input('unit_kerja');
+                if (!$unit) return back()->with('error', 'Unit kerja wajib diisi.');
+                User::whereIn('id', $ids)->update(['unit_kerja' => $unit]);
+                return back()->with('success', count($ids) . ' pegawai dipindahkan ke unit ' . $unit . '.');
+
+            case 'nonaktifkan':
+                User::whereIn('id', $ids)->update(['is_active' => false]);
+                return back()->with('success', count($ids) . ' pegawai dinonaktifkan.');
+
+            case 'aktifkan':
+                User::whereIn('id', $ids)->update(['is_active' => true]);
+                return back()->with('success', count($ids) . ' pegawai diaktifkan.');
+
+            default:
+                return back()->with('error', 'Aksi tidak dikenali.');
+        }
+    }
+
+    /**
+     * Sprint 5 #31: Inline edit jabatan / unit_kerja
+     */
+    public function inlineEdit(Request $request, User $pegawai)
+    {
+        $validated = $request->validate([
+            'field' => 'required|in:jabatan,unit_kerja,golongan_ruang',
+            'value' => 'nullable|string|max:255',
+        ]);
+        $pegawai->update([$validated['field'] => $validated['value']]);
+        return response()->json(['success' => true, 'value' => $pegawai->{$validated['field']}]);
+    }
+
+    /**
+     * Sprint 5 #27: Upload photo / avatar
+     */
+    public function uploadPhoto(Request $request, User $pegawai)
+    {
+        $request->validate(['photo' => 'required|image|max:2048|mimes:jpg,jpeg,png,webp']);
+        if ($pegawai->photo) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($pegawai->photo);
+        }
+        $path = $request->file('photo')->store('avatars', 'public');
+        $pegawai->update(['photo' => $path]);
+        return back()->with('success', 'Foto profil pegawai berhasil diperbarui.');
+    }
+
+    /**
+     * Sprint 5 #32: Toggle active/non-active
+     */
+    public function toggleActive(User $pegawai)
+    {
+        $pegawai->update(['is_active' => !($pegawai->is_active ?? true)]);
+        $status = ($pegawai->is_active) ? 'diaktifkan' : 'dinonaktifkan';
+        return back()->with('success', "Pegawai {$pegawai->name} berhasil {$status}.");
     }
 }

@@ -191,6 +191,194 @@
         </div>
     </div>
 
+    {{-- Sprint 3 Widgets Row --}}
+    <div class="row g-3 mb-4">
+        {{-- #16: Widget Saldo Rendah --}}
+        @if($saldoRendah->isNotEmpty())
+        <div class="col-md-4 animate-in">
+            <div class="card sh-card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h3 class="card-title mb-0" style="font-size:0.9rem;">
+                        <i class="ti ti-alert-triangle me-2" style="color:var(--sh-warning);"></i>
+                        Saldo Cuti Rendah
+                    </h3>
+                    <span class="sh-badge" style="background:var(--sh-warning-light);color:var(--sh-warning);">≤ 3 hari</span>
+                </div>
+                <div class="card-body p-3">
+                    @foreach($saldoRendah as $p)
+                    <div class="d-flex align-items-center gap-2 py-1 {{ !$loop->last ? 'border-bottom' : '' }}">
+                        <div class="sh-user-avatar" style="width:28px;height:28px;font-size:0.65rem;background:var(--sh-warning-light);color:var(--sh-warning);border:none;border-radius:6px;flex-shrink:0;">{{ strtoupper(substr($p->name,0,2)) }}</div>
+                        <div class="flex-fill" style="min-width:0;">
+                            <div style="font-size:0.82rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $p->name }}</div>
+                        </div>
+                        <span class="fw-bold" style="color:var(--sh-warning);font-size:0.82rem;">{{ $p->leave_balance }}h</span>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        @endif
+
+        {{-- #19: Top 5 Paling Banyak Cuti --}}
+        @if($top5Cuti->isNotEmpty())
+        <div class="col-md-4 animate-in">
+            <div class="card sh-card h-100">
+                <div class="card-header">
+                    <h3 class="card-title mb-0" style="font-size:0.9rem;">
+                        <i class="ti ti-trophy me-2" style="color:var(--sh-accent);"></i>
+                        Top 5 Penggunaan Cuti {{ $year }}
+                    </h3>
+                </div>
+                <div class="card-body p-3">
+                    @foreach($top5Cuti as $i => $p)
+                    <div class="d-flex align-items-center gap-2 py-1 {{ !$loop->last ? 'border-bottom' : '' }}">
+                        <span style="font-size:0.75rem;font-weight:700;color:var(--sh-text-muted);width:16px;flex-shrink:0;">{{ $i+1 }}</span>
+                        <div class="flex-fill" style="min-width:0;">
+                            <div style="font-size:0.82rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $p->name }}</div>
+                        </div>
+                        <span class="fw-bold" style="color:var(--sh-primary);font-size:0.82rem;">{{ $p->total_hari }}h</span>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        @endif
+
+        {{-- #21: Recent Activity Feed --}}
+        <div class="col-md-4 animate-in">
+            <div class="card sh-card h-100">
+                <div class="card-header">
+                    <h3 class="card-title mb-0" style="font-size:0.9rem;">
+                        <i class="ti ti-activity me-2" style="color:var(--sh-primary);"></i>
+                        Aktivitas Terbaru
+                    </h3>
+                </div>
+                <div class="card-body p-3">
+                    @forelse($recentActivity as $act)
+                    <div class="d-flex align-items-start gap-2 py-1 {{ !$loop->last ? 'border-bottom' : '' }}">
+                        <div class="sh-user-avatar" style="width:26px;height:26px;font-size:0.6rem;background:var(--sh-primary-light);color:var(--sh-primary);border:none;border-radius:6px;flex-shrink:0;margin-top:2px;">{{ strtoupper(substr($act->user->name,0,2)) }}</div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:0.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                <strong>{{ $act->user->name }}</strong>
+                                {{ $act->status === 'diajukan' ? 'mengajukan' : ($act->status === 'disetujui' ? 'cuti disetujui' : ($act->status === 'ditolak' ? 'cuti ditolak' : 'update')) }}
+                                <span style="color:var(--sh-primary);">{{ $act->type_label }}</span>
+                            </div>
+                            <div class="text-muted" style="font-size:0.72rem;">{{ $act->created_at->diffForHumans() }}</div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="text-center py-3 text-muted" style="font-size:0.82rem;">Belum ada aktivitas.</div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- #18: Trend Indicator on Stats (#18) - inline with stat cards --}}
+    @if(isset($monthTrend))
+    <div class="mb-4 p-3 sh-card" style="border-radius:12px;">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <i class="ti ti-trending-{{ $monthTrend['trending'] }}" style="font-size:1.5rem;color:{{ $monthTrend['trending'] === 'up' ? 'var(--sh-danger)' : 'var(--sh-success)' }};"></i>
+            <div>
+                <div class="fw-bold" style="font-size:0.9rem;">Trend Pengajuan Cuti</div>
+                <div class="text-muted" style="font-size:0.82rem;">
+                    Bulan ini: <strong>{{ $monthTrend['this_month'] }}</strong> cuti disetujui &bull;
+                    Bulan lalu: <strong>{{ $monthTrend['last_month'] }}</strong> &bull;
+                    <strong style="color:{{ $monthTrend['trending'] === 'up' ? 'var(--sh-danger)' : 'var(--sh-success)' }}">
+                        {{ $monthTrend['diff_pct'] >= 0 ? '+' : '' }}{{ $monthTrend['diff_pct'] }}%
+                    </strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- #17: Widget Carry-Over Akan Hangus (shown Oct-Dec) --}}
+    @if(!empty($carryOverHangus) && $carryOverHangus->isNotEmpty())
+    <div class="alert mb-4" style="background:var(--sh-warning-light);border:2px solid var(--sh-warning);border-radius:12px;">
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <i class="ti ti-clock-exclamation" style="color:var(--sh-warning);font-size:1.2rem;"></i>
+            <strong style="color:var(--sh-warning);">Carry-Over Cuti Akan Hangus Akhir Tahun!</strong>
+        </div>
+        <div style="font-size:0.85rem;color:#78350f;">
+            {{ $carryOverHangus->count() }} pegawai memiliki sisa carry-over dari tahun lalu yang belum digunakan:
+            @foreach($carryOverHangus->take(5) as $co)
+            <span class="sh-badge ms-1" style="background:#fef3c7;color:#92400e;">{{ $co->user->name ?? '-' }} ({{ $co->carry_over }}h)</span>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- #20: Mini Calendar Widget --}}
+    @php
+        $calNow      = \Carbon\Carbon::now();
+        $calYear     = $calNow->year;
+        $calMonth    = $calNow->month;
+        $calFirst    = \Carbon\Carbon::create($calYear, $calMonth, 1);
+        $calDays     = $calFirst->daysInMonth;
+        $calStartDow = $calFirst->dayOfWeekIso; // 1=Mon, 7=Sun
+        // Build leave day set for current month
+        $calLeaveDays = \App\Models\LeaveRequest::where('status','disetujui')
+            ->whereYear('start_date', $calYear)->orWhereYear('end_date', $calYear)
+            ->get()
+            ->flatMap(function($lr) use ($calYear, $calMonth) {
+                $days = [];
+                $s = max(strtotime($lr->start_date), mktime(0,0,0,$calMonth,1,$calYear));
+                $e = min(strtotime($lr->end_date), mktime(0,0,0,$calMonth+1,0,$calYear));
+                for ($d=$s; $d<=$e; $d+=86400) { $days[] = (int)date('j',$d); }
+                return $days;
+            })->unique()->values()->toArray();
+        $calMonthNames = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    @endphp
+    <div class="card sh-card mb-4 animate-in">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <h3 class="card-title mb-0" style="font-size:0.9rem;">
+                <i class="ti ti-calendar me-2" style="color:var(--sh-primary);"></i>
+                {{ $calMonthNames[$calMonth] }} {{ $calYear }}
+            </h3>
+            <a href="{{ route('kalender', ['year' => $calYear, 'month' => $calMonth]) }}" class="btn btn-sm btn-outline-primary" style="border-radius:8px;font-size:0.78rem;">
+                <i class="ti ti-external-link me-1"></i> Buka Kalender
+            </a>
+        </div>
+        <div class="card-body p-3">
+            <div class="row g-0 text-center mb-2">
+                @foreach(['S','S','R','K','J','S','M'] as $dn)
+                <div class="col" style="font-size:0.7rem;font-weight:700;color:var(--sh-text-muted);text-transform:uppercase;">{{ $dn }}</div>
+                @endforeach
+            </div>
+            @php $dc = 1; @endphp
+            @for($row = 0; $row < 6; $row++)
+                @if($dc > $calDays) @break @endif
+                <div class="row g-0 text-center mb-1">
+                    @for($col = 1; $col <= 7; $col++)
+                        @if(($row === 0 && $col < $calStartDow) || $dc > $calDays)
+                            <div class="col"></div>
+                        @else
+                            @php
+                                $isToday   = ($dc === $calNow->day);
+                                $hasLeave  = in_array($dc, $calLeaveDays);
+                                $isWeekend = ($col >= 6);
+                            @endphp
+                            <div class="col d-flex flex-column align-items-center" style="cursor:{{ $hasLeave ? 'pointer' : 'default' }}"
+                                 @if($hasLeave) onclick="window.location='{{ route('kalender', ['year'=>$calYear,'month'=>$calMonth]) }}'" @endif>
+                                <span style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:{{ $isToday ? '800' : '500' }};
+                                    {{ $isToday ? 'background:var(--sh-primary);color:#fff;' : ($isWeekend ? 'color:var(--sh-danger);' : 'color:var(--sh-text);') }}">
+                                    {{ $dc }}
+                                </span>
+                                @if($hasLeave)
+                                <span style="width:5px;height:5px;border-radius:50%;background:var(--sh-success);margin-top:1px;"></span>
+                                @else
+                                <span style="width:5px;height:5px;"></span>
+                                @endif
+                            </div>
+                            @php $dc++; @endphp
+                        @endif
+                    @endfor
+                </div>
+            @endfor
+        </div>
+    </div>
+
     {{-- Pending Requests --}}
     <div class="card sh-card mb-4">
         <div class="card-header d-flex align-items-center justify-content-between">

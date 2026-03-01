@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CutiRecord;
 use App\Models\LeaveRequest;
 use App\Models\User;
 use App\Services\AnalyticsService;
@@ -83,11 +84,43 @@ class DashboardController extends Controller
         $chartMonthly = $analytics['charts']['monthly_trend'] ?? [];
         $chartByDepartment = $analytics['charts']['by_department']['values'] ?? [];
 
+        // Sprint 3 #16: Pegawai with low leave balance (≤ 3)
+        $saldoRendah = User::where('leave_balance', '<=', 3)->orderBy('leave_balance')->take(5)->get();
+
+        // Sprint 3 #17: Carry-over akan hangus (only show Oct-Dec)
+        $carryOverHangus = [];
+        if ((int) date('m') >= 10) {
+            $carryOverHangus = \App\Models\CutiRecord::where('tahun', $year - 1)
+                ->where('carry_over', '>', 0)
+                ->with('user')
+                ->get();
+        }
+
+        // Sprint 3 #18: Trend indicator (this month vs last month)
+        $monthTrend = $analyticsService->getMonthTrend();
+
+        // Sprint 3 #19: Top 5 pegawai paling banyak cuti tahun ini
+        $top5Cuti = LeaveRequest::join('users', 'leave_requests.user_id', '=', 'users.id')
+            ->selectRaw("users.id, users.name, SUM(COALESCE(total_hari_kerja, CAST((julianday(end_date) - julianday(start_date)) AS INTEGER) + 1)) as total_hari")
+            ->whereIn('leave_requests.status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+            ->whereYear('leave_requests.start_date', $year)
+            ->groupBy('users.id', 'users.name')
+            ->orderByDesc('total_hari')
+            ->take(5)
+            ->get();
+
+        // Sprint 3 #21: Recent activity feed (5 latest leave requests)
+        $recentActivity = LeaveRequest::with('user')
+            ->latest()
+            ->take(5)
+            ->get();
+
         return view('dashboard', compact(
             'user', 'pendingRequests', 'recentDecisions', 'totalPegawai',
             'analytics', 'leaveBalances', 'year',
             'chartByType', 'chartByStatus', 'chartMonthly', 'chartByDepartment',
-            'todayOnLeave', 'upcomingLeaves7Days'
+            'todayOnLeave', 'upcomingLeaves7Days',
+            'saldoRendah', 'carryOverHangus', 'monthTrend', 'top5Cuti', 'recentActivity'
         ));
     }
 

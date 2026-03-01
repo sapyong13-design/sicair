@@ -283,4 +283,136 @@ class AnalyticsService
 
         return $users;
     }
+
+    /**
+     * Sprint 7 #38: Rolling 12-month leave trend
+     */
+    public function getMonthlyTrend12(): array
+    {
+        $labels = [];
+        $values = [];
+        $now    = Carbon::now();
+
+        for ($i = 11; $i >= 0; $i--) {
+            $d      = $now->copy()->subMonths($i);
+            $labels[] = $d->format('M Y');
+            $count  = LeaveRequest::whereIn('status', [
+                    LeaveRequest::STATUS_DISETUJUI,
+                    LeaveRequest::STATUS_APPROVED,
+                ])
+                ->whereYear('start_date', $d->year)
+                ->whereMonth('start_date', $d->month)
+                ->count();
+            $values[] = $count;
+        }
+
+        return ['labels' => $labels, 'values' => $values];
+    }
+
+    /**
+     * Sprint 7 #39: Comparison by Bagian (Kepaniteraan / Kesekretariatan / Hakim)
+     * Uses User::getBagian() logic via SQL CASE WHEN
+     */
+    public function getByBagian(int $year): array
+    {
+        $rows = LeaveRequest::join('users', 'leave_requests.user_id', '=', 'users.id')
+            ->selectRaw("
+                CASE
+                    WHEN users.role IN ('hakim','hakim_ad_hoc') THEN 'Hakim'
+                    WHEN users.role = 'panitera' OR users.unit_kerja LIKE '%paniter%' THEN 'Kepaniteraan'
+                    ELSE 'Kesekretariatan'
+                END AS bagian,
+                COUNT(*) as total_pengajuan,
+                SUM(COALESCE(total_hari_kerja, CAST((julianday(end_date) - julianday(start_date)) AS INTEGER) + 1)) as total_hari
+            ")
+            ->whereIn('leave_requests.status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+            ->whereYear('leave_requests.start_date', $year)
+            ->groupBy('bagian')
+            ->get();
+
+        $map  = ['Kepaniteraan' => [], 'Kesekretariatan' => [], 'Hakim' => []];
+        foreach ($rows as $row) {
+            $key = $row->bagian;
+            if (!isset($map[$key])) continue;
+            $map[$key] = [
+                'total_pengajuan' => (int) $row->total_pengajuan,
+                'total_hari'      => (int) $row->total_hari,
+                'rata_hari'       => $row->total_pengajuan > 0 ? round($row->total_hari / $row->total_pengajuan, 1) : 0,
+            ];
+        }
+
+        // Ensure all keys exist with defaults
+        foreach ($map as $k => $v) {
+            if (empty($v)) {
+                $map[$k] = ['total_pengajuan' => 0, 'total_hari' => 0, 'rata_hari' => 0];
+            }
+        }
+
+        return $map;
+    }
+
+    /**
+     * Sprint 7 #18: Monthly trend comparison — this month vs last month
+     */
+    public function getMonthTrend(): array
+    {
+        $thisMonth  = (int) date('m');
+        $thisYear   = (int) date('Y');
+        $lastMonth  = $thisMonth === 1 ? 12 : $thisMonth - 1;
+        $lastYear   = $thisMonth === 1 ? $thisYear - 1 : $thisYear;
+
+        $this = LeaveRequest::whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+            ->whereYear('start_date', $thisYear)
+            ->whereMonth('start_date', $thisMonth)
+            ->count();
+
+        $last = LeaveRequest::whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+            ->whereYear('start_date', $lastYear)
+            ->whereMonth('start_date', $lastMonth)
+            ->count();
+
+        $diff = $last > 0 ? round((($this - $last) / $last) * 100) : 0;
+
+        return [
+            'this_month' => $this,
+            'last_month' => $last,
+            'diff_pct'   => $diff,
+            'trending'   => $diff >= 0 ? 'up' : 'down',
+        ];
+    }
+
+    /**
+     * Sprint 7 #41: Heatmap of approved leaves per unit per month
+     */
+    public function getHeatmapByUnit(int $year): array
+    {
+        $rows = LeaveRequest::join('users', 'leave_requests.user_id', '=', 'users.id')
+            ->selectRaw("
+                users.unit_kerja,
+                CAST(strftime('%m', leave_requests.start_date) AS INTEGER) as month,
+                COUNT(*) as count
+            ")
+            ->whereIn('leave_requests.status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+            ->whereYear('leave_requests.start_date', $year)
+            ->whereNotNull('users.unit_kerja')
+            ->groupBy('users.unit_kerja', 'month')
+            ->orderBy('users.unit_kerja')
+            ->get();
+
+        $units = $rows->pluck('unit_kerja')->unique()->values()->all();
+        $data  = [];
+        foreach ($units as $unit) {
+            $months = array_fill(1, 12, 0);
+            foreach ($rows->where('unit_kerja', $unit) as $row) {
+                $months[(int) $row->month] = (int) $row->count;
+            }
+            $data[] = [
+                'unit'   => $unit,
+                'months' => array_values($months),
+                'total'  => array_sum($months),
+            ];
+        }
+
+        return $data;
+    }
 }

@@ -42,8 +42,32 @@
         </div>
     </div>
     @else
+    @php
+        $today     = \Carbon\Carbon::today();
+        $yesterday = \Carbon\Carbon::yesterday();
+        $grouped   = [];
+        foreach ($notifications as $notif) {
+            $date = $notif->created_at->startOfDay();
+            if ($date->isSameDay($today)) {
+                $key = 'Hari ini';
+            } elseif ($date->isSameDay($yesterday)) {
+                $key = 'Kemarin';
+            } else {
+                $key = $notif->created_at->diffForHumans(null, true) . ' lalu';
+            }
+            $grouped[$key][] = $notif;
+        }
+    @endphp
     <div class="list-group list-group-flush">
-        @foreach($notifications as $notif)
+        @foreach($grouped as $dateLabel => $groupNotifs)
+        {{-- Date separator --}}
+        <div class="sh-notif-date-sep px-4 py-2 d-flex align-items-center gap-2">
+            <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--sh-text-muted);">
+                {{ $dateLabel }}
+            </span>
+            <div style="flex: 1; height: 1px; background: var(--sh-gray-100);"></div>
+        </div>
+        @foreach($groupNotifs as $notif)
         <div class="list-group-item px-4 py-3 {{ !$notif->is_read ? 'sh-notif-unread' : '' }}" style="border-left: 4px solid {{ match($notif->type) {
             'cuti_disetujui' => 'var(--sh-success)',
             'cuti_ditolak' => 'var(--sh-danger)',
@@ -94,6 +118,7 @@
                 </div>
             </div>
         </div>
+        @endforeach
         @endforeach
     </div>
 

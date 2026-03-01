@@ -599,6 +599,49 @@ class LeaveRequestController extends Controller
         return $pdf->download("leave-summary-{$year}.pdf");
     }
 
+    /**
+     * Sprint 1 #2: Check if requested dates conflict with existing active leaves.
+     * Returns JSON: { conflict: bool, message: string? }
+     */
+    public function checkConflict(Request $request)
+    {
+        $user = Auth::user();
+        $start = $request->query('start');
+        $end   = $request->query('end');
+
+        if (!$start || !$end) {
+            return response()->json(['conflict' => false]);
+        }
+
+        $conflict = LeaveRequest::where('user_id', $user->id)
+            ->whereIn('status', [
+                LeaveRequest::STATUS_DIAJUKAN,
+                LeaveRequest::STATUS_PERTIMBANGAN,
+                LeaveRequest::STATUS_DISETUJUI,
+                LeaveRequest::STATUS_APPROVED,
+            ])
+            ->where(function ($q) use ($start, $end) {
+                $q->whereBetween('start_date', [$start, $end])
+                  ->orWhereBetween('end_date', [$start, $end])
+                  ->orWhere(function ($q2) use ($start, $end) {
+                      $q2->where('start_date', '<=', $start)
+                         ->where('end_date', '>=', $end);
+                  });
+            })
+            ->first();
+
+        if ($conflict) {
+            $startFmt = \Carbon\Carbon::parse($conflict->start_date)->format('d/m/Y');
+            $endFmt   = \Carbon\Carbon::parse($conflict->end_date)->format('d/m/Y');
+            return response()->json([
+                'conflict' => true,
+                'message'  => "Anda sudah memiliki pengajuan {$conflict->type_label} pada {$startFmt} – {$endFmt} (status: {$conflict->status}).",
+            ]);
+        }
+
+        return response()->json(['conflict' => false]);
+    }
+
     // ===== Private helpers =====
 
     private function addTypeSpecificRules(array &$rules, string $type): void

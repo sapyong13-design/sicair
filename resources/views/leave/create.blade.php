@@ -174,6 +174,14 @@
                         </div>
                     </div>
 
+                    {{-- Conflict Banner (#2) --}}
+                    <div class="d-none mb-3" id="conflict-banner">
+                        <div class="d-flex align-items-center gap-2 p-3" style="background: var(--sh-warning-light); border: 2px solid var(--sh-warning); border-radius: 12px;">
+                            <i class="ti ti-alert-triangle" style="color: var(--sh-warning); font-size: 1.2rem; flex-shrink: 0;"></i>
+                            <div style="font-size: 0.85rem; color: var(--sh-warning);" id="conflict-message"></div>
+                        </div>
+                    </div>
+
                     {{-- Duration preview --}}
                     <div class="d-none mb-4" id="duration-preview">
                         <div class="d-flex align-items-center gap-3 p-3" id="duration-box" style="border-radius: 12px; background: var(--sh-primary-light); border: 2px solid #bbf7d0;">
@@ -193,6 +201,11 @@
                         <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
                             <i class="ti ti-list me-1" style="color: var(--sh-warning);"></i>
                             Kategori Alasan Penting <span class="text-danger">*</span>
+                            <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                  title="Pilih kategori yang paling sesuai dengan alasan cuti Anda. Setiap kategori memiliki ketentuan berbeda."
+                                  style="cursor:help;">
+                                <i class="ti ti-info-circle" style="font-size:0.9rem;color:#94a3b8;"></i>
+                            </span>
                         </label>
                         <select name="alasan_cap" class="form-select @error('alasan_cap') is-invalid @enderror" required
                                 style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
@@ -255,7 +268,7 @@
                         </div>
                     </div>
 
-                    {{-- Dokumen Pendukung (for types that need it) --}}
+                    {{-- Dokumen Pendukung (for types that need it) — Drag & Drop (#10) --}}
                     @if(in_array($type, ['cuti_sakit', 'cuti_besar', 'cuti_alasan_penting']))
                     <div class="mb-4">
                         <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
@@ -265,11 +278,21 @@
                             <span class="text-danger">* (Surat Dokter)</span>
                             @endif
                         </label>
-                        <input type="file" name="dokumen_pendukung"
-                               class="form-control @error('dokumen_pendukung') is-invalid @enderror"
-                               accept=".pdf,.jpg,.jpeg,.png"
-                               style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
-                        @error('dokumen_pendukung') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <div id="drop-zone" style="border: 2px dashed #c4b5fd; border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: background 0.2s; position: relative;"
+                             ondragover="event.preventDefault(); this.style.background='var(--sh-primary-light)';"
+                             ondragleave="this.style.background=''"
+                             ondrop="handleFileDrop(event)">
+                            <i class="ti ti-upload" style="font-size: 2rem; color: #7c3aed; opacity: 0.6;"></i>
+                            <div style="font-size: 0.85rem; color: #64748b; margin-top: 0.4rem;">
+                                Seret & lepas file di sini, atau <strong style="color:#7c3aed;">klik untuk pilih</strong>
+                            </div>
+                            <div id="drop-file-name" style="font-size: 0.82rem; color: var(--sh-primary); margin-top: 0.25rem;"></div>
+                            <input type="file" name="dokumen_pendukung" id="dokumen-input"
+                                   class="@error('dokumen_pendukung') is-invalid @enderror"
+                                   accept=".pdf,.jpg,.jpeg,.png"
+                                   style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;">
+                        </div>
+                        @error('dokumen_pendukung') <div class="text-danger mt-1" style="font-size:0.82rem;">{{ $message }}</div> @enderror
                         <div class="form-hint mt-1" style="font-size: 0.78rem; color: #94a3b8;">
                             Format: PDF, JPG, PNG. Maks 5MB.
                             @if($type === 'cuti_sakit') Surat keterangan dokter wajib dilampirkan. @endif
@@ -283,6 +306,11 @@
                             <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
                                 <i class="ti ti-map-pin me-1" style="color: #64748b;"></i>
                                 Alamat Selama Cuti
+                                <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                      title="Alamat lengkap tempat Anda tinggal selama cuti — diperlukan untuk keperluan dinas darurat"
+                                      style="cursor:help;">
+                                    <i class="ti ti-info-circle" style="font-size:0.9rem;color:#94a3b8;"></i>
+                                </span>
                             </label>
                             <input type="text" name="alamat_cuti"
                                    class="form-control @error('alamat_cuti') is-invalid @enderror"
@@ -323,6 +351,38 @@
 
 @push('scripts')
 <script>
+// Sprint 9 #50: Initialize tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
+        new bootstrap.Tooltip(el);
+    });
+});
+
+// Sprint 2 #10: Handle drag & drop file upload
+function handleFileDrop(event) {
+    event.preventDefault();
+    var files = event.dataTransfer.files;
+    if (files.length > 0) {
+        var input = document.getElementById('dokumen-input');
+        if (input) {
+            // Create a new DataTransfer to set files on input
+            var dt = new DataTransfer();
+            dt.items.add(files[0]);
+            input.files = dt.files;
+            document.getElementById('drop-file-name').textContent = '✓ ' + files[0].name;
+            event.currentTarget.style.background = 'var(--sh-primary-light)';
+        }
+    }
+}
+var dokumenInput = document.getElementById('dokumen-input');
+if (dokumenInput) {
+    dokumenInput.addEventListener('change', function() {
+        var name = this.files[0] ? this.files[0].name : '';
+        var label = document.getElementById('drop-file-name');
+        if (label) label.textContent = name ? '✓ ' + name : '';
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const startDate = document.querySelector('input[name="start_date"]');
     const endDate = document.querySelector('input[name="end_date"]');
@@ -332,6 +392,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const iconBox = document.getElementById('duration-icon-box');
     const durationLabel = document.getElementById('duration-label');
     const durationSub = document.getElementById('duration-sub');
+    const conflictBanner = document.getElementById('conflict-banner');
+    const conflictMsg = document.getElementById('conflict-message');
     const submitBtn = document.querySelector('button[type="submit"]');
     const type = '{{ $type }}';
     const balance = {{ $type === 'cuti_tahunan' ? ($cutiInfo['sisa_cuti'] ?? $user->leave_balance) : 0 }};
@@ -356,6 +418,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Sprint 1 #2: Conflict check debounce
+    var conflictTimer = null;
+    function checkConflict(start, end) {
+        if (conflictTimer) clearTimeout(conflictTimer);
+        conflictTimer = setTimeout(function() {
+            fetch('/leave/check-conflict?start=' + start + '&end=' + end, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.conflict) {
+                    conflictBanner.classList.remove('d-none');
+                    conflictMsg.textContent = data.message;
+                } else {
+                    conflictBanner.classList.add('d-none');
+                }
+            })
+            .catch(function() { conflictBanner.classList.add('d-none'); });
+        }, 400);
+    }
+
     function calcDays() {
         if (startDate.value && endDate.value) {
             const start = new Date(startDate.value);
@@ -366,6 +449,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 daysLabel.textContent = diff;
                 preview.classList.remove('d-none');
                 isValid = true;
+
+                // Sprint 1 #2: Check conflict
+                checkConflict(startDate.value, endDate.value);
 
                 if (type === 'cuti_tahunan' && diff > balance) {
                     durationBox.style.background = 'var(--sh-danger-light)';
@@ -380,7 +466,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     iconBox.style.background = 'var(--sh-primary)';
                     durationLabel.style.color = 'var(--sh-primary)';
                     if (type === 'cuti_tahunan') {
-                        durationSub.innerHTML = 'Estimasi <strong>' + diff + '</strong> hari kalender &mdash; hari kerja dihitung otomatis oleh sistem';
+                        // Sprint 1 #1: Show sisa cuti after leave
+                        var sisaSetelah = balance - diff;
+                        var sisaColor = sisaSetelah < 0 ? 'var(--sh-danger)' : (sisaSetelah <= 3 ? 'var(--sh-warning)' : 'var(--sh-primary)');
+                        durationSub.innerHTML = 'Estimasi <strong>' + diff + '</strong> hari kalender &mdash; hari kerja dihitung otomatis &bull; <strong style="color:' + sisaColor + '">Sisa setelah: ' + sisaSetelah + ' hari</strong>';
                     } else {
                         durationSub.innerHTML = diff + ' hari kalender &mdash; hari kerja dihitung otomatis';
                     }
@@ -389,9 +478,11 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 preview.classList.add('d-none');
                 isValid = false;
+                conflictBanner.classList.add('d-none');
             }
         } else {
             isValid = false;
+            conflictBanner.classList.add('d-none');
         }
 
         // Update submit button state
@@ -465,6 +556,83 @@ document.addEventListener('DOMContentLoaded', function() {
         validateDates();
         calcDays();
     }
+
+    // Sprint 2 #9: Auto-save draft to localStorage
+    var draftKey = 'cuti_draft_{{ $type }}';
+    var draftBanner = null;
+
+    function saveDraft() {
+        var draft = {
+            start_date: startDate.value,
+            end_date: endDate.value,
+            reason: document.querySelector('[name="reason"]') ? document.querySelector('[name="reason"]').value : '',
+            alamat_cuti: document.querySelector('[name="alamat_cuti"]') ? document.querySelector('[name="alamat_cuti"]').value : '',
+            telepon_cuti: document.querySelector('[name="telepon_cuti"]') ? document.querySelector('[name="telepon_cuti"]').value : '',
+            timestamp: Date.now()
+        };
+        localStorage.setItem(draftKey, JSON.stringify(draft));
+    }
+
+    function loadDraft() {
+        var raw = localStorage.getItem(draftKey);
+        if (!raw) return;
+        try {
+            var draft = JSON.parse(raw);
+            var age = Date.now() - (draft.timestamp || 0);
+            if (age > 24 * 60 * 60 * 1000) { localStorage.removeItem(draftKey); return; }
+            // Only show banner if fields are empty (not pre-filled by old() or reapply)
+            if (!startDate.value && !endDate.value && draft.start_date) {
+                showDraftBanner(draft);
+            }
+        } catch(e) {}
+    }
+
+    function showDraftBanner(draft) {
+        var banner = document.createElement('div');
+        banner.className = 'mb-3';
+        banner.innerHTML = '<div class="d-flex align-items-center gap-2 p-3" style="background:var(--sh-primary-light);border:2px solid var(--sh-primary);border-radius:12px;">' +
+            '<i class="ti ti-restore" style="color:var(--sh-primary);font-size:1.2rem;flex-shrink:0;"></i>' +
+            '<div style="flex:1;font-size:0.85rem;color:var(--sh-primary);">' +
+            '<strong>Lanjutkan draft?</strong> Anda punya draft tersimpan untuk cuti ini.' +
+            '</div>' +
+            '<button type="button" class="btn btn-sm btn-outline-secondary" id="dismiss-draft" style="border-radius:8px;flex-shrink:0;">Abaikan</button>' +
+            '<button type="button" class="btn btn-sm sh-btn-primary ms-2" id="restore-draft" style="flex-shrink:0;">Lanjutkan</button>' +
+            '</div>';
+        var form = document.getElementById('leave-form');
+        form.insertBefore(banner, form.firstChild);
+        draftBanner = banner;
+
+        document.getElementById('restore-draft').addEventListener('click', function() {
+            if (draft.start_date) startDate.value = draft.start_date;
+            if (draft.end_date) endDate.value = draft.end_date;
+            if (draft.reason) { var ta = document.querySelector('[name="reason"]'); if (ta) ta.value = draft.reason; }
+            if (draft.alamat_cuti) { var al = document.querySelector('[name="alamat_cuti"]'); if (al) al.value = draft.alamat_cuti; }
+            if (draft.telepon_cuti) { var te = document.querySelector('[name="telepon_cuti"]'); if (te) te.value = draft.telepon_cuti; }
+            validateDates(); calcDays();
+            if (draftBanner) draftBanner.remove();
+        });
+        document.getElementById('dismiss-draft').addEventListener('click', function() {
+            localStorage.removeItem(draftKey);
+            if (draftBanner) draftBanner.remove();
+        });
+    }
+
+    // Auto-save on input
+    ['start_date', 'end_date', 'reason', 'alamat_cuti', 'telepon_cuti'].forEach(function(fieldName) {
+        var el = document.querySelector('[name="' + fieldName + '"]');
+        if (el) el.addEventListener('input', saveDraft);
+    });
+    [startDate, endDate].forEach(function(el) {
+        el.addEventListener('change', saveDraft);
+    });
+
+    // Clear draft on successful form submit
+    document.getElementById('leave-form').addEventListener('submit', function() {
+        localStorage.removeItem(draftKey);
+    });
+
+    // Load draft if no old() values
+    loadDraft();
 
     // Prevent double-submit: show loading state on submit
     document.getElementById('leave-form').addEventListener('submit', function() {

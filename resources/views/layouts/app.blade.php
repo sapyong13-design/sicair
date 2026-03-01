@@ -1330,6 +1330,84 @@
             font-weight: 700;
             animation: notifPulse 2s ease infinite;
         }
+
+        /* ===== Sprint 2 #6: Loading Skeleton ===== */
+        .sh-skeleton {
+            background: linear-gradient(90deg, var(--sh-gray-100) 25%, var(--sh-gray-50) 50%, var(--sh-gray-100) 75%);
+            background-size: 200% 100%;
+            animation: sh-shimmer 1.4s infinite;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        @keyframes sh-shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .sh-skeleton-row { height: 46px; width: 100%; margin-bottom: 0.5rem; border-radius: 8px; }
+        .sh-skeleton-text { height: 14px; width: 80%; margin-bottom: 0.4rem; border-radius: 4px; }
+        .sh-skeleton-avatar { width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; }
+
+        /* ===== Sprint 8 #43: High Contrast Mode ===== */
+        [data-contrast="high"] {
+            --sh-primary: #004d00 !important;
+            --sh-text: #000 !important;
+            --sh-text-muted: #333 !important;
+            --sh-border: #000 !important;
+            --sh-body-bg: #fff !important;
+            --sh-card-bg: #fff !important;
+            --sh-gray-50: #f0f0f0 !important;
+            --sh-gray-100: #e0e0e0 !important;
+        }
+        [data-contrast="high"] .card, [data-contrast="high"] .sh-card { border: 2px solid #000 !important; }
+        [data-contrast="high"] .btn-outline-secondary { border-color: #000 !important; color: #000 !important; }
+        [data-contrast="high"] .text-muted { color: #333 !important; }
+
+        /* ===== Sprint 8 #45: Focus Visible ===== */
+        :focus-visible {
+            outline: 2px solid var(--sh-primary) !important;
+            outline-offset: 2px !important;
+            border-radius: 4px;
+        }
+        .btn:focus-visible, a:focus-visible { box-shadow: 0 0 0 3px rgba(22,101,52,0.25) !important; }
+
+        /* ===== Sprint 8 #42: Font Size Adjuster ===== */
+        .sh-font-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: #fff;
+            border-radius: 6px;
+            padding: 0.2rem 0.4rem;
+            font-weight: 700;
+            cursor: pointer;
+            line-height: 1;
+            transition: background 0.15s;
+        }
+        .sh-font-btn:hover { background: rgba(255,255,255,0.3); }
+        .sh-font-size-group { display: flex; align-items: center; gap: 2px; }
+
+        /* ===== Sprint 9 #48: Export Progress Overlay ===== */
+        .sh-export-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .sh-export-overlay-inner {
+            background: var(--sh-card-bg); border-radius: 16px; padding: 1.5rem 2rem;
+            text-align: center; box-shadow: 0 16px 40px rgba(0,0,0,0.2);
+            min-width: 240px;
+        }
+
+        /* ===== Sprint 6 #35: Notification date separator ===== */
+        .sh-notif-date-sep {
+            text-align: center; font-size: 0.75rem; font-weight: 600;
+            color: var(--sh-text-muted); padding: 0.5rem 1rem;
+            position: relative;
+        }
+        .sh-notif-date-sep::before, .sh-notif-date-sep::after {
+            content: ''; position: absolute; top: 50%; width: 30%;
+            height: 1px; background: var(--sh-border);
+        }
+        .sh-notif-date-sep::before { left: 1rem; }
+        .sh-notif-date-sep::after { right: 1rem; }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -1352,6 +1430,22 @@
                 </span>
             </a>
             <div class="navbar-nav flex-row order-md-last align-items-center">
+                {{-- Sprint 8 #42: Font Size Adjuster --}}
+                <div class="nav-item me-1 d-none d-md-flex align-items-center">
+                    <div class="sh-font-size-group" title="Ukuran teks">
+                        <button class="sh-font-btn" id="fontSmall" aria-label="Perkecil teks" title="Perkecil teks" style="font-size:0.7rem;">A</button>
+                        <button class="sh-font-btn" id="fontNormal" aria-label="Ukuran normal" title="Ukuran normal" style="font-size:0.85rem;">A</button>
+                        <button class="sh-font-btn" id="fontLarge" aria-label="Perbesar teks" title="Perbesar teks" style="font-size:1rem;">A</button>
+                    </div>
+                </div>
+
+                {{-- Sprint 8 #43: High Contrast Toggle --}}
+                <div class="nav-item me-2 d-none d-md-flex align-items-center">
+                    <button class="sh-dark-toggle" id="contrastToggle" title="Toggle High Contrast" aria-label="Toggle mode kontras tinggi" style="font-size:0.85rem;">
+                        <i class="ti ti-contrast" id="contrastIcon" aria-hidden="true"></i>
+                    </button>
+                </div>
+
                 {{-- Dark Mode Toggle (#6, #7) --}}
                 <div class="nav-item me-2">
                     <button class="sh-dark-toggle" id="darkModeToggle" title="Toggle Dark Mode" aria-label="Toggle mode gelap/terang">
@@ -1520,7 +1614,7 @@
                         {{-- Admin: Dropdown Manajemen --}}
                         @if(Auth::user()->isAdmin())
                         @php
-                            $isManajemenActive = request()->is('pegawai*') || request()->is('hari-libur*') || request()->is('dinas-luar*') || request()->is('laporan-bulanan*') || request()->is('admin/*') || request()->is('balance-adjustments*') || request()->is('analytics*');
+                            $isManajemenActive = request()->is('pegawai*') || request()->is('hari-libur*') || request()->is('dinas-luar*') || request()->is('laporan-bulanan*') || request()->is('admin/*') || request()->is('balance-adjustments*') || request()->is('analytics*') || request()->is('laporan-saldo-cuti*');
                         @endphp
                         <li class="nav-item dropdown sh-nav-dropdown">
                             <a class="nav-link dropdown-toggle {{ $isManajemenActive ? 'active' : '' }}"
@@ -1550,6 +1644,9 @@
                                 </a>
                                 <a class="dropdown-item {{ request()->is('analytics*') ? 'active' : '' }}" href="{{ route('analytics.index') }}">
                                     <i class="ti ti-chart-bar"></i> Analytics Cuti
+                                </a>
+                                <a class="dropdown-item {{ request()->is('laporan-saldo-cuti*') ? 'active' : '' }}" href="{{ route('laporan-saldo-cuti.index') }}">
+                                    <i class="ti ti-report"></i> Laporan Saldo Cuti
                                 </a>
                                 <a class="dropdown-item {{ request()->is('admin/audit-logs*') ? 'active' : '' }}" href="{{ route('admin.audit-logs.index') }}">
                                     <i class="ti ti-clipboard-list"></i> Audit Log
@@ -1681,6 +1778,32 @@
         </button>
     </div>
     @endauth
+
+    {{-- Sprint 8 #44: Keyboard Shortcuts Modal --}}
+    <div class="modal fade" id="shKeyboardModal" tabindex="-1" aria-labelledby="shKeyboardModalLabel">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+            <div class="modal-content" style="border-radius: 16px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="shKeyboardModalLabel">
+                        <i class="ti ti-keyboard me-2" style="color:var(--sh-primary);"></i>
+                        Pintasan Keyboard
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-sm mb-0">
+                        <tbody>
+                            <tr><td><kbd>?</kbd></td><td>Tampilkan/sembunyikan daftar pintasan ini</td></tr>
+                            <tr><td><kbd>n</kbd></td><td>Ajukan Cuti baru</td></tr>
+                            <tr><td><kbd>k</kbd></td><td>Buka Kalender Cuti</td></tr>
+                            <tr><td><kbd>d</kbd></td><td>Kembali ke Dashboard</td></tr>
+                            <tr><td><kbd>Esc</kbd></td><td>Tutup modal/dialog yang sedang terbuka</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <footer class="sh-footer d-print-none mt-auto" role="contentinfo">
         <div class="container-xl">
@@ -1923,6 +2046,252 @@
             }
         });
     })();
+    </script>
+
+    {{-- Sprint 2 #8: Toast for deleted_info flash --}}
+    @if(session('deleted_info'))
+    <script>document.addEventListener('DOMContentLoaded', function() { shToast(@json(session('deleted_info')), 'success'); });</script>
+    @endif
+
+    {{-- Sprint 8 #42: Font Size Adjuster --}}
+    <script>
+    (function() {
+        var sizes = { small: '0.875rem', normal: '1rem', large: '1.125rem' };
+        var saved = localStorage.getItem('sh-font-size') || 'normal';
+        document.documentElement.style.fontSize = sizes[saved] || '1rem';
+
+        function setSize(key) {
+            document.documentElement.style.fontSize = sizes[key];
+            localStorage.setItem('sh-font-size', key);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var s = document.getElementById('fontSmall');
+            var n = document.getElementById('fontNormal');
+            var l = document.getElementById('fontLarge');
+            if (s) s.addEventListener('click', function() { setSize('small'); });
+            if (n) n.addEventListener('click', function() { setSize('normal'); });
+            if (l) l.addEventListener('click', function() { setSize('large'); });
+        });
+    })();
+    </script>
+
+    {{-- Sprint 8 #43: High Contrast Mode --}}
+    <script>
+    (function() {
+        if (localStorage.getItem('sh-contrast') === 'high') {
+            document.documentElement.setAttribute('data-contrast', 'high');
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            var btn = document.getElementById('contrastToggle');
+            var icon = document.getElementById('contrastIcon');
+            if (!btn) return;
+            function updateIcon() {
+                var isHigh = document.documentElement.getAttribute('data-contrast') === 'high';
+                if (icon) icon.className = isHigh ? 'ti ti-contrast-2' : 'ti ti-contrast';
+                btn.title = isHigh ? 'Mode Kontras Normal' : 'Mode Kontras Tinggi';
+            }
+            updateIcon();
+            btn.addEventListener('click', function() {
+                var isHigh = document.documentElement.getAttribute('data-contrast') === 'high';
+                if (isHigh) {
+                    document.documentElement.removeAttribute('data-contrast');
+                    localStorage.removeItem('sh-contrast');
+                } else {
+                    document.documentElement.setAttribute('data-contrast', 'high');
+                    localStorage.setItem('sh-contrast', 'high');
+                }
+                updateIcon();
+            });
+        });
+    })();
+    </script>
+
+    {{-- Sprint 8 #44: Keyboard Shortcuts --}}
+    <script>
+    document.addEventListener('keydown', function(e) {
+        // Skip if in input/textarea/select
+        if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+        if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+        if (e.key === '?') {
+            e.preventDefault();
+            var modal = document.getElementById('shKeyboardModal');
+            if (modal) {
+                var bsModal = bootstrap.Modal.getOrCreateInstance(modal);
+                bsModal.toggle();
+            }
+        }
+        if (e.key === 'n') {
+            e.preventDefault();
+            window.location.href = '/leave/select-type';
+        }
+        if (e.key === 'k') {
+            e.preventDefault();
+            window.location.href = '/kalender';
+        }
+        if (e.key === 'd') {
+            e.preventDefault();
+            window.location.href = '/dashboard';
+        }
+        if (e.key === 'Escape') {
+            // Close all open Bootstrap modals
+            document.querySelectorAll('.modal.show').forEach(function(el) {
+                var m = bootstrap.Modal.getInstance(el);
+                if (m) m.hide();
+            });
+        }
+    });
+    </script>
+
+    {{-- Sprint 6 #34: Favicon Badge Counter --}}
+    <script>
+    @auth
+    (function() {
+        var unread = {{ \App\Models\Notification::where('user_id', Auth::id())->where('is_read', false)->count() }};
+        if (unread <= 0) return;
+        var link = document.querySelector("link[rel='icon']");
+        if (!link) return;
+        var img = new Image();
+        img.onload = function() {
+            var canvas = document.createElement('canvas');
+            canvas.width = 32; canvas.height = 32;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, 32, 32);
+            ctx.fillStyle = '#dc2626';
+            ctx.beginPath();
+            ctx.arc(26, 6, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 8px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(unread > 9 ? '9+' : String(unread), 26, 6);
+            link.href = canvas.toDataURL();
+        };
+        img.src = link.href;
+    })();
+    @endauth
+    </script>
+
+    {{-- Sprint 6 #33: Browser Push Notification --}}
+    <script>
+    @auth
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+        var asked = localStorage.getItem('sh-push-asked');
+        if (asked) return;
+        // Ask for permission after 3s on first login
+        setTimeout(function() {
+            Notification.requestPermission().then(function(permission) {
+                localStorage.setItem('sh-push-asked', '1');
+                if (permission === 'granted') {
+                    var lastCount = {{ \App\Models\Notification::where('user_id', Auth::id())->where('is_read', false)->count() }};
+                    // Poll every 60 seconds for new notifications
+                    setInterval(function() {
+                        fetch('/notifications', { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+                        .then(function(r) { return r.json(); })
+                        .catch(function() { return null; })
+                        .then(function(data) {
+                            if (!data || typeof data.unread_count === 'undefined') return;
+                            if (data.unread_count > lastCount) {
+                                new Notification('SiHEALING', {
+                                    body: 'Ada ' + (data.unread_count - lastCount) + ' notifikasi baru.',
+                                    icon: '/images/favicon-pn.png'
+                                });
+                            }
+                            lastCount = data.unread_count;
+                        });
+                    }, 60000);
+                }
+            });
+        }, 3000);
+    });
+    @endauth
+    </script>
+
+    {{-- Sprint 6 #36: Sound Notification Toggle --}}
+    <script>
+    window.shPlayNotifSound = function() {
+        if (localStorage.getItem('sh-sound-notif') === 'off') return;
+        // Short beep using Web Audio API
+        try {
+            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.frequency.value = 880; osc.type = 'sine';
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.2);
+        } catch(e) {}
+    };
+    </script>
+
+    {{-- Sprint 9 #49: Onboarding Tour (lazy-load Intro.js) --}}
+    <script>
+    @auth
+    @if(!Auth::user()->isAdmin())
+    document.addEventListener('DOMContentLoaded', function() {
+        if (localStorage.getItem('sh_onboarding_done')) return;
+        // Lazy-load Intro.js only if needed
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/introjs.min.css';
+        document.head.appendChild(link);
+        var script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/intro.min.js';
+        script.onload = function() {
+            if (typeof introJs === 'undefined') return;
+            setTimeout(function() {
+                introJs().setOptions({
+                    steps: [
+                        { title: 'Selamat Datang! 👋', intro: 'Ini adalah SiHEALING — Sistem Informasi Cuti Pengadilan Negeri Natuna. Mari kita kenalkan fitur-fiturnya.' },
+                        { element: '.sh-navbar', title: 'Navigasi', intro: 'Gunakan menu di sini untuk berpindah halaman. Di mobile, ada navigasi bawah yang praktis.' },
+                        { element: '#main-content', title: 'Area Konten', intro: 'Di sini ditampilkan informasi dan fitur utama sesuai halaman yang sedang dibuka.' },
+                        { element: '.sh-qa-toggle', title: 'Aksi Cepat', intro: 'Tombol ini membuka panel aksi cepat — ajukan cuti, lihat kalender, dll.' },
+                        { element: 'body', title: 'Selesai!', intro: 'Anda siap menggunakan SiHEALING! Tekan ? kapan saja untuk melihat pintasan keyboard.' }
+                    ],
+                    nextLabel: 'Lanjut →',
+                    prevLabel: '← Kembali',
+                    doneLabel: 'Mulai!',
+                    showBullets: true,
+                    exitOnEsc: true,
+                    exitOnOverlayClick: false,
+                    disableInteraction: true,
+                }).oncomplete(function() {
+                    localStorage.setItem('sh_onboarding_done', '1');
+                }).onexit(function() {
+                    localStorage.setItem('sh_onboarding_done', '1');
+                }).start();
+            }, 800);
+        };
+        document.body.appendChild(script);
+    });
+    @endif
+    @endauth
+    </script>
+
+    {{-- Sprint 9 #48: Export Progress Overlay --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.sh-export-btn, a[href*="export"]').forEach(function(btn) {
+            if (btn.classList.contains('sh-no-overlay')) return;
+            btn.addEventListener('click', function(e) {
+                if (btn.tagName === 'A' && !btn.href.includes('export')) return;
+                var overlay = document.createElement('div');
+                overlay.className = 'sh-export-overlay';
+                overlay.innerHTML = '<div class="sh-export-overlay-inner">' +
+                    '<div class="spinner-border text-success mb-3" style="width:2.5rem;height:2.5rem;"></div>' +
+                    '<div class="fw-bold">Menyiapkan file...</div>' +
+                    '<div class="text-muted" style="font-size:0.82rem;">Mohon tunggu sebentar</div>' +
+                    '</div>';
+                document.body.appendChild(overlay);
+                setTimeout(function() { if (overlay.parentNode) overlay.remove(); }, 5000);
+            });
+        });
+    });
     </script>
 
     @stack('scripts')

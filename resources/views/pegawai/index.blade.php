@@ -22,7 +22,15 @@
                 Menampilkan <strong class="text-dark">{{ $pegawai->total() }}</strong> pegawai terdaftar
             </div>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
+            {{-- Sprint 5 #29: Export CSV --}}
+            <a href="{{ route('pegawai.export', request()->query()) }}" class="btn btn-outline-secondary sh-export-btn" style="border-radius:10px;">
+                <i class="ti ti-download me-1"></i> Export CSV
+            </a>
+            {{-- #30: Card/Table Toggle --}}
+            <button type="button" class="btn btn-outline-secondary" id="viewToggleBtn" style="border-radius:10px;" title="Ganti tampilan" onclick="togglePegawaiView()">
+                <i class="ti ti-layout-grid" id="viewToggleIcon"></i>
+            </button>
             {{-- #36 Import Excel --}}
             <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#importModal"
                 style="border-radius: 10px;">
@@ -80,12 +88,22 @@
                         <option value="pppk" {{ request('status_pegawai') === 'pppk' ? 'selected' : '' }}>PPPK</option>
                     </select>
                 </div>
-                <div class="col-12 col-md-3">
+                <div class="col-6 col-md-2">
+                    <label class="form-label" style="font-weight: 600; font-size: 0.8rem;">
+                        <i class="ti ti-toggle-right me-1" style="color: var(--sh-primary);"></i> Status
+                    </label>
+                    <select name="active" class="form-select" style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
+                        <option value="">Semua</option>
+                        <option value="1" {{ request('active') === '1' ? 'selected' : '' }}>Aktif</option>
+                        <option value="0" {{ request('active') === '0' ? 'selected' : '' }}>Non-Aktif</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-1">
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary sh-btn-primary flex-fill" style="height: 46px;">
-                            <i class="ti ti-search me-1"></i> Filter
+                            <i class="ti ti-search me-1"></i>
                         </button>
-                        @if(request()->hasAny(['search', 'role', 'status_pegawai']))
+                        @if(request()->hasAny(['search', 'role', 'status_pegawai', 'active']))
                         <a href="{{ route('pegawai.index') }}" class="btn btn-outline-secondary" style="border-radius: 10px; height: 46px; display: flex; align-items: center; justify-content: center;" title="Reset filter">
                             <i class="ti ti-x"></i>
                         </a>
@@ -97,8 +115,33 @@
     </div>
 </div>
 
+{{-- Sprint 5 #28: Bulk Action Form (hidden, submitted via JS) --}}
+<form method="POST" action="{{ route('pegawai.bulk-action') }}" id="bulkActionForm">
+    @csrf
+    <input type="hidden" name="action" id="bulkActionType">
+    <input type="hidden" name="unit_kerja" id="bulkUnitKerja">
+    {{-- Checkboxes submitted as ids[] via JS --}}
+</form>
+
+{{-- Sprint 5 #28: Floating Bulk Action Bar --}}
+<div id="bulkActionBar" class="d-none" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:1030;background:var(--sh-card-bg);border-radius:50px;padding:0.5rem 1rem;box-shadow:0 8px 32px rgba(0,0,0,0.2);border:2px solid var(--sh-primary);display:flex;align-items:center;gap:0.5rem;">
+    <span class="fw-semibold text-primary" style="font-size:0.85rem;" id="bulkSelectedCount">0 dipilih</span>
+    <button type="button" class="btn btn-sm btn-outline-secondary" style="border-radius:50px;" onclick="doBulkAction('reset-password')">
+        <i class="ti ti-key me-1"></i> Reset Password
+    </button>
+    <button type="button" class="btn btn-sm btn-outline-warning" style="border-radius:50px;" onclick="promptPindahUnit()">
+        <i class="ti ti-building me-1"></i> Pindah Unit
+    </button>
+    <button type="button" class="btn btn-sm btn-outline-danger" style="border-radius:50px;" onclick="doBulkAction('nonaktifkan')">
+        <i class="ti ti-user-off me-1"></i> Non-aktifkan
+    </button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" style="border-radius:50px;" onclick="clearBulk()">
+        <i class="ti ti-x"></i>
+    </button>
+</div>
+
 {{-- Data Table Card --}}
-<div class="card sh-card animate-in">
+<div class="card sh-card animate-in" id="pegawaiTableCard">
     <div class="card-header d-flex align-items-center justify-content-between">
         <h3 class="card-title mb-0">
             <i class="ti ti-list-details me-2" style="color: var(--sh-primary);"></i>
@@ -231,10 +274,11 @@
     </div>
 
     {{-- Desktop: Table --}}
-    <div class="table-responsive d-none d-md-block">
+    <div class="table-responsive d-none d-md-block" id="tableView">
         <table class="table sh-table mb-0">
             <thead>
                 <tr>
+                    <th style="width:36px;"><input type="checkbox" id="checkAll" style="cursor:pointer;" title="Pilih semua" onchange="toggleAllCheckboxes(this)"></th>
                     <th>Pegawai</th>
                     <th>Jabatan / Golongan</th>
                     <th>Role</th>
@@ -246,12 +290,17 @@
             </thead>
             <tbody>
             @foreach($pegawai as $p)
-                <tr>
+                <tr class="{{ ($p->is_active === false) ? 'opacity-50' : '' }}">
+                    <td><input type="checkbox" class="bulk-check" value="{{ $p->id }}" onchange="updateBulkBar()" style="cursor:pointer;"></td>
                     <td>
                         <div class="d-flex align-items-center gap-2">
+                            @if($p->photo)
+                            <img src="{{ Storage::url($p->photo) }}" alt="{{ $p->name }}" style="width:38px;height:38px;border-radius:10px;object-fit:cover;flex-shrink:0;">
+                            @else
                             <div class="sh-user-avatar" style="width: 38px; height: 38px; font-size: 0.75rem; background: var(--sh-primary-light); color: var(--sh-primary); border: none; border-radius: 10px;">
                                 {{ strtoupper(substr($p->name, 0, 2)) }}
                             </div>
+                            @endif
                             <div>
                                 <div class="fw-bold" style="font-size: 0.9rem;">{{ $p->name }}</div>
                                 <div class="text-muted" style="font-size: 0.75rem;">NIP: {{ $p->nip }}</div>
@@ -323,7 +372,7 @@
                         <span class="text-muted" style="font-size: 0.75rem;">hari</span>
                     </td>
                     <td class="text-end">
-                        <div class="d-flex gap-1 justify-content-end">
+                        <div class="d-flex gap-1 justify-content-end flex-wrap">
                             {{-- #38 Quick View --}}
                             <button class="btn btn-sm btn-outline-info sh-quick-view-btn" style="border-radius: 8px;"
                                 title="Lihat riwayat cuti {{ $p->name }}"
@@ -331,16 +380,23 @@
                                 data-pegawai-name="{{ $p->name }}">
                                 <i class="ti ti-history" aria-hidden="true"></i>
                             </button>
-                            <a href="{{ route('pegawai.show', $p) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 8px;" title="Detail {{ $p->name }}" aria-label="Lihat detail {{ $p->name }}">
+                            <a href="{{ route('pegawai.show', $p) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 8px;" title="Detail {{ $p->name }}">
                                 <i class="ti ti-eye" aria-hidden="true"></i>
                             </a>
-                            <a href="{{ route('pegawai.edit', $p) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;" title="Edit {{ $p->name }}" aria-label="Edit data {{ $p->name }}">
+                            <a href="{{ route('pegawai.edit', $p) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;" title="Edit {{ $p->name }}">
                                 <i class="ti ti-edit" aria-hidden="true"></i>
                             </a>
-                            <a href="{{ route('balance-adjustment.create', $p) }}" class="btn btn-sm btn-outline-warning" style="border-radius: 8px;" title="Ubah saldo cuti {{ $p->name }}" aria-label="Ubah saldo cuti {{ $p->name }}">
+                            <a href="{{ route('balance-adjustment.create', $p) }}" class="btn btn-sm btn-outline-warning" style="border-radius: 8px;" title="Ubah saldo cuti">
                                 <i class="ti ti-calendar-stats" aria-hidden="true"></i>
                             </a>
-                            <button class="btn btn-sm btn-outline-danger" style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $p->id }}" title="Hapus {{ $p->name }}" aria-label="Hapus {{ $p->name }}">
+                            {{-- Sprint 5 #32: Toggle Active --}}
+                            <form method="POST" action="{{ route('pegawai.toggle-active', $p) }}" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-sm {{ ($p->is_active ?? true) ? 'btn-outline-secondary' : 'btn-outline-success' }}" style="border-radius:8px;" title="{{ ($p->is_active ?? true) ? 'Non-aktifkan' : 'Aktifkan' }}">
+                                    <i class="ti {{ ($p->is_active ?? true) ? 'ti-user-off' : 'ti-user-check' }}" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                            <button class="btn btn-sm btn-outline-danger" style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $p->id }}" title="Hapus {{ $p->name }}">
                                 <i class="ti ti-trash" aria-hidden="true"></i>
                             </button>
                         </div>
@@ -430,8 +486,133 @@
     </div>
 </div>
 
+{{-- Sprint 5 #30: Card View --}}
+<div class="d-none" id="cardView">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mb-3">
+        @foreach($pegawai as $p)
+        <div class="col">
+            <div class="card sh-card h-100 {{ ($p->is_active === false) ? 'opacity-50' : '' }}">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        @if($p->photo)
+                        <img src="{{ Storage::url($p->photo) }}" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+                        @else
+                        <div class="sh-user-avatar" style="width:48px;height:48px;font-size:0.9rem;background:var(--sh-primary-light);color:var(--sh-primary);border:none;border-radius:50%;flex-shrink:0;">{{ strtoupper(substr($p->name,0,2)) }}</div>
+                        @endif
+                        <div>
+                            <div class="fw-bold" style="font-size:0.95rem;">{{ $p->name }}</div>
+                            <div class="text-muted" style="font-size:0.75rem;">{{ $p->nip }}</div>
+                        </div>
+                    </div>
+                    <div style="font-size:0.82rem;" class="mb-2">
+                        <div>{{ $p->jabatan ?? '-' }} &bull; {{ $p->unit_kerja ?? '-' }}</div>
+                        <div class="text-muted">Sisa Cuti: <strong style="color:var(--sh-primary);">{{ $p->leave_balance }}h</strong></div>
+                    </div>
+                    <div class="d-flex gap-1 flex-wrap">
+                        <a href="{{ route('pegawai.show', $p) }}" class="btn btn-sm btn-outline-primary" style="border-radius:8px;font-size:0.78rem;">
+                            <i class="ti ti-eye me-1"></i> Detail
+                        </a>
+                        <a href="{{ route('pegawai.edit', $p) }}" class="btn btn-sm btn-outline-secondary" style="border-radius:8px;font-size:0.78rem;">
+                            <i class="ti ti-edit me-1"></i> Edit
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+</div>
+
 @push('scripts')
 <script>
+// Sprint 2 #7: NIP confirmation for delete
+function checkNipConfirm(id, expectedNip) {
+    var input = document.getElementById('nipConfirm' + id);
+    var btn = document.getElementById('deleteBtn' + id);
+    if (!input || !btn) return;
+    var match = input.value.trim() === expectedNip.trim();
+    btn.disabled = !match;
+    btn.style.opacity = match ? '1' : '0.5';
+}
+
+// Sprint 5 #28: Bulk action handlers
+var selectedIds = [];
+function updateBulkBar() {
+    var checks = document.querySelectorAll('.bulk-check:checked');
+    selectedIds = Array.from(checks).map(function(c) { return c.value; });
+    var bar = document.getElementById('bulkActionBar');
+    var cnt = document.getElementById('bulkSelectedCount');
+    if (selectedIds.length > 0) {
+        bar.classList.remove('d-none');
+        bar.style.display = 'flex';
+        cnt.textContent = selectedIds.length + ' dipilih';
+    } else {
+        bar.classList.add('d-none');
+    }
+}
+function clearBulk() {
+    document.querySelectorAll('.bulk-check').forEach(function(c) { c.checked = false; });
+    var ca = document.getElementById('checkAll'); if (ca) ca.checked = false;
+    updateBulkBar();
+}
+function toggleAllCheckboxes(master) {
+    document.querySelectorAll('.bulk-check').forEach(function(c) { c.checked = master.checked; });
+    updateBulkBar();
+}
+function doBulkAction(action) {
+    if (selectedIds.length === 0) return;
+    if (!confirm('Lakukan aksi "' + action + '" untuk ' + selectedIds.length + ' pegawai?')) return;
+    var form = document.getElementById('bulkActionForm');
+    document.getElementById('bulkActionType').value = action;
+    // Add hidden id inputs
+    form.querySelectorAll('input[name="ids[]"]').forEach(function(el) { el.remove(); });
+    selectedIds.forEach(function(id) {
+        var inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = id;
+        form.appendChild(inp);
+    });
+    form.submit();
+}
+function promptPindahUnit() {
+    var unit = prompt('Masukkan nama unit kerja tujuan:');
+    if (!unit) return;
+    document.getElementById('bulkUnitKerja').value = unit;
+    doBulkAction('pindah-unit');
+}
+
+// Sprint 5 #30: Card/Table View Toggle
+function togglePegawaiView() {
+    var tableView = document.getElementById('tableView');
+    var cardView = document.getElementById('cardView');
+    var icon = document.getElementById('viewToggleIcon');
+    var tableCard = document.getElementById('pegawaiTableCard');
+    var isCard = localStorage.getItem('sh-pegawai-view') === 'card';
+    if (isCard) {
+        // Switch to table
+        if (tableView) tableView.classList.remove('d-none');
+        if (cardView) cardView.classList.add('d-none');
+        if (icon) icon.className = 'ti ti-layout-grid';
+        localStorage.setItem('sh-pegawai-view', 'table');
+    } else {
+        // Switch to card
+        if (tableView) tableView.classList.add('d-none');
+        if (cardView) { cardView.classList.remove('d-none'); cardView.style.display = 'block'; }
+        if (icon) icon.className = 'ti ti-layout-list';
+        localStorage.setItem('sh-pegawai-view', 'card');
+    }
+}
+// Apply saved view preference on load
+document.addEventListener('DOMContentLoaded', function() {
+    if (localStorage.getItem('sh-pegawai-view') === 'card') {
+        var tableView = document.getElementById('tableView');
+        var cardView = document.getElementById('cardView');
+        var icon = document.getElementById('viewToggleIcon');
+        if (tableView) tableView.classList.add('d-none');
+        if (cardView) { cardView.classList.remove('d-none'); cardView.style.display = 'block'; }
+        if (icon) icon.className = 'ti ti-layout-list';
+    }
+});
+
 // #38 Quick View Riwayat Cuti
 document.querySelectorAll('.sh-quick-view-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -473,10 +654,11 @@ document.querySelectorAll('.sh-quick-view-btn').forEach(function(btn) {
 @endpush
 
 @foreach($pegawai as $p)
+{{-- Sprint 2 #7: Typed NIP confirmation delete modal --}}
 <div class="modal modal-blur fade" id="deleteModal{{ $p->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $p->id }}" aria-modal="true" role="dialog">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
         <div class="modal-content" style="border-radius: 16px; border: none; overflow: hidden;">
-            <form method="POST" action="{{ route('pegawai.destroy', $p) }}">
+            <form method="POST" action="{{ route('pegawai.destroy', $p) }}" id="deleteForm{{ $p->id }}">
                 @csrf
                 @method('DELETE')
                 <div class="modal-body p-4 text-center">
@@ -484,21 +666,24 @@ document.querySelectorAll('.sh-quick-view-btn').forEach(function(btn) {
                         <i class="ti ti-alert-triangle" style="font-size: 2rem; color: var(--sh-danger);"></i>
                     </div>
                     <h3 class="fw-bold mb-1" id="deleteModalLabel{{ $p->id }}">Hapus Pegawai?</h3>
-                    <p class="text-muted mb-1">
-                        Anda yakin ingin menghapus data pegawai:
-                    </p>
-                    <p class="mb-0">
+                    <p class="text-muted mb-1">Konfirmasi hapus dengan mengetik NIP pegawai:</p>
+                    <p class="mb-3">
                         <strong class="text-dark">{{ $p->name }}</strong><br>
-                        <span class="text-muted" style="font-size: 0.85rem;">NIP: {{ $p->nip }}</span>
+                        <code style="font-size:0.85rem;">NIP: {{ $p->nip }}</code>
                     </p>
-                    <div class="alert mt-3 mb-0" style="background: var(--sh-danger-light); border: none; border-radius: 10px; color: var(--sh-danger); font-size: 0.85rem;">
+                    <input type="text" class="form-control text-center mb-3"
+                           placeholder="Ketik NIP untuk konfirmasi..."
+                           id="nipConfirm{{ $p->id }}"
+                           oninput="checkNipConfirm('{{ $p->id }}', '{{ $p->nip }}')"
+                           style="border-radius:10px;border:2px solid #e2e8f0;">
+                    <div class="alert" style="background: var(--sh-danger-light); border: none; border-radius: 10px; color: var(--sh-danger); font-size: 0.82rem; text-align:left;">
                         <i class="ti ti-alert-circle me-1"></i>
                         Tindakan ini tidak dapat dibatalkan. Semua data terkait pegawai ini akan ikut terhapus.
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0 px-4 pb-4" style="justify-content: center; gap: 0.5rem;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; min-width: 100px;">Batal</button>
-                    <button type="submit" class="btn sh-btn-danger" style="min-width: 100px;">
+                    <button type="submit" class="btn sh-btn-danger" id="deleteBtn{{ $p->id }}" disabled style="min-width: 100px; opacity:0.5;">
                         <i class="ti ti-trash me-1"></i> Hapus
                     </button>
                 </div>

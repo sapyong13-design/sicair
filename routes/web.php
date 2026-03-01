@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminLeaveController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AmendmentController;
+use App\Http\Controllers\LaporanSaldoCutiController;
 use App\Http\Controllers\AppealController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
@@ -50,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/kalender/export-ics', [KalenderController::class, 'exportIcs'])->name('kalender.export-ics');
 
     // === Pengajuan Cuti (semua pegawai termasuk atasan/ketua) ===
+    Route::get('/leave/check-conflict', [LeaveRequestController::class, 'checkConflict'])->name('leave.check-conflict');
     Route::get('/leave/select-type', [LeaveRequestController::class, 'selectType'])->name('leave.select-type');
     Route::get('/leave/create', [LeaveRequestController::class, 'create'])->name('leave.create');
     Route::post('/leave', [LeaveRequestController::class, 'store'])->name('leave.store');
@@ -114,12 +116,17 @@ Route::middleware('auth')->group(function () {
     // === Manajemen Pegawai (admin only) ===
     Route::middleware('role:admin')->prefix('pegawai')->name('pegawai.')->group(function () {
         Route::get('/', [PegawaiController::class, 'index'])->name('index');
+        Route::get('/export', [PegawaiController::class, 'export'])->name('export');           // Sprint 5 #29
+        Route::post('/bulk-action', [PegawaiController::class, 'bulkAction'])->name('bulk-action'); // Sprint 5 #28
         Route::get('/import-template', [PegawaiController::class, 'importTemplate'])->name('import-template');
         Route::post('/import', [PegawaiController::class, 'import'])->name('import');
         Route::get('/create', [PegawaiController::class, 'create'])->name('create');
         Route::post('/', [PegawaiController::class, 'store'])->name('store');
         Route::get('/{pegawai}/riwayat-cuti', [PegawaiController::class, 'riwayatCuti'])->name('riwayat-cuti');
         Route::post('/{pegawai}/saldo-cuti/{year}', [PegawaiController::class, 'updateSaldoCuti'])->name('saldo-cuti');
+        Route::patch('/{pegawai}/inline', [PegawaiController::class, 'inlineEdit'])->name('inline');    // Sprint 5 #31
+        Route::post('/{pegawai}/upload-photo', [PegawaiController::class, 'uploadPhoto'])->name('upload-photo'); // Sprint 5 #27
+        Route::post('/{pegawai}/toggle-active', [PegawaiController::class, 'toggleActive'])->name('toggle-active'); // Sprint 5 #32
         Route::get('/{pegawai}', [PegawaiController::class, 'show'])->name('show');
         Route::get('/{pegawai}/edit', [PegawaiController::class, 'edit'])->name('edit');
         Route::put('/{pegawai}', [PegawaiController::class, 'update'])->name('update');
@@ -195,6 +202,13 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->prefix('analytics')->name('analytics.')->group(function () {
         Route::get('/', [AnalyticsController::class, 'index'])->name('index');
         Route::get('/export-annual', [AnalyticsController::class, 'exportAnnual'])->name('export-annual');
+        Route::get('/export-pdf', [AnalyticsController::class, 'exportPdf'])->name('export-pdf'); // Sprint 7 #40
+    });
+
+    // === Laporan Saldo Cuti (Sprint 7 #37) ===
+    Route::middleware('role:admin')->prefix('laporan-saldo-cuti')->name('laporan-saldo-cuti.')->group(function () {
+        Route::get('/', [LaporanSaldoCutiController::class, 'index'])->name('index');
+        Route::get('/export', [LaporanSaldoCutiController::class, 'export'])->name('export');
     });
 
     // FIX #3: Debug endpoint removed — was publicly accessible and leaked user data

@@ -35,6 +35,29 @@
                 </select>
             </form>
             @endif
+            {{-- #26 Filter per Pegawai --}}
+            @php $leaveUsers = $leaves->pluck('user')->unique('id')->filter(); @endphp
+            @if($leaveUsers->isNotEmpty())
+            <select id="calPegawaiFilter" class="form-select form-select-sm" style="border-radius: 8px; width: auto; font-size: 0.82rem;" onchange="filterCalPegawai(this.value)" title="Filter per pegawai">
+                <option value="">Semua Pegawai</option>
+                @foreach($leaveUsers as $pu)
+                <option value="{{ $pu->id }}">{{ $pu->name }}</option>
+                @endforeach
+            </select>
+            @endif
+            {{-- #22 View toggle --}}
+            <div class="btn-group btn-group-sm d-none d-md-flex" style="border-radius: 8px; overflow: hidden;">
+                <button type="button" id="btnMonthView" class="btn btn-primary" onclick="setCalView('month')" title="Tampilan bulan">
+                    <i class="ti ti-calendar-month"></i>
+                </button>
+                <button type="button" id="btnWeekView" class="btn btn-outline-secondary" onclick="setCalView('week')" title="Tampilan minggu">
+                    <i class="ti ti-calendar-week"></i>
+                </button>
+            </div>
+            {{-- #25 Print --}}
+            <button type="button" class="btn btn-sm btn-outline-secondary d-print-none" onclick="window.print()" style="border-radius: 8px; font-size: 0.82rem;" title="Cetak kalender">
+                <i class="ti ti-printer"></i>
+            </button>
             {{-- #31 Export iCal --}}
             <a href="{{ route('kalender.export-ics', ['year' => $year]) }}"
                class="btn btn-sm btn-outline-secondary"
@@ -148,8 +171,20 @@
             }
         @endphp
 
+        @php
+        // #23 Color map per leave type
+        $leaveTypeColors = [
+            'cuti_tahunan'         => ['bg' => 'rgba(22,101,52,0.85)',   'text' => '#fff'],
+            'cuti_sakit'           => ['bg' => 'rgba(220,38,38,0.8)',    'text' => '#fff'],
+            'cuti_melahirkan'      => ['bg' => 'rgba(219,39,119,0.8)',   'text' => '#fff'],
+            'cuti_alasan_penting'  => ['bg' => 'rgba(202,138,4,0.85)',   'text' => '#fff'],
+            'cuti_besar'           => ['bg' => 'rgba(124,58,237,0.8)',   'text' => '#fff'],
+            'cuti_luar_tanggungan' => ['bg' => 'rgba(100,116,139,0.8)',  'text' => '#fff'],
+        ];
+        $defaultLeaveColor = ['bg' => 'rgba(22,101,52,0.75)', 'text' => '#fff'];
+        @endphp
         {{-- Desktop Calendar --}}
-        <div class="d-none d-md-block">
+        <div id="monthView" class="d-none d-md-block">
             <table class="table table-bordered mb-0" style="table-layout: fixed;">
                 <thead>
                     <tr>
@@ -211,7 +246,18 @@
                                         {{-- Leave events (max 2 shown) --}}
                                         @php $shownSlots = 0; @endphp
                                         @foreach(array_slice($dayLeaves, 0, 2) as $lv)
-                                        <div class="sh-cal-event sh-cal-leave" title="{{ $lv->user->name }} — {{ $lv->type_label }}">
+                                        @php
+                                            $lvColor = $leaveTypeColors[$lv->type] ?? $defaultLeaveColor;
+                                        @endphp
+                                        <div class="sh-cal-event sh-cal-leave"
+                                             data-user-id="{{ $lv->user_id }}"
+                                             data-leave-name="{{ $lv->user->name }}"
+                                             data-leave-type="{{ $lv->type_label }}"
+                                             data-leave-start="{{ $lv->start_date->format('d M Y') }}"
+                                             data-leave-end="{{ $lv->end_date->format('d M Y') }}"
+                                             data-leave-days="{{ $lv->total_hari_kerja ?? '—' }}"
+                                             style="background: {{ $lvColor['bg'] }}; color: {{ $lvColor['text'] }};"
+                                             title="{{ $lv->user->name }} — {{ $lv->type_label }}">
                                             {{ Str::limit($lv->user->name, 12) }}
                                         </div>
                                         @php $shownSlots++; @endphp
@@ -245,6 +291,86 @@
                     @endfor
                 </tbody>
             </table>
+        </div>
+
+        {{-- #22 Week View --}}
+        @php
+            // Determine current week (Mon-Sun containing today if this is current month, else first week)
+            $todayDate = \Carbon\Carbon::today();
+            $isCurrMonth = ($todayDate->year == $year && $todayDate->month == $month);
+            $weekAnchor  = $isCurrMonth ? $todayDate->copy()->startOfWeek(\Carbon\Carbon::MONDAY) : \Carbon\Carbon::create($year, $month, 1)->startOfWeek(\Carbon\Carbon::MONDAY);
+            // Clamp to month
+            $weekStart = $weekAnchor->copy()->max(\Carbon\Carbon::create($year, $month, 1));
+            $weekEnd   = $weekAnchor->copy()->endOfWeek(\Carbon\Carbon::SUNDAY)->min(\Carbon\Carbon::create($year, $month, 1)->endOfMonth());
+        @endphp
+        <div id="weekView" style="display: none;">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="fw-semibold" style="font-size:0.88rem; color:var(--sh-text);">
+                    <i class="ti ti-calendar-week me-1" style="color:var(--sh-primary);"></i>
+                    Minggu {{ $weekStart->format('d') }}–{{ $weekEnd->format('d M Y') }}
+                </span>
+                <span class="text-muted" style="font-size:0.8rem;">(gunakan navigasi bulan untuk berpindah minggu)</span>
+            </div>
+            <div class="table-responsive">
+            <table class="table table-bordered mb-0" style="table-layout: fixed; min-width: 600px;">
+                <thead>
+                    <tr>
+                        @for($wi = 0; $wi < 7; $wi++)
+                        @php
+                            $wd = $weekAnchor->copy()->addDays($wi);
+                            $isWkend = $wd->dayOfWeek === 0 || $wd->dayOfWeek === 6;
+                        @endphp
+                        <th class="text-center py-2" style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: var(--sh-gray-50); color: {{ $isWkend ? 'var(--sh-danger)' : '#64748b' }};">
+                            {{ $wd->isoFormat('ddd') }}<br>
+                            <span style="font-size: 1rem; font-weight: 800; {{ $wd->isToday() ? 'color: var(--sh-primary);' : '' }}">{{ $wd->day }}</span>
+                        </th>
+                        @endfor
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        @for($wi = 0; $wi < 7; $wi++)
+                        @php
+                            $wd = $weekAnchor->copy()->addDays($wi);
+                            $wdStr = $wd->format('Y-m-d');
+                            $holiday = $wd->month == $month ? ($holidayMap[$wd->day] ?? null) : null;
+                            $wdLeaves = $wd->month == $month ? ($leaveMap[$wd->day] ?? []) : [];
+                            $wdDinas  = $wd->month == $month ? ($dinasLuarMap[$wd->day] ?? []) : [];
+                            $isOut = $wd->month != $month;
+                        @endphp
+                        <td style="vertical-align: top; min-height: 120px; padding: 0.4rem; {{ $wd->isToday() ? 'background: var(--sh-primary-light);' : ($isOut ? 'background: var(--sh-gray-50);' : '') }}">
+                            @if(!$isOut)
+                            @if($holiday)
+                            <div class="sh-cal-event {{ $holiday->is_cuti_bersama ? 'sh-cal-cuti-bersama' : 'sh-cal-holiday' }}">
+                                {{ Str::limit($holiday->keterangan, 16) }}
+                            </div>
+                            @endif
+                            @foreach($wdLeaves as $lv)
+                            @php $lvColor = $leaveTypeColors[$lv->type] ?? $defaultLeaveColor; @endphp
+                            <div class="sh-cal-event sh-cal-leave"
+                                 data-user-id="{{ $lv->user_id }}"
+                                 data-leave-name="{{ $lv->user->name }}"
+                                 data-leave-type="{{ $lv->type_label }}"
+                                 data-leave-start="{{ $lv->start_date->format('d M Y') }}"
+                                 data-leave-end="{{ $lv->end_date->format('d M Y') }}"
+                                 data-leave-days="{{ $lv->total_hari_kerja ?? '—' }}"
+                                 style="background: {{ $lvColor['bg'] }}; color: {{ $lvColor['text'] }};">
+                                {{ Str::limit($lv->user->name, 10) }}
+                            </div>
+                            @endforeach
+                            @foreach($wdDinas as $dl)
+                            <div class="sh-cal-event sh-cal-dinas-luar" title="{{ $dl->user->name }} — Dinas Luar">
+                                <i class="ti ti-briefcase" style="font-size:0.6rem;"></i>
+                                {{ Str::limit($dl->user->name, 10) }}
+                            </div>
+                            @endforeach
+                            @endif
+                        </td>
+                        @endfor
+                    </tr>
+                </tbody>
+            </table>
+            </div>
         </div>
 
         {{-- Mobile Calendar --}}
@@ -347,9 +473,26 @@
                 <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-primary);"></span>
                 Hari Ini
             </div>
+            {{-- #23 Color coding per jenis cuti --}}
             <div class="d-flex align-items-center gap-1">
-                <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-success);"></span>
-                Cuti Disetujui
+                <span style="width: 12px; height: 12px; border-radius: 3px; background: rgba(22,101,52,0.85);"></span>
+                Cuti Tahunan
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <span style="width: 12px; height: 12px; border-radius: 3px; background: rgba(220,38,38,0.8);"></span>
+                Cuti Sakit
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <span style="width: 12px; height: 12px; border-radius: 3px; background: rgba(219,39,119,0.8);"></span>
+                Melahirkan
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <span style="width: 12px; height: 12px; border-radius: 3px; background: rgba(202,138,4,0.85);"></span>
+                Alasan Penting
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <span style="width: 12px; height: 12px; border-radius: 3px; background: rgba(124,58,237,0.8);"></span>
+                Cuti Besar
             </div>
             <div class="d-flex align-items-center gap-1">
                 <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-cal-cb-event-bg); border-left: 3px solid var(--sh-cal-cb-border);"></span>
@@ -357,17 +500,13 @@
             </div>
             <div class="d-flex align-items-center gap-1">
                 <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-danger);"></span>
-                Hari Libur Nasional
+                Hari Libur
             </div>
             <div class="d-flex align-items-center gap-1">
                 <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-cal-dinas-bg); border-left: 3px solid #ea580c;"></span>
                 Dinas Luar
             </div>
-            <div class="d-flex align-items-center gap-1">
-                <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-cal-holiday-bg); border: 1px solid var(--sh-danger);"></span>
-                Weekend / Libur
-            </div>
-            <div class="d-flex align-items-center gap-1 ms-auto text-muted">
+            <div class="d-flex align-items-center gap-1 ms-auto text-muted d-print-none">
                 <i class="ti ti-hand-click" style="font-size: 0.8rem;"></i>
                 Klik tanggal untuk detail
             </div>
@@ -515,6 +654,37 @@
 </div>
 
 @push('scripts')
+<style>
+/* #25 Print styles */
+@media print {
+    .sh-page-header .d-flex > :not(:first-child) { display: none !important; }
+    .sh-breadcrumb, .sh-navbar, .sh-sidebar, .sh-mobile-nav,
+    #dayDetailModal, .d-print-none { display: none !important; }
+    #weekView { display: none !important; }
+    #monthView { display: block !important; }
+    body { font-size: 10pt; }
+    .card { box-shadow: none !important; border: 1px solid #ccc !important; }
+    @page { size: landscape; margin: 1cm; }
+}
+/* #24 Hover tooltip */
+.sh-cal-tooltip {
+    position: fixed;
+    z-index: 9999;
+    background: var(--bs-body-bg, #fff);
+    border: 1px solid var(--sh-gray-100);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    padding: 0.55rem 0.75rem;
+    font-size: 0.78rem;
+    max-width: 220px;
+    pointer-events: none;
+    transition: opacity 0.15s;
+}
+.sh-cal-tooltip .tt-name { font-weight: 700; color: var(--sh-text); margin-bottom: 2px; }
+.sh-cal-tooltip .tt-type { margin-bottom: 2px; }
+.sh-cal-tooltip .tt-date { color: var(--sh-text-muted); }
+</style>
+<div id="calTooltip" class="sh-cal-tooltip" style="display:none;opacity:0;"></div>
 <script>
 const LEAVES_FOR_DAY_URL = '{{ route("kalender.leaves-for-day") }}';
 const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
@@ -662,6 +832,98 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('[data-bs-toggle="tooltip"]')
         .forEach(el => new bootstrap.Tooltip(el));
 });
+
+// #22 View toggle (month / week)
+function setCalView(mode) {
+    const monthEl = document.getElementById('monthView');
+    const weekEl  = document.getElementById('weekView');
+    const btnM    = document.getElementById('btnMonthView');
+    const btnW    = document.getElementById('btnWeekView');
+    if (!monthEl || !weekEl) return;
+    if (mode === 'week') {
+        monthEl.style.display = 'none';
+        weekEl.style.display  = 'block';
+        btnM && btnM.classList.replace('btn-primary', 'btn-outline-secondary');
+        btnW && btnW.classList.replace('btn-outline-secondary', 'btn-primary');
+        localStorage.setItem('sh_cal_view', 'week');
+    } else {
+        monthEl.style.display = '';
+        weekEl.style.display  = 'none';
+        btnM && btnM.classList.replace('btn-outline-secondary', 'btn-primary');
+        btnW && btnW.classList.replace('btn-primary', 'btn-outline-secondary');
+        localStorage.setItem('sh_cal_view', 'month');
+    }
+}
+// Restore saved view
+(function() {
+    const saved = localStorage.getItem('sh_cal_view');
+    if (saved === 'week') setCalView('week');
+})();
+
+// #26 Filter per pegawai
+function filterCalPegawai(userId) {
+    document.querySelectorAll('.sh-cal-leave').forEach(function(el) {
+        if (!userId) {
+            el.style.display = '';
+        } else {
+            el.style.display = el.dataset.userId == userId ? '' : 'none';
+        }
+    });
+}
+
+// #24 Hover tooltip
+(function() {
+    const tooltip = document.getElementById('calTooltip');
+    if (!tooltip) return;
+
+    function showTooltip(el, e) {
+        const name  = el.dataset.leaveName  || '';
+        const type  = el.dataset.leaveType  || '';
+        const start = el.dataset.leaveStart || '';
+        const end   = el.dataset.leaveEnd   || '';
+        const days  = el.dataset.leaveDays  || '';
+        if (!name) return;
+        tooltip.innerHTML = `
+            <div class="tt-name">${escHtml(name)}</div>
+            <div class="tt-type">${escHtml(type)}</div>
+            <div class="tt-date"><i class="ti ti-calendar me-1"></i>${escHtml(start)} – ${escHtml(end)}</div>
+            ${days !== '—' && days ? `<div class="tt-date"><i class="ti ti-clock me-1"></i>${escHtml(days)} hari kerja</div>` : ''}
+        `;
+        tooltip.style.display = 'block';
+        posTooltip(e);
+        setTimeout(() => { tooltip.style.opacity = '1'; }, 10);
+    }
+
+    function posTooltip(e) {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        let x = e.clientX + 14;
+        let y = e.clientY + 14;
+        const tw = tooltip.offsetWidth || 220;
+        const th = tooltip.offsetHeight || 80;
+        if (x + tw > vw - 8) x = e.clientX - tw - 14;
+        if (y + th > vh - 8) y = e.clientY - th - 14;
+        tooltip.style.left = x + 'px';
+        tooltip.style.top  = y + 'px';
+    }
+
+    function hideTooltip() {
+        tooltip.style.opacity = '0';
+        setTimeout(() => { tooltip.style.display = 'none'; }, 150);
+    }
+
+    document.addEventListener('mouseover', function(e) {
+        const el = e.target.closest('.sh-cal-leave[data-leave-name]');
+        if (el) showTooltip(el, e);
+    });
+    document.addEventListener('mousemove', function(e) {
+        if (tooltip.style.display !== 'none') posTooltip(e);
+    });
+    document.addEventListener('mouseout', function(e) {
+        const el = e.target.closest('.sh-cal-leave[data-leave-name]');
+        if (el) hideTooltip();
+    });
+})();
 
 // #34 Swipe gesture for month navigation (mobile)
 (function() {
