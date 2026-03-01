@@ -336,6 +336,48 @@
                 return $days;
             })->unique()->values()->toArray();
         $calMonthNames = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+        // Hari libur nasional & cuti bersama Indonesia 2026
+        // Format: 'Y-m-d' => ['label' => '...', 'type' => 'libur|bersama']
+        $hariLiburNasional = [
+            '2026-01-01' => ['label' => 'Tahun Baru Masehi', 'type' => 'libur'],
+            '2026-01-27' => ['label' => 'Isra Mikraj Nabi Muhammad SAW', 'type' => 'libur'],
+            '2026-01-28' => ['label' => 'Cuti Bersama Isra Mikraj', 'type' => 'bersama'],
+            '2026-02-17' => ['label' => 'Tahun Baru Imlek 2577', 'type' => 'libur'],
+            '2026-03-03' => ['label' => 'Cuti Bersama Tahun Baru Imlek', 'type' => 'bersama'],
+            '2026-03-22' => ['label' => 'Hari Raya Nyepi Tahun Saka 1948', 'type' => 'libur'],
+            '2026-03-23' => ['label' => 'Cuti Bersama Nyepi', 'type' => 'bersama'],
+            '2026-04-02' => ['label' => 'Wafat Isa Al-Masih', 'type' => 'libur'],
+            '2026-04-03' => ['label' => 'Cuti Bersama Paskah', 'type' => 'bersama'],
+            '2026-04-06' => ['label' => 'Cuti Bersama Paskah', 'type' => 'bersama'],
+            '2026-04-20' => ['label' => 'Idul Fitri 1447 H', 'type' => 'libur'],
+            '2026-04-21' => ['label' => 'Idul Fitri 1447 H', 'type' => 'libur'],
+            '2026-04-17' => ['label' => 'Cuti Bersama Idul Fitri', 'type' => 'bersama'],
+            '2026-04-22' => ['label' => 'Cuti Bersama Idul Fitri', 'type' => 'bersama'],
+            '2026-04-23' => ['label' => 'Cuti Bersama Idul Fitri', 'type' => 'bersama'],
+            '2026-04-24' => ['label' => 'Cuti Bersama Idul Fitri', 'type' => 'bersama'],
+            '2026-05-01' => ['label' => 'Hari Buruh Internasional', 'type' => 'libur'],
+            '2026-05-14' => ['label' => 'Kenaikan Isa Al-Masih', 'type' => 'libur'],
+            '2026-05-15' => ['label' => 'Cuti Bersama Kenaikan Isa Al-Masih', 'type' => 'bersama'],
+            '2026-05-25' => ['label' => 'Hari Raya Waisak', 'type' => 'libur'],
+            '2026-06-01' => ['label' => 'Hari Lahir Pancasila', 'type' => 'libur'],
+            '2026-06-27' => ['label' => 'Idul Adha 1447 H', 'type' => 'libur'],
+            '2026-06-26' => ['label' => 'Cuti Bersama Idul Adha', 'type' => 'bersama'],
+            '2026-07-17' => ['label' => 'Tahun Baru Islam 1448 H', 'type' => 'libur'],
+            '2026-08-17' => ['label' => 'Hari Kemerdekaan RI', 'type' => 'libur'],
+            '2026-09-25' => ['label' => 'Maulid Nabi Muhammad SAW', 'type' => 'libur'],
+            '2026-12-25' => ['label' => 'Hari Raya Natal', 'type' => 'libur'],
+            '2026-12-24' => ['label' => 'Cuti Bersama Natal', 'type' => 'bersama'],
+        ];
+
+        // Filter to current month
+        $calHolidays = []; // day => ['label', 'type']
+        foreach ($hariLiburNasional as $dateStr => $info) {
+            [$hy, $hm, $hd] = explode('-', $dateStr);
+            if ((int)$hy === $calYear && (int)$hm === $calMonth) {
+                $calHolidays[(int)$hd] = $info;
+            }
+        }
     @endphp
     <div class="card sh-card mb-4 animate-in">
         <div class="card-header d-flex align-items-center justify-content-between">
@@ -348,6 +390,18 @@
             </a>
         </div>
         <div class="card-body p-3">
+            {{-- Legend --}}
+            <div class="d-flex align-items-center gap-3 mb-2 flex-wrap" style="font-size:0.7rem;color:var(--sh-text-muted);">
+                <span class="d-flex align-items-center gap-1">
+                    <span style="width:8px;height:8px;border-radius:50%;background:var(--sh-success);display:inline-block;"></span> Cuti pegawai
+                </span>
+                <span class="d-flex align-items-center gap-1">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#dc2626;display:inline-block;"></span> Hari libur
+                </span>
+                <span class="d-flex align-items-center gap-1">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#b8860b;display:inline-block;"></span> Cuti bersama
+                </span>
+            </div>
             <div class="row g-0 text-center mb-2">
                 @foreach(['S','S','R','K','J','S','M'] as $dn)
                 <div class="col" style="font-size:0.7rem;font-weight:700;color:var(--sh-text-muted);text-transform:uppercase;">{{ $dn }}</div>
@@ -362,21 +416,34 @@
                             <div class="col"></div>
                         @else
                             @php
-                                $isToday   = ($dc === $calNow->day);
-                                $hasLeave  = in_array($dc, $calLeaveDays);
-                                $isWeekend = ($col >= 6);
+                                $isToday    = ($dc === $calNow->day);
+                                $hasLeave   = in_array($dc, $calLeaveDays);
+                                $isWeekend  = ($col >= 6);
+                                $holiday    = $calHolidays[$dc] ?? null;
+                                $isLibur    = $holiday && $holiday['type'] === 'libur';
+                                $isBersama  = $holiday && $holiday['type'] === 'bersama';
+                                $isRed      = $isWeekend || $isLibur || $isBersama;
+                                $tooltipParts = [];
+                                if ($hasLeave)   $tooltipParts[] = 'Ada cuti pegawai';
+                                if ($holiday)    $tooltipParts[] = $holiday['label'];
+                                $tooltip = implode(' • ', $tooltipParts);
+                                $isClickable = $hasLeave || $holiday;
                             @endphp
-                            <div class="col d-flex flex-column align-items-center sh-cal-day-cell" style="cursor:{{ $hasLeave ? 'pointer' : 'default' }}; border-radius:6px; transition:background 0.15s;"
-                                 @if($hasLeave) onclick="window.location='{{ route('kalender', ['year'=>$calYear,'month'=>$calMonth]) }}'" title="Ada cuti pada tanggal {{ $dc }}" @endif>
+                            <div class="col d-flex flex-column align-items-center sh-cal-day-cell"
+                                 style="cursor:{{ $isClickable ? 'pointer' : 'default' }};border-radius:6px;transition:background 0.15s;"
+                                 @if($isClickable) onclick="window.location='{{ route('kalender', ['year'=>$calYear,'month'=>$calMonth]) }}'"
+                                 title="{{ $tooltip }}" @endif>
                                 <span style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:{{ $isToday ? '800' : '500' }};
-                                    {{ $isToday ? 'background:var(--sh-primary);color:#fff;' : ($isWeekend ? 'color:var(--sh-danger);' : 'color:var(--sh-text);') }}">
+                                    {{ $isToday ? 'background:var(--sh-primary);color:#fff;' : ($isRed ? 'color:#dc2626;' : 'color:var(--sh-text);') }}">
                                     {{ $dc }}
                                 </span>
-                                @if($hasLeave)
-                                <span style="width:5px;height:5px;border-radius:50%;background:var(--sh-success);margin-top:1px;"></span>
-                                @else
-                                <span style="width:5px;height:5px;"></span>
-                                @endif
+                                {{-- Dots row: leave (green), libur (red), bersama (gold) --}}
+                                <span class="d-flex gap-1" style="height:6px;margin-top:1px;align-items:center;">
+                                    @if($hasLeave)<span style="width:5px;height:5px;border-radius:50%;background:var(--sh-success);"></span>@endif
+                                    @if($isLibur)<span style="width:5px;height:5px;border-radius:50%;background:#dc2626;"></span>@endif
+                                    @if($isBersama)<span style="width:5px;height:5px;border-radius:50%;background:#b8860b;"></span>@endif
+                                    @if(!$hasLeave && !$holiday)<span style="width:5px;height:5px;"></span>@endif
+                                </span>
                             </div>
                             @php $dc++; @endphp
                         @endif
@@ -588,54 +655,6 @@
     </div>
     @endif
 
-    {{-- Fitur 7: Charts & Statistik --}}
-    <div class="row g-3 mt-2">
-        <div class="col-lg-6 animate-in">
-            <div class="card sh-card">
-                <div class="card-header">
-                    <h3 class="card-title mb-0">
-                        <i class="ti ti-chart-bar me-2" style="color: var(--sh-primary);"></i>
-                        Pengajuan per Jenis Cuti ({{ date('Y') }})
-                    </h3>
-                </div>
-                <div class="card-body p-3">
-                    <div class="sh-chart-container">
-                        <canvas id="chartByType"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6 animate-in">
-            <div class="card sh-card">
-                <div class="card-header">
-                    <h3 class="card-title mb-0">
-                        <i class="ti ti-chart-line me-2" style="color: var(--sh-accent);"></i>
-                        Tren Bulanan ({{ date('Y') }})
-                    </h3>
-                </div>
-                <div class="card-body p-3">
-                    <div class="sh-chart-container">
-                        <canvas id="chartMonthly"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6 animate-in">
-            <div class="card sh-card">
-                <div class="card-header">
-                    <h3 class="card-title mb-0">
-                        <i class="ti ti-chart-pie me-2" style="color: var(--sh-success);"></i>
-                        Distribusi Status ({{ date('Y') }})
-                    </h3>
-                </div>
-                <div class="card-body p-3">
-                    <div class="sh-chart-container">
-                        <canvas id="chartByStatus"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
 @elseif($user->isKetua())
     {{-- ============================= --}}
@@ -1312,7 +1331,6 @@
 .sh-cal-day-cell[title]:hover { background: var(--sh-primary-light) !important; }
 [data-bs-theme="dark"] .sh-cal-day-cell[title]:hover { background: rgba(34,197,94,0.12) !important; }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 // #12 Count-up animation for stat numbers
 (function() {
@@ -1339,112 +1357,6 @@
     });
 })();
 
-document.addEventListener('DOMContentLoaded', function() {
-    var isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-    var textColor = isDark ? '#94a3b8' : '#64748b';
-    var gridColor = isDark ? '#334155' : '#f0f4f0';
-
-    Chart.defaults.color = textColor;
-    Chart.defaults.borderColor = gridColor;
-
-    // Chart by Type
-    var typeLabels = @json(array_map(fn($t) => \App\Models\LeaveRequest::typeLabels()[$t] ?? $t, array_keys($chartByType)));
-    var typeData = @json(array_values($chartByType));
-    if (typeLabels.length > 0 && typeData.length > 0 && document.getElementById('chartByType')) {
-        new Chart(document.getElementById('chartByType'), {
-            type: 'bar',
-            data: {
-                labels: typeLabels,
-                datasets: [{
-                    label: 'Jumlah',
-                    data: typeData,
-                    backgroundColor: ['#166534','#059669','#d97706','#dc2626','#7c3aed','#64748b'],
-                    borderRadius: 8,
-                    barThickness: 32
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
-                }
-            }
-        });
-    }
-
-    // Monthly Trend
-    var monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
-    var monthlyData = new Array(12).fill(0);
-    var rawMonthly = @json($chartMonthly);
-    if (rawMonthly && Object.keys(rawMonthly).length > 0) {
-        for (var m in rawMonthly) { monthlyData[parseInt(m) - 1] = rawMonthly[m]; }
-    }
-    if (document.getElementById('chartMonthly')) {
-        new Chart(document.getElementById('chartMonthly'), {
-            type: 'line',
-            data: {
-                labels: monthNames,
-                datasets: [{
-                    label: 'Pengajuan',
-                    data: monthlyData,
-                    borderColor: '#b8860b',
-                    backgroundColor: 'rgba(184,134,11,0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#b8860b',
-                    pointRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
-                }
-            }
-        });
-    }
-
-    // Status Distribution
-    var statusMap = @json(\App\Models\LeaveRequest::statusLabels());
-    var rawStatus = @json($chartByStatus);
-    var statusLabels = [], statusData = [], statusColors = [];
-    var colorMap = {
-        'diajukan': '#d97706', 'pertimbangan_atasan': '#f59e0b',
-        'disetujui': '#059669', 'approved': '#059669',
-        'ditolak': '#dc2626', 'rejected': '#dc2626',
-        'diubah': '#166534', 'ditangguhkan': '#b8860b', 'pending': '#d97706'
-    };
-    for (var s in rawStatus) {
-        statusLabels.push(statusMap[s] || s);
-        statusData.push(rawStatus[s]);
-        statusColors.push(colorMap[s] || '#64748b');
-    }
-    if (statusLabels.length > 0 && document.getElementById('chartByStatus')) {
-        new Chart(document.getElementById('chartByStatus'), {
-            type: 'doughnut',
-            data: {
-                labels: statusLabels,
-                datasets: [{
-                    data: statusData,
-                    backgroundColor: statusColors,
-                    borderWidth: 2,
-                    borderColor: isDark ? '#1e293b' : '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { padding: 16 } }
-                }
-            }
-        });
-    }
-});
 </script>
 @endpush
 @endif

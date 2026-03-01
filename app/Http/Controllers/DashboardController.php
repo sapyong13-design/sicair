@@ -78,10 +78,6 @@ class DashboardController extends Controller
         $analytics = $analyticsService->getDashboardAnalytics($year);
         $leaveBalances = $analyticsService->getLeaveBalanceOverview($year);
 
-        // Unpack chart data for view compatibility
-        $chartByType = $analytics['charts']['by_type']['values'] ?? [];
-        $chartByStatus = $analytics['charts']['by_status']['values'] ?? [];
-        $chartMonthly = $analytics['charts']['monthly_trend'] ?? [];
         $chartByDepartment = $analytics['charts']['by_department']['values'] ?? [];
 
         // Sprint 3 #16: Pegawai with low leave balance (≤ 3)
@@ -117,8 +113,7 @@ class DashboardController extends Controller
 
         return view('dashboard', compact(
             'user', 'pendingRequests', 'recentDecisions', 'totalPegawai',
-            'analytics', 'leaveBalances', 'year',
-            'chartByType', 'chartByStatus', 'chartMonthly', 'chartByDepartment',
+            'analytics', 'leaveBalances', 'year', 'chartByDepartment',
             'todayOnLeave', 'upcomingLeaves7Days',
             'saldoRendah', 'carryOverHangus', 'monthTrend', 'top5Cuti', 'recentActivity'
         ));
