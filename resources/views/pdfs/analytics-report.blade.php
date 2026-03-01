@@ -70,12 +70,12 @@
         </tr>
     </thead>
     <tbody>
-        @foreach($byBagian as $bagian => $data)
+        @foreach($byBagian as $data)
         <tr>
-            <td><strong>{{ $bagian }}</strong></td>
-            <td>{{ $data['total_pengajuan'] }}</td>
-            <td>{{ $data['total_hari'] }}</td>
-            <td>{{ $data['rata_hari'] }}</td>
+            <td><strong>{{ $data['bagian'] }}</strong></td>
+            <td>{{ $data['total_requests'] }}</td>
+            <td>{{ $data['total_days'] }}</td>
+            <td>{{ $data['total_requests'] > 0 ? round($data['total_days'] / $data['total_requests'], 1) : 0 }}</td>
         </tr>
         @endforeach
     </tbody>
@@ -85,15 +85,15 @@
 <table>
     <thead>
         <tr>
-            @foreach($monthly12['labels'] as $label)
-            <th style="font-size:9px;">{{ $label }}</th>
+            @foreach($monthly12 as $m)
+            <th style="font-size:9px;">{{ $m['label'] }}</th>
             @endforeach
         </tr>
     </thead>
     <tbody>
         <tr>
-            @foreach($monthly12['values'] as $v)
-            <td class="text-center">{{ $v }}</td>
+            @foreach($monthly12 as $m)
+            <td class="text-center">{{ $m['count'] }}</td>
             @endforeach
         </tr>
     </tbody>

@@ -318,8 +318,12 @@
         $calDays     = $calFirst->daysInMonth;
         $calStartDow = $calFirst->dayOfWeekIso; // 1=Mon, 7=Sun
         // Build leave day set for current month
-        $calLeaveDays = \App\Models\LeaveRequest::where('status','disetujui')
-            ->whereYear('start_date', $calYear)->orWhereYear('end_date', $calYear)
+        $calLeaveDays = \App\Models\LeaveRequest::whereIn('status',['disetujui','approved'])
+            ->where(function($q) use ($calYear, $calMonth) {
+                $monthStart = sprintf('%04d-%02d-01', $calYear, $calMonth);
+                $monthEnd   = sprintf('%04d-%02d-%02d', $calYear, $calMonth, cal_days_in_month(CAL_GREGORIAN, $calMonth, $calYear));
+                $q->where('start_date', '<=', $monthEnd)->where('end_date', '>=', $monthStart);
+            })
             ->get()
             ->flatMap(function($lr) use ($calYear, $calMonth) {
                 $days = [];

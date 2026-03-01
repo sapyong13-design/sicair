@@ -289,24 +289,22 @@ class AnalyticsService
      */
     public function getMonthlyTrend12(): array
     {
-        $labels = [];
-        $values = [];
+        $result = [];
         $now    = Carbon::now();
 
         for ($i = 11; $i >= 0; $i--) {
-            $d      = $now->copy()->subMonths($i);
-            $labels[] = $d->format('M Y');
-            $count  = LeaveRequest::whereIn('status', [
+            $d     = $now->copy()->subMonths($i);
+            $count = LeaveRequest::whereIn('status', [
                     LeaveRequest::STATUS_DISETUJUI,
                     LeaveRequest::STATUS_APPROVED,
                 ])
                 ->whereYear('start_date', $d->year)
                 ->whereMonth('start_date', $d->month)
                 ->count();
-            $values[] = $count;
+            $result[] = ['label' => $d->format('M Y'), 'count' => $count];
         }
 
-        return ['labels' => $labels, 'values' => $values];
+        return $result;
     }
 
     /**
@@ -330,25 +328,19 @@ class AnalyticsService
             ->groupBy('bagian')
             ->get();
 
-        $map  = ['Kepaniteraan' => [], 'Kesekretariatan' => [], 'Hakim' => []];
+        $map = [
+            'Kepaniteraan'    => ['bagian' => 'Kepaniteraan',    'total_requests' => 0, 'total_days' => 0],
+            'Kesekretariatan' => ['bagian' => 'Kesekretariatan', 'total_requests' => 0, 'total_days' => 0],
+            'Hakim'           => ['bagian' => 'Hakim',           'total_requests' => 0, 'total_days' => 0],
+        ];
         foreach ($rows as $row) {
             $key = $row->bagian;
             if (!isset($map[$key])) continue;
-            $map[$key] = [
-                'total_pengajuan' => (int) $row->total_pengajuan,
-                'total_hari'      => (int) $row->total_hari,
-                'rata_hari'       => $row->total_pengajuan > 0 ? round($row->total_hari / $row->total_pengajuan, 1) : 0,
-            ];
+            $map[$key]['total_requests'] = (int) $row->total_pengajuan;
+            $map[$key]['total_days']     = (int) $row->total_hari;
         }
 
-        // Ensure all keys exist with defaults
-        foreach ($map as $k => $v) {
-            if (empty($v)) {
-                $map[$k] = ['total_pengajuan' => 0, 'total_hari' => 0, 'rata_hari' => 0];
-            }
-        }
-
-        return $map;
+        return array_values($map);
     }
 
     /**
@@ -361,7 +353,7 @@ class AnalyticsService
         $lastMonth  = $thisMonth === 1 ? 12 : $thisMonth - 1;
         $lastYear   = $thisMonth === 1 ? $thisYear - 1 : $thisYear;
 
-        $this = LeaveRequest::whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+        $thisCount = LeaveRequest::whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
             ->whereYear('start_date', $thisYear)
             ->whereMonth('start_date', $thisMonth)
             ->count();
@@ -371,10 +363,10 @@ class AnalyticsService
             ->whereMonth('start_date', $lastMonth)
             ->count();
 
-        $diff = $last > 0 ? round((($this - $last) / $last) * 100) : 0;
+        $diff = $last > 0 ? round((($thisCount - $last) / $last) * 100) : 0;
 
         return [
-            'this_month' => $this,
+            'this_month' => $thisCount,
             'last_month' => $last,
             'diff_pct'   => $diff,
             'trending'   => $diff >= 0 ? 'up' : 'down',
