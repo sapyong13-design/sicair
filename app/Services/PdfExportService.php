@@ -95,7 +95,7 @@ class PdfExportService
 
         $filename = "Surat-Permohonan-Cuti-{$leaveRequest->user->nip}-{$leaveRequest->start_date->format('Ymd')}.pdf";
 
-        return $pdf->download($filename);
+        return $pdf->stream($filename);
     }
 
     /**

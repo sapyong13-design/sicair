@@ -28,7 +28,7 @@
             {{-- #28 Print Preview --}}
             <button type="button" class="btn btn-outline-secondary"
                style="border-radius: 10px; font-size: 0.85rem;"
-               onclick="document.getElementById('printPreviewModal').classList.add('show'); document.getElementById('printPreviewModal').style.display='block';"
+               data-bs-toggle="modal" data-bs-target="#printPreviewModal"
                title="Preview sebelum cetak">
                 <i class="ti ti-printer me-1"></i>
                 Preview
@@ -450,14 +450,27 @@
                         <i class="ti ti-clipboard-text me-1"></i> Form Cuti
                     </button>
                 </div>
+                <div id="previewLoading" class="d-flex align-items-center justify-content-center" style="height:65vh; display:none!important;">
+                    <div class="text-center text-muted">
+                        <div class="spinner-border mb-2" role="status" style="color: var(--sh-primary);"></div>
+                        <div>Memuat pratinjau...</div>
+                    </div>
+                </div>
+                <div id="previewDocxMsg" class="d-flex align-items-center justify-content-center d-none" style="height:65vh;">
+                    <div class="text-center text-muted">
+                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">📄</div>
+                        <div class="fw-semibold mb-1">Format DOCX tidak dapat dipratinjau</div>
+                        <div style="font-size: 0.85rem;">Klik <strong>Download</strong> untuk mengunduh file.</div>
+                    </div>
+                </div>
                 <iframe id="previewFrame"
-                    src="{{ route('leave.surat-permohonan', $leaveRequest) }}"
+                    src="about:blank"
                     style="width:100%; height:65vh; border:none;"
                     title="Preview dokumen cuti">
                 </iframe>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <a href="{{ route('leave.surat-permohonan', $leaveRequest) }}" target="_blank" class="btn sh-btn-primary">
+                <a id="previewDownloadBtn" href="{{ route('leave.surat-permohonan', $leaveRequest) }}" target="_blank" class="btn sh-btn-primary">
                     <i class="ti ti-download me-1"></i> Download
                 </a>
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -571,16 +584,47 @@
 </style>
 <script>
 // #28 Print Preview
+@php
+    $suratUrl = route('leave.surat-permohonan', $leaveRequest);
+    $formUrl  = route('leave.form-cuti', $leaveRequest);
+@endphp
+const previewUrls = {
+    surat: @json($suratUrl),
+    form:  @json($formUrl),
+};
+let currentPreviewType = 'surat';
+
+// Lazy load: set iframe src only when modal opens
+document.getElementById('printPreviewModal').addEventListener('show.bs.modal', function () {
+    loadPreview('surat');
+});
+
+// Clear iframe when modal closes to stop loading
+document.getElementById('printPreviewModal').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('previewFrame').src = 'about:blank';
+    currentPreviewType = 'surat';
+});
+
 function loadPreview(type) {
-    var frame = document.getElementById('previewFrame');
-    @php
-        $suratUrl = route('leave.surat-permohonan', $leaveRequest);
-        $formUrl = route('leave.form-cuti', $leaveRequest);
-    @endphp
+    currentPreviewType = type;
+    const frame  = document.getElementById('previewFrame');
+    const dlBtn  = document.getElementById('previewDownloadBtn');
+    const docxMsg = document.getElementById('previewDocxMsg');
+
     if (type === 'surat') {
-        frame.src = @json($suratUrl);
+        // PDF — can be shown inline in iframe
+        frame.classList.remove('d-none');
+        docxMsg.classList.add('d-none');
+        frame.src = previewUrls.surat;
+        dlBtn.href = previewUrls.surat;
+        dlBtn.style.display = '';
     } else {
-        frame.src = @json($formUrl);
+        // DOCX — cannot iframe; show message, update download link
+        frame.classList.add('d-none');
+        frame.src = 'about:blank';
+        docxMsg.classList.remove('d-none');
+        dlBtn.href = previewUrls.form;
+        dlBtn.style.display = '';
     }
 }
 </script>
