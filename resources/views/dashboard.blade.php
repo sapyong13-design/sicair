@@ -322,7 +322,7 @@
         $calStartDow = $calFirst->dayOfWeekIso; // 1=Mon, 7=Sun
         // Build leave day set for current month
         $calLeaveDays = \App\Models\LeaveRequest::whereIn('status',['disetujui','approved'])
-            ->where(function($q) use ($calYear, $calMonth) {
+            ->where(function($q) use ($calYear, $calMonth, $calDays) {
                 $monthStart = sprintf('%04d-%02d-01', $calYear, $calMonth);
                 $monthEnd   = sprintf('%04d-%02d-%02d', $calYear, $calMonth, $calDays);
                 $q->where('start_date', '<=', $monthEnd)->where('end_date', '>=', $monthStart);
