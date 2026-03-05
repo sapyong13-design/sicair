@@ -18,26 +18,27 @@
         .login-banner {
             display: none;
             width: 50%;
-            background: linear-gradient(135deg, #0d3320 0%, #14532d 35%, #166534 70%, #15803d 100%);
+            background-image: url('/gedung.png');
+            background-size: cover;
+            background-position: center center;
             position: relative;
             overflow: hidden;
             padding: 3rem;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
         }
         @media (min-width: 992px) {
             .login-banner { display: flex; }
         }
 
+        /* Dark overlay di atas foto gedung */
         .login-banner::before {
             content: '';
             position: absolute;
-            top: -30%;
-            right: -20%;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(184,134,11,0.12) 0%, transparent 70%);
-            border-radius: 50%;
+            inset: 0;
+            background: rgba(10, 40, 24, 0.55);
+            z-index: 0;
         }
         .login-banner::after {
             content: '';
