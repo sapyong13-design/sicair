@@ -20,7 +20,9 @@
         .login-banner {
             display: none;
             width: 50%;
-            background: linear-gradient(160deg, #0a2818 0%, #0d3320 30%, #14532d 65%, #166534 100%);
+            background-image: url('/gedung.png');
+            background-size: cover;
+            background-position: center center;
             position: relative;
             overflow: hidden;
             padding: 3rem;
@@ -32,16 +34,13 @@
             .login-banner { display: flex; }
         }
 
-        /* Subtle radial glows */
+        /* Dark overlay di atas foto gedung */
         .login-banner::before {
             content: '';
             position: absolute;
-            top: -10%;
-            right: -15%;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(184,134,11,0.10) 0%, transparent 65%);
-            border-radius: 50%;
+            inset: 0;
+            background: rgba(10, 40, 24, 0.55);
+            z-index: 0;
         }
         .login-banner::after {
             content: '';
