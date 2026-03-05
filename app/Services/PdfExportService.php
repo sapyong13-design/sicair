@@ -56,12 +56,16 @@ class PdfExportService
     }
 
     /**
-     * Export user leave balance report
+     * Export user leave balance report (with CutiTahunanCalculator data)
      */
     public static function exportBalanceReport($user)
     {
+        $calculator = new \App\Services\CutiTahunanCalculator($user);
+        $cutiInfo = $calculator->hitung();
+
         $pdf = Pdf::loadView('pdfs.balance-report', [
             'user' => $user,
+            'cutiInfo' => $cutiInfo,
             'generatedAt' => now(),
         ]);
 

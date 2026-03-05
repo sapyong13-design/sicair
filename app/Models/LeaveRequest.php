@@ -38,6 +38,14 @@ class LeaveRequest extends Model
     const TYPE_MELAHIRKAN = 'cuti_melahirkan';
     const TYPE_ALASAN_PENTING = 'cuti_alasan_penting';
     const TYPE_LUAR_TANGGUNGAN = 'cuti_luar_tanggungan';
+    const TYPE_BERSAMA = 'cuti_bersama'; // SEMA 13/2019: auto-deduct dari cuti tahunan
+
+    // Batas SEMA 13/2019
+    const MAX_CONSECUTIVE_DAYS_WITHOUT_APPROVAL = 5; // Maks 5 hari berturut tanpa persetujuan khusus
+    const CARRY_OVER_LIMIT = 6; // Maks 6 hari carry-over per tahun sebelumnya
+    const MAX_CLTN_YEARS = 3; // Maks 3 tahun CLTN
+    const MAX_CLTN_EXTENSION_YEARS = 1; // Perpanjangan CLTN maks 1 tahun
+    const CUTI_SAKIT_SURAT_DOKTER_PEMERINTAH_DAYS = 14; // >14 hari wajib surat dokter pemerintah
 
     const STATUS_DIAJUKAN = 'diajukan';
     const STATUS_PERTIMBANGAN = 'pertimbangan_atasan';
@@ -67,6 +75,7 @@ class LeaveRequest extends Model
             self::TYPE_MELAHIRKAN => 'Cuti Melahirkan',
             self::TYPE_ALASAN_PENTING => 'Cuti Karena Alasan Penting',
             self::TYPE_LUAR_TANGGUNGAN => 'Cuti di Luar Tanggungan Negara',
+            self::TYPE_BERSAMA => 'Cuti Bersama',
         ];
     }
 

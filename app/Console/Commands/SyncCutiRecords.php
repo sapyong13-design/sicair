@@ -2,35 +2,21 @@
 
 namespace App\Console\Commands;
 
-use App\Models\CutiRecord;
-use App\Models\LeaveRequest;
 use App\Models\User;
+use App\Services\CutiTahunanCalculator;
 use Illuminate\Console\Command;
 
 class SyncCutiRecords extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'app:sync-cuti-records
                             {--year= : Year to sync (default: current year)}
                             {--dry-run : Show what would be done without making changes}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Sync CutiRecord with actual approved leave requests (reconciliation)';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
-        $year = $this->option('year') ?? date('Y');
+        $year = (int) ($this->option('year') ?? date('Y'));
         $dryRun = $this->option('dry-run');
 
         $this->info("Syncing CutiRecords for year {$year}...");
@@ -42,17 +28,28 @@ class SyncCutiRecords extends Command
         $syncedCount = 0;
         $errorsCount = 0;
 
-        // Get all active users
-        $users = User::where('status', 'aktif')->get();
+        // Get all users (using role-based filter, no 'status' column)
+        $users = User::whereNotIn('role', ['admin'])->get();
 
         foreach ($users as $user) {
             try {
-                $synced = $this->syncUserCutiRecords($user, $year, $dryRun);
+                // Gunakan CutiTahunanCalculator untuk rekonsiliasi
+                $calculator = new CutiTahunanCalculator($user, $year);
+                $cutiData = $calculator->hitung();
 
-                if ($synced) {
-                    $syncedCount++;
-                    $this->line("  ✓ {$user->name}");
+                if ($cutiData['pesan'] !== null) {
+                    // User belum berhak cuti tahunan, skip
+                    continue;
                 }
+
+                if (!$dryRun) {
+                    $calculator->updateRecord();
+                }
+
+                $syncedCount++;
+                $sisa = $cutiData['sisa'] ?? 0;
+                $diambil = $cutiData['cuti_diambil'] ?? 0;
+                $this->line("  ✓ {$user->name}: diambil={$diambil}, sisa={$sisa}");
             } catch (\Exception $e) {
                 $errorsCount++;
                 $this->error("  ✗ {$user->name}: {$e->getMessage()}");

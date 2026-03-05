@@ -39,11 +39,13 @@ class CutiTahunanCalculator
         if (!$this->user->sudahBekerjaSatuTahun()) {
             return [
                 'hak_dasar' => 0,
+                'hak_cuti' => 0, // alias untuk view compatibility
                 'carry_over' => 0,
                 'tambahan_terpencil' => 0,
                 'total_hak' => 0,
                 'cuti_diambil' => 0,
                 'sisa' => 0,
+                'sisa_cuti' => 0, // alias untuk view compatibility
                 'pesan' => 'Belum bekerja 1 tahun, belum berhak cuti tahunan.',
             ];
         }
@@ -56,11 +58,13 @@ class CutiTahunanCalculator
 
         return [
             'hak_dasar' => $hakDasar,
+            'hak_cuti' => $hakDasar, // alias untuk view compatibility
             'carry_over' => $carryOver,
             'tambahan_terpencil' => $tambahanTerpencil,
             'total_hak' => $totalHak,
             'cuti_diambil' => $cutiDiambil,
             'sisa' => $sisa,
+            'sisa_cuti' => $sisa, // alias untuk view compatibility
             'detail_carry_over' => $this->detailCarryOver(),
             'pesan' => null,
         ];
@@ -99,7 +103,8 @@ class CutiTahunanCalculator
             $diambilN2 = $recordN2->cuti_diambil;
 
             // 2 tahun berturut tidak digunakan sama sekali
-            if ($diambilN1 === 0 && $diambilN2 === 0) {
+            // Gunakan == untuk toleransi tipe data (int vs null vs string)
+            if ((int) $diambilN1 === 0 && (int) $diambilN2 === 0) {
                 // Total max 24: 12 hak + 6 dari N-1 + 6 dari N-2
                 $fromN1 = min($sisaN1, 6);
                 $fromN2 = min($sisaN2, 6);
@@ -136,7 +141,7 @@ class CutiTahunanCalculator
         if ($recordN2) {
             $diambilN1 = $recordN1 ? $recordN1->cuti_diambil : 0;
             $diambilN2 = $recordN2->cuti_diambil;
-            $bisa_carry_n2 = ($diambilN1 === 0 && $diambilN2 === 0);
+            $bisa_carry_n2 = ((int) $diambilN1 === 0 && (int) $diambilN2 === 0);
 
             $detail['tahun_n2'] = [
                 'tahun' => $this->tahun - 2,
@@ -153,14 +158,16 @@ class CutiTahunanCalculator
 
     protected function hitungTambahanTerpencil(): int
     {
-        // FIX #24: Use case-insensitive comparison so 'pengadilan negeri natuna' etc. also excluded
+        // SEMA 13/2019: PN Natuna ADALAH lokasi terpencil → berhak +12 hari kalender
+        // Cek berdasarkan flag lokasi_terpencil ATAU unit_kerja PN Natuna
         $unitKerja = strtolower(trim($this->user->unit_kerja ?? ''));
-        $excludedLocations = array_map('strtolower', [
-            'Pengadilan Negeri Natuna',
-        ]);
+        $lokasiTerpencil = [
+            'pengadilan negeri natuna',
+        ];
 
-        if (in_array($unitKerja, $excludedLocations)) {
-            return 0;
+        // PN Natuna selalu dianggap terpencil sesuai SEMA 13/2019
+        if (in_array($unitKerja, $lokasiTerpencil)) {
+            return 12;
         }
 
         if ($this->user->lokasi_terpencil) {

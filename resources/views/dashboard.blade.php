@@ -1060,18 +1060,18 @@
                             <i class="ti ti-calendar-stats me-1"></i> Sisa Cuti Tahunan
                         </div>
                         <div class="d-flex align-items-baseline gap-2 mb-2">
-                            <span class="sh-hero-number">{{ $cutiInfo['sisa'] }}</span>
-                            <span style="font-size: 1.1rem; opacity: 0.8;">/ {{ $cutiInfo['total_hak'] }} hari</span>
+                            <span class="sh-hero-number">{{ $cutiInfo['sisa_cuti'] ?? $cutiInfo['sisa'] ?? $user->leave_balance }}</span>
+                            <span style="font-size: 1.1rem; opacity: 0.8;">/ {{ $cutiInfo['total_hak'] ?? 12 }} hari</span>
                         </div>
                         <div class="sh-hero-progress mb-2" style="max-width: 280px;">
-                            @php $hakTotal = $cutiInfo['total_hak'] > 0 ? $cutiInfo['total_hak'] : 1; @endphp
-                            <div class="sh-hero-progress-bar" style="width: {{ min(100, ($cutiInfo['sisa'] / $hakTotal) * 100) }}%;"></div>
+                            @php $hakTotal = $cutiInfo['total_hak'] ?? 12; $hakTotal = $hakTotal > 0 ? $hakTotal : 1; @endphp
+                            <div class="sh-hero-progress-bar" style="width: {{ min(100, (($cutiInfo['sisa_cuti'] ?? $cutiInfo['sisa'] ?? $user->leave_balance) / $hakTotal) * 100) }}%;"></div>
                         </div>
                         <div style="font-size: 0.8rem; opacity: 0.75;" class="mb-3">
-                            Hak: {{ $cutiInfo['hak_dasar'] }} hari
-                            @if($cutiInfo['carry_over'] > 0) + Carry Over: {{ $cutiInfo['carry_over'] }} hari @endif
-                            @if($cutiInfo['tambahan_terpencil'] > 0) + Terpencil: {{ $cutiInfo['tambahan_terpencil'] }} hari @endif
-                            &mdash; Terpakai: {{ $cutiInfo['cuti_diambil'] }} hari
+                            Hak: {{ $cutiInfo['hak_cuti'] ?? $cutiInfo['hak_dasar'] ?? 12 }} hari
+                            @if(($cutiInfo['carry_over'] ?? 0) > 0) + Carry Over: {{ $cutiInfo['carry_over'] }} hari @endif
+                            @if(($cutiInfo['tambahan_terpencil'] ?? 0) > 0) + Terpencil: {{ $cutiInfo['tambahan_terpencil'] }} hari @endif
+                            &mdash; Terpakai: {{ $cutiInfo['cuti_diambil'] ?? 0 }} hari
                         </div>
                         @elseif(!$user->sudahBekerjaSatuTahun())
                         {{-- Belum bekerja 1 tahun — tampilkan status jelas tanpa angka menyesatkan --}}

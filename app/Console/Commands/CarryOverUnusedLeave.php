@@ -5,38 +5,29 @@ namespace App\Console\Commands;
 use App\Models\CutiRecord;
 use App\Models\Notification;
 use App\Models\User;
-use Carbon\Carbon;
+use App\Services\CutiTahunanCalculator;
 use Illuminate\Console\Command;
 
 class CarryOverUnusedLeave extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'app:carry-over-unused-leave
                             {--year= : Year to carry over from (default: current year - 1)}
                             {--dry-run : Show what would be done without making changes}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Auto carry over unused leave days from previous year (max 5 days)';
-
-    const CARRY_OVER_LIMIT = 5;
+    protected $description = 'Auto carry over unused leave days from previous year (max 6 days per SEMA 13/2019)';
 
     /**
-     * Execute the console command.
+     * Batas carry-over sesuai SEMA 13/2019: maks 6 hari per tahun sebelumnya
      */
+    const CARRY_OVER_LIMIT = 6;
+
     public function handle()
     {
-        $year = $this->option('year') ?? (date('Y') - 1);
+        $year = (int) ($this->option('year') ?? (date('Y') - 1));
         $dryRun = $this->option('dry-run');
+        $nextYear = $year + 1;
 
-        $this->info("Processing carry-over for year {$year}...");
+        $this->info("Processing carry-over from year {$year} to {$nextYear}...");
 
         if ($dryRun) {
             $this->warn('DRY RUN - No changes will be made');
@@ -45,41 +36,41 @@ class CarryOverUnusedLeave extends Command
         $processed = 0;
         $totalCarried = 0;
 
-        // Get all users with employee status
-        $users = User::where('status', 'aktif')->get();
+        // Get all users (using role-based filter, no 'status' column)
+        $users = User::whereNotIn('role', ['admin'])->get();
 
         foreach ($users as $user) {
-            $carryOverDays = $this->calculateCarryOver($user, $year);
+            // Gunakan CutiTahunanCalculator untuk menghitung sisa cuti tahun $year
+            $calculator = new CutiTahunanCalculator($user, $year);
+            $cutiData = $calculator->hitung();
 
-            if ($carryOverDays <= 0) {
+            $sisa = $cutiData['sisa'] ?? 0;
+
+            if ($sisa <= 0) {
                 continue;
             }
+
+            // Cap at carry-over limit (6 hari per SEMA 13/2019)
+            $carryOverDays = min($sisa, self::CARRY_OVER_LIMIT);
 
             $processed++;
             $totalCarried += $carryOverDays;
 
             if (!$dryRun) {
-                // Create carry-over record for next year
-                $nextYear = $year + 1;
+                // Simpan/update record tahun sumber
+                $calculator->updateRecord();
+
+                // Update record tahun tujuan dengan carry_over
                 CutiRecord::updateOrCreate(
                     [
                         'user_id' => $user->id,
                         'tahun' => $nextYear,
-                        'jenis_cuti' => 'Cuti Tahunan',
                     ],
                     [
                         'carry_over' => $carryOverDays,
+                        'hak_cuti' => 12,
                     ]
                 );
-
-                // Create audit log
-                \App\Models\AuditLog::create([
-                    'user_id' => $user->id,
-                    'action' => 'carry_over_unused_leave',
-                    'description' => "Carry over {$carryOverDays} hari cuti tahunan dari tahun {$year}",
-                    'ip_address' => 'console-command',
-                    'user_agent' => 'Laravel Command',
-                ]);
 
                 // Send notification
                 Notification::kirim(
@@ -91,7 +82,7 @@ class CarryOverUnusedLeave extends Command
                 );
             }
 
-            $this->line("  ✓ {$user->name}: {$carryOverDays} hari");
+            $this->line("  ✓ {$user->name}: {$carryOverDays} hari (sisa: {$sisa})");
         }
 
         $this->info("---");

@@ -16,8 +16,8 @@ class PdfExportController extends Controller
      */
     public function leaveRequest(LeaveRequest $leaveRequest)
     {
-        // Check authorization
-        if (Auth::id() !== $leaveRequest->user_id && !Auth::user()->isAdmin()) {
+        // Check authorization — admin dan ketua boleh akses semua
+        if (Auth::id() !== $leaveRequest->user_id && !Auth::user()->isAdmin() && !Auth::user()->isKetua()) {
             return back()->with('error', 'Anda tidak memiliki akses.');
         }
 

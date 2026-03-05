@@ -45,11 +45,11 @@
                     <div>
                         <div class="sh-stat-label mb-1">Sisa Cuti Tahunan {{ date('Y') }}</div>
                         <div class="d-flex align-items-baseline gap-1">
-                            <span class="sh-stat-number" style="color: var(--sh-primary);">{{ $cutiInfo['sisa'] ?? $user->leave_balance }}</span>
+                            <span class="sh-stat-number" style="color: var(--sh-primary);">{{ $cutiInfo['sisa_cuti'] ?? $cutiInfo['sisa'] ?? $user->leave_balance }}</span>
                             <span class="text-muted" style="font-size: 0.85rem;">/ {{ $cutiInfo['total_hak'] ?? 12 }} hari</span>
                         </div>
                         <div class="text-muted mt-1" style="font-size: 0.78rem;">
-                            Hak: {{ $cutiInfo['hak_dasar'] ?? 12 }}
+                            Hak: {{ $cutiInfo['hak_cuti'] ?? $cutiInfo['hak_dasar'] ?? 12 }}
                             @if(($cutiInfo['carry_over'] ?? 0) > 0) + CO: {{ $cutiInfo['carry_over'] }} @endif
                             @if(($cutiInfo['tambahan_terpencil'] ?? 0) > 0)
                             + Terpencil: {{ $cutiInfo['tambahan_terpencil'] }}
@@ -67,7 +67,7 @@
                 </div>
                 <div style="height: 6px; border-radius: 3px; background: var(--sh-gray-100); margin-top: 0.75rem;">
                     @php $hakTotal = $cutiInfo['total_hak'] ?? 12; @endphp
-                    <div style="height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--sh-primary), #22c55e); width: {{ $hakTotal > 0 ? (($cutiInfo['sisa_cuti'] ?? $user->leave_balance) / $hakTotal) * 100 : 0 }}%;"></div>
+                    <div style="height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--sh-primary), #22c55e); width: {{ $hakTotal > 0 ? (($cutiInfo['sisa_cuti'] ?? $cutiInfo['sisa'] ?? $user->leave_balance) / $hakTotal) * 100 : 0 }}%;"></div>
                 </div>
             </div>
         </div>
@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const conflictMsg = document.getElementById('conflict-message');
     const submitBtn = document.querySelector('button[type="submit"]');
     const type = '{{ $type }}';
-    const balance = {{ $type === 'cuti_tahunan' ? ($cutiInfo['sisa'] ?? $user->leave_balance) : 0 }};
+    const balance = {{ $type === 'cuti_tahunan' ? ($cutiInfo['sisa_cuti'] ?? $cutiInfo['sisa'] ?? $user->leave_balance) : 0 }};
 
     let isValid = false;
 

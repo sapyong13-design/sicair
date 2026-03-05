@@ -23,14 +23,14 @@ class LeaveRequestController extends Controller
 {
     /**
      * Pilih jenis cuti
+     * Fix #16: CPNS type-aware — tampilkan halaman select-type dengan info cuti terbatas
      */
     public function selectType()
     {
         $user = Auth::user();
-        if (!$user->bolehCuti()) {
-            $pesan = $user->status_pegawai === 'cpns'
-                ? 'CPNS belum berhak mengajukan cuti.'
-                : 'PPPK yang baru dilantik (masa kerja < 1 tahun) belum berhak mengajukan cuti.';
+        // Fix #16: Jangan blokir total, biarkan CPNS memilih jenis cuti yang diperbolehkan
+        if (!$user->bolehCuti() && $user->status_pegawai !== 'cpns') {
+            $pesan = 'PPPK yang baru dilantik (masa kerja < 1 tahun) belum berhak mengajukan cuti.';
             return redirect('/dashboard')->with('error', $pesan);
         }
 
@@ -39,17 +39,19 @@ class LeaveRequestController extends Controller
 
     /**
      * Form pengajuan cuti (semua jenis)
+     * Fix #16: type-aware bolehCuti check
      */
     public function create(Request $request)
     {
         $type = $request->query('type', LeaveRequest::TYPE_TAHUNAN);
         $user = Auth::user();
 
-        if (!$user->bolehCuti()) {
+        // Fix #16: CPNS type-aware check — boleh cuti sakit/melahirkan/alasan penting
+        if (!$user->bolehCuti($type)) {
             $pesan = $user->status_pegawai === 'cpns'
-                ? 'CPNS belum berhak mengajukan cuti.'
-                : 'PPPK yang baru dilantik (masa kerja < 1 tahun) belum berhak mengajukan cuti.';
-            return redirect('/dashboard')->with('error', $pesan);
+                ? 'CPNS hanya berhak mengajukan Cuti Sakit, Cuti Melahirkan, atau Cuti Karena Alasan Penting.'
+                : 'Anda belum berhak mengajukan jenis cuti ini.';
+            return redirect()->route('leave.select-type')->with('error', $pesan);
         }
 
         // #21 Re-apply: pre-fill from rejected leave request
@@ -96,10 +98,11 @@ class LeaveRequestController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user->bolehCuti()) {
+        // Fix #16: CPNS type-aware check
+        if (!$user->bolehCuti($type)) {
             $pesan = $user->status_pegawai === 'cpns'
-                ? 'CPNS belum berhak mengajukan cuti.'
-                : 'PPPK yang baru dilantik (masa kerja < 1 tahun) belum berhak mengajukan cuti.';
+                ? 'CPNS hanya berhak mengajukan Cuti Sakit, Cuti Melahirkan, atau Cuti Karena Alasan Penting.'
+                : 'Anda belum berhak mengajukan jenis cuti ini.';
             return redirect('/dashboard')->with('error', $pesan);
         }
 
@@ -187,13 +190,21 @@ class LeaveRequestController extends Controller
             'status' => $initialStatus,
         ]);
 
-        // Kirim email ke pemohon
-        Mail::queue(new LeaveRequestSubmitted($leaveRequest));
+        // Kirim email ke pemohon (try-catch for OpenWrt sync queue compatibility)
+        try {
+            Mail::send(new LeaveRequestSubmitted($leaveRequest));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Email gagal dikirim: ' . $e->getMessage());
+        }
 
         if ($skipAtasan) {
             // Langsung ke Ketua/Admin (tanpa review atasan)
             // Kirim email ke pejabat berwenang
-            Mail::queue(new LeaveRequestNeedsConsideration($leaveRequest));
+            try {
+                Mail::send(new LeaveRequestNeedsConsideration($leaveRequest));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Email gagal dikirim: ' . $e->getMessage());
+            }
 
             // Notifikasi ke semua pejabat (ketua + admin)
             $pejabatIds = \App\Models\User::whereIn('role', ['ketua', 'admin'])->pluck('id');
@@ -253,11 +264,15 @@ class LeaveRequestController extends Controller
             ]);
 
             // Kirim email penolakan
-            Mail::queue(new LeaveRequestRejected(
-                $leaveRequest,
-                $reviewer->name,
-                $request->catatan_atasan
-            ));
+            try {
+                Mail::send(new LeaveRequestRejected(
+                    $leaveRequest,
+                    $reviewer->name,
+                    $request->catatan_atasan
+                ));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Email gagal dikirim: ' . $e->getMessage());
+            }
 
             Notification::kirim(
                 $leaveRequest->user_id,
@@ -280,7 +295,11 @@ class LeaveRequestController extends Controller
         ]);
 
         // Kirim email ke pejabat untuk pertimbangan lanjutan
-        Mail::queue(new LeaveRequestNeedsConsideration($leaveRequest));
+        try {
+            Mail::send(new LeaveRequestNeedsConsideration($leaveRequest));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Email gagal dikirim: ' . $e->getMessage());
+        }
 
         // Notifikasi ke pemohon
         Notification::kirim(
@@ -349,15 +368,19 @@ class LeaveRequestController extends Controller
             });
         }
 
-        // Kirim email sesuai keputusan
-        if ($keputusan === 'setuju') {
-            Mail::queue(new LeaveRequestApproved($leaveRequest, $pejabat->name));
-        } elseif ($keputusan === 'tolak') {
-            Mail::queue(new LeaveRequestRejected(
-                $leaveRequest,
-                $pejabat->name,
-                $request->catatan_pejabat
-            ));
+        // Kirim email sesuai keputusan (try-catch for OpenWrt sync queue compatibility)
+        try {
+            if ($keputusan === 'setuju') {
+                Mail::send(new LeaveRequestApproved($leaveRequest, $pejabat->name));
+            } elseif ($keputusan === 'tolak') {
+                Mail::send(new LeaveRequestRejected(
+                    $leaveRequest,
+                    $pejabat->name,
+                    $request->catatan_pejabat
+                ));
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Email gagal dikirim: ' . $e->getMessage());
         }
 
         $label = match ($keputusan) {
@@ -438,7 +461,11 @@ class LeaveRequestController extends Controller
         }
 
         // Kirim email persetujuan
-        Mail::queue(new LeaveRequestApproved($leaveRequest, $pejabat->name));
+        try {
+            Mail::send(new LeaveRequestApproved($leaveRequest, $pejabat->name));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Email gagal dikirim: ' . $e->getMessage());
+        }
 
         $totalDays = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days;
         return back()->with('success', "Cuti {$leaveRequest->user->name} disetujui ($totalDays hari).");
@@ -467,7 +494,11 @@ class LeaveRequestController extends Controller
         ]);
 
         // Kirim email penolakan
-        Mail::queue(new LeaveRequestRejected($leaveRequest, $pejabat->name, $adminNote));
+        try {
+            Mail::send(new LeaveRequestRejected($leaveRequest, $pejabat->name, $adminNote));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Email gagal dikirim: ' . $e->getMessage());
+        }
 
         return back()->with('success', "Pengajuan cuti {$leaveRequest->user->name} ditolak.");
     }
@@ -484,8 +515,8 @@ class LeaveRequestController extends Controller
             return back()->with('error', 'Anda tidak memiliki akses untuk export dokumen ini.');
         }
 
-        $pdf = (new PdfExportService())->exportLeaveRequest($leaveRequest);
-        return $pdf->download("leave-request-{$leaveRequest->id}.pdf");
+        $pdf = PdfExportService::exportLeaveRequest($leaveRequest);
+        return $pdf;
     }
 
     /**
@@ -583,8 +614,8 @@ class LeaveRequestController extends Controller
 
         $leaveRequests = $query->latest()->get();
 
-        $pdf = (new PdfExportService())->exportLeaveRequests($leaveRequests);
-        return $pdf->download("leave-requests-report-" . now()->format('Y-m-d') . ".pdf");
+        $pdf = PdfExportService::exportLeaveRequestSummary($leaveRequests);
+        return $pdf;
     }
 
     /**
@@ -595,8 +626,8 @@ class LeaveRequestController extends Controller
         $user = Auth::user();
         $year = $request->input('year', date('Y'));
 
-        $pdf = (new PdfExportService())->exportLeaveSummary($user, $year);
-        return $pdf->download("leave-summary-{$year}.pdf");
+        $pdf = PdfExportService::exportBalanceReport($user);
+        return $pdf;
     }
 
     /**
@@ -721,13 +752,17 @@ class LeaveRequestController extends Controller
                 break;
 
             case LeaveRequest::TYPE_SAKIT:
-                // Hakim: tampilkan peringatan (diatur Perma 7/2016)
-                if ($user->isHakim()) {
-                    return 'Cuti sakit untuk Hakim diatur dalam Perma No. 7/2016. Silakan konsultasikan dengan admin.';
-                }
+                // Hakim: SEMA 13/2019 — cuti sakit diizinkan, tapi tetap ada peringatan via flash message
+                // Tidak lagi memblokir pengajuan (sebelumnya return error)
                 // Max 1 tahun
                 if ($startDate->diffInDays($endDate) > 365) {
                     return 'Cuti sakit maksimal 1 tahun (dapat diperpanjang 6 bulan).';
+                }
+                // > 14 hari wajib surat keterangan dokter pemerintah
+                if ($startDate->diffInDays($endDate) > LeaveRequest::CUTI_SAKIT_SURAT_DOKTER_PEMERINTAH_DAYS) {
+                    if (!$request->hasFile('dokumen_pendukung')) {
+                        return 'Cuti sakit lebih dari 14 hari wajib melampirkan surat keterangan dokter pemerintah.';
+                    }
                 }
                 break;
 
@@ -775,6 +810,12 @@ class LeaveRequestController extends Controller
                 }
                 if (now()->diffInDays($startDate) < 90) {
                     return 'Pengajuan CLTN minimal 3 bulan sebelum pelaksanaan.';
+                }
+                // SEMA 13/2019: Maks 3 tahun, perpanjangan maks 1 tahun
+                $durasiTahun = $startDate->diffInYears($endDate);
+                $maxCLTN = LeaveRequest::MAX_CLTN_YEARS + LeaveRequest::MAX_CLTN_EXTENSION_YEARS;
+                if ($durasiTahun > $maxCLTN) {
+                    return "CLTN maksimal {$maxCLTN} tahun (3 tahun + 1 tahun perpanjangan).";
                 }
                 break;
         }

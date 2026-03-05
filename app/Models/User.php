@@ -63,9 +63,10 @@ class User extends Authenticatable
      * True jika user berperan sebagai atasan langsung (supervisor).
      * Note: ketua & admin juga bisa approve sebagai atasan via canApproveAsAtasan().
      */
+    // Fix #5: Wakil Ketua juga bisa review bawahan sebagai atasan
     public function isAtasan(): bool
     {
-        return in_array($this->role, ['atasan', 'panitera', 'sekretaris']);
+        return in_array($this->role, ['atasan', 'panitera', 'sekretaris', 'wakil_ketua']);
     }
 
     public function isPanitera(): bool
@@ -93,20 +94,27 @@ class User extends Authenticatable
         return $this->role === 'hakim_ad_hoc';
     }
 
-    public function canApproveAsAtasan(): bool
+    public function isWakilKetua(): bool
     {
-        return in_array($this->role, ['atasan', 'panitera', 'sekretaris', 'ketua', 'admin']);
+        return $this->role === 'wakil_ketua';
     }
 
+    // Fix #2: Wakil Ketua juga bisa approve sebagai atasan
+    public function canApproveAsAtasan(): bool
+    {
+        return in_array($this->role, ['atasan', 'panitera', 'sekretaris', 'ketua', 'wakil_ketua', 'admin']);
+    }
+
+    // Fix #3: Wakil Ketua bisa menjadi PYB sementara saat Ketua berhalangan
     public function canApproveAsPejabat(): bool
     {
-        return in_array($this->role, ['ketua', 'admin']);
+        return in_array($this->role, ['ketua', 'wakil_ketua', 'admin']);
     }
 
     public function isKepegawaian(): bool
     {
         return in_array($this->role, ['atasan', 'panitera', 'sekretaris'])
-            && in_array($this->unit_kerja, ['kepegawaian', 'Kepegawaian', 'KEPEGAWAIAN']);
+            && strtolower(trim($this->unit_kerja ?? '')) === 'kepegawaian';
     }
 
     /**
@@ -159,17 +167,27 @@ class User extends Authenticatable
             return true;
         }
 
+        // Fix #1: Wakil Ketua juga skip langsung ke Ketua
+        if ($this->isWakilKetua()) {
+            return true;
+        }
+
         // Panitera/Sekretaris — atasan mereka adalah Ketua
         if ($this->isPanitera() || $this->isSekretaris()) {
             return true;
         }
 
-        // Pegawai (hakim, cakim, dll) yang atasannya langsung Ketua
+        // Hakim dan Hakim Ad Hoc — langsung ke Ketua sesuai SEMA 13/2019
+        if ($this->isHakim() || $this->isHakimAdHoc()) {
+            return true;
+        }
+
+        // Fix #7: Pegawai yang atasannya langsung Ketua atau Wakil Ketua
         if ($this->atasan_id) {
             $atasan = $this->relationLoaded('atasan')
                 ? $this->atasan
                 : User::find($this->atasan_id);
-            return $atasan && $atasan->isKetua();
+            return $atasan && ($atasan->isKetua() || $atasan->isWakilKetua());
         }
 
         return false;
@@ -207,18 +225,32 @@ class User extends Authenticatable
     /**
      * Apakah pegawai ini berhak mengajukan cuti?
      *
-     * Semua pegawai berhak KECUALI:
-     * - CPNS (belum diangkat penuh)
-     * - PPPK yang baru dilantik (masa kerja < 1 tahun)
+     * Fix #4: CPNS BOLEH cuti sakit/melahirkan/alasan penting (SEMA 13/2019)
+     * Parameter $jenisCuti opsional untuk pengecekan type-aware.
      */
-    public function bolehCuti(): bool
+    public function bolehCuti(string $jenisCuti = null): bool
     {
+        // Fix #4: CPNS boleh cuti sakit, melahirkan, alasan penting
         if ($this->status_pegawai === 'cpns') {
-            return false;
+            if ($jenisCuti === null) {
+                // Tanpa jenis: cek umum — CPNS punya hak terbatas
+                return false;
+            }
+            return in_array($jenisCuti, [
+                LeaveRequest::TYPE_SAKIT,
+                LeaveRequest::TYPE_ALASAN_PENTING,
+                LeaveRequest::TYPE_MELAHIRKAN,
+            ]);
         }
 
         if ($this->status_pegawai === 'pppk' && !$this->sudahBekerjaSatuTahun()) {
-            return false;
+            if ($jenisCuti === null) {
+                return false;
+            }
+            return in_array($jenisCuti, [
+                LeaveRequest::TYPE_SAKIT,
+                LeaveRequest::TYPE_MELAHIRKAN,
+            ]);
         }
 
         return true;
@@ -227,6 +259,45 @@ class User extends Authenticatable
     public function sudahBekerjaLimaTahun(): bool
     {
         return $this->masaKerjaTahun !== null && $this->masaKerjaTahun >= 5;
+    }
+
+    // Fix #6: Accessor PYB (Pejabat Yang Berwenang) sesuai SEMA 13/2019
+    public function getPejabatYangBerwenangAttribute(): string
+    {
+        if ($this->isKetua() || $this->isWakilKetua()) {
+            return 'Ketua Pengadilan Tinggi';
+        }
+        return 'Ketua Pengadilan Negeri Natuna';
+    }
+
+    // Fix #8: Label status pegawai untuk display
+    public function getStatusPegawaiLabelAttribute(): string
+    {
+        return match($this->status_pegawai) {
+            'pns' => 'PNS',
+            'cpns' => 'CPNS',
+            'pppk' => 'PPPK',
+            'cakim' => 'Calon Hakim',
+            'hakim' => 'Hakim',
+            'aparatur' => 'Aparatur',
+            default => strtoupper($this->status_pegawai ?? '-'),
+        };
+    }
+
+    // Fix #9: Label jenis kelamin untuk display
+    public function getJenisKelaminLabelAttribute(): string
+    {
+        return match($this->jenis_kelamin) {
+            'L' => 'Laki-laki',
+            'P' => 'Perempuan',
+            default => '-',
+        };
+    }
+
+    // Fix #10: Cek apakah pegawai aktif (bukan CPNS/cakim)
+    public function isAparaturAktif(): bool
+    {
+        return in_array($this->status_pegawai, ['pns', 'pppk', 'hakim', 'aparatur']);
     }
 
     // ===== Relationships =====
