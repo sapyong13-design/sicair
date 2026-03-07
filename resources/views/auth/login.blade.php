@@ -350,6 +350,56 @@
             margin-top: 2rem;
         }
         .footer-text strong { color: #166534; }
+
+        /* Mobile: full-screen background + glass card */
+        @media (max-width: 991px) {
+            body {
+                background-image: url('/gedung.webp');
+                background-size: cover;
+                background-position: center center;
+                background-attachment: fixed;
+                position: relative;
+            }
+            body::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background: rgba(10, 40, 24, 0.45);
+                z-index: 0;
+            }
+            .login-form-panel {
+                background: transparent !important;
+                position: relative;
+                z-index: 1;
+                min-height: 100vh;
+                padding: 1.5rem 1rem;
+            }
+            .login-card {
+                background: rgba(255, 255, 255, 0.88) !important;
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.5) !important;
+                border-top: 4px solid #166534 !important;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+            }
+            .mobile-header {
+                position: relative;
+                z-index: 1;
+            }
+            .mobile-institution {
+                color: #ffffff !important;
+                text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+            }
+            .mobile-subtitle {
+                color: rgba(255,255,255,0.85) !important;
+                text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+            }
+            /* Dark mode override for glass card */
+            [data-bs-theme="dark"] .login-card {
+                background: rgba(15, 23, 42, 0.88) !important;
+                border-color: rgba(255, 255, 255, 0.15) !important;
+            }
+        }
     </style>
 </head>
 <body>
