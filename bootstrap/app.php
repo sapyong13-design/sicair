@@ -18,5 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, $request) {
+            if (!$request->expectsJson()) {
+                return redirect()->route('login')->with('info', 'Sesi Anda telah berakhir. Silakan login kembali.');
+            }
+        });
     })->create();
