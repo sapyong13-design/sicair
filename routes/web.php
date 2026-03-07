@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function () {
 
     // === Kalender Cuti ===
     Route::get('/kalender', [KalenderController::class, 'index'])->name('kalender');
+    Route::get('/kalender/tim', [KalenderController::class, 'tim'])->name('kalender.tim');
     Route::get('/kalender/leaves-for-day', [KalenderController::class, 'leavesForDay'])->name('kalender.leaves-for-day');
     Route::get('/kalender/export-ics', [KalenderController::class, 'exportIcs'])->name('kalender.export-ics');
 
@@ -150,6 +151,13 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{pegawai}', [PegawaiController::class, 'destroy'])->name('destroy');
     });
 
+    // === Admin: Generate Quota Cuti Otomatis (C5) ===
+    Route::post('/admin/generate-quota', function (\Illuminate\Http\Request $req) {
+        $year = (int) $req->input('year', now()->year);
+        \Illuminate\Support\Facades\Artisan::call('cuti:generate-quota', ['year' => $year]);
+        return back()->with('success', "Quota cuti tahun {$year} berhasil digenerate untuk semua pegawai aktif.");
+    })->name('admin.generate-quota')->middleware('role:admin');
+
     // === Admin: Manajemen Cuti Pegawai (manual entry) ===
     Route::middleware('role:admin')->prefix('admin/leave')->name('admin.leave.')->group(function () {
         Route::get('/create/{user}', [AdminLeaveController::class, 'create'])->name('create');
@@ -214,6 +222,15 @@ Route::middleware('auth')->group(function () {
             Route::get('/statistics', [PdfExportController::class, 'statistics'])->name('statistics');
         });
     });
+
+    // === Report Download (background job results) ===
+    Route::get('/reports/{token}/download', function (string $token) {
+        $path = "reports/{$token}.pdf";
+        if (!\Illuminate\Support\Facades\Storage::exists($path)) {
+            abort(404, 'Laporan tidak ditemukan atau sudah kadaluarsa.');
+        }
+        return \Illuminate\Support\Facades\Storage::download($path, 'laporan.pdf');
+    })->name('reports.download')->middleware('auth');
 
     // === Analytics (#40, #41, #42, #43) ===
     Route::middleware('role:admin')->prefix('analytics')->name('analytics.')->group(function () {

@@ -123,6 +123,42 @@ class KalenderController extends Controller
         return str_replace(["\r\n", "\n", "\r", ',', ';', '\\'], ['\\n', '\\n', '\\n', '\\,', '\\;', '\\\\'], $str);
     }
 
+    public function tim(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user->canApproveAsAtasan() && !$user->isAdmin()) {
+            abort(403);
+        }
+
+        $month = (int) $request->get('month', now()->month);
+        $year  = (int) $request->get('year', now()->year);
+
+        // Ambil semua bawahan langsung
+        $bawahanIds = \App\Models\User::where('atasan_id', $user->id)->pluck('id');
+
+        // Jika admin atau ketua, ambil semua user
+        if ($user->isAdmin()) {
+            $bawahanIds = \App\Models\User::where('role', '!=', 'admin')->pluck('id');
+        }
+
+        $leaves = \App\Models\LeaveRequest::with('user')
+            ->whereIn('user_id', $bawahanIds)
+            ->whereIn('status', [\App\Models\LeaveRequest::STATUS_DISETUJUI, \App\Models\LeaveRequest::STATUS_APPROVED])
+            ->where(function ($q) use ($year, $month) {
+                $q->whereRaw('MONTH(start_date) = ? AND YEAR(start_date) = ?', [$month, $year])
+                  ->orWhereRaw('MONTH(end_date) = ? AND YEAR(end_date) = ?', [$month, $year]);
+            })
+            ->orderBy('start_date')
+            ->get();
+
+        $prevMonth = $month == 1 ? 12 : $month - 1;
+        $prevYear  = $month == 1 ? $year - 1 : $year;
+        $nextMonth = $month == 12 ? 1 : $month + 1;
+        $nextYear  = $month == 12 ? $year + 1 : $year;
+
+        return view('kalender.tim', compact('leaves', 'month', 'year', 'prevMonth', 'prevYear', 'nextMonth', 'nextYear'));
+    }
+
     /**
      * JSON endpoint: cuti yang disetujui pada tanggal tertentu (untuk modal kalender)
      */

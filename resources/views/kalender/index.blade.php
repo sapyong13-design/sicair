@@ -65,6 +65,11 @@
                title="Export kalender ke Google Calendar / Outlook">
                 <i class="ti ti-calendar-export me-1"></i> Export .ics
             </a>
+            @if(auth()->user()->canApproveAsAtasan() || auth()->user()->isAdmin())
+            <a href="{{ route('kalender.tim') }}" class="btn btn-outline-primary btn-sm ms-2" style="border-radius: 8px; font-size: 0.82rem;">
+                <i class="ti ti-users me-1"></i>Kalender Tim
+            </a>
+            @endif
         </div>
     </div>
 </div>

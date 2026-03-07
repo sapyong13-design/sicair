@@ -36,6 +36,18 @@
                 style="border-radius: 10px;">
                 <i class="ti ti-file-import me-1"></i> Import Excel
             </button>
+            {{-- C5: Generate Quota Cuti Otomatis --}}
+            @if(auth()->user()->isAdmin())
+            <form method="POST" action="{{ route('admin.generate-quota') }}" class="d-inline">
+                @csrf
+                <input type="hidden" name="year" value="{{ now()->year }}">
+                <button type="submit" class="btn btn-outline-success btn-sm"
+                    style="border-radius: 10px; height: 38px; padding: 0 0.75rem;"
+                    onclick="return confirm('Generate quota cuti {{ now()->year }} untuk semua pegawai aktif?')">
+                    <i class="ti ti-refresh me-1"></i>Generate Quota {{ now()->year }}
+                </button>
+            </form>
+            @endif
             <a href="{{ route('pegawai.create') }}" class="btn btn-primary sh-btn-primary">
                 <i class="ti ti-user-plus me-1"></i> Tambah Pegawai
             </a>
