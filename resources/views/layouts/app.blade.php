@@ -975,6 +975,15 @@
         @media (max-width: 767.98px) {
             .sh-navbar { position: relative; }
 
+            /* Avatar dropdown on mobile: constrain width, proper z-index */
+            .nav-item.dropdown .dropdown-menu {
+                max-width: calc(100vw - 1.5rem);
+                min-width: 200px;
+                z-index: 1055;
+                right: 0 !important;
+                left: auto !important;
+            }
+
             /* The collapse panel itself */
             #navbar-menu {
                 position: absolute;
@@ -1647,18 +1656,18 @@
         /* T19: Sticky saldo balance bar */
         .sh-sticky-balance {
             position: sticky;
-            top: 60px;
+            top: 0;
             z-index: 100;
             background: linear-gradient(135deg, #14532d, #166534);
             color: white;
-            padding: 0.55rem 1rem;
-            border-radius: 0 0 12px 12px;
+            padding: 0.5rem 1rem;
+            border-radius: 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 0.85rem;
-            box-shadow: 0 4px 12px rgba(20,83,45,0.2);
-            margin-bottom: 1rem;
+            font-size: 0.82rem;
+            box-shadow: 0 2px 8px rgba(20,83,45,0.15);
+            margin-bottom: 0.75rem;
         }
         @media (min-width: 992px) { .sh-sticky-balance { display: none; } }
         [data-bs-theme="dark"] .sh-sticky-balance {
