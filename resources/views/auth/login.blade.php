@@ -20,7 +20,7 @@
         .login-banner {
             display: none;
             width: 50%;
-            background-image: url('/gedung.png');
+            background-image: url('/gedung.webp');
             background-size: cover;
             background-position: center center;
             position: relative;
