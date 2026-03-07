@@ -194,7 +194,7 @@ class LeaveRequestController extends Controller
 
         // Kirim email ke pemohon (try-catch for OpenWrt sync queue compatibility)
         try {
-            Mail::send(new LeaveRequestSubmitted($leaveRequest));
+            Mail::queue(new LeaveRequestSubmitted($leaveRequest));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning('Email gagal dikirim: ' . $e->getMessage());
         }
@@ -203,7 +203,7 @@ class LeaveRequestController extends Controller
             // Langsung ke Ketua/Admin (tanpa review atasan)
             // Kirim email ke pejabat berwenang
             try {
-                Mail::send(new LeaveRequestNeedsConsideration($leaveRequest));
+                Mail::queue(new LeaveRequestNeedsConsideration($leaveRequest));
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::warning('Email gagal dikirim: ' . $e->getMessage());
             }
@@ -276,7 +276,7 @@ class LeaveRequestController extends Controller
 
             // Kirim email penolakan
             try {
-                Mail::send(new LeaveRequestRejected(
+                Mail::queue(new LeaveRequestRejected(
                     $leaveRequest,
                     $reviewer->name,
                     $request->catatan_atasan
@@ -307,7 +307,7 @@ class LeaveRequestController extends Controller
 
         // Kirim email ke pejabat untuk pertimbangan lanjutan
         try {
-            Mail::send(new LeaveRequestNeedsConsideration($leaveRequest));
+            Mail::queue(new LeaveRequestNeedsConsideration($leaveRequest));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning('Email gagal dikirim: ' . $e->getMessage());
         }
@@ -396,9 +396,9 @@ class LeaveRequestController extends Controller
         // Kirim email sesuai keputusan (try-catch for OpenWrt sync queue compatibility)
         try {
             if ($keputusan === 'setuju') {
-                Mail::send(new LeaveRequestApproved($leaveRequest, $pejabat->name));
+                Mail::queue(new LeaveRequestApproved($leaveRequest, $pejabat->name));
             } elseif ($keputusan === 'tolak') {
-                Mail::send(new LeaveRequestRejected(
+                Mail::queue(new LeaveRequestRejected(
                     $leaveRequest,
                     $pejabat->name,
                     $request->catatan_pejabat
@@ -496,7 +496,7 @@ class LeaveRequestController extends Controller
 
         // Kirim email persetujuan
         try {
-            Mail::send(new LeaveRequestApproved($leaveRequest, $pejabat->name));
+            Mail::queue(new LeaveRequestApproved($leaveRequest, $pejabat->name));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning('Email gagal dikirim: ' . $e->getMessage());
         }
@@ -538,7 +538,7 @@ class LeaveRequestController extends Controller
 
         // Kirim email penolakan
         try {
-            Mail::send(new LeaveRequestRejected($leaveRequest, $pejabat->name, $adminNote));
+            Mail::queue(new LeaveRequestRejected($leaveRequest, $pejabat->name, $adminNote));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning('Email gagal dikirim: ' . $e->getMessage());
         }
