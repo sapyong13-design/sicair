@@ -234,11 +234,11 @@ class DashboardController extends Controller
         $cutiPerBulan = \App\Models\LeaveRequest::where('user_id', $user->id)
             ->whereIn('status', [\App\Models\LeaveRequest::STATUS_DISETUJUI, \App\Models\LeaveRequest::STATUS_APPROVED])
             ->where('start_date', '>=', now()->subMonths(11)->startOfMonth())
-            ->selectRaw('MONTH(start_date) as bulan, YEAR(start_date) as tahun, SUM(total_hari_kerja) as total')
-            ->groupBy('tahun', 'bulan')
-            ->orderBy('tahun')->orderBy('bulan')
+            ->selectRaw("strftime('%Y-%m', start_date) as bulan_key, SUM(total_hari_kerja) as total")
+            ->groupBy('bulan_key')
+            ->orderBy('bulan_key')
             ->get()
-            ->keyBy(fn($r) => $r->tahun . '-' . str_pad($r->bulan, 2, '0', STR_PAD_LEFT));
+            ->keyBy('bulan_key');
 
         // Siapkan array 12 bulan lengkap (fill 0 jika tidak ada data)
         $chartLabels = [];
