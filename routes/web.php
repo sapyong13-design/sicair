@@ -23,6 +23,47 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
+// === Health Check (public, no auth) ===
+Route::get('/health', function () {
+    $status = 'ok';
+    $checks = [];
+
+    // Database check
+    try {
+        \DB::connection()->getPdo();
+        $checks['database'] = 'ok';
+    } catch (\Exception $e) {
+        $checks['database'] = 'error';
+        $status = 'degraded';
+    }
+
+    // Queue check (stuck jobs > 10 min)
+    try {
+        $stuckJobs = \DB::table('jobs')
+            ->where('reserved_at', '<', now()->subMinutes(10)->timestamp)
+            ->count();
+        $checks['queue'] = $stuckJobs === 0 ? 'ok' : "degraded ({$stuckJobs} stuck)";
+    } catch (\Exception $e) {
+        $checks['queue'] = 'unknown';
+    }
+
+    // Disk check
+    $freeBytes = disk_free_space(storage_path());
+    $freeMb    = $freeBytes !== false ? round($freeBytes / 1024 / 1024) : 0;
+    $checks['disk_free_mb'] = $freeMb;
+    $checks['disk']         = $freeMb > 100 ? 'ok' : 'warning: low disk space';
+    if ($freeMb <= 100) $status = 'degraded';
+
+    $checks['app_env']     = app()->environment();
+    $checks['php_version'] = phpversion();
+    $checks['timestamp']   = now()->toIso8601String();
+
+    return response()->json([
+        'status'  => $status,
+        'checks'  => $checks,
+    ], $status === 'ok' ? 200 : 503);
+})->name('health');
+
 // Public routes (no auth required)
 Route::get('/offline', function () {
     return view('errors.offline');
