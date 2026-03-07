@@ -19,6 +19,11 @@
             <div class="text-muted" style="font-size:0.85rem;">Sisa cuti tahunan seluruh pegawai tahun {{ $year }}</div>
         </div>
         <div class="d-flex gap-2">
+            <a href="{{ route('laporan-saldo-cuti.export', array_merge(request()->query(), ['format' => 'excel'])) }}"
+               class="btn btn-outline-success sh-export-btn"
+               style="border-radius:10px;">
+                <i class="ti ti-file-spreadsheet me-1"></i> Export Excel
+            </a>
             <a href="{{ route('laporan-saldo-cuti.export', request()->query()) }}"
                class="btn btn-outline-secondary sh-export-btn"
                style="border-radius:10px;">
