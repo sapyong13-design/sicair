@@ -1870,7 +1870,36 @@
             .sh-float-back:hover { transform: scale(1.08); color: var(--sh-primary); }
             .sh-float-back:active { transform: scale(0.95); }
         }
+/* Lottie success overlay */
+.sh-success-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+[data-bs-theme="dark"] .sh-success-overlay {
+    background: rgba(15, 23, 42, 0.92);
+}
+.sh-success-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+.sh-success-overlay p {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--sh-primary, #166534);
+    margin-top: 0.5rem;
+}
     </style>
+<script src="https://cdn.jsdelivr.net/npm/@lottiefiles/lottie-player@2/dist/lottie-player.js" defer></script>
 </head>
 <body class="d-flex flex-column min-vh-100">
 <!-- Landscape hint -->
@@ -3046,5 +3075,36 @@
         <i class="ti ti-arrow-left"></i>
     </a>
     @endif
+<!-- Lottie success overlay -->
+<div id="sh-success-overlay" class="sh-success-overlay">
+    <lottie-player
+        src="https://assets9.lottiefiles.com/packages/lf20_jbrw3hcz.json"
+        background="transparent"
+        speed="1.2"
+        style="width: 180px; height: 180px;"
+        autoplay
+        id="sh-lottie-player">
+    </lottie-player>
+    <p>Pengajuan Berhasil!</p>
+</div>
+<script>
+// Show Lottie success animation on successful leave submission
+@if(session('success') && str_contains(session('success'), 'berhasil'))
+(function() {
+    var overlay = document.getElementById('sh-success-overlay');
+    if (!overlay) return;
+    overlay.classList.add('visible');
+    setTimeout(function() {
+        overlay.style.transition = 'opacity 0.5s';
+        overlay.style.opacity = '0';
+        setTimeout(function() {
+            overlay.classList.remove('visible');
+            overlay.style.opacity = '';
+            overlay.style.transition = '';
+        }, 500);
+    }, 2500);
+})();
+@endif
+</script>
 </body>
 </html>
