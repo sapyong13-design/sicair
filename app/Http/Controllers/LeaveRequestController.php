@@ -441,6 +441,111 @@ class LeaveRequestController extends Controller
     }
 
     /**
+     * Bulk approve/reject/tangguhkan oleh Ketua/Pejabat Berwenang
+     */
+    public function bulkDecide(Request $request)
+    {
+        $request->validate([
+            'ids'      => 'required|array|min:1',
+            'ids.*'    => 'exists:leave_requests,id',
+            'decision' => 'required|in:setuju,tolak,tangguhkan',
+            'note'     => 'nullable|string|max:500',
+        ]);
+
+        $user = auth()->user();
+        if (!$user->canApproveAsPejabat() && !$user->isAdmin()) {
+            abort(403);
+        }
+
+        $statusMap = [
+            'setuju'     => LeaveRequest::STATUS_DISETUJUI,
+            'tolak'      => LeaveRequest::STATUS_DITOLAK,
+            'tangguhkan' => LeaveRequest::STATUS_DITANGGUHKAN,
+        ];
+
+        $newStatus = $statusMap[$request->decision];
+        $count = 0;
+
+        foreach ($request->ids as $id) {
+            $leave = LeaveRequest::with('user')->find($id);
+            if (!$leave || !in_array($leave->status, [LeaveRequest::STATUS_PERTIMBANGAN, LeaveRequest::STATUS_DIAJUKAN])) {
+                continue;
+            }
+
+            $leave->update([
+                'status'            => $newStatus,
+                'pejabat_id'        => $user->id,
+                'keputusan_pejabat' => $request->decision,
+                'catatan_pejabat'   => $request->note,
+                'decided_at'        => now(),
+            ]);
+
+            if ($request->decision === 'setuju' && $leave->type === LeaveRequest::TYPE_TAHUNAN) {
+                DB::transaction(function () use ($leave) {
+                    $lockedUser = \App\Models\User::lockForUpdate()->find($leave->user_id);
+                    $totalDays = $leave->total_hari_kerja ?? $leave->total_days ?? 0;
+                    $previousBalance = $lockedUser->leave_balance;
+                    $lockedUser->decrement('leave_balance', $totalDays);
+
+                    BalanceAuditService::logBalanceChange(
+                        $lockedUser,
+                        $previousBalance,
+                        $previousBalance - $totalDays,
+                        "Pengajuan {$leave->type_label} disetujui (bulk)",
+                        $leave->id
+                    );
+                });
+            }
+
+            AuditLog::log(
+                $request->decision === 'setuju' ? 'approve' : ($request->decision === 'tolak' ? 'reject' : $request->decision),
+                LeaveRequest::class,
+                $leave->id,
+                null,
+                ['status' => $newStatus, 'keputusan_pejabat' => $request->decision, 'catatan_pejabat' => $request->note],
+                "Pejabat {$user->name} bulk-{$request->decision} pengajuan cuti #{$leave->id} milik {$leave->user->name ?? '-'}"
+            );
+
+            $notifType = $request->decision === 'setuju'
+                ? Notification::TYPE_CUTI_DISETUJUI
+                : ($request->decision === 'tolak' ? Notification::TYPE_CUTI_DITOLAK : Notification::TYPE_CUTI_PERTIMBANGAN);
+
+            $notifTitle = match ($request->decision) {
+                'setuju'     => 'Cuti Disetujui',
+                'tolak'      => 'Cuti Ditolak',
+                'tangguhkan' => 'Cuti Ditangguhkan',
+            };
+
+            $notifMessage = "Pengajuan {$leave->type_label} Anda telah " .
+                match ($request->decision) {
+                    'setuju'     => 'disetujui',
+                    'tolak'      => 'ditolak',
+                    'tangguhkan' => 'ditangguhkan',
+                } .
+                " oleh {$user->name}" .
+                ($request->note ? '. Catatan: ' . $request->note : '.');
+
+            Notification::kirim(
+                $leave->user_id,
+                $notifTitle,
+                $notifMessage,
+                $notifType,
+                route('leave.show', $leave->id)
+            );
+
+            $count++;
+        }
+
+        // Invalidate analytics cache
+        Cache::forget('analytics_annual_' . now()->year);
+        Cache::forget('analytics_dashboard_' . now()->year);
+        Cache::forget('analytics_balance_overview_' . now()->year);
+        Cache::forget('analytics_heatmap_by_unit_' . now()->year);
+
+        return back()->with('success', "{$count} pengajuan berhasil diproses.");
+    }
+
+    /**
      * Detail pengajuan cuti
      */
     public function show(LeaveRequest $leaveRequest)

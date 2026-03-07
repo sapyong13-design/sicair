@@ -760,11 +760,32 @@
         </div>
         @else
         <div class="card-body p-3">
+            <form id="sh-bulk-form" method="POST" action="{{ route('leave.bulk-decide') }}">
+                @csrf
+                <div class="mb-3" id="sh-bulk-actions" style="display:none;">
+                    <div class="d-flex gap-2 align-items-center flex-wrap p-2" style="background:var(--sh-primary-light,#dcfce7);border-radius:10px;">
+                        <span class="text-muted small" id="sh-bulk-count">0 dipilih</span>
+                        <select name="decision" class="form-select form-select-sm" style="width:auto;" required>
+                            <option value="">-- Pilih Keputusan --</option>
+                            <option value="setuju">Setujui Semua</option>
+                            <option value="tolak">Tolak Semua</option>
+                            <option value="tangguhkan">Tangguhkan Semua</option>
+                        </select>
+                        <input type="text" name="note" class="form-control form-control-sm"
+                            placeholder="Catatan (opsional)" style="max-width:200px;">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="ti ti-check me-1"></i> Terapkan
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="sh-bulk-clear">Batal</button>
+                    </div>
+                </div>
+
             @foreach($needsDecision as $req)
             <div class="card sh-history-card status-{{ $req->status }} mb-3">
                 <div class="card-body p-3">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="d-flex align-items-center gap-2">
+                            <input type="checkbox" name="ids[]" value="{{ $req->id }}" class="sh-bulk-cb form-check-input" style="width:18px;height:18px;flex-shrink:0;margin-top:0;">
                             <div class="sh-user-avatar" style="width: 40px; height: 40px; font-size: 0.8rem; background: var(--sh-primary-light); color: var(--sh-primary); border: none; border-radius: 10px;">
                                 {{ strtoupper(substr($req->user->name, 0, 2)) }}
                             </div>
@@ -810,7 +831,7 @@
                     </div>
                     @endif
                     <div class="d-flex gap-2 mt-2">
-                        <button class="btn btn-sm sh-btn-primary flex-fill" data-bs-toggle="modal" data-bs-target="#decisionModal{{ $req->id }}">
+                        <button type="button" class="btn btn-sm sh-btn-primary flex-fill" data-bs-toggle="modal" data-bs-target="#decisionModal{{ $req->id }}">
                             <i class="ti ti-gavel me-1"></i> Beri Keputusan
                         </button>
                         <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">
@@ -821,9 +842,25 @@
             </div>
             @include('partials.pejabat-decision-modal', ['req' => $req])
             @endforeach
+            </form>
         </div>
         @endif
     </div>
+
+    <script>
+    document.querySelectorAll('.sh-bulk-cb').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            var checked = document.querySelectorAll('.sh-bulk-cb:checked').length;
+            document.getElementById('sh-bulk-count').textContent = checked + ' dipilih';
+            document.getElementById('sh-bulk-actions').style.display = checked > 0 ? 'flex' : 'none';
+        });
+    });
+    document.getElementById('sh-bulk-clear')?.addEventListener('click', function() {
+        document.querySelectorAll('.sh-bulk-cb').forEach(function(cb) { cb.checked = false; });
+        document.getElementById('sh-bulk-actions').style.display = 'none';
+        document.getElementById('sh-bulk-count').textContent = '0 dipilih';
+    });
+    </script>
 
     {{-- Ketua's Own Leave --}}
     @if(isset($leaveRequests) && $leaveRequests->isNotEmpty())

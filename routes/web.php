@@ -119,6 +119,7 @@ Route::middleware('auth')->group(function () {
     // Ketua/Pejabat Berwenang: keputusan final
     Route::middleware('role:ketua,admin')->group(function () {
         Route::post('/leave/{leaveRequest}/decide', [LeaveRequestController::class, 'decidePejabat'])->name('leave.decide');
+        Route::post('/leave/bulk-decide', [LeaveRequestController::class, 'bulkDecide'])->name('leave.bulk-decide');
     });
 
     // Admin backward compat: approve/reject langsung
