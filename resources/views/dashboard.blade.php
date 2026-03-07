@@ -1387,10 +1387,31 @@
         </div>
         @else
 
+        {{-- Filter chips + view toggle --}}
+        <div class="card-body pb-0 pt-3">
+            <div class="d-flex align-items-center justify-content-between gap-2 mb-3 flex-wrap">
+                <div class="sh-filter-chips">
+                    <button class="sh-filter-chip active" data-filter="all">Semua</button>
+                    <button class="sh-filter-chip" data-filter="pending">Menunggu</button>
+                    <button class="sh-filter-chip" data-filter="approved">Disetujui</button>
+                    <button class="sh-filter-chip" data-filter="rejected">Ditolak</button>
+                    <button class="sh-filter-chip" data-filter="ditangguhkan">Ditangguhkan</button>
+                </div>
+                <div class="sh-view-toggle d-none d-md-flex">
+                    <button class="sh-view-btn active" id="sh-view-expanded" title="Tampilan normal">
+                        <i class="ti ti-layout-list"></i>
+                    </button>
+                    <button class="sh-view-btn" id="sh-view-compact" title="Tampilan kompak">
+                        <i class="ti ti-layout-rows"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         {{-- Mobile: cards --}}
-        <div class="card-body d-md-none">
+        <div class="card-body d-md-none" id="sh-leave-cards">
             @foreach($leaveRequests as $req)
-            <div class="card sh-history-card status-{{ $req->status }} mb-3">
+            <div class="card sh-history-card status-{{ $req->status }} mb-3" data-status="{{ $req->status }}">
                 <div class="card-body p-3">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
@@ -1451,7 +1472,7 @@
                 </thead>
                 <tbody>
                 @foreach($leaveRequests as $req)
-                    <tr>
+                    <tr data-status="{{ $req->status }}">
                         <td>
                             <span class="fw-semibold" style="font-size: 0.88rem;">{{ $req->type_label }}</span>
                         </td>
@@ -1490,6 +1511,55 @@
         </div>
         @endif
     </div>
+@endif
+
+@if(!$user->isAdmin())
+@push('scripts')
+<script>
+// Filter chips for Riwayat Pengajuan Cuti
+(function() {
+    var pendingStatuses   = ['diajukan', 'pertimbangan_atasan', 'pending'];
+    var approvedStatuses  = ['disetujui', 'approved'];
+    var rejectedStatuses  = ['ditolak', 'rejected'];
+    var suspendStatuses   = ['ditangguhkan'];
+
+    function statusMatchesFilter(status, filter) {
+        if (filter === 'all')          return true;
+        if (filter === 'pending')      return pendingStatuses.indexOf(status) !== -1;
+        if (filter === 'approved')     return approvedStatuses.indexOf(status) !== -1;
+        if (filter === 'rejected')     return rejectedStatuses.indexOf(status) !== -1;
+        if (filter === 'ditangguhkan') return suspendStatuses.indexOf(status) !== -1;
+        return status === filter;
+    }
+
+    document.querySelectorAll('.sh-filter-chip').forEach(function(chip) {
+        chip.addEventListener('click', function() {
+            document.querySelectorAll('.sh-filter-chip').forEach(function(c) { c.classList.remove('active'); });
+            this.classList.add('active');
+            var filter = this.dataset.filter;
+            document.querySelectorAll('[data-status]').forEach(function(row) {
+                var show = statusMatchesFilter(row.dataset.status, filter);
+                row.style.display = show ? '' : 'none';
+            });
+        });
+    });
+
+    // View toggle (desktop table only)
+    var viewExp = document.getElementById('sh-view-expanded');
+    var viewCmp = document.getElementById('sh-view-compact');
+    if (viewExp && viewCmp) {
+        viewCmp.addEventListener('click', function() {
+            viewExp.classList.remove('active'); viewCmp.classList.add('active');
+            document.querySelectorAll('tbody tr').forEach(function(r) { r.classList.add('sh-compact-row'); });
+        });
+        viewExp.addEventListener('click', function() {
+            viewCmp.classList.remove('active'); viewExp.classList.add('active');
+            document.querySelectorAll('tbody tr').forEach(function(r) { r.classList.remove('sh-compact-row'); });
+        });
+    }
+})();
+</script>
+@endpush
 @endif
 
 @if($user->isAdmin())

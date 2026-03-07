@@ -1756,6 +1756,55 @@
                 padding: 1.25rem;
             }
         }
+
+/* Quick filter chips */
+.sh-filter-chips {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+.sh-filter-chips::-webkit-scrollbar { display: none; }
+.sh-filter-chip {
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    padding: 0.3rem 0.85rem;
+    border-radius: 99px;
+    border: 1.5px solid var(--sh-border, #d1e7d8);
+    color: var(--sh-text-muted, #64748b);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    font-weight: 500;
+}
+.sh-filter-chip.active,
+.sh-filter-chip:hover {
+    background: var(--sh-primary, #166534);
+    border-color: var(--sh-primary, #166534);
+    color: white;
+}
+
+/* Compact/Expanded toggle */
+.sh-view-toggle { display: flex; gap: 0.25rem; }
+.sh-view-btn {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: 1.5px solid var(--sh-border, #d1e7d8);
+    background: transparent;
+    color: var(--sh-text-muted, #64748b);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1rem;
+    transition: all 0.15s;
+}
+.sh-view-btn.active {
+    background: var(--sh-primary, #166534);
+    border-color: var(--sh-primary, #166534);
+    color: white;
+}
+.sh-compact-row td { padding: 0.4rem 0.75rem !important; font-size: 0.83rem !important; }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
