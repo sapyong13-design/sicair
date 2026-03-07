@@ -713,6 +713,32 @@
         </div>
     </div>
 
+    {{-- Widget: Siapa yang cuti hari ini --}}
+    @if(isset($todayOnLeave) && $todayOnLeave->count() > 0)
+    <div class="card sh-card mb-4 animate-in">
+        <div class="card-body p-3">
+            <h6 class="fw-bold mb-3" style="font-size:0.9rem;">
+                <i class="ti ti-user-off me-2" style="color:var(--sh-accent,#b8860b)"></i>
+                Sedang Cuti Hari Ini
+                <span class="badge ms-1" style="background:var(--sh-primary-light,#dcfce7);color:var(--sh-primary,#166534);font-size:0.75rem;border-radius:99px;">{{ $todayOnLeave->count() }}</span>
+            </h6>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach($todayOnLeave as $c)
+                @php
+                    $initials = collect(explode(' ', $c->user->name ?? ''))->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
+                    $colors = ['#166534','#1d4ed8','#7c3aed','#b45309','#0f766e','#9f1239'];
+                    $bg = $colors[abs(crc32($c->user->name ?? '')) % count($colors)];
+                @endphp
+                <div class="d-flex align-items-center gap-2 px-3 py-2" style="background:var(--sh-primary-light,#dcfce7);border-radius:99px;">
+                    <span class="sh-avatar-initials" style="width:26px;height:26px;font-size:0.68rem;background:{{ $bg }};color:#fff;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;flex-shrink:0;">{{ $initials }}</span>
+                    <span style="font-size:0.83rem;font-weight:600;color:var(--sh-primary,#166534);">{{ $c->user->name }}</span>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
+
     {{-- Needs Decision (already reviewed by atasan) --}}
     <div class="card sh-card mb-4">
         <div class="card-header d-flex align-items-center justify-content-between">
@@ -892,6 +918,32 @@
             </div>
         </div>
     </div>
+
+    {{-- Widget: Siapa yang cuti hari ini --}}
+    @if(isset($todayOnLeave) && $todayOnLeave->count() > 0)
+    <div class="card sh-card mb-4 animate-in">
+        <div class="card-body p-3">
+            <h6 class="fw-bold mb-3" style="font-size:0.9rem;">
+                <i class="ti ti-user-off me-2" style="color:var(--sh-accent,#b8860b)"></i>
+                Sedang Cuti Hari Ini
+                <span class="badge ms-1" style="background:var(--sh-primary-light,#dcfce7);color:var(--sh-primary,#166534);font-size:0.75rem;border-radius:99px;">{{ $todayOnLeave->count() }}</span>
+            </h6>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach($todayOnLeave as $c)
+                @php
+                    $initials = collect(explode(' ', $c->user->name ?? ''))->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
+                    $colors = ['#166534','#1d4ed8','#7c3aed','#b45309','#0f766e','#9f1239'];
+                    $bg = $colors[abs(crc32($c->user->name ?? '')) % count($colors)];
+                @endphp
+                <div class="d-flex align-items-center gap-2 px-3 py-2" style="background:var(--sh-primary-light,#dcfce7);border-radius:99px;">
+                    <span class="sh-avatar-initials" style="width:26px;height:26px;font-size:0.68rem;background:{{ $bg }};color:#fff;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;flex-shrink:0;">{{ $initials }}</span>
+                    <span style="font-size:0.83rem;font-weight:600;color:var(--sh-primary,#166534);">{{ $c->user->name }}</span>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
 
     {{-- Pending Review --}}
     <div class="card sh-card mb-4">

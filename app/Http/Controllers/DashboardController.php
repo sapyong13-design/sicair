@@ -138,7 +138,15 @@ class DashboardController extends Controller
 
         $leaveRequests = $user->leaveRequests()->latest()->get();
 
-        return view('dashboard', compact('user', 'needsDecision', 'recentDecisions', 'leaveRequests'));
+        // Widget: Siapa yang cuti hari ini
+        $today = \Carbon\Carbon::today();
+        $todayOnLeave = LeaveRequest::with('user')
+            ->whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+            ->where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->get();
+
+        return view('dashboard', compact('user', 'needsDecision', 'recentDecisions', 'leaveRequests', 'todayOnLeave'));
     }
 
     private function atasanDashboard(User $user, Request $request)
@@ -173,7 +181,15 @@ class DashboardController extends Controller
 
         $leaveRequests = $leaveQuery->get();
 
-        return view('dashboard', compact('user', 'pendingReview', 'reviewedByMe', 'leaveRequests'));
+        // Widget: Siapa yang cuti hari ini
+        $today = \Carbon\Carbon::today();
+        $todayOnLeave = LeaveRequest::with('user')
+            ->whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+            ->where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->get();
+
+        return view('dashboard', compact('user', 'pendingReview', 'reviewedByMe', 'leaveRequests', 'todayOnLeave'));
     }
 
     private function pegawaiDashboard(User $user, Request $request)
