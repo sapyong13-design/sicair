@@ -1376,6 +1376,38 @@
         [data-contrast="high"] .btn-outline-secondary { border-color: #000 !important; color: #000 !important; }
         [data-contrast="high"] .text-muted { color: #333 !important; }
 
+        /* High Contrast + Dark Mode combined */
+        [data-bs-theme="dark"][data-contrast="high"],
+        [data-contrast="high"][data-bs-theme="dark"] {
+            --sh-body-bg: #000000 !important;
+            --sh-card-bg: #0a0a0a !important;
+            --sh-text: #ffffff !important;
+            --sh-text-muted: #cccccc !important;
+            --sh-border: #ffffff !important;
+            --sh-primary: #4ade80 !important;
+            --sh-primary-light: #052e16 !important;
+            --sh-gray-50: #111111 !important;
+            --sh-gray-100: #1a1a1a !important;
+            --sh-success-light: #052e16 !important;
+            --sh-warning-light: #1c1007 !important;
+            --sh-danger-light: #1a0505 !important;
+        }
+        [data-bs-theme="dark"][data-contrast="high"] .card,
+        [data-bs-theme="dark"][data-contrast="high"] .sh-card,
+        [data-contrast="high"][data-bs-theme="dark"] .card,
+        [data-contrast="high"][data-bs-theme="dark"] .sh-card {
+            border: 2px solid #ffffff !important;
+        }
+        [data-bs-theme="dark"][data-contrast="high"] .text-muted,
+        [data-contrast="high"][data-bs-theme="dark"] .text-muted {
+            color: #cccccc !important;
+        }
+        [data-bs-theme="dark"][data-contrast="high"] .btn-outline-secondary,
+        [data-contrast="high"][data-bs-theme="dark"] .btn-outline-secondary {
+            border-color: #ffffff !important;
+            color: #ffffff !important;
+        }
+
         /* ===== Sprint 8 #45: Focus Visible ===== */
         :focus-visible {
             outline: 2px solid var(--sh-primary) !important;
@@ -2325,8 +2357,9 @@
     {{-- Sprint 8 #43: High Contrast Mode --}}
     <script>
     (function() {
-        if (localStorage.getItem('sh-contrast') === 'high') {
+        if (localStorage.getItem('sh-contrast') === 'high' || localStorage.getItem('sh-high-contrast') === 'true') {
             document.documentElement.setAttribute('data-contrast', 'high');
+            document.documentElement.classList.add('high-contrast');
         }
         document.addEventListener('DOMContentLoaded', function() {
             var btn = document.getElementById('contrastToggle');
@@ -2345,10 +2378,14 @@
                 var isHigh = document.documentElement.getAttribute('data-contrast') === 'high';
                 if (isHigh) {
                     document.documentElement.removeAttribute('data-contrast');
+                    document.documentElement.classList.remove('high-contrast');
                     localStorage.removeItem('sh-contrast');
+                    localStorage.removeItem('sh-high-contrast');
                 } else {
                     document.documentElement.setAttribute('data-contrast', 'high');
+                    document.documentElement.classList.add('high-contrast');
                     localStorage.setItem('sh-contrast', 'high');
+                    localStorage.setItem('sh-high-contrast', 'true');
                 }
                 updateIcon();
             });
