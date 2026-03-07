@@ -1842,6 +1842,34 @@
     color: var(--sh-text-muted);
 }
 .sh-longpress-preview-row:last-child { border-bottom: none; }
+
+        /* Floating back button (mobile only) */
+        .sh-float-back {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .sh-float-back {
+                display: flex;
+                position: fixed;
+                bottom: 80px;
+                left: 1.25rem;
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                background: var(--sh-card-bg, #fff);
+                border: 1.5px solid var(--sh-border, #d1e7d8);
+                box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+                align-items: center;
+                justify-content: center;
+                color: var(--sh-primary, #166534);
+                font-size: 1.1rem;
+                z-index: 1039;
+                text-decoration: none;
+                transition: transform 0.15s;
+            }
+            .sh-float-back:hover { transform: scale(1.08); color: var(--sh-primary); }
+            .sh-float-back:active { transform: scale(0.95); }
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -3011,5 +3039,12 @@
         }, { passive: true });
     })();
     </script>
+
+    {{-- Floating back button (mobile, detail pages only) --}}
+    @if(request()->is('leave/*') || request()->is('pegawai/*') || request()->is('profile*'))
+    <a href="javascript:history.back()" class="sh-float-back" aria-label="Kembali">
+        <i class="ti ti-arrow-left"></i>
+    </a>
+    @endif
 </body>
 </html>

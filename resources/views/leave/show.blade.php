@@ -69,6 +69,10 @@
                 Ajukan Ulang
             </a>
             @endif
+            {{-- Share button --}}
+            <button id="sh-share-btn" class="btn btn-outline-secondary btn-sm" style="border-radius: 10px;" title="Bagikan status cuti">
+                <i class="ti ti-share me-1"></i> Bagikan
+            </button>
         </div>
     </div>
 </div>
@@ -627,6 +631,30 @@ function loadPreview(type) {
         docxMsg.classList.remove('d-none');
         dlBtn.href = previewUrls.form;
         dlBtn.style.display = '';
+    }
+}
+
+// Share button
+var shareBtn = document.getElementById('sh-share-btn');
+if (shareBtn) {
+    var shareData = {
+        title: 'Status Cuti — SiHEALING',
+        text: '{{ "Pengajuan cuti: " . ($leaveRequest->type_label ?? "") . " | Status: " . ucfirst($leaveRequest->status ?? "") . " | " . ($leaveRequest->start_date ? $leaveRequest->start_date->format("d M Y") : "") . " s/d " . ($leaveRequest->end_date ? $leaveRequest->end_date->format("d M Y") : "") }}',
+        url: window.location.href
+    };
+    if (navigator.share) {
+        shareBtn.addEventListener('click', function() {
+            navigator.share(shareData).catch(function() {});
+        });
+    } else {
+        shareBtn.addEventListener('click', function() {
+            var text = shareData.text + ' — ' + shareData.url;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(function() {
+                    if (typeof showToast === 'function') showToast('Link berhasil disalin!', 'success');
+                }).catch(function() {});
+            }
+        });
     }
 }
 </script>
