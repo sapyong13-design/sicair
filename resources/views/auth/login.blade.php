@@ -504,6 +504,9 @@
                             </button>
                         </div>
                     </div>
+                    <div class="d-flex justify-content-end mb-2">
+                        <a href="{{ route('password.request') }}" class="text-muted small" style="font-size: 0.82rem;">Lupa password?</a>
+                    </div>
                     <div class="mb-4">
                         <label class="form-check" style="cursor: pointer;">
                             <input type="checkbox" name="remember" class="form-check-input" style="border-radius: 6px; border-color: #166534;"/>
