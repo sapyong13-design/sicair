@@ -173,7 +173,32 @@
     padding: 1rem 1.25rem;
     border-bottom: 1px solid var(--sh-gray-100);
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.3s ease, opacity 0.3s ease, height 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y;
+}
+.notification-item.swipe-left {
+    transform: translateX(-60px);
+}
+.notification-item .sh-swipe-action {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 60px;
+    background: var(--sh-primary, #166534);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transform: translateX(60px);
+    transition: transform 0.3s ease;
+}
+.notification-item.swipe-left .sh-swipe-action {
+    transform: translateX(0);
 }
 
 .notification-item:hover {
@@ -440,5 +465,55 @@ document.addEventListener('DOMContentLoaded', function() {
               });
           });
     }
+
+    // Swipe to dismiss notifications (mobile)
+    document.querySelectorAll('.notification-item').forEach(function(item) {
+        var startX = 0, startY = 0, swiping = false;
+
+        // Add swipe action button
+        var action = document.createElement('div');
+        action.className = 'sh-swipe-action';
+        action.innerHTML = '<i class="ti ti-check"></i>';
+        action.addEventListener('click', function() {
+            var id = item.dataset.notificationId;
+            item.style.opacity = '0';
+            item.style.height = item.offsetHeight + 'px';
+            setTimeout(function() {
+                item.style.height = '0';
+                item.style.padding = '0';
+                item.style.margin = '0';
+            }, 300);
+            // Mark as read via fetch if endpoint exists
+            if (id) {
+                var csrfToken = document.querySelector('meta[name="csrf-token"]');
+                fetch('/notifications/' + id + '/mark-read', {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken ? csrfToken.content : '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    }
+                }).catch(function(){});
+            }
+        });
+        item.appendChild(action);
+
+        item.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            swiping = true;
+        }, { passive: true });
+
+        item.addEventListener('touchmove', function(e) {
+            if (!swiping) return;
+            var dx = e.touches[0].clientX - startX;
+            var dy = e.touches[0].clientY - startY;
+            if (Math.abs(dy) > Math.abs(dx)) { swiping = false; return; }
+            if (dx < -20) item.classList.add('swipe-left');
+            if (dx > 20) item.classList.remove('swipe-left');
+        }, { passive: true });
+
+        item.addEventListener('touchend', function() { swiping = false; });
+    });
 });
 </script>
