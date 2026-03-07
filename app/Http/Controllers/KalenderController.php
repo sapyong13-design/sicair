@@ -145,8 +145,9 @@ class KalenderController extends Controller
             ->whereIn('user_id', $bawahanIds)
             ->whereIn('status', [\App\Models\LeaveRequest::STATUS_DISETUJUI, \App\Models\LeaveRequest::STATUS_APPROVED])
             ->where(function ($q) use ($year, $month) {
-                $q->whereRaw('MONTH(start_date) = ? AND YEAR(start_date) = ?', [$month, $year])
-                  ->orWhereRaw('MONTH(end_date) = ? AND YEAR(end_date) = ?', [$month, $year]);
+                $ym = sprintf('%04d-%02d', $year, $month);
+                $q->whereRaw("strftime('%Y-%m', start_date) = ?", [$ym])
+                  ->orWhereRaw("strftime('%Y-%m', end_date) = ?", [$ym]);
             })
             ->orderBy('start_date')
             ->get();
