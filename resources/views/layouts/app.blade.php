@@ -1805,6 +1805,43 @@
     color: white;
 }
 .sh-compact-row td { padding: 0.4rem 0.75rem !important; font-size: 0.83rem !important; }
+
+/* Long press preview tooltip */
+.sh-longpress-preview {
+    position: fixed;
+    z-index: 2000;
+    background: var(--sh-card-bg, #fff);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    border: 1px solid var(--sh-border, #d1e7d8);
+    border-top: 3px solid var(--sh-primary, #166534);
+    padding: 1rem;
+    max-width: 280px;
+    min-width: 220px;
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.2s, transform 0.2s;
+}
+.sh-longpress-preview.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+.sh-longpress-preview-title {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--sh-text);
+    margin-bottom: 0.5rem;
+}
+.sh-longpress-preview-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    padding: 0.2rem 0;
+    border-bottom: 1px solid var(--sh-border-light, #e8f5e9);
+    color: var(--sh-text-muted);
+}
+.sh-longpress-preview-row:last-child { border-bottom: none; }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -2932,6 +2969,47 @@
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') SHBottomSheet.close();
     });
+    </script>
+    <script>
+    // Long press preview (mobile)
+    (function() {
+        var preview = document.createElement('div');
+        preview.className = 'sh-longpress-preview';
+        preview.innerHTML = '<div class="sh-longpress-preview-title" id="sh-lp-title"></div><div id="sh-lp-body"></div>';
+        document.body.appendChild(preview);
+
+        var timer, activeEl;
+        document.addEventListener('touchstart', function(e) {
+            var card = e.target.closest('[data-preview]');
+            if (!card) return;
+            activeEl = card;
+            timer = setTimeout(function() {
+                try {
+                    var data = JSON.parse(card.dataset.preview);
+                    document.getElementById('sh-lp-title').textContent = data.title || 'Detail';
+                    var body = document.getElementById('sh-lp-body');
+                    body.innerHTML = Object.entries(data).filter(function(kv) { return kv[0] !== 'title'; }).map(function(kv) {
+                        return '<div class="sh-longpress-preview-row"><span>' + kv[0] + '</span><strong>' + kv[1] + '</strong></div>';
+                    }).join('');
+                    var rect = card.getBoundingClientRect();
+                    var top = Math.max(8, rect.top - 8);
+                    var left = Math.min(window.innerWidth - 296, rect.left);
+                    preview.style.top = top + 'px';
+                    preview.style.left = left + 'px';
+                    preview.classList.add('visible');
+                } catch(e) {}
+            }, 500);
+        }, { passive: true });
+
+        document.addEventListener('touchend', function() {
+            clearTimeout(timer);
+            preview.classList.remove('visible');
+        }, { passive: true });
+        document.addEventListener('touchmove', function() {
+            clearTimeout(timer);
+            preview.classList.remove('visible');
+        }, { passive: true });
+    })();
     </script>
 </body>
 </html>
