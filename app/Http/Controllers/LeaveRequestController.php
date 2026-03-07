@@ -277,7 +277,7 @@ class LeaveRequestController extends Controller
                 $leaveRequest->id,
                 null,
                 ['status' => LeaveRequest::STATUS_DITOLAK, 'catatan_atasan' => $request->catatan_atasan],
-                "Atasan {$reviewer->name} menolak pengajuan cuti #{$leaveRequest->id} milik {$leaveRequest->user->name ?? '-'}"
+                "Atasan {$reviewer->name} menolak pengajuan cuti #{$leaveRequest->id} milik {$leaveRequest->user?->name}"
             );
 
             // Kirim email penolakan
@@ -384,7 +384,7 @@ class LeaveRequestController extends Controller
             $leaveRequest->id,
             null,
             ['status' => $statusMap[$keputusan], 'keputusan_pejabat' => $keputusan, 'catatan_pejabat' => $request->catatan_pejabat],
-            "Pejabat {$pejabat->name} memutuskan '{$keputusan}' pada pengajuan cuti #{$leaveRequest->id} milik {$leaveRequest->user->name ?? '-'}"
+            "Pejabat {$pejabat->name} memutuskan '{$keputusan}' pada pengajuan cuti #{$leaveRequest->id} milik {$leaveRequest->user?->name}"
         );
 
         // FIX #5: Wrap balance deduction in transaction with row lock to prevent race condition
@@ -503,7 +503,7 @@ class LeaveRequestController extends Controller
                 $leave->id,
                 null,
                 ['status' => $newStatus, 'keputusan_pejabat' => $request->decision, 'catatan_pejabat' => $request->note],
-                "Pejabat {$user->name} bulk-{$request->decision} pengajuan cuti #{$leave->id} milik {$leave->user->name ?? '-'}"
+                "Pejabat {$user->name} bulk-{$request->decision} pengajuan cuti #{$leave->id} milik {$leave->user?->name}"
             );
 
             $notifType = $request->decision === 'setuju'
@@ -614,7 +614,7 @@ class LeaveRequestController extends Controller
             $leaveRequest->id,
             null,
             ['status' => LeaveRequest::STATUS_DISETUJUI],
-            "Admin/pejabat {$pejabat->name} menyetujui pengajuan cuti #{$leaveRequest->id} milik {$leaveRequest->user->name ?? '-'}"
+            "Admin/pejabat {$pejabat->name} menyetujui pengajuan cuti #{$leaveRequest->id} milik {$leaveRequest->user?->name}"
         );
 
         // Kirim email persetujuan
@@ -656,7 +656,7 @@ class LeaveRequestController extends Controller
             $leaveRequest->id,
             null,
             ['status' => LeaveRequest::STATUS_DITOLAK, 'admin_note' => $adminNote],
-            "Admin/pejabat {$pejabat->name} menolak pengajuan cuti #{$leaveRequest->id} milik {$leaveRequest->user->name ?? '-'}"
+            "Admin/pejabat {$pejabat->name} menolak pengajuan cuti #{$leaveRequest->id} milik {$leaveRequest->user?->name}"
         );
 
         // Kirim email penolakan
