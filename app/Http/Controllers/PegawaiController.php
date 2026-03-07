@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUserRequest;
 use App\Models\AuditLog;
 use App\Models\CutiRecord;
 use App\Models\LeaveRequest;
@@ -59,27 +60,9 @@ class PegawaiController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'nip' => 'required|string|size:18|unique:users,nip',
-            'email' => 'nullable|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8',
-            'role' => 'required|in:admin,ketua,atasan,panitera,sekretaris,pegawai,hakim,hakim_ad_hoc',
-            'jabatan' => 'nullable|string|max:255',
-            'golongan_ruang' => 'nullable|string|max:10',
-            'unit_kerja' => 'required|string|max:255',
-            'masa_kerja_mulai' => 'nullable|date',
-            'status_pegawai' => 'required|in:hakim,aparatur,cpns,cakim,pppk',
-            'jenis_kelamin' => 'required|in:L,P',
-            'jumlah_anak' => 'nullable|integer|min:0',
-            'lokasi_terpencil' => 'nullable|boolean',
-            'atasan_id' => 'nullable|exists:users,id',
-            'telepon' => 'nullable|string|max:20',
-            'alamat' => 'nullable|string',
-            'leave_balance' => 'nullable|integer|min:0',
-        ]);
+        $validated = $request->validated();
 
         $validated['lokasi_terpencil'] = $request->boolean('lokasi_terpencil');
         $validated['leave_balance'] = $validated['leave_balance'] ?? 12;

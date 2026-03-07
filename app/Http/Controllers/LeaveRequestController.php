@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreLeaveRequestRequest;
 use App\Mail\LeaveRequestApproved;
 use App\Mail\LeaveRequestNeedsConsideration;
 use App\Mail\LeaveRequestRejected;
@@ -95,7 +96,7 @@ class LeaveRequestController extends Controller
     /**
      * Simpan pengajuan cuti
      */
-    public function store(Request $request)
+    public function store(StoreLeaveRequestRequest $request)
     {
         $user = Auth::user();
 
