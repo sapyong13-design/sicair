@@ -6,6 +6,7 @@ use App\Mail\LeaveRequestApproved;
 use App\Mail\LeaveRequestNeedsConsideration;
 use App\Mail\LeaveRequestRejected;
 use App\Mail\LeaveRequestSubmitted;
+use App\Models\AuditLog;
 use App\Models\LeaveRequest;
 use App\Models\Notification;
 use App\Services\BalanceAuditService;
@@ -263,6 +264,15 @@ class LeaveRequestController extends Controller
                 'status' => LeaveRequest::STATUS_DITOLAK,
             ]);
 
+            AuditLog::log(
+                'reject',
+                LeaveRequest::class,
+                $leaveRequest->id,
+                null,
+                ['status' => LeaveRequest::STATUS_DITOLAK, 'catatan_atasan' => $request->catatan_atasan],
+                "Atasan {$reviewer->name} menolak pengajuan cuti #{$leaveRequest->id} milik {$leaveRequest->user->name ?? '-'}"
+            );
+
             // Kirim email penolakan
             try {
                 Mail::send(new LeaveRequestRejected(
@@ -349,6 +359,20 @@ class LeaveRequestController extends Controller
             'decided_at' => now(),
             'status' => $statusMap[$keputusan],
         ]);
+
+        $auditAction = match ($keputusan) {
+            'setuju'     => 'approve',
+            'tolak'      => 'reject',
+            default      => $keputusan,
+        };
+        AuditLog::log(
+            $auditAction,
+            LeaveRequest::class,
+            $leaveRequest->id,
+            null,
+            ['status' => $statusMap[$keputusan], 'keputusan_pejabat' => $keputusan, 'catatan_pejabat' => $request->catatan_pejabat],
+            "Pejabat {$pejabat->name} memutuskan '{$keputusan}' pada pengajuan cuti #{$leaveRequest->id} milik {$leaveRequest->user->name ?? '-'}"
+        );
 
         // FIX #5: Wrap balance deduction in transaction with row lock to prevent race condition
         if ($keputusan === 'setuju' && $leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
@@ -460,6 +484,15 @@ class LeaveRequestController extends Controller
             return back()->with('error', $error);
         }
 
+        AuditLog::log(
+            'approve',
+            LeaveRequest::class,
+            $leaveRequest->id,
+            null,
+            ['status' => LeaveRequest::STATUS_DISETUJUI],
+            "Admin/pejabat {$pejabat->name} menyetujui pengajuan cuti #{$leaveRequest->id} milik {$leaveRequest->user->name ?? '-'}"
+        );
+
         // Kirim email persetujuan
         try {
             Mail::send(new LeaveRequestApproved($leaveRequest, $pejabat->name));
@@ -492,6 +525,15 @@ class LeaveRequestController extends Controller
             'catatan_pejabat' => $adminNote,
             'decided_at' => now(),
         ]);
+
+        AuditLog::log(
+            'reject',
+            LeaveRequest::class,
+            $leaveRequest->id,
+            null,
+            ['status' => LeaveRequest::STATUS_DITOLAK, 'admin_note' => $adminNote],
+            "Admin/pejabat {$pejabat->name} menolak pengajuan cuti #{$leaveRequest->id} milik {$leaveRequest->user->name ?? '-'}"
+        );
 
         // Kirim email penolakan
         try {
