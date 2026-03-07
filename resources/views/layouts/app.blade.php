@@ -2485,6 +2485,58 @@
     });
     </script>
 
+    {{-- T16-T17: Double-submit prevention & Session timeout warning --}}
+    <script>
+    // T16: Global double-submit prevention
+    document.addEventListener('submit', function(e) {
+        var form = e.target;
+        if (form.dataset.submitting) { e.preventDefault(); return; }
+        form.dataset.submitting = '1';
+        var btn = form.querySelector('[type="submit"]');
+        if (btn && !btn.id.includes('sh-confirm')) {
+            btn.disabled = true;
+            var orig = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Memproses...';
+            setTimeout(function() { btn.disabled = false; btn.innerHTML = orig; delete form.dataset.submitting; }, 10000);
+        }
+    }, true);
+
+    // T17: Session timeout warning (15 min idle)
+    @auth
+    (function() {
+        var WARNING_MS  = 15 * 60 * 1000;
+        var COUNTDOWN_S = 5 * 60;
+        var timer, interval, modalInstance;
+
+        function showWarning() {
+            var el = document.getElementById('sh-session-modal');
+            if (!el) return;
+            modalInstance = new bootstrap.Modal(el, { backdrop: 'static', keyboard: false });
+            modalInstance.show();
+            var secs = COUNTDOWN_S;
+            interval = setInterval(function() {
+                secs--;
+                var cd = document.getElementById('sh-countdown');
+                if (cd) cd.textContent = Math.floor(secs/60).toString().padStart(2,'0') + ':' + (secs%60).toString().padStart(2,'0');
+                if (secs <= 0) { clearInterval(interval); window.location.href = '{{ route("login") }}'; }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearTimeout(timer);
+            clearInterval(interval);
+            if (modalInstance) { try { modalInstance.hide(); } catch(e) {} modalInstance = null; }
+            timer = setTimeout(showWarning, WARNING_MS);
+        }
+
+        ['click','keydown','touchstart','mousemove'].forEach(function(ev) {
+            document.addEventListener(ev, resetTimer, { passive: true });
+        });
+        resetTimer();
+    })();
+    @endauth
+    </script>
+
     @stack('scripts')
 
     <script>
@@ -2494,5 +2546,31 @@
         if (main) main.classList.add('sh-page-transition');
     });
     </script>
+
+    @auth
+    {{-- T17: Session Timeout Warning --}}
+    <div class="modal fade" id="sh-session-modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content" style="border-radius:16px;">
+                <div class="modal-body text-center p-4">
+                    <i class="ti ti-clock-exclamation mb-3" style="font-size:3rem; color:#d97706; display:block;"></i>
+                    <h5 class="fw-bold mb-2">Sesi Hampir Habis</h5>
+                    <p class="text-muted mb-3" style="font-size:0.88rem;">
+                        Sesi Anda akan berakhir dalam <strong id="sh-countdown">5:00</strong>.<br>Perpanjang sesi?
+                    </p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button onclick="window.location.reload()" class="btn btn-primary btn-sm" style="border-radius:8px;">
+                            <i class="ti ti-refresh me-1"></i> Perpanjang
+                        </button>
+                        <a href="{{ route('logout') }}"
+                           onclick="event.preventDefault(); document.getElementById('sh-logout-form').submit();"
+                           class="btn btn-outline-secondary btn-sm" style="border-radius:8px;">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <form id="sh-logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">@csrf</form>
+    @endauth
 </body>
 </html>
