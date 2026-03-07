@@ -12,17 +12,16 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Admin
-        User::factory()->admin()->create([
-            'name'  => 'Administrator',
-            'nip'   => '000000000000000000',
-            'email' => 'admin@pn-natuna.go.id',
-        ]);
+        $admin = User::firstOrCreate(['nip' => '000000000000000000'], array_merge(
+            User::factory()->admin()->make()->toArray(),
+            ['name' => 'Administrator', 'email' => 'admin@pn-natuna.go.id', 'password' => \Illuminate\Support\Facades\Hash::make('password')]
+        ));
 
         // Ketua
-        $ketua = User::factory()->ketua()->create([
-            'name' => 'Ketua Pengadilan',
-            'nip'  => '197001010000000001',
-        ]);
+        $ketua = User::firstOrCreate(['nip' => '197001010000000001'], array_merge(
+            User::factory()->ketua()->make()->toArray(),
+            ['name' => 'Ketua Pengadilan', 'password' => \Illuminate\Support\Facades\Hash::make('password')]
+        ));
 
         // 2 Atasan (Panitera / Sekretaris)
         $atasan1 = User::factory()->atasan()->create([
