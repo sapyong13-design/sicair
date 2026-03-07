@@ -39,6 +39,19 @@ class AuthController extends Controller
             return redirect()->intended('/dashboard');
         }
 
+        AuditLog::create([
+            'user_id'    => null,
+            'action'     => 'login_failed',
+            'model'      => 'Auth',
+            'model_id'   => null,
+            'old_values' => null,
+            'new_values' => json_encode([
+                'username_attempted' => $request->input('nip', $request->input('email', $request->input('username', '-')))
+            ]),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
         return back()->withErrors([
             'nip' => 'NIP atau password salah.',
         ])->onlyInput('nip');
