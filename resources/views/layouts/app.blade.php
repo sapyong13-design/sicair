@@ -1457,6 +1457,117 @@
         }
         .sh-notif-date-sep::before { left: 1rem; }
         .sh-notif-date-sep::after { right: 1rem; }
+
+        /* ============================================================
+           UI/UX IMPROVEMENTS — 2026-03-07
+           ============================================================ */
+
+        /* T2: Prevent iOS auto-zoom on input focus */
+        @media (max-width: 768px) {
+            input[type="text"],
+            input[type="email"],
+            input[type="password"],
+            input[type="number"],
+            input[type="date"],
+            input[type="search"],
+            select,
+            textarea {
+                font-size: 16px !important;
+            }
+        }
+
+        /* T3: Touch target minimum 44px (WCAG 2.5.5) */
+        @media (max-width: 768px) {
+            .sh-bottom-nav-item,
+            .navbar-toggler,
+            .page-link,
+            .dropdown-item {
+                min-height: 44px;
+                min-width: 44px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .btn-sm {
+                padding: 0.5rem 0.85rem;
+                min-height: 44px;
+            }
+        }
+
+        /* T4: FAB — Floating Action Button */
+        .sh-fab {
+            position: fixed;
+            bottom: 80px;
+            right: 1.25rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #14532d, #166634);
+            color: #fff;
+            border: none;
+            box-shadow: 0 4px 16px rgba(20,83,45,0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            z-index: 1040;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-decoration: none;
+        }
+        .sh-fab:hover, .sh-fab:focus {
+            transform: scale(1.08);
+            box-shadow: 0 6px 24px rgba(20,83,45,0.55);
+            color: #fff;
+        }
+        .sh-fab:active { transform: scale(0.96); }
+        @media (min-width: 992px) { .sh-fab { display: none; } }
+
+        /* T6: Avatar inisial pegawai */
+        .sh-avatar-initials {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #fff;
+            flex-shrink: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* T7: Status badge warna konsisten */
+        .sh-badge-pending   { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+        .sh-badge-approved  { background: #dcfce7; color: #14532d; border: 1px solid #86efac; }
+        .sh-badge-rejected  { background: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; }
+        .sh-badge-cancelled { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .sh-badge-revised   { background: #fff7ed; color: #7c2d12; border: 1px solid #fdba74; }
+
+        /* T9: Print-friendly CSS */
+        @media print {
+            .navbar, .sh-bottom-nav, .sh-fab, .sh-sidebar,
+            .navbar-toggler, .dropdown-menu,
+            .sh-toast-container, #nprogress,
+            .sh-page-header .btn, .btn:not(.btn-print) { display: none !important; }
+            body { background: white !important; color: black !important; }
+            .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
+            .sh-stat-card, .card { break-inside: avoid; }
+            .container-xl { max-width: 100% !important; padding: 0 !important; }
+            a { color: inherit !important; text-decoration: none !important; }
+            table { border-collapse: collapse !important; }
+            th, td { border: 1px solid #dee2e6 !important; padding: 0.4rem !important; }
+        }
+
+        /* T22: Page fade-in transition */
+        .sh-page-transition {
+            animation: sh-fade-in 0.25s ease;
+        }
+        @keyframes sh-fade-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -1805,6 +1916,18 @@
         </a>
         @endif
     </nav>
+    @endauth
+
+    {{-- FAB: Ajukan Cuti (mobile only) --}}
+    @auth
+        @if(auth()->check() && method_exists(auth()->user(), 'bolehCuti') && auth()->user()->bolehCuti() && !auth()->user()->isAdmin())
+        <a href="{{ route('leave.select-type') }}"
+           class="sh-fab"
+           aria-label="Ajukan Cuti"
+           title="Ajukan Cuti">
+            <i class="ti ti-file-plus"></i>
+        </a>
+        @endif
     @endauth
 
     {{-- #14 Quick Actions Floating Panel (Desktop) --}}
@@ -2363,5 +2486,13 @@
     </script>
 
     @stack('scripts')
+
+    <script>
+    // T22: Page transition
+    document.addEventListener('DOMContentLoaded', function() {
+        var main = document.querySelector('.sh-main-content') || document.querySelector('main') || document.querySelector('.container-xl');
+        if (main) main.classList.add('sh-page-transition');
+    });
+    </script>
 </body>
 </html>
