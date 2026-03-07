@@ -22,6 +22,11 @@ use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
+// Public routes (no auth required)
+Route::get('/offline', function () {
+    return view('errors.offline');
+})->name('offline');
+
 // Guest routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

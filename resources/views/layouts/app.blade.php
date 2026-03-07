@@ -2778,5 +2778,14 @@
     </div>
     <form id="sh-logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">@csrf</form>
     @endauth
+
+    <script>
+    // PWA: Register service worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js').catch(function() {});
+        });
+    }
+    </script>
 </body>
 </html>
