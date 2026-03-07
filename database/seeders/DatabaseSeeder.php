@@ -6,22 +6,47 @@ use App\Models\HariLibur;
 use App\Models\LeaveRequest;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
         // Admin
-        $admin = User::firstOrCreate(['nip' => '000000000000000000'], array_merge(
-            User::factory()->admin()->make()->toArray(),
-            ['name' => 'Administrator', 'email' => 'admin@pn-natuna.go.id', 'password' => \Illuminate\Support\Facades\Hash::make('password')]
-        ));
+        $admin = User::firstOrCreate(['nip' => '000000000000000000'], [
+            'name'             => 'Administrator',
+            'email'            => 'admin@pn-natuna.go.id',
+            'password'         => Hash::make('password'),
+            'role'             => 'admin',
+            'jabatan'          => 'Administrator',
+            'golongan_ruang'   => 'IV/a',
+            'unit_kerja'       => 'Pengadilan Negeri Natuna',
+            'masa_kerja_mulai' => '2010-01-01',
+            'status_pegawai'   => 'aparatur',
+            'leave_balance'    => 12,
+            'is_active'        => true,
+            'jenis_kelamin'    => 'L',
+            'jumlah_anak'      => 0,
+            'lokasi_terpencil' => false,
+        ]);
 
         // Ketua
-        $ketua = User::firstOrCreate(['nip' => '197001010000000001'], array_merge(
-            User::factory()->ketua()->make()->toArray(),
-            ['name' => 'Ketua Pengadilan', 'password' => \Illuminate\Support\Facades\Hash::make('password')]
-        ));
+        $ketua = User::firstOrCreate(['nip' => '197001010000000001'], [
+            'name'             => 'Ketua Pengadilan',
+            'email'            => 'ketua@pn-natuna.go.id',
+            'password'         => Hash::make('password'),
+            'role'             => 'ketua',
+            'jabatan'          => 'Ketua Pengadilan',
+            'golongan_ruang'   => 'IV/b',
+            'unit_kerja'       => 'Pengadilan Negeri Natuna',
+            'masa_kerja_mulai' => '2005-01-01',
+            'status_pegawai'   => 'hakim',
+            'leave_balance'    => 12,
+            'is_active'        => true,
+            'jenis_kelamin'    => 'L',
+            'jumlah_anak'      => 2,
+            'lokasi_terpencil' => false,
+        ]);
 
         // 2 Atasan (Panitera / Sekretaris)
         $atasan1 = User::factory()->atasan()->create([
