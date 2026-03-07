@@ -1301,6 +1301,16 @@
         </div>
     </div>
 
+    {{-- Statistik Penggunaan Cuti --}}
+    <div class="card sh-card mt-4 mb-4 animate-in">
+        <div class="card-header">
+            <h5 class="card-title mb-0"><i class="ti ti-chart-bar me-2"></i>Penggunaan Cuti 12 Bulan Terakhir</h5>
+        </div>
+        <div class="card-body">
+            <canvas id="sh-cuti-chart" height="80"></canvas>
+        </div>
+    </div>
+
     {{-- Fitur 6: Search & Filter --}}
     <div class="card sh-card mb-4 animate-in">
         <div class="card-body p-3">
@@ -1511,6 +1521,35 @@
         </div>
         @endif
     </div>
+@endif
+
+@if(!$user->isAdmin() && !$user->isKetua() && !$user->isAtasan())
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    var ctx = document.getElementById('sh-cuti-chart');
+    if (!ctx) return;
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode($chartLabels ?? []) !!},
+            datasets: [{
+                label: 'Hari Cuti',
+                data: {!! json_encode($chartData ?? []) !!},
+                backgroundColor: 'rgba(22, 101, 52, 0.7)',
+                borderRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+})();
+</script>
+@endpush
 @endif
 
 @if(!$user->isAdmin())

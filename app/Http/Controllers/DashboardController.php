@@ -230,6 +230,26 @@ class DashboardController extends Controller
             ->orderBy('start_date')
             ->get();
 
-        return view('dashboard', compact('user', 'leaveRequests', 'cutiInfo', 'todayOnLeave', 'todayDinasLuar'));
+        // Statistik penggunaan cuti 12 bulan terakhir
+        $cutiPerBulan = \App\Models\LeaveRequest::where('user_id', $user->id)
+            ->whereIn('status', [\App\Models\LeaveRequest::STATUS_DISETUJUI, \App\Models\LeaveRequest::STATUS_APPROVED])
+            ->where('start_date', '>=', now()->subMonths(11)->startOfMonth())
+            ->selectRaw('MONTH(start_date) as bulan, YEAR(start_date) as tahun, SUM(total_hari_kerja) as total')
+            ->groupBy('tahun', 'bulan')
+            ->orderBy('tahun')->orderBy('bulan')
+            ->get()
+            ->keyBy(fn($r) => $r->tahun . '-' . str_pad($r->bulan, 2, '0', STR_PAD_LEFT));
+
+        // Siapkan array 12 bulan lengkap (fill 0 jika tidak ada data)
+        $chartLabels = [];
+        $chartData   = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $key  = $date->format('Y-m');
+            $chartLabels[] = $date->translatedFormat('M Y');
+            $chartData[]   = (int) ($cutiPerBulan[$key]->total ?? 0);
+        }
+
+        return view('dashboard', compact('user', 'leaveRequests', 'cutiInfo', 'todayOnLeave', 'todayDinasLuar', 'chartLabels', 'chartData'));
     }
 }
