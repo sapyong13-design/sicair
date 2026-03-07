@@ -52,6 +52,23 @@ class ProfileController extends Controller
         return back()->with('success', 'Preferensi notifikasi berhasil disimpan.');
     }
 
+    public function updateDelegate(Request $request)
+    {
+        $request->validate([
+            'delegate_atasan_id' => 'nullable|exists:users,id',
+            'delegate_start'     => 'nullable|date',
+            'delegate_end'       => 'nullable|date|after_or_equal:delegate_start',
+        ]);
+
+        auth()->user()->update([
+            'delegate_atasan_id' => $request->delegate_atasan_id ?: null,
+            'delegate_start'     => $request->delegate_start ?: null,
+            'delegate_end'       => $request->delegate_end ?: null,
+        ]);
+
+        return back()->with('success', 'Delegasi persetujuan berhasil disimpan.');
+    }
+
     public function updatePassword(Request $request)
     {
         $request->validate([

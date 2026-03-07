@@ -53,6 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::put('/profile/notifications', [ProfileController::class, 'updateNotificationPreferences'])->name('profile.notifications');
+    Route::post('/profile/delegate', [ProfileController::class, 'updateDelegate'])->name('profile.delegate');
 
     // === Notifikasi ===
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');

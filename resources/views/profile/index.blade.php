@@ -201,6 +201,54 @@
             </div>
         </div>
 
+        {{-- Delegasi Atasan --}}
+        @if(auth()->user()->canApproveAsAtasan())
+        <div class="card sh-card mb-4">
+            <div class="card-header">
+                <h3 class="card-title mb-0">
+                    <i class="ti ti-user-share me-2" style="color: var(--sh-primary);"></i>
+                    Delegasi Persetujuan
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <p class="text-muted mb-3" style="font-size:0.875rem;">Saat Anda cuti, pengajuan bawahan akan diteruskan ke atasan pengganti selama periode yang ditentukan.</p>
+                <form method="POST" action="{{ route('profile.delegate') }}">
+                    @csrf
+                    <div class="row g-3">
+                        <div class="col-sm-12">
+                            <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">Atasan Pengganti</label>
+                            <select name="delegate_atasan_id" class="form-select" style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
+                                <option value="">-- Tidak ada delegasi --</option>
+                                @foreach(\App\Models\User::whereIn('role', ['atasan', 'ketua', 'wakil_ketua', 'panitera', 'sekretaris'])->where('id', '!=', auth()->id())->orderBy('name')->get() as $u)
+                                    <option value="{{ $u->id }}" {{ auth()->user()->delegate_atasan_id == $u->id ? 'selected' : '' }}>
+                                        {{ $u->name }} ({{ $u->jabatan }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">Mulai Delegasi</label>
+                            <input type="date" name="delegate_start" class="form-control"
+                                value="{{ auth()->user()->delegate_start?->format('Y-m-d') }}"
+                                style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">Selesai Delegasi</label>
+                            <input type="date" name="delegate_end" class="form-control"
+                                value="{{ auth()->user()->delegate_end?->format('Y-m-d') }}"
+                                style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn sh-btn-primary">
+                            <i class="ti ti-device-floppy me-1"></i> Simpan Delegasi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        @endif
+
         {{-- Ganti Password --}}
         <div class="card sh-card">
             <div class="card-header">
