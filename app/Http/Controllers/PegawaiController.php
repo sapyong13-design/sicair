@@ -43,7 +43,7 @@ class PegawaiController extends Controller
             }
         }
 
-        $pegawai = $query->paginate(15)->withQueryString();
+        $pegawai = $query->with(['atasan', 'cutiRecords'])->paginate(15)->withQueryString();
 
         return view('pegawai.index', compact('pegawai'));
     }

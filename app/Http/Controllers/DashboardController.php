@@ -81,7 +81,7 @@ class DashboardController extends Controller
         $chartByDepartment = $analytics['charts']['by_department']['values'] ?? [];
 
         // Sprint 3 #16: Pegawai with low leave balance (≤ 3)
-        $saldoRendah = User::where('leave_balance', '<=', 3)->orderBy('leave_balance')->take(5)->get();
+        $saldoRendah = User::where('leave_balance', '<=', 3)->with(['cutiRecords'])->orderBy('leave_balance')->take(5)->get();
 
         // Sprint 3 #17: Carry-over akan hangus (only show Oct-Dec)
         $carryOverHangus = [];
@@ -136,7 +136,7 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        $leaveRequests = $user->leaveRequests()->latest()->get();
+        $leaveRequests = $user->leaveRequests()->with(['user'])->latest()->get();
 
         // Widget: Siapa yang cuti hari ini
         $today = \Carbon\Carbon::today();

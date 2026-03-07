@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use App\Mail\LeaveRequestApprovedMail;
+use App\Mail\LeaveRequestApproved;
 use App\Mail\LeaveRequestNeedsConsiderationMail;
-use App\Mail\LeaveRequestRejectedMail;
-use App\Mail\LeaveRequestSubmittedMail;
+use App\Mail\LeaveRequestRejected;
+use App\Mail\LeaveRequestSubmitted;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Mail;
@@ -75,9 +75,9 @@ class Notification extends Model
     private static function sendEmailNotification(string $email, string $type, LeaveRequest $leaveRequest): void
     {
         $mailable = match ($type) {
-            self::TYPE_CUTI_DIAJUKAN => new LeaveRequestSubmittedMail($leaveRequest),
-            self::TYPE_CUTI_DISETUJUI => new LeaveRequestApprovedMail($leaveRequest, auth()->user()->name ?? 'Admin'),
-            self::TYPE_CUTI_DITOLAK => new LeaveRequestRejectedMail($leaveRequest, auth()->user()->name ?? 'Admin', $leaveRequest->catatan_atasan),
+            self::TYPE_CUTI_DIAJUKAN => new LeaveRequestSubmitted($leaveRequest),
+            self::TYPE_CUTI_DISETUJUI => new LeaveRequestApproved($leaveRequest, auth()->user()->name ?? 'Admin'),
+            self::TYPE_CUTI_DITOLAK => new LeaveRequestRejected($leaveRequest, auth()->user()->name ?? 'Admin', $leaveRequest->catatan_atasan),
             self::TYPE_CUTI_PERTIMBANGAN => new LeaveRequestNeedsConsiderationMail($leaveRequest),
             default => null,
         };
