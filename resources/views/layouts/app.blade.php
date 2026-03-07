@@ -3,6 +3,13 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+    <!-- Mobile: theme color & safe area -->
+    <meta name="theme-color" content="#166534" id="sh-theme-color-meta">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <!-- PWA manifest -->
+    <link rel="manifest" href="/manifest.json">
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
     <title>@yield('title', 'SiHEALING - PN Natuna')</title>
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/favicon-pn.png') }}">
@@ -1658,9 +1665,53 @@
             background: linear-gradient(135deg, #064e3b, #065f46);
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
+
+        /* Safe area insets (notch + home bar) */
+        .sh-bottom-nav {
+            padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+        .navbar {
+            padding-top: max(0.5rem, env(safe-area-inset-top));
+        }
+        body {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Landscape hint on mobile */
+        @media (max-height: 500px) and (max-width: 900px) and (orientation: landscape) {
+            .sh-landscape-hint {
+                display: flex !important;
+            }
+        }
+        .sh-landscape-hint {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 40, 24, 0.95);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+            gap: 1rem;
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
+<!-- Landscape hint -->
+<div class="sh-landscape-hint" id="sh-landscape-hint">
+    <i class="ti ti-rotate" style="font-size: 3rem; animation: sh-rotate-hint 1.5s ease-in-out infinite alternate;"></i>
+    <p style="font-size: 1rem; font-weight: 600; margin: 0;">Putar perangkat untuk tampilan optimal</p>
+</div>
+<style>
+@keyframes sh-rotate-hint {
+    from { transform: rotate(-30deg); }
+    to   { transform: rotate(30deg); }
+}
+</style>
     {{-- Skip to Content (#9) --}}
     <a href="#main-content" class="sh-skip-link">Langsung ke Konten</a>
 
@@ -2088,6 +2139,26 @@
     <!-- NProgress (#2) -->
     <script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js"></script>
 
+    {{-- System dark mode auto-follow --}}
+    <script>
+    // System dark mode auto-follow
+    (function() {
+        var html = document.documentElement;
+        // Only auto-follow if user hasn't set a manual preference
+        if (!localStorage.getItem('sh-theme')) {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                html.setAttribute('data-bs-theme', 'dark');
+            }
+            // Listen for OS changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                if (!localStorage.getItem('sh-theme')) {
+                    html.setAttribute('data-bs-theme', e.matches ? 'dark' : 'light');
+                }
+            });
+        }
+    })();
+    </script>
+
     {{-- Dark Mode Toggle JS --}}
     <script>
     (function() {
@@ -2124,6 +2195,22 @@
                 }, 50);
             }, 200);
         });
+    })();
+    </script>
+
+    {{-- Sync theme-color meta with dark/light mode --}}
+    <script>
+    // Sync theme-color meta with dark/light mode
+    (function() {
+        var meta = document.getElementById('sh-theme-color-meta');
+        function syncMeta() {
+            if (!meta) return;
+            meta.content = document.documentElement.getAttribute('data-bs-theme') === 'dark'
+                ? '#0f172a' : '#166534';
+        }
+        syncMeta();
+        var toggle = document.getElementById('themeToggle');
+        if (toggle) toggle.addEventListener('click', function() { setTimeout(syncMeta, 50); });
     })();
     </script>
 
