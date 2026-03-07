@@ -178,6 +178,8 @@
                                    min="{{ date('Y-m-d') }}" required
                                    style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
                             @error('end_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <div id="sh-duration-info" class="mt-2" style="font-size:0.85rem; color:#475569; min-height:1.4rem;"></div>
+                            <div id="sh-saldo-warning" class="mt-2 p-2" style="display:none; font-size:0.85rem; background:#fef2f2; border:1px solid #fecaca; color:#dc2626; border-radius:10px;"></div>
                         </div>
                     </div>
 
@@ -248,6 +250,16 @@
 
                     {{-- Reason --}}
                     <div class="mb-4">
+                        <div class="mb-2">
+                            <select id="sh-reason-template" class="form-select form-select-sm" style="border-radius:8px; font-size:0.85rem;">
+                                <option value="">-- Pilih template alasan (opsional) --</option>
+                                <option value="Keperluan keluarga yang mendesak dan tidak dapat ditunda.">Keperluan keluarga mendesak</option>
+                                <option value="Melaksanakan ibadah haji/umrah sesuai jadwal yang telah ditetapkan.">Ibadah haji/umrah</option>
+                                <option value="Istirahat dan pemulihan kondisi kesehatan.">Istirahat/pemulihan kesehatan</option>
+                                <option value="Menghadiri acara pernikahan anggota keluarga inti.">Pernikahan keluarga</option>
+                                <option value="Keperluan pribadi yang tidak dapat ditinggalkan.">Keperluan pribadi</option>
+                            </select>
+                        </div>
                         <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
                             <i class="ti ti-writing me-1" style="color: var(--sh-primary);"></i>
                             Alasan Cuti <span class="text-danger">*</span>
@@ -272,6 +284,10 @@
                         <div class="d-flex justify-content-between mt-1">
                             <div class="form-hint" style="font-size: 0.78rem; color: #94a3b8;">Jelaskan alasan dengan jelas dan singkat.</div>
                             <div class="sh-char-counter" id="reason-counter">0 / 500 karakter</div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1" style="font-size:0.78rem; color:#94a3b8;">
+                            <span>Jelaskan alasan pengajuan cuti Anda</span>
+                            <span id="sh-reason-count">0</span>/500
                         </div>
                     </div>
 
@@ -342,7 +358,7 @@
 
                     {{-- Actions --}}
                     <div class="d-flex gap-2 flex-column flex-sm-row">
-                        <button type="submit" id="submit-btn" class="btn btn-primary sh-btn-primary btn-lg flex-fill">
+                        <button type="button" id="sh-confirm-btn" class="btn btn-primary sh-btn-primary btn-lg flex-fill">
                             <span id="submit-label"><i class="ti ti-send me-2"></i> Kirim Pengajuan</span>
                             <span id="submit-loading" class="d-none"><span class="spinner-border spinner-border-sm me-2" role="status"></span> Mengirim...</span>
                         </button>
@@ -351,6 +367,27 @@
                         </a>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal Konfirmasi Submit --}}
+<div class="modal fade" id="sh-confirm-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="ti ti-file-check me-2" style="color:var(--sh-primary,#166534)"></i>Konfirmasi Pengajuan
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="sh-confirm-body"></div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="sh-confirm-submit" style="border-radius:10px;">
+                    <i class="ti ti-check me-1"></i> Ya, Ajukan
+                </button>
             </div>
         </div>
     </div>
@@ -698,6 +735,119 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+</script>
+<script>
+(function() {
+    // --- Feature 1: Auto-hitung durasi ---
+    var startEl = document.querySelector('[name="start_date"]');
+    var endEl   = document.querySelector('[name="end_date"]');
+    var durEl   = document.getElementById('sh-duration-info');
+
+    function countWorkdays(s, e) {
+        var count = 0, cur = new Date(s), fin = new Date(e);
+        while (cur <= fin) { var d = cur.getDay(); if (d !== 0 && d !== 6) count++; cur.setDate(cur.getDate()+1); }
+        return count;
+    }
+    function updateDur() {
+        if (!startEl || !endEl || !durEl) return;
+        var s = startEl.value, e = endEl.value;
+        if (!s || !e || s > e) { durEl.innerHTML = ''; return; }
+        var days = countWorkdays(s, e);
+        durEl.innerHTML = '<i class="ti ti-calendar-check me-1" style="color:#166534"></i><strong>' + days + ' hari kerja</strong> (Sabtu & Minggu tidak dihitung)';
+        checkSaldo(days);
+    }
+    if (startEl) startEl.addEventListener('change', updateDur);
+    if (endEl)   endEl.addEventListener('change', updateDur);
+
+    // --- Feature 2: Validasi saldo ---
+    var saldo = parseInt('{{ $user->leave_balance ?? 0 }}');
+    var warnEl = document.getElementById('sh-saldo-warning');
+    function checkSaldo(days) {
+        if (!warnEl) return;
+        var type = document.querySelector('[name="type"]');
+        var jenis = type ? type.value : 'cuti_tahunan';
+        if (jenis === 'cuti_tahunan' && days > saldo && saldo > 0) {
+            warnEl.innerHTML = '<i class="ti ti-alert-triangle me-1"></i>Durasi <strong>' + days + ' hari</strong> melebihi saldo Anda (<strong>' + saldo + ' hari</strong>)';
+            warnEl.style.display = 'block';
+        } else {
+            warnEl.style.display = 'none';
+        }
+    }
+
+    // --- Feature 3: Character counter ---
+    var reasonEl = document.querySelector('[name="reason"], [name="alasan"]');
+    var countEl  = document.getElementById('sh-reason-count');
+    if (reasonEl && countEl) {
+        var updateCount = function() {
+            countEl.textContent = reasonEl.value.length;
+            countEl.style.color = reasonEl.value.length > 450 ? '#dc2626' : '#94a3b8';
+        };
+        reasonEl.addEventListener('input', updateCount);
+        updateCount();
+    }
+
+    // --- Feature 4: Template alasan ---
+    var tmplEl = document.getElementById('sh-reason-template');
+    if (tmplEl) {
+        tmplEl.addEventListener('change', function() {
+            if (this.value && reasonEl) {
+                reasonEl.value = this.value;
+                reasonEl.dispatchEvent(new Event('input'));
+                this.value = '';
+            }
+        });
+    }
+
+    // --- Feature 5: Draft localStorage ---
+    var DRAFT_KEY = 'sihealing_cuti_draft';
+    var form = document.querySelector('form');
+    if (form) {
+        var fields = ['start_date','end_date','reason','alasan','address_during_leave','phone_during_leave'];
+        var saved = {};
+        try { saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}'); } catch(e) {}
+        fields.forEach(function(name) {
+            var el = form.querySelector('[name="' + name + '"]');
+            if (el && saved[name]) el.value = saved[name];
+        });
+        form.addEventListener('input', function() {
+            var data = {};
+            fields.forEach(function(name) {
+                var el = form.querySelector('[name="' + name + '"]');
+                if (el) data[name] = el.value;
+            });
+            try { localStorage.setItem(DRAFT_KEY, JSON.stringify(data)); } catch(e) {}
+        });
+        form.addEventListener('submit', function() {
+            try { localStorage.removeItem(DRAFT_KEY); } catch(e) {}
+        });
+    }
+
+    // --- Feature 6: Konfirmasi modal ---
+    var confirmBtn = document.getElementById('sh-confirm-btn');
+    var confirmSubmit = document.getElementById('sh-confirm-submit');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function() {
+            var s = startEl ? startEl.value : '-';
+            var e = endEl ? endEl.value : '-';
+            var dur = durEl ? durEl.textContent : '-';
+            var body = document.getElementById('sh-confirm-body');
+            if (body) body.innerHTML =
+                '<div class="list-group list-group-flush">' +
+                '<div class="list-group-item px-0 py-2"><span class="text-muted" style="font-size:.85rem">Tanggal Mulai</span><strong class="float-end">' + s + '</strong></div>' +
+                '<div class="list-group-item px-0 py-2"><span class="text-muted" style="font-size:.85rem">Tanggal Selesai</span><strong class="float-end">' + e + '</strong></div>' +
+                '<div class="list-group-item px-0 py-2 border-0"><span class="text-muted" style="font-size:.85rem">Durasi</span><strong class="float-end" style="color:#166534">' + dur + '</strong></div>' +
+                '</div>';
+            var modal = new bootstrap.Modal(document.getElementById('sh-confirm-modal'));
+            modal.show();
+        });
+    }
+    if (confirmSubmit) {
+        confirmSubmit.addEventListener('click', function() {
+            var f = document.querySelector('form');
+            if (f) { this.disabled = true; f.submit(); }
+        });
+    }
+})();
 </script>
 <style>
 /* Custom invalid-feedback styling */
