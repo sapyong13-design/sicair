@@ -132,12 +132,11 @@ class LeaveRequestController extends Controller
             return back()->withErrors(['reason' => $error])->withInput();
         }
 
-        // FIX #18: Cegah pengajuan cuti yang tanggalnya overlap dengan cuti aktif
-        $overlapExists = \App\Models\LeaveRequest::where('user_id', $user->id)
-            ->whereIn('status', [
-                LeaveRequest::STATUS_DIAJUKAN,
-                LeaveRequest::STATUS_PERTIMBANGAN,
-                LeaveRequest::STATUS_DISETUJUI,
+        // Cek tumpang tindih dengan cuti yang aktif (server-level conflict detection)
+        $conflict = LeaveRequest::where('user_id', $user->id)
+            ->whereNotIn('status', [
+                LeaveRequest::STATUS_DITOLAK,
+                LeaveRequest::STATUS_REJECTED,
             ])
             ->where(function ($q) use ($request) {
                 $q->whereBetween('start_date', [$request->start_date, $request->end_date])
@@ -147,10 +146,16 @@ class LeaveRequestController extends Controller
                          ->where('end_date', '>=', $request->end_date);
                   });
             })
-            ->exists();
+            ->first();
 
-        if ($overlapExists) {
-            return back()->withErrors(['start_date' => 'Anda sudah memiliki pengajuan cuti aktif atau yang telah disetujui pada rentang tanggal tersebut.'])->withInput();
+        if ($conflict) {
+            $conflictStart = \Carbon\Carbon::parse($conflict->start_date)->format('d/m/Y');
+            $conflictEnd   = \Carbon\Carbon::parse($conflict->end_date)->format('d/m/Y');
+            return back()->withErrors([
+                'start_date' => 'Anda sudah memiliki pengajuan cuti pada periode ' .
+                    $conflictStart . ' s/d ' . $conflictEnd .
+                    ' (status: ' . $conflict->status . ').',
+            ])->withInput();
         }
 
         // Hitung hari kerja
