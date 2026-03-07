@@ -1521,6 +1521,14 @@
         }
         .sh-fab:active { transform: scale(0.96); }
         @media (min-width: 992px) { .sh-fab { display: none; } }
+        [data-bs-theme="dark"] .sh-fab {
+            background: linear-gradient(135deg, #064e3b, #065f46);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        [data-bs-theme="dark"] .sh-fab:hover {
+            background: linear-gradient(135deg, #065f46, #047857);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+        }
 
         /* T6: Avatar inisial pegawai */
         .sh-avatar-initials {
@@ -1537,13 +1545,6 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
-        /* T7: Status badge warna konsisten */
-        .sh-badge-pending   { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
-        .sh-badge-approved  { background: #dcfce7; color: #14532d; border: 1px solid #86efac; }
-        .sh-badge-rejected  { background: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; }
-        .sh-badge-cancelled { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-        .sh-badge-revised   { background: #fff7ed; color: #7c2d12; border: 1px solid #fdba74; }
 
         /* T9: Print-friendly CSS */
         @media print {
@@ -1621,6 +1622,10 @@
             margin-bottom: 1rem;
         }
         @media (min-width: 992px) { .sh-sticky-balance { display: none; } }
+        [data-bs-theme="dark"] .sh-sticky-balance {
+            background: linear-gradient(135deg, #064e3b, #065f46);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
