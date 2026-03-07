@@ -18,6 +18,7 @@ use App\Services\PdfExportService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -361,6 +362,12 @@ class LeaveRequestController extends Controller
             'status' => $statusMap[$keputusan],
         ]);
 
+        // Invalidate analytics cache so dashboard reflects the new decision immediately
+        Cache::forget('analytics_annual_' . now()->year);
+        Cache::forget('analytics_dashboard_' . now()->year);
+        Cache::forget('analytics_balance_overview_' . now()->year);
+        Cache::forget('analytics_heatmap_by_unit_' . now()->year);
+
         $auditAction = match ($keputusan) {
             'setuju'     => 'approve',
             'tolak'      => 'reject',
@@ -484,6 +491,12 @@ class LeaveRequestController extends Controller
         if ($error) {
             return back()->with('error', $error);
         }
+
+        // Invalidate analytics cache so dashboard reflects the approval immediately
+        Cache::forget('analytics_annual_' . now()->year);
+        Cache::forget('analytics_dashboard_' . now()->year);
+        Cache::forget('analytics_balance_overview_' . now()->year);
+        Cache::forget('analytics_heatmap_by_unit_' . now()->year);
 
         AuditLog::log(
             'approve',

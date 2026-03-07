@@ -6,6 +6,7 @@ use App\Models\CutiRecord;
 use App\Models\LeaveRequest;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class AnalyticsService
 {
@@ -16,12 +17,14 @@ class AnalyticsService
     {
         $year = $year ?? date('Y');
 
-        return [
-            'summary' => $this->getSummaryStats($year),
-            'charts' => $this->getChartData($year),
-            'topUsers' => $this->getTopUsersWithLeave($year),
-            'upcomingLeaves' => $this->getUpcomingLeaves(),
-        ];
+        return Cache::remember("analytics_dashboard_{$year}", 3600, function () use ($year) {
+            return [
+                'summary' => $this->getSummaryStats($year),
+                'charts' => $this->getChartData($year),
+                'topUsers' => $this->getTopUsersWithLeave($year),
+                'upcomingLeaves' => $this->getUpcomingLeaves(),
+            ];
+        });
     }
 
     /**
@@ -250,38 +253,40 @@ class AnalyticsService
     {
         $year = $year ?? date('Y');
 
-        $users = User::where('status_pegawai', '!=', 'cpns')
-            ->with(['cutiRecords' => fn($q) => $q->where('tahun', $year)])
-            ->get()
-            ->map(function ($user) use ($year) {
-                $cutiRecord = $user->cutiRecords->first();
+        return Cache::remember("analytics_balance_overview_{$year}", 3600, function () use ($year) {
+            $users = User::where('status_pegawai', '!=', 'cpns')
+                ->with(['cutiRecords' => fn($q) => $q->where('tahun', $year)])
+                ->get()
+                ->map(function ($user) use ($year) {
+                    $cutiRecord = $user->cutiRecords->first();
 
-                if (!$cutiRecord) {
-                    return null;
-                }
+                    if (!$cutiRecord) {
+                        return null;
+                    }
 
-                $allocated = $cutiRecord->hak_cuti ?? 12;
-                $carryOver = $cutiRecord->carry_over ?? 0;
-                $used = $cutiRecord->cuti_diambil ?? 0;
-                $total = $allocated + $carryOver;
-                $remaining = $total - $used;
+                    $allocated = $cutiRecord->hak_cuti ?? 12;
+                    $carryOver = $cutiRecord->carry_over ?? 0;
+                    $used = $cutiRecord->cuti_diambil ?? 0;
+                    $total = $allocated + $carryOver;
+                    $remaining = $total - $used;
 
-                return [
-                    'name' => $user->name,
-                    'nip' => $user->nip,
-                    'allocated' => $allocated,
-                    'carry_over' => $carryOver,
-                    'total' => $total,
-                    'used' => $used,
-                    'remaining' => $remaining,
-                    'usage_percentage' => $total > 0 ? round(($used / $total) * 100) : 0,
-                ];
-            })
-            ->filter(fn($item) => $item !== null)
-            ->values()
-            ->toArray();
+                    return [
+                        'name' => $user->name,
+                        'nip' => $user->nip,
+                        'allocated' => $allocated,
+                        'carry_over' => $carryOver,
+                        'total' => $total,
+                        'used' => $used,
+                        'remaining' => $remaining,
+                        'usage_percentage' => $total > 0 ? round(($used / $total) * 100) : 0,
+                    ];
+                })
+                ->filter(fn($item) => $item !== null)
+                ->values()
+                ->toArray();
 
-        return $users;
+            return $users;
+        });
     }
 
     /**
@@ -378,33 +383,35 @@ class AnalyticsService
      */
     public function getHeatmapByUnit(int $year): array
     {
-        $rows = LeaveRequest::join('users', 'leave_requests.user_id', '=', 'users.id')
-            ->selectRaw("
-                users.unit_kerja,
-                CAST(strftime('%m', leave_requests.start_date) AS INTEGER) as month,
-                COUNT(*) as count
-            ")
-            ->whereIn('leave_requests.status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
-            ->whereYear('leave_requests.start_date', $year)
-            ->whereNotNull('users.unit_kerja')
-            ->groupBy('users.unit_kerja', 'month')
-            ->orderBy('users.unit_kerja')
-            ->get();
+        return Cache::remember("analytics_heatmap_by_unit_{$year}", 3600, function () use ($year) {
+            $rows = LeaveRequest::join('users', 'leave_requests.user_id', '=', 'users.id')
+                ->selectRaw("
+                    users.unit_kerja,
+                    CAST(strftime('%m', leave_requests.start_date) AS INTEGER) as month,
+                    COUNT(*) as count
+                ")
+                ->whereIn('leave_requests.status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+                ->whereYear('leave_requests.start_date', $year)
+                ->whereNotNull('users.unit_kerja')
+                ->groupBy('users.unit_kerja', 'month')
+                ->orderBy('users.unit_kerja')
+                ->get();
 
-        $units = $rows->pluck('unit_kerja')->unique()->values()->all();
-        $data  = [];
-        foreach ($units as $unit) {
-            $months = array_fill(1, 12, 0);
-            foreach ($rows->where('unit_kerja', $unit) as $row) {
-                $months[(int) $row->month] = (int) $row->count;
+            $units = $rows->pluck('unit_kerja')->unique()->values()->all();
+            $data  = [];
+            foreach ($units as $unit) {
+                $months = array_fill(1, 12, 0);
+                foreach ($rows->where('unit_kerja', $unit) as $row) {
+                    $months[(int) $row->month] = (int) $row->count;
+                }
+                $data[] = [
+                    'unit'   => $unit,
+                    'months' => array_values($months),
+                    'total'  => array_sum($months),
+                ];
             }
-            $data[] = [
-                'unit'   => $unit,
-                'months' => array_values($months),
-                'total'  => array_sum($months),
-            ];
-        }
 
-        return $data;
+            return $data;
+        });
     }
 }
