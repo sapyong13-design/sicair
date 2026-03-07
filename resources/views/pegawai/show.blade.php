@@ -169,6 +169,35 @@
                 </div>
             </div>
         </div>
+
+        {{-- Notification Channels (admin only) --}}
+        @if(auth()->user()->isAdmin())
+        <div class="card sh-card mt-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="ti ti-bell me-2"></i>Channel Notifikasi</h6>
+            </div>
+            <div class="card-body py-2">
+                <form method="POST" action="{{ route('pegawai.update-channels', $pegawai->id) }}">
+                    @csrf @method('PATCH')
+                    <div class="d-flex gap-3 align-items-center flex-wrap">
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" name="channels[email]" value="1"
+                                id="ch_email_{{ $pegawai->id }}"
+                                {{ ($pegawai->notification_channels['email'] ?? true) ? 'checked' : '' }}>
+                            <label class="form-check-label small" for="ch_email_{{ $pegawai->id }}">Email</label>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" name="channels[whatsapp]" value="1"
+                                id="ch_wa_{{ $pegawai->id }}"
+                                {{ ($pegawai->notification_channels['whatsapp'] ?? false) ? 'checked' : '' }}>
+                            <label class="form-check-label small" for="ch_wa_{{ $pegawai->id }}">WhatsApp</label>
+                        </div>
+                        <button type="submit" class="btn btn-xs btn-outline-primary btn-sm">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        @endif
     </div>
 
     {{-- Right Column: Records --}}

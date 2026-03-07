@@ -19,6 +19,7 @@ class User extends Authenticatable
         'atasan_id', 'telepon', 'alamat', 'notification_preferences',
         'photo', 'is_active', 'last_login_at',
         'delegate_atasan_id', 'delegate_start', 'delegate_end',
+        'notification_channels',
     ];
 
     protected $hidden = [
@@ -35,6 +36,7 @@ class User extends Authenticatable
             'jumlah_anak' => 'integer',
             'lokasi_terpencil' => 'boolean',
             'notification_preferences' => 'array',
+            'notification_channels' => 'array',
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
             'delegate_start' => 'date',
@@ -50,6 +52,12 @@ class User extends Authenticatable
     {
         $prefs = $this->notification_preferences ?? [];
         return $prefs[$key] ?? true;
+    }
+
+    public function wantsWhatsAppNotification(): bool
+    {
+        $channels = $this->notification_channels ?? [];
+        return ($channels['whatsapp'] ?? false) && !empty($this->telepon);
     }
 
     // ===== Role Checks =====

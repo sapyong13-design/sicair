@@ -429,4 +429,17 @@ class PegawaiController extends Controller
         $status = ($pegawai->is_active) ? 'diaktifkan' : 'dinonaktifkan';
         return back()->with('success', "Pegawai {$pegawai->name} berhasil {$status}.");
     }
+
+    /**
+     * C4: Update notification channels (Email/WhatsApp) per user.
+     */
+    public function updateChannels(Request $request, User $user)
+    {
+        $channels = [
+            'email'    => $request->boolean('channels.email', false),
+            'whatsapp' => $request->boolean('channels.whatsapp', false),
+        ];
+        $user->update(['notification_channels' => $channels]);
+        return back()->with('success', 'Channel notifikasi berhasil diperbarui.');
+    }
 }

@@ -143,6 +143,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('/{pegawai}/inline', [PegawaiController::class, 'inlineEdit'])->name('inline');    // Sprint 5 #31
         Route::post('/{pegawai}/upload-photo', [PegawaiController::class, 'uploadPhoto'])->name('upload-photo'); // Sprint 5 #27
         Route::post('/{pegawai}/toggle-active', [PegawaiController::class, 'toggleActive'])->name('toggle-active'); // Sprint 5 #32
+        Route::patch('/{user}/channels', [PegawaiController::class, 'updateChannels'])->name('update-channels');
         Route::get('/{pegawai}', [PegawaiController::class, 'show'])->name('show');
         Route::get('/{pegawai}/edit', [PegawaiController::class, 'edit'])->name('edit');
         Route::put('/{pegawai}', [PegawaiController::class, 'update'])->name('update');
