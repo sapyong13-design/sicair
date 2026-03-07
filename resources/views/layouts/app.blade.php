@@ -2014,22 +2014,22 @@
                             <div class="fw-bold">{{ Auth::user()->name }}</div>
                             <div class="text-muted small">NIP: {{ Auth::user()->nip }}</div>
                         </div>
-                        <a href="{{ route('profile') }}" class="dropdown-item py-2">
+                        <a href="{{ route('profile') }}" class="dropdown-item py-2" style="text-align:left;justify-content:flex-start;">
                             <i class="ti ti-user-circle me-2"></i> Profil Saya
                         </a>
-                        <a href="{{ route('notifications') }}" class="dropdown-item py-2">
+                        <a href="{{ route('notifications') }}" class="dropdown-item py-2" style="text-align:left;justify-content:flex-start;">
                             <i class="ti ti-bell me-2"></i> Notifikasi
                             @if($unreadCount > 0)
                             <span class="badge ms-1" style="background: var(--sh-danger); border-radius: 50px; font-size: 0.65rem;">{{ $unreadCount }}</span>
                             @endif
                         </a>
-                        <a href="{{ route('kalender') }}" class="dropdown-item py-2">
+                        <a href="{{ route('kalender') }}" class="dropdown-item py-2" style="text-align:left;justify-content:flex-start;">
                             <i class="ti ti-calendar me-2"></i> Kalender Cuti
                         </a>
                         <div class="dropdown-divider"></div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="dropdown-item text-danger py-2">
+                            <button type="submit" class="dropdown-item text-danger py-2 w-100" style="text-align:center;justify-content:center;">
                                 <i class="ti ti-logout me-2"></i> Keluar
                             </button>
                         </form>
