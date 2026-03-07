@@ -3,6 +3,13 @@
 @section('title', 'Pilih Jenis Cuti - SiHEALING')
 
 @section('content')
+{{-- T19: Sticky saldo bar (mobile only) --}}
+@if(!Auth::user()->isAdmin())
+<div class="sh-sticky-balance">
+    <span><i class="ti ti-calendar-stats me-1"></i> Saldo Cuti Tahunan</span>
+    <strong>{{ Auth::user()->leave_balance ?? 0 }} hari tersisa</strong>
+</div>
+@endif
 {{-- Breadcrumb (#10) --}}
 <nav class="sh-breadcrumb" aria-label="Breadcrumb">
     <a href="{{ route('dashboard') }}">Dashboard</a>

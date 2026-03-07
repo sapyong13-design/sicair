@@ -1568,6 +1568,59 @@
             from { opacity: 0; transform: translateY(6px); }
             to   { opacity: 1; transform: translateY(0); }
         }
+
+        /* T18: Responsive table → card stack on mobile */
+        @media (max-width: 767px) {
+            .sh-table-responsive-cards thead { display: none; }
+            .sh-table-responsive-cards tbody tr {
+                display: block;
+                margin-bottom: 0.85rem;
+                border-radius: 12px;
+                border: 1px solid var(--sh-border, #d1e7d8);
+                box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+                padding: 0.75rem;
+                background: var(--sh-card-bg, #fff);
+            }
+            .sh-table-responsive-cards td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.35rem 0;
+                border: none;
+                border-bottom: 1px solid var(--sh-border-light, #e8f5e9);
+                font-size: 0.88rem;
+            }
+            .sh-table-responsive-cards td:last-child { border-bottom: none; }
+            .sh-table-responsive-cards td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--sh-muted, #64748b);
+                font-size: 0.78rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-right: 0.5rem;
+                flex-shrink: 0;
+                min-width: 80px;
+            }
+        }
+
+        /* T19: Sticky saldo balance bar */
+        .sh-sticky-balance {
+            position: sticky;
+            top: 60px;
+            z-index: 100;
+            background: linear-gradient(135deg, #14532d, #166534);
+            color: white;
+            padding: 0.55rem 1rem;
+            border-radius: 0 0 12px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(20,83,45,0.2);
+            margin-bottom: 1rem;
+        }
+        @media (min-width: 992px) { .sh-sticky-balance { display: none; } }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -2535,6 +2588,30 @@
         resetTimer();
     })();
     @endauth
+
+    // T20: Pull-to-refresh (mobile only)
+    (function() {
+        if (window.innerWidth > 768) return;
+        var startY = 0, pulling = false;
+        var bar = document.createElement('div');
+        bar.style.cssText = 'position:fixed;top:0;left:0;right:0;height:4px;background:#166534;transform:scaleX(0);transform-origin:left;transition:transform 0.15s;z-index:9999;pointer-events:none;';
+        document.body.appendChild(bar);
+        document.addEventListener('touchstart', function(e) {
+            if (window.scrollY === 0) { startY = e.touches[0].clientY; pulling = true; }
+        }, { passive: true });
+        document.addEventListener('touchmove', function(e) {
+            if (!pulling) return;
+            var dist = Math.min((e.touches[0].clientY - startY) / 80, 1);
+            if (dist > 0) bar.style.transform = 'scaleX(' + dist + ')';
+        }, { passive: true });
+        document.addEventListener('touchend', function(e) {
+            if (!pulling) return;
+            pulling = false;
+            var dist = (e.changedTouches[0].clientY - startY) / 80;
+            if (dist >= 1) { bar.style.transform = 'scaleX(1)'; setTimeout(function() { window.location.reload(); }, 200); }
+            else { bar.style.transform = 'scaleX(0)'; }
+        });
+    })();
     </script>
 
     @stack('scripts')
