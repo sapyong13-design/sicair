@@ -1698,6 +1698,64 @@
             text-align: center;
             gap: 1rem;
         }
+
+        /* Bottom Sheet (mobile modal replacement) */
+        .sh-bottom-sheet-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1050;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .sh-bottom-sheet-backdrop.active {
+            display: block;
+            opacity: 1;
+        }
+        .sh-bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1051;
+            background: var(--sh-card-bg, #fff);
+            border-radius: 20px 20px 0 0;
+            padding: 0 1.25rem 1.5rem;
+            padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
+        }
+        .sh-bottom-sheet.active {
+            transform: translateY(0);
+        }
+        .sh-bottom-sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: var(--sh-border, #d1e7d8);
+            border-radius: 2px;
+            margin: 0.75rem auto 1rem;
+        }
+        .sh-bottom-sheet-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--sh-text, #1e293b);
+            margin-bottom: 1rem;
+        }
+        @media (min-width: 768px) {
+            /* On desktop, bottom sheet behaves like normal modal */
+            .sh-bottom-sheet {
+                position: relative;
+                transform: none;
+                border-radius: 16px;
+                max-height: none;
+                box-shadow: none;
+                padding: 1.25rem;
+            }
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -2786,6 +2844,45 @@
             navigator.serviceWorker.register('/sw.js').catch(function() {});
         });
     }
+    </script>
+
+    <script>
+    // Bottom Sheet API
+    window.SHBottomSheet = {
+        _backdrop: null,
+        _sheet: null,
+        open: function(id) {
+            var sheet = document.getElementById(id);
+            if (!sheet) return;
+            if (!this._backdrop) {
+                this._backdrop = document.createElement('div');
+                this._backdrop.className = 'sh-bottom-sheet-backdrop';
+                this._backdrop.addEventListener('click', function() { SHBottomSheet.close(); });
+                document.body.appendChild(this._backdrop);
+            }
+            this._sheet = sheet;
+            this._backdrop.style.display = 'block';
+            requestAnimationFrame(function() {
+                SHBottomSheet._backdrop.classList.add('active');
+                sheet.classList.add('active');
+            });
+            document.body.style.overflow = 'hidden';
+        },
+        close: function() {
+            if (this._sheet) this._sheet.classList.remove('active');
+            if (this._backdrop) {
+                this._backdrop.classList.remove('active');
+                setTimeout(function() {
+                    if (SHBottomSheet._backdrop) SHBottomSheet._backdrop.style.display = 'none';
+                }, 300);
+            }
+            document.body.style.overflow = '';
+        }
+    };
+    // Close on ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') SHBottomSheet.close();
+    });
     </script>
 </body>
 </html>
