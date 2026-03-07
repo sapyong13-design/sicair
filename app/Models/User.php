@@ -17,6 +17,7 @@ class User extends Authenticatable
         'status_pegawai', 'jenis_kelamin', 'jumlah_anak', 'lokasi_terpencil',
         'atasan_id', 'telepon', 'alamat', 'notification_preferences',
         'photo', 'is_active', 'last_login_at',
+        'delegate_atasan_id', 'delegate_start', 'delegate_end',
     ];
 
     protected $hidden = [
@@ -35,6 +36,8 @@ class User extends Authenticatable
             'notification_preferences' => 'array',
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
+            'delegate_start' => 'date',
+            'delegate_end'   => 'date',
         ];
     }
 
@@ -321,5 +324,32 @@ class User extends Authenticatable
     public function bawahan(): HasMany
     {
         return $this->hasMany(User::class, 'atasan_id');
+    }
+
+    public function delegateAtasan()
+    {
+        return $this->belongsTo(User::class, 'delegate_atasan_id');
+    }
+
+    public function getEffectiveAtasan(): ?User
+    {
+        // Cek apakah atasan asli sedang cuti aktif
+        $atasanAsli = $this->atasan;
+        if (!$atasanAsli) return null;
+
+        $atasanSedangCuti = \App\Models\LeaveRequest::where('user_id', $atasanAsli->id)
+            ->where('status', 'disetujui')
+            ->where('start_date', '<=', today())
+            ->where('end_date', '>=', today())
+            ->exists();
+
+        if ($atasanSedangCuti && $atasanAsli->delegate_atasan_id) {
+            // Cek apakah periode delegasi masih berlaku
+            if ($atasanAsli->delegate_start <= today() && $atasanAsli->delegate_end >= today()) {
+                return $atasanAsli->delegateAtasan;
+            }
+        }
+
+        return $atasanAsli;
     }
 }
