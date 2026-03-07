@@ -173,6 +173,13 @@
                                    min="{{ date('Y-m-d') }}" required
                                    style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
                             @error('start_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            {{-- Smart date shortcuts --}}
+                            <div class="d-flex flex-wrap gap-1 mt-2" id="sh-date-shortcuts">
+                                <button type="button" class="sh-date-chip" data-offset="1">Besok</button>
+                                <button type="button" class="sh-date-chip" data-offset="7">Minggu depan</button>
+                                <button type="button" class="sh-date-chip" data-type="next-monday">Senin depan</button>
+                                <button type="button" class="sh-date-chip" data-type="end-month">Akhir bulan</button>
+                            </div>
                         </div>
                         <div class="col-sm-6">
                             <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
@@ -856,7 +863,47 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 })();
 </script>
+<script>
+// Smart date shortcuts
+document.querySelectorAll('.sh-date-chip').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var d = new Date();
+        var offset = parseInt(this.dataset.offset);
+        var type = this.dataset.type;
+        if (!isNaN(offset)) {
+            d.setDate(d.getDate() + offset);
+        } else if (type === 'next-monday') {
+            var day = d.getDay();
+            d.setDate(d.getDate() + ((8 - day) % 7 || 7));
+        } else if (type === 'end-month') {
+            d = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+        }
+        var iso = d.toISOString().split('T')[0];
+        var startInput = document.querySelector('[name="start_date"]');
+        if (startInput) {
+            startInput.value = iso;
+            startInput.dispatchEvent(new Event('change'));
+        }
+    });
+});
+</script>
 <style>
+/* Smart date shortcut chips */
+.sh-date-chip {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 99px;
+    border: 1px solid var(--sh-primary, #166534);
+    color: var(--sh-primary, #166534);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.sh-date-chip:hover, .sh-date-chip:active {
+    background: var(--sh-primary, #166534);
+    color: white;
+}
 /* Custom invalid-feedback styling */
 .invalid-feedback {
     background: var(--sh-danger-light, #fee2e2);
