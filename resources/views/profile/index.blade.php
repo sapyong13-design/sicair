@@ -255,6 +255,14 @@
         </div>
     </div>
 </div>
+{{-- Last login --}}
+@if(auth()->user()->last_login_at)
+<div class="text-center mt-3" style="font-size:0.8rem;color:#94a3b8;">
+    <i class="ti ti-clock me-1"></i>
+    Login terakhir: {{ \Carbon\Carbon::parse(auth()->user()->last_login_at)->diffForHumans() }}
+</div>
+@endif
+
 @push('scripts')
 <script>
 function togglePw(inputId, btn) {

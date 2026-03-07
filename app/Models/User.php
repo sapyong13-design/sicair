@@ -16,7 +16,7 @@ class User extends Authenticatable
         'jabatan', 'golongan_ruang', 'unit_kerja', 'masa_kerja_mulai',
         'status_pegawai', 'jenis_kelamin', 'jumlah_anak', 'lokasi_terpencil',
         'atasan_id', 'telepon', 'alamat', 'notification_preferences',
-        'photo', 'is_active',
+        'photo', 'is_active', 'last_login_at',
     ];
 
     protected $hidden = [
@@ -34,6 +34,7 @@ class User extends Authenticatable
             'lokasi_terpencil' => 'boolean',
             'notification_preferences' => 'array',
             'is_active' => 'boolean',
+            'last_login_at' => 'datetime',
         ];
     }
 

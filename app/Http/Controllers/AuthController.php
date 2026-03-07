@@ -34,6 +34,8 @@ class AuthController extends Controller
                 'user_agent' => $request->userAgent(),
             ]);
 
+            $user->update(['last_login_at' => now()]);
+
             return redirect()->intended('/dashboard');
         }
 
