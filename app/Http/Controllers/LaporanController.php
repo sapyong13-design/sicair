@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\LeaveRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class LaporanController extends Controller
 {
@@ -60,7 +65,7 @@ class LaporanController extends Controller
             ->get();
 
         if ($format === 'excel') {
-            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $spreadsheet = new Spreadsheet();
             $spreadsheet->getProperties()
                 ->setTitle("Rekap Cuti {$year}")
                 ->setCreator('SiHEALING - PN Natuna');
@@ -73,10 +78,11 @@ class LaporanController extends Controller
             }
             $sheet->getStyle('A1:I1')->applyFromArray([
                 'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '166534']],
-                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '166534']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
             ]);
 
+            $typeLabels = LeaveRequest::typeLabels();
             foreach ($rows as $i => $row) {
                 $r = $i + 2;
                 $sheet->setCellValue('A' . $r, $i + 1);
@@ -84,19 +90,32 @@ class LaporanController extends Controller
                 $sheet->setCellValue('C' . $r, $row->user?->name);
                 $sheet->setCellValue('D' . $r, $row->user?->unit_kerja);
                 $sheet->setCellValue('E' . $r, $row->user?->jabatan);
-                $sheet->setCellValue('F' . $r, LeaveRequest::typeLabels()[$row->type] ?? $row->type);
+                $sheet->setCellValue('F' . $r, $typeLabels[$row->type] ?? $row->type);
                 $sheet->setCellValue('G' . $r, $row->start_date?->format('d/m/Y'));
                 $sheet->setCellValue('H' . $r, $row->end_date?->format('d/m/Y'));
                 $sheet->setCellValue('I' . $r, $row->total_hari_kerja ?? $row->total_days);
+            }
+
+            if ($rows->isEmpty()) {
+                $sheet->mergeCells('A2:I2');
+                $sheet->setCellValue('A2', 'Tidak ada data cuti yang disetujui untuk periode ini.');
+                $sheet->getStyle('A2')->applyFromArray([
+                    'font' => ['italic' => true, 'color' => ['rgb' => '9CA3AF']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                ]);
             }
 
             foreach (range('A', 'I') as $col) {
                 $sheet->getColumnDimension($col)->setAutoSize(true);
             }
 
-            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-            $filename = 'rekap-cuti-' . $year . ($unitKerja ? '-' . str_replace(' ', '_', $unitKerja) : '') . '.xlsx';
+            $writer = new Xlsx($spreadsheet);
+            $safeUnit = $unitKerja ? '-' . Str::slug($unitKerja) : '';
+            $filename = 'rekap-cuti-' . $year . $safeUnit . '.xlsx';
             $tempPath = tempnam(sys_get_temp_dir(), 'excel_');
+            if ($tempPath === false) {
+                abort(500, 'Gagal membuat file sementara untuk ekspor.');
+            }
             $writer->save($tempPath);
 
             return response()->download($tempPath, $filename, [
@@ -104,13 +123,15 @@ class LaporanController extends Controller
             ])->deleteFileAfterSend(true);
         }
 
-        $filename = "rekap-cuti-{$year}" . ($unitKerja ? '-' . str_replace(' ', '_', $unitKerja) : '') . '.csv';
+        $safeUnitCsv = $unitKerja ? '-' . Str::slug($unitKerja) : '';
+        $filename = "rekap-cuti-{$year}{$safeUnitCsv}.csv";
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ];
 
-        $callback = function () use ($rows) {
+        $typeLabels = LeaveRequest::typeLabels();
+        $callback = function () use ($rows, $typeLabels) {
             $handle = fopen('php://output', 'w');
             // UTF-8 BOM for Excel
             fwrite($handle, "\xEF\xBB\xBF");
@@ -121,7 +142,7 @@ class LaporanController extends Controller
                     $row->user?->name,
                     $row->user?->unit_kerja,
                     $row->user?->jabatan,
-                    LeaveRequest::typeLabels()[$row->type] ?? $row->type,
+                    $typeLabels[$row->type] ?? $row->type,
                     $row->start_date?->format('d/m/Y'),
                     $row->end_date?->format('d/m/Y'),
                     $row->total_hari_kerja ?? $row->total_days,
