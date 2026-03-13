@@ -13,6 +13,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DinasLuarController;
 use App\Http\Controllers\LaporanBulananController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\HariLiburController;
 use App\Http\Controllers\KalenderController;
 use App\Http\Controllers\LeaveRequestController;
@@ -229,6 +230,13 @@ Route::middleware('auth')->group(function () {
     });
     // Download dokumen: accessible by admin + ketua + pemilik record
     Route::get('/dinas-luar/{dinasLuar}/dokumen', [DinasLuarController::class, 'downloadDokumen'])->name('dinas-luar.dokumen');
+
+    // === Laporan Tahunan (admin only) ===
+    Route::middleware('role:admin')->prefix('laporan-tahunan')->name('laporan.tahunan.')->group(function () {
+        Route::get('/', [LaporanController::class, 'tahunan'])->name('index');
+        Route::get('/export', [LaporanController::class, 'exportTahunan'])->name('export');
+    });
+    Route::middleware('role:admin')->get('/laporan/tahunan', [LaporanController::class, 'tahunan'])->name('laporan.tahunan');
 
     // === Laporan Bulanan (admin only) ===
     Route::middleware('role:admin')->prefix('laporan-bulanan')->name('laporan-bulanan.')->group(function () {
