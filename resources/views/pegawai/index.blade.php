@@ -288,12 +288,34 @@
     {{-- Desktop: Table --}}
     <div class="table-responsive d-none d-md-block" id="tableView">
         <table class="table sh-table mb-0">
+            @php
+                function sortUrl($col, $currentSort, $currentDir) {
+                    $dir = ($currentSort === $col && $currentDir === 'asc') ? 'desc' : 'asc';
+                    return request()->fullUrlWithQuery(['sort' => $col, 'dir' => $dir]);
+                }
+                function sortIcon($col, $currentSort, $currentDir) {
+                    if ($currentSort !== $col) return 'ti-arrows-sort';
+                    return $currentDir === 'asc' ? 'ti-sort-ascending' : 'ti-sort-descending';
+                }
+            @endphp
             <thead>
                 <tr>
                     <th style="width:36px;"><input type="checkbox" id="checkAll" style="cursor:pointer;" tabindex="0" title="Pilih semua pegawai" aria-label="Pilih semua pegawai" onchange="toggleAllCheckboxes(this)"></th>
-                    <th>Pegawai</th>
-                    <th>Jabatan / Golongan</th>
-                    <th>Role</th>
+                    <th>
+                        <a href="{{ sortUrl('name', $sortBy, $sortDir) }}" class="text-decoration-none text-dark d-flex align-items-center gap-1">
+                            Pegawai <i class="ti {{ sortIcon('name', $sortBy, $sortDir) }}" style="font-size:0.75rem;"></i>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ sortUrl('jabatan', $sortBy, $sortDir) }}" class="text-decoration-none text-dark d-flex align-items-center gap-1">
+                            Jabatan / Golongan <i class="ti {{ sortIcon('jabatan', $sortBy, $sortDir) }}" style="font-size:0.75rem;"></i>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ sortUrl('role', $sortBy, $sortDir) }}" class="text-decoration-none text-dark d-flex align-items-center gap-1">
+                            Role <i class="ti {{ sortIcon('role', $sortBy, $sortDir) }}" style="font-size:0.75rem;"></i>
+                        </a>
+                    </th>
                     <th>Status</th>
                     <th>Masa Kerja</th>
                     <th class="text-center">Sisa Cuti</th>

@@ -839,6 +839,83 @@ class LeaveRequestController extends Controller
         return response()->json(['conflict' => false]);
     }
 
+    /**
+     * Riwayat cuti lengkap milik user yang sedang login
+     */
+    public function history(Request $request)
+    {
+        $user = Auth::user();
+
+        $filterStatus = $request->input('status', '');
+        $filterType   = $request->input('type', '');
+        $filterYear   = $request->input('year', '');
+
+        $query = LeaveRequest::where('user_id', $user->id)
+            ->when($filterStatus, fn($q) => $q->where('status', $filterStatus))
+            ->when($filterType,   fn($q) => $q->where('type', $filterType))
+            ->when($filterYear,   fn($q) => $q->whereYear('start_date', $filterYear))
+            ->with(['pejabat', 'atasanReviewer'])
+            ->latest();
+
+        $leaves = $query->paginate(15)->withQueryString();
+
+        $statusLabels = LeaveRequest::statusLabels();
+        $typeLabels   = LeaveRequest::typeLabels();
+
+        $years = LeaveRequest::where('user_id', $user->id)
+            ->selectRaw("strftime('%Y', start_date) as yr")
+            ->distinct()
+            ->orderByDesc('yr')
+            ->pluck('yr');
+
+        return view('leave.history', compact(
+            'leaves', 'filterStatus', 'filterType', 'filterYear',
+            'statusLabels', 'typeLabels', 'years'
+        ));
+    }
+
+    /**
+     * Ringkasan & statistik cuti milik user yang sedang login
+     */
+    public function saya(Request $request)
+    {
+        $user = Auth::user();
+        $year = (int) $request->input('year', date('Y'));
+
+        $leaveBalance = $user->leave_balance ?? 0;
+
+        $upcoming = LeaveRequest::where('user_id', $user->id)
+            ->whereIn('status', [
+                LeaveRequest::STATUS_DISETUJUI,
+                LeaveRequest::STATUS_APPROVED,
+                LeaveRequest::STATUS_DIAJUKAN,
+                LeaveRequest::STATUS_PERTIMBANGAN,
+            ])
+            ->where('start_date', '>=', now())
+            ->orderBy('start_date')
+            ->get();
+
+        $pendingCount = LeaveRequest::where('user_id', $user->id)
+            ->whereIn('status', [LeaveRequest::STATUS_DIAJUKAN, LeaveRequest::STATUS_PERTIMBANGAN])
+            ->count();
+
+        $usedThisYear = LeaveRequest::where('user_id', $user->id)
+            ->whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+            ->whereYear('start_date', $year)
+            ->get()
+            ->sum(fn($r) => $r->total_hari_kerja ?? $r->total_days ?? 0);
+
+        $recentLeaves = LeaveRequest::where('user_id', $user->id)
+            ->with(['pejabat', 'atasanReviewer'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('leave.saya', compact(
+            'year', 'leaveBalance', 'upcoming', 'pendingCount', 'usedThisYear', 'recentLeaves'
+        ));
+    }
+
     // ===== Private helpers =====
 
     private function addTypeSpecificRules(array &$rules, string $type): void

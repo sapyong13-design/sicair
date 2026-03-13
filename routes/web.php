@@ -111,6 +111,8 @@ Route::middleware('auth')->group(function () {
 
     // === Pengajuan Cuti (semua pegawai termasuk atasan/ketua) ===
     Route::get('/leave/check-conflict', [LeaveRequestController::class, 'checkConflict'])->name('leave.check-conflict');
+    Route::get('/leave/history', [LeaveRequestController::class, 'history'])->name('leave.history');
+    Route::get('/leave/saya', [LeaveRequestController::class, 'saya'])->name('leave.saya');
     Route::get('/leave/select-type', [LeaveRequestController::class, 'selectType'])->name('leave.select-type');
     Route::get('/leave/create', [LeaveRequestController::class, 'create'])->name('leave.create');
     Route::post('/leave', [LeaveRequestController::class, 'store'])->name('leave.store');

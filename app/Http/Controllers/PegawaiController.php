@@ -15,7 +15,12 @@ class PegawaiController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::query()->orderBy('name');
+        $sortBy  = $request->input('sort', 'name');
+        $sortDir = $request->input('dir', 'asc') === 'desc' ? 'desc' : 'asc';
+        $allowed = ['name', 'nip', 'jabatan', 'unit_kerja', 'role'];
+        if (!in_array($sortBy, $allowed)) $sortBy = 'name';
+
+        $query = User::query();
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -43,9 +48,11 @@ class PegawaiController extends Controller
             }
         }
 
+        $query->orderBy($sortBy, $sortDir);
+
         $pegawai = $query->with(['atasan', 'cutiRecords'])->paginate(15)->withQueryString();
 
-        return view('pegawai.index', compact('pegawai'));
+        return view('pegawai.index', compact('pegawai', 'sortBy', 'sortDir'));
     }
 
     public function create()
