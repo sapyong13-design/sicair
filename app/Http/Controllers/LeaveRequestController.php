@@ -449,7 +449,7 @@ class LeaveRequestController extends Controller
             'ids'      => 'required|array|min:1',
             'ids.*'    => 'exists:leave_requests,id',
             'decision' => 'required|in:setuju,tolak,tangguhkan',
-            'note'     => 'nullable|string|max:500',
+            'catatan'  => 'nullable|string|max:500',
         ]);
 
         $user = auth()->user();
@@ -476,7 +476,7 @@ class LeaveRequestController extends Controller
                 'status'            => $newStatus,
                 'pejabat_id'        => $user->id,
                 'keputusan_pejabat' => $request->decision,
-                'catatan_pejabat'   => $request->note,
+                'catatan_pejabat'   => $request->catatan,
                 'decided_at'        => now(),
             ]);
 
@@ -502,7 +502,7 @@ class LeaveRequestController extends Controller
                 LeaveRequest::class,
                 $leave->id,
                 null,
-                ['status' => $newStatus, 'keputusan_pejabat' => $request->decision, 'catatan_pejabat' => $request->note],
+                ['status' => $newStatus, 'keputusan_pejabat' => $request->decision, 'catatan_pejabat' => $request->catatan],
                 "Pejabat {$user->name} bulk-{$request->decision} pengajuan cuti #{$leave->id} milik {$leave->user?->name}"
             );
 
@@ -523,7 +523,7 @@ class LeaveRequestController extends Controller
                     'tangguhkan' => 'ditangguhkan',
                 } .
                 " oleh {$user->name}" .
-                ($request->note ? '. Catatan: ' . $request->note : '.');
+                ($request->catatan ? '. Catatan: ' . $request->catatan : '.');
 
             Notification::kirim(
                 $leave->user_id,

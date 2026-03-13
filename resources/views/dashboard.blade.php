@@ -763,20 +763,26 @@
             <form id="sh-bulk-form" method="POST" action="{{ route('leave.bulk-decide') }}">
                 @csrf
                 <div class="mb-3" id="sh-bulk-actions" style="display:none;">
-                    <div class="d-flex gap-2 align-items-center flex-wrap p-2" style="background:var(--sh-primary-light,#dcfce7);border-radius:10px;">
-                        <span class="text-muted small" id="sh-bulk-count">0 dipilih</span>
-                        <select name="decision" class="form-select form-select-sm" style="width:auto;" required>
-                            <option value="">-- Pilih Keputusan --</option>
-                            <option value="setuju">Setujui Semua</option>
-                            <option value="tolak">Tolak Semua</option>
-                            <option value="tangguhkan">Tangguhkan Semua</option>
-                        </select>
-                        <input type="text" name="note" class="form-control form-control-sm"
-                            placeholder="Catatan (opsional)" style="max-width:200px;">
-                        <button type="submit" class="btn btn-sm btn-primary">
-                            <i class="ti ti-check me-1"></i> Terapkan
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="sh-bulk-clear">Batal</button>
+                    <div class="p-3" style="background:var(--sh-primary-light,#dcfce7);border-radius:10px;">
+                        <div class="d-flex gap-2 align-items-center flex-wrap mb-2">
+                            <span class="text-muted small" id="sh-bulk-count">0 dipilih</span>
+                            <select name="decision" class="form-select form-select-sm" style="width:auto;" required>
+                                <option value="">-- Pilih Keputusan --</option>
+                                <option value="setuju">Setujui Semua</option>
+                                <option value="tolak">Tolak Semua</option>
+                                <option value="tangguhkan">Tangguhkan Semua</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="ti ti-check me-1"></i> Terapkan
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="sh-bulk-clear">Batal</button>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label fw-semibold" style="font-size:0.83rem;">Catatan (opsional)</label>
+                            <textarea name="catatan" class="form-control form-control-sm" rows="3"
+                                placeholder="Catatan untuk semua pengajuan yang dipilih..."></textarea>
+                            <div class="form-text" style="font-size:0.78rem;">Catatan ini akan berlaku untuk semua pengajuan yang dipilih.</div>
+                        </div>
                     </div>
                 </div>
 
