@@ -8,7 +8,7 @@
             </div>
             <div class="timeline-content">
                 <div class="timeline-title">Diajukan</div>
-                <div class="timeline-date">{{ $leaveRequest->created_at->format('d M Y, H:i') }}</div>
+                <div class="timeline-date">{{ $leaveRequest->created_at?->format('d M Y, H:i') ?? '-' }}</div>
                 <div class="timeline-description">Pengajuan cuti telah dibuat</div>
             </div>
         </div>
@@ -97,7 +97,7 @@
                         $durasi = $leaveRequest->created_at->diffInDays($leaveRequest->updated_at);
                     @endphp
                     <div class="text-muted mt-1" style="font-size:0.8rem;">
-                        <i class="ti ti-clock me-1"></i>Diproses dalam {{ $durasi }} hari
+                        <i class="ti ti-clock me-1"></i>Diproses dalam {{ $durasi > 0 ? $durasi . ' hari' : 'kurang dari 1 hari' }}
                     </div>
                 @else
                     <div class="timeline-date">Menunggu penyelesaian</div>
