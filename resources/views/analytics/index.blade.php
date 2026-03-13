@@ -28,9 +28,23 @@
                     @endforeach
                 </select>
             </form>
-            <a href="{{ route('analytics.export-annual', ['year' => $year]) }}" class="btn btn-sm sh-btn-primary sh-export-trigger">
-                <i class="ti ti-download me-1"></i> Export CSV {{ $year }}
-            </a>
+            <div class="dropdown">
+                <button class="btn btn-sm sh-btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="ti ti-download me-1"></i> Export {{ $year }}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="{{ route('analytics.export-annual', ['year' => $year]) }}">
+                            <i class="ti ti-file-text me-1"></i> CSV
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('analytics.export-annual', ['year' => $year, 'format' => 'excel']) }}">
+                            <i class="ti ti-file-spreadsheet me-1"></i> Excel (.xlsx)
+                        </a>
+                    </li>
+                </ul>
+            </div>
             <a href="{{ route('analytics.export-pdf', ['year' => $year]) }}" target="_blank" class="btn btn-sm btn-outline-secondary sh-export-trigger">
                 <i class="ti ti-printer me-1"></i> Export PDF
             </a>

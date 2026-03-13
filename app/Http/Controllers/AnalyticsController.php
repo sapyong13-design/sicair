@@ -7,6 +7,11 @@ use App\Models\User;
 use App\Services\AnalyticsService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class AnalyticsController extends Controller
 {
@@ -63,6 +68,66 @@ class AnalyticsController extends Controller
             ->whereYear('created_at', $year)
             ->orderBy('created_at')
             ->get();
+
+        $format = $request->input('format', 'csv');
+
+        if ($format === 'excel') {
+            $spreadsheet = new Spreadsheet();
+            $spreadsheet->getProperties()
+                ->setTitle("Analytics Cuti {$year}")
+                ->setCreator('SiHEALING - PN Natuna');
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('Analytics ' . $year);
+
+            $headers = ['No', 'Nama', 'NIP', 'Jabatan', 'Jenis Cuti', 'Tgl Mulai', 'Tgl Selesai', 'Hari Kerja', 'Status', 'Catatan'];
+            foreach ($headers as $i => $h) {
+                $sheet->setCellValue(chr(65 + $i) . '1', $h);
+            }
+            $sheet->getStyle('A1:J1')->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1d4ed8']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+            ]);
+
+            foreach ($leaves as $i => $l) {
+                $r = $i + 2;
+                $sheet->setCellValue('A' . $r, $i + 1);
+                $sheet->setCellValue('B' . $r, $l->user->name ?? '-');
+                $sheet->setCellValue('C' . $r, $l->user->nip ?? '-');
+                $sheet->setCellValue('D' . $r, $l->user->jabatan ?? '-');
+                $sheet->setCellValue('E' . $r, $l->type_label ?? '-');
+                $sheet->setCellValue('F' . $r, $l->start_date->format('d/m/Y'));
+                $sheet->setCellValue('G' . $r, $l->end_date->format('d/m/Y'));
+                $sheet->setCellValue('H' . $r, $l->total_hari_kerja ?? $l->total_days ?? 0);
+                $sheet->setCellValue('I' . $r, $l->status_label ?? $l->status);
+                $sheet->setCellValue('J' . $r, $l->catatan_pejabat ?? $l->catatan_atasan ?? '');
+            }
+
+            if ($leaves->isEmpty()) {
+                $sheet->mergeCells('A2:J2');
+                $sheet->setCellValue('A2', 'Tidak ada data cuti untuk tahun ini.');
+                $sheet->getStyle('A2')->applyFromArray([
+                    'font' => ['italic' => true, 'color' => ['rgb' => '9CA3AF']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                ]);
+            }
+
+            foreach (range('A', 'J') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            $writer = new Xlsx($spreadsheet);
+            $filename = "analytics-cuti-{$year}.xlsx";
+            $tempPath = tempnam(sys_get_temp_dir(), 'excel_');
+            if ($tempPath === false) {
+                abort(500, 'Gagal membuat file sementara untuk ekspor.');
+            }
+            $writer->save($tempPath);
+
+            return response()->download($tempPath, $filename, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ])->deleteFileAfterSend(true);
+        }
 
         $csv = "No,Nama,NIP,Jabatan,Jenis Cuti,Tanggal Mulai,Tanggal Selesai,Hari Kerja,Status,Catatan\n";
         $no = 1;
