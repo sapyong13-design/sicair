@@ -2182,7 +2182,7 @@
                     <a href="{{ route('notifications') }}" class="btn btn-outline-secondary" style="position:relative;">
                         <i class="ti ti-bell"></i> Notifikasi
                         @if(isset($unreadCount) && $unreadCount > 0)
-                        <span style="position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--sh-danger);display:block;"></span>
+                        <span id="notif-dot-mobile" style="position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--sh-danger);display:block;"></span>
                         @endif
                     </a>
                     <form method="POST" action="{{ route('logout') }}" style="flex:1;">
@@ -3133,11 +3133,16 @@
                     b.style.display = 'none';
                 }
             });
+            var dot = document.getElementById('notif-dot-mobile');
+            if (dot) {
+                dot.style.display = data.count > 0 ? 'block' : 'none';
+            }
         })
         .catch(function() {}); // silent fail
     }
 
     // Polling setiap 30 detik
+    updateNotifBadge(); // run immediately on page load
     setInterval(updateNotifBadge, 30000);
 })();
 </script>
