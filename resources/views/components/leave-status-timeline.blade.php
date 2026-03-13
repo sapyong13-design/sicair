@@ -29,6 +29,11 @@
                                 <i class="ti ti-{{ $leaveRequest->pertimbangan_atasan === 'setuju' ? 'circle-check' : ($leaveRequest->pertimbangan_atasan === 'tolak' ? 'circle-x' : ($leaveRequest->pertimbangan_atasan === 'ubah' ? 'edit' : 'clock-pause')) }}"></i>
                                 {{ ucfirst($leaveRequest->pertimbangan_atasan === 'setuju' ? 'Disetujui' : ($leaveRequest->pertimbangan_atasan === 'tolak' ? 'Tidak Disetujui' : ($leaveRequest->pertimbangan_atasan === 'ubah' ? 'Perubahan' : 'Ditangguhkan'))) }}
                             </span>
+                            @if($leaveRequest->catatan_atasan)
+                                <div class="timeline-notes">
+                                    <i class="ti ti-message me-1"></i>{{ $leaveRequest->catatan_atasan }}
+                                </div>
+                            @endif
                         @else
                             <span class="timeline-status-badge pending">
                                 <i class="ti ti-clock-hour-4"></i> Menunggu
@@ -58,6 +63,11 @@
                                 <i class="ti ti-{{ $leaveRequest->keputusan === 'setuju' ? 'circle-check' : ($leaveRequest->keputusan === 'tolak' ? 'circle-x' : ($leaveRequest->keputusan === 'ubah' ? 'edit' : 'clock-pause')) }}"></i>
                                 {{ ucfirst($leaveRequest->keputusan === 'setuju' ? 'Disetujui' : ($leaveRequest->keputusan === 'tolak' ? 'Tidak Disetujui' : ($leaveRequest->keputusan === 'ubah' ? 'Perubahan' : 'Ditangguhkan'))) }}
                             </span>
+                            @if($leaveRequest->catatan_pejabat)
+                                <div class="timeline-notes">
+                                    <i class="ti ti-message me-1"></i>{{ $leaveRequest->catatan_pejabat }}
+                                </div>
+                            @endif
                         @else
                             <span class="timeline-status-badge pending">
                                 <i class="ti ti-clock-hour-4"></i> Menunggu
@@ -82,6 +92,12 @@
                     <div class="timeline-date">{{ $leaveRequest->updated_at->format('d M Y, H:i') }}</div>
                     <div class="timeline-description">
                         Pengajuan {{ $leaveRequest->isApproved() ? 'disetujui' : 'ditolak' }}
+                    </div>
+                    @php
+                        $durasi = $leaveRequest->created_at->diffInDays($leaveRequest->updated_at);
+                    @endphp
+                    <div class="text-muted mt-1" style="font-size:0.8rem;">
+                        <i class="ti ti-clock me-1"></i>Diproses dalam {{ $durasi }} hari
                     </div>
                 @else
                     <div class="timeline-date">Menunggu penyelesaian</div>
@@ -221,6 +237,17 @@
 .timeline-status-badge.pending {
     background: var(--sh-gray-100);
     color: var(--sh-gray-600);
+}
+
+.timeline-notes {
+    background: var(--sh-gray-50, #f9fafb);
+    border-left: 3px solid var(--sh-gray-300, #d1d5db);
+    padding: 0.5rem 0.75rem;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.85rem;
+    color: var(--sh-gray-600, #4b5563);
+    margin-top: 0.5rem;
+    font-style: italic;
 }
 
 @media (max-width: 576px) {
