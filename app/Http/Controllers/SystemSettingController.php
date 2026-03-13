@@ -56,7 +56,7 @@ class SystemSettingController extends Controller
         $backups = [];
 
         if (is_dir($backupDir)) {
-            $files = glob($backupDir . '/database-*.sqlite');
+            $files = glob($backupDir . '/database-*.sqlite') ?: [];
             rsort($files);
             foreach ($files as $f) {
                 $bytes = filesize($f);
@@ -73,7 +73,10 @@ class SystemSettingController extends Controller
 
     public function runBackup()
     {
-        Artisan::call('backup:database', ['--keep' => 14]);
+        $exitCode = Artisan::call('backup:database', ['--keep' => 14]);
+        if ($exitCode !== 0) {
+            return redirect()->route('admin.backup')->with('error', 'Backup gagal dibuat. Periksa log server.');
+        }
         return redirect()->route('admin.backup')->with('success', 'Backup berhasil dibuat.');
     }
 
