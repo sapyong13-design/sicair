@@ -288,6 +288,7 @@
     {{-- Desktop: Table --}}
     <div class="table-responsive d-none d-md-block" id="tableView">
         <table class="table sh-table mb-0">
+            @once
             @php
                 function sortUrl($col, $currentSort, $currentDir) {
                     $dir = ($currentSort === $col && $currentDir === 'asc') ? 'desc' : 'asc';
@@ -298,6 +299,7 @@
                     return $currentDir === 'asc' ? 'ti-sort-ascending' : 'ti-sort-descending';
                 }
             @endphp
+            @endonce
             <thead>
                 <tr>
                     <th style="width:36px;"><input type="checkbox" id="checkAll" style="cursor:pointer;" tabindex="0" title="Pilih semua pegawai" aria-label="Pilih semua pegawai" onchange="toggleAllCheckboxes(this)"></th>

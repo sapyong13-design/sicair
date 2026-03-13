@@ -853,7 +853,7 @@ class LeaveRequestController extends Controller
         $query = LeaveRequest::where('user_id', $user->id)
             ->when($filterStatus, fn($q) => $q->where('status', $filterStatus))
             ->when($filterType,   fn($q) => $q->where('type', $filterType))
-            ->when($filterYear,   fn($q) => $q->whereYear('start_date', $filterYear))
+            ->when($filterYear,   fn($q) => $q->whereRaw("strftime('%Y', start_date) = ?", [(string)$filterYear]))
             ->with(['pejabat', 'atasanReviewer'])
             ->latest();
 
