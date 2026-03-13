@@ -1991,7 +1991,7 @@
                     <a href="{{ route('notifications') }}" class="sh-dark-toggle" title="Notifikasi" style="text-decoration: none;" aria-label="Notifikasi{{ ($unreadCount = \App\Models\Notification::where('user_id', Auth::id())->where('is_read', false)->count()) > 0 ? ' - ' . $unreadCount . ' belum dibaca' : '' }}">
                         <i class="ti ti-bell" aria-hidden="true"></i>
                         @if($unreadCount > 0)
-                        <span class="sh-notif-badge" role="status" aria-label="{{ $unreadCount }} notifikasi belum dibaca">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
+                        <span class="sh-notif-badge notif-unread-badge" role="status" aria-label="{{ $unreadCount }} notifikasi belum dibaca">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
                         @endif
                     </a>
                 </div>
@@ -2020,7 +2020,7 @@
                         <a href="{{ route('notifications') }}" class="dropdown-item py-2" style="text-align:left;justify-content:flex-start;">
                             <i class="ti ti-bell me-2"></i> Notifikasi
                             @if($unreadCount > 0)
-                            <span class="badge ms-1" style="background: var(--sh-danger); border-radius: 50px; font-size: 0.65rem;">{{ $unreadCount }}</span>
+                            <span class="badge ms-1 notif-unread-badge" style="background: var(--sh-danger); border-radius: 50px; font-size: 0.65rem;">{{ $unreadCount }}</span>
                             @endif
                         </a>
                         <a href="{{ route('kalender') }}" class="dropdown-item py-2" style="text-align:left;justify-content:flex-start;">
@@ -2256,7 +2256,7 @@
             <i class="ti ti-bell"></i>
             @php $bottomUnread = \App\Models\Notification::where('user_id', Auth::id())->where('is_read', false)->count(); @endphp
             @if($bottomUnread > 0)
-            <span class="sh-bottom-nav-badge">{{ $bottomUnread > 9 ? '9+' : $bottomUnread }}</span>
+            <span class="sh-bottom-nav-badge notif-unread-badge">{{ $bottomUnread > 9 ? '9+' : $bottomUnread }}</span>
             @endif
             <span>Notifikasi</span>
         </a>
@@ -3115,5 +3115,32 @@
 })();
 @endif
 </script>
+@auth
+<script>
+(function() {
+    function updateNotifBadge() {
+        fetch('{{ route("notifications.unread-count") }}', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var badges = document.querySelectorAll('.notif-unread-badge');
+            badges.forEach(function(b) {
+                if (data.count > 0) {
+                    b.textContent = data.count > 99 ? '99+' : data.count;
+                    b.style.display = '';
+                } else {
+                    b.style.display = 'none';
+                }
+            });
+        })
+        .catch(function() {}); // silent fail
+    }
+
+    // Polling setiap 30 detik
+    setInterval(updateNotifBadge, 30000);
+})();
+</script>
+@endauth
 </body>
 </html>

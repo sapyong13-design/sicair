@@ -39,4 +39,13 @@ class NotificationController extends Controller
 
         return back()->with('success', 'Semua notifikasi telah ditandai dibaca.');
     }
+
+    public function unreadCount()
+    {
+        $count = \App\Models\Notification::where('user_id', Auth::id())
+            ->where('is_read', false)
+            ->count();
+
+        return response()->json(['count' => $count]);
+    }
 }
