@@ -96,6 +96,9 @@
                     <th class="text-center">Total Hak</th>
                     <th class="text-center">Diambil</th>
                     <th class="text-center">Sisa</th>
+                    <th class="text-center" title="Estimasi sisa cuti pada 31 Desember berdasarkan rata-rata penggunaan s/d bulan ini">
+                        Prediksi Sisa <i class="ti ti-info-circle text-muted" style="font-size:0.75rem;"></i>
+                    </th>
                     <th class="text-center">Status</th>
                 </tr>
             </thead>
@@ -131,6 +134,14 @@
                         </span>
                     </td>
                     <td class="text-center">
+                        <span class="badge {{ $row['prediksi_sisa'] >= 5 ? 'bg-success-subtle text-success' : ($row['prediksi_sisa'] >= 2 ? 'bg-warning-subtle text-warning' : 'bg-danger-subtle text-danger') }}">
+                            {{ $row['prediksi_sisa'] }} hari
+                        </span>
+                        @if($row['rata_per_bulan'] > 0)
+                        <div class="text-muted" style="font-size:0.7rem;">~{{ $row['rata_per_bulan'] }} hr/bln</div>
+                        @endif
+                    </td>
+                    <td class="text-center">
                         @if($sisa <= 0)
                         <span class="sh-badge" style="background:var(--sh-danger-light);color:var(--sh-danger);">Habis</span>
                         @elseif($sisa <= 3)
@@ -143,6 +154,14 @@
             @endforeach
             </tbody>
         </table>
+    </div>
+    @endif
+    @if(!empty($saldoData))
+    <div class="card-body pt-0 pb-3">
+        <div class="text-muted mt-3" style="font-size:0.75rem;">
+            <i class="ti ti-calculator me-1"></i>
+            * Prediksi berdasarkan rata-rata penggunaan s/d {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}. Belum termasuk cuti yang sudah diajukan tapi belum disetujui.
+        </div>
     </div>
     @endif
 </div>

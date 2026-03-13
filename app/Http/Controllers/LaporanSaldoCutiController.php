@@ -34,14 +34,24 @@ class LaporanSaldoCutiController extends Controller
         foreach ($users as $user) {
             $calc      = new CutiTahunanCalculator($user);
             $info      = $calc->hitung();
+            // Prediksi saldo akhir tahun
+            $bulanBerjalan = (int) date('n'); // bulan saat ini (1-12)
+            $cutiDiambilTahunIni = $info['cuti_diambil'] ?? 0;
+            $rataPerBulan = $bulanBerjalan > 0 ? ($cutiDiambilTahunIni / $bulanBerjalan) : 0;
+            $sisaBulan = 12 - $bulanBerjalan;
+            $prediksiTambahan = round($rataPerBulan * $sisaBulan);
+            $prediksiSisa = max(0, ($info['sisa'] ?? 0) - $prediksiTambahan);
+
             $saldoData[] = [
-                'user'              => $user,
-                'hak_cuti'          => $info['hak_dasar'] ?? 12,
-                'carry_over'        => $info['carry_over'] ?? 0,
-                'tambahan_terpencil'=> $info['tambahan_terpencil'] ?? 0,
-                'total_hak'         => $info['total_hak'] ?? 12,
-                'cuti_diambil'      => $info['cuti_diambil'] ?? 0,
-                'sisa_cuti'         => $info['sisa'] ?? 0,
+                'user'               => $user,
+                'hak_cuti'           => $info['hak_dasar'] ?? 12,
+                'carry_over'         => $info['carry_over'] ?? 0,
+                'tambahan_terpencil' => $info['tambahan_terpencil'] ?? 0,
+                'total_hak'          => $info['total_hak'] ?? 12,
+                'cuti_diambil'       => $info['cuti_diambil'] ?? 0,
+                'sisa_cuti'          => $info['sisa'] ?? 0,
+                'prediksi_sisa'      => $prediksiSisa,
+                'rata_per_bulan'     => round($rataPerBulan, 1),
             ];
         }
 
