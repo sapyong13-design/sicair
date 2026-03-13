@@ -22,6 +22,7 @@ use App\Http\Controllers\PdfExportController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SystemSettingController;
 use Illuminate\Support\Facades\Route;
 
 // === Health Check (public, no auth) ===
@@ -298,4 +299,13 @@ Route::middleware('auth')->group(function () {
     });
 
     // FIX #3: Debug endpoint removed — was publicly accessible and leaked user data
+
+    // === Pengaturan Sistem (admin only) ===
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/admin/settings', [SystemSettingController::class, 'index'])->name('admin.settings');
+        Route::put('/admin/settings', [SystemSettingController::class, 'update'])->name('admin.settings.update');
+        Route::get('/admin/backup', [SystemSettingController::class, 'backup'])->name('admin.backup');
+        Route::post('/admin/backup/run', [SystemSettingController::class, 'runBackup'])->name('admin.backup.run');
+        Route::get('/admin/backup/download', [SystemSettingController::class, 'downloadBackup'])->name('admin.backup.download');
+    });
 });
