@@ -65,7 +65,7 @@ class AnalyticsController extends Controller
         $year = (int) $request->input('year', date('Y'));
 
         $leaves = LeaveRequest::with('user')
-            ->whereYear('created_at', $year)
+            ->whereRaw("strftime('%Y', start_date) = ?", [(string)$year])
             ->orderBy('created_at')
             ->get();
 
@@ -92,12 +92,12 @@ class AnalyticsController extends Controller
             foreach ($leaves as $i => $l) {
                 $r = $i + 2;
                 $sheet->setCellValue('A' . $r, $i + 1);
-                $sheet->setCellValue('B' . $r, $l->user->name ?? '-');
-                $sheet->setCellValue('C' . $r, $l->user->nip ?? '-');
-                $sheet->setCellValue('D' . $r, $l->user->jabatan ?? '-');
+                $sheet->setCellValue('B' . $r, $l->user?->name ?? '-');
+                $sheet->setCellValue('C' . $r, $l->user?->nip ?? '-');
+                $sheet->setCellValue('D' . $r, $l->user?->jabatan ?? '-');
                 $sheet->setCellValue('E' . $r, $l->type_label ?? '-');
-                $sheet->setCellValue('F' . $r, $l->start_date->format('d/m/Y'));
-                $sheet->setCellValue('G' . $r, $l->end_date->format('d/m/Y'));
+                $sheet->setCellValue('F' . $r, $l->start_date?->format('d/m/Y') ?? '-');
+                $sheet->setCellValue('G' . $r, $l->end_date?->format('d/m/Y') ?? '-');
                 $sheet->setCellValue('H' . $r, $l->total_hari_kerja ?? $l->total_days ?? 0);
                 $sheet->setCellValue('I' . $r, $l->status_label ?? $l->status);
                 $sheet->setCellValue('J' . $r, $l->catatan_pejabat ?? $l->catatan_atasan ?? '');
@@ -134,12 +134,12 @@ class AnalyticsController extends Controller
         foreach ($leaves as $l) {
             $csv .= implode(',', [
                 $no++,
-                '"' . str_replace('"', '""', $l->user->name) . '"',
-                $l->user->nip,
-                '"' . str_replace('"', '""', $l->user->jabatan ?? '') . '"',
+                '"' . str_replace('"', '""', $l->user?->name ?? '-') . '"',
+                $l->user?->nip ?? '-',
+                '"' . str_replace('"', '""', $l->user?->jabatan ?? '') . '"',
                 '"' . $l->type_label . '"',
-                $l->start_date->format('d/m/Y'),
-                $l->end_date->format('d/m/Y'),
+                $l->start_date?->format('d/m/Y') ?? '-',
+                $l->end_date?->format('d/m/Y') ?? '-',
                 $l->total_hari_kerja ?? $l->total_days,
                 $l->status_label,
                 '"' . str_replace('"', '""', $l->catatan_pejabat ?? $l->catatan_atasan ?? '') . '"',
