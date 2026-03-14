@@ -2,7 +2,12 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\LeaveRequestController;
+use App\Http\Controllers\Api\WhatsAppWebhookController;
 use Illuminate\Support\Facades\Route;
+
+// WhatsApp incoming webhook (public — auth via token header dari Fonnte)
+Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'handle'])
+    ->name('api.whatsapp.webhook');
 
 Route::post('/login', [AuthController::class, 'login']);
 

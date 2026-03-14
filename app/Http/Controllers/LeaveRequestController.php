@@ -12,6 +12,7 @@ use App\Models\LeaveRequest;
 use App\Models\Notification;
 use App\Services\BalanceAuditService;
 use App\Services\CutiTahunanCalculator;
+use App\Services\WhatsAppService;
 use App\Services\DocxExportService;
 use App\Services\HariKerjaCalculator;
 use App\Services\PdfExportService;
@@ -205,6 +206,16 @@ class LeaveRequestController extends Controller
             \Illuminate\Support\Facades\Log::warning('Email gagal dikirim: ' . $e->getMessage());
         }
 
+        // WA: konfirmasi ke pemohon
+        if ($user->wantsWhatsAppNotification()) {
+            $typeLabel = LeaveRequest::typeLabels()[$type] ?? $type;
+            WhatsAppService::send($user->telepon,
+                "SiHEALING: Pengajuan {$typeLabel} Anda\n"
+                . $leaveRequest->start_date->format('d/m/Y') . " s/d " . $leaveRequest->end_date->format('d/m/Y')
+                . " ({$leaveRequest->total_hari_kerja} hari kerja)\nberhasil diajukan dan sedang menunggu persetujuan."
+            );
+        }
+
         if ($skipAtasan) {
             // Langsung ke Ketua/Admin (tanpa review atasan)
             // Kirim email ke pejabat berwenang
@@ -235,6 +246,17 @@ class LeaveRequestController extends Controller
                     Notification::TYPE_CUTI_DIAJUKAN,
                     '/dashboard#pending-review'
                 );
+
+                // WA: notif ke atasan
+                $atasan = \App\Models\User::find($user->atasan_id);
+                if ($atasan && $atasan->wantsWhatsAppNotification()) {
+                    $typeLabel = LeaveRequest::typeLabels()[$type] ?? $type;
+                    WhatsAppService::send($atasan->telepon,
+                        "SiHEALING: {$user->name} mengajukan {$typeLabel}\n"
+                        . $leaveRequest->start_date->format('d/m/Y') . " - " . $leaveRequest->end_date->format('d/m/Y')
+                        . "\nSilakan login ke SiHEALING untuk memberikan pertimbangan."
+                    );
+                }
             }
         }
 
@@ -299,6 +321,17 @@ class LeaveRequestController extends Controller
                 route('leave.show', $leaveRequest)
             );
 
+            // WA: notif ditolak atasan
+            $pemohon = $leaveRequest->user;
+            if ($pemohon && $pemohon->wantsWhatsAppNotification()) {
+                WhatsAppService::send($pemohon->telepon,
+                    "SiHEALING: Maaf, pengajuan {$leaveRequest->type_label} Anda\n"
+                    . $leaveRequest->start_date->format('d/m/Y') . " - " . $leaveRequest->end_date->format('d/m/Y')
+                    . "\nDITOLAK oleh {$reviewer->name}."
+                    . ($request->catatan_atasan ? "\nCatatan: {$request->catatan_atasan}" : '')
+                );
+            }
+
             return $isAjax ? response()->json(['success' => true, 'message' => 'Pengajuan cuti ditolak.']) : back()->with('success', 'Pengajuan cuti ditolak.');
         }
 
@@ -326,6 +359,16 @@ class LeaveRequestController extends Controller
             Notification::TYPE_CUTI_PERTIMBANGAN,
             route('leave.show', $leaveRequest)
         );
+
+        // WA: notif diteruskan ke pejabat
+        $pemohon = $leaveRequest->user;
+        if ($pemohon && $pemohon->wantsWhatsAppNotification()) {
+            WhatsAppService::send($pemohon->telepon,
+                "SiHEALING: Pengajuan {$leaveRequest->type_label} Anda\n"
+                . $leaveRequest->start_date->format('d/m/Y') . " - " . $leaveRequest->end_date->format('d/m/Y')
+                . "\ntelah dipertimbangkan oleh {$reviewer->name} dan diteruskan ke Pejabat Berwenang."
+            );
+        }
 
         return $isAjax ? response()->json(['success' => true, 'message' => 'Pertimbangan berhasil dikirim ke Pejabat Berwenang.']) : back()->with('success', 'Pertimbangan berhasil dikirim ke Pejabat Berwenang.');
     }
@@ -437,6 +480,19 @@ class LeaveRequestController extends Controller
             route('leave.show', $leaveRequest)
         );
 
+        // WA: notif keputusan final
+        $pemohon = $leaveRequest->user;
+        if ($pemohon && $pemohon->wantsWhatsAppNotification()) {
+            $tgl = $leaveRequest->start_date->format('d/m/Y') . " - " . $leaveRequest->end_date->format('d/m/Y');
+            $pesan = match ($keputusan) {
+                'setuju' => "SiHEALING: Selamat! Pengajuan {$leaveRequest->type_label} Anda\n{$tgl}\ntelah DISETUJUI oleh {$pejabat->name}.\nSisa cuti: " . $pemohon->fresh()->leave_balance . " hari.",
+                'tolak'  => "SiHEALING: Maaf, pengajuan {$leaveRequest->type_label} Anda\n{$tgl}\nDITOLAK oleh {$pejabat->name}."
+                            . ($request->catatan_pejabat ? "\nCatatan: {$request->catatan_pejabat}" : ''),
+                default  => "SiHEALING: Pengajuan {$leaveRequest->type_label} Anda\n{$tgl}\ntelah {$label} oleh {$pejabat->name}.",
+            };
+            WhatsAppService::send($pemohon->telepon, $pesan);
+        }
+
         return back()->with('success', "Pengajuan cuti {$leaveRequest->user->name} {$label}.");
     }
 
@@ -532,6 +588,20 @@ class LeaveRequestController extends Controller
                 $notifType,
                 route('leave.show', $leave->id)
             );
+
+            // WA: notif bulk decision
+            if ($leave->user && $leave->user->wantsWhatsAppNotification()) {
+                $statusLabel = match ($request->decision) {
+                    'setuju'     => 'DISETUJUI',
+                    'tolak'      => 'DITOLAK',
+                    'tangguhkan' => 'DITANGGUHKAN',
+                };
+                $tgl = $leave->start_date->format('d/m/Y') . " - " . $leave->end_date->format('d/m/Y');
+                WhatsAppService::send($leave->user->telepon,
+                    "SiHEALING: Pengajuan {$leave->type_label} Anda\n{$tgl}\ntelah {$statusLabel} oleh {$user->name}."
+                    . ($request->catatan ? "\nCatatan: {$request->catatan}" : '')
+                );
+            }
 
             $count++;
         }
