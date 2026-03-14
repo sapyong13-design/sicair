@@ -41,6 +41,24 @@
     </div>
 </div>
 
+{{-- Wizard Step Indicator --}}
+<div class="sh-wizard-nav mb-4" id="wizardNav">
+    <div class="wiz-step active" data-step="1">
+        <div class="wiz-num">1</div>
+        <div class="wiz-label">Info Cuti</div>
+    </div>
+    <div class="wiz-connector"></div>
+    <div class="wiz-step" data-step="2">
+        <div class="wiz-num">2</div>
+        <div class="wiz-label">Tanggal &amp; Lokasi</div>
+    </div>
+    <div class="wiz-connector"></div>
+    <div class="wiz-step" data-step="3">
+        <div class="wiz-num">3</div>
+        <div class="wiz-label">Review &amp; Kirim</div>
+    </div>
+</div>
+
 <div class="row justify-content-center">
     <div class="col-lg-8">
 
@@ -154,71 +172,26 @@
                         </ul>
                     </div>
                 </div>
+                <script>
+                // Jika ada validation error, bypass wizard dan tampilkan semua panel
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.querySelectorAll('.wiz-panel').forEach(function(p) { p.style.display = 'block'; });
+                    var nav = document.getElementById('wizardNav');
+                    if (nav) nav.style.display = 'none';
+                    var btnRow = document.getElementById('wizBtnRow');
+                    if (btnRow) btnRow.style.display = 'none';
+                });
+                </script>
                 @endif
 
                 <form method="POST" action="{{ route('leave.store') }}" enctype="multipart/form-data" id="leave-form">
                     @csrf
                     <input type="hidden" name="type" value="{{ $type }}">
 
-                    {{-- Date fields --}}
-                    <div class="row g-3 mb-4">
-                        <div class="col-sm-6">
-                            <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
-                                <i class="ti ti-calendar-event me-1" style="color: var(--sh-primary);"></i>
-                                Tanggal Mulai <span class="text-danger">*</span>
-                            </label>
-                            <input type="date" name="start_date"
-                                   class="form-control @error('start_date') is-invalid @enderror"
-                                   value="{{ old('start_date', isset($reapplyData) ? $reapplyData->start_date->format('Y-m-d') : '') }}"
-                                   min="{{ date('Y-m-d') }}" required
-                                   style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
-                            @error('start_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            {{-- Smart date shortcuts --}}
-                            <div class="d-flex flex-wrap gap-1 mt-2" id="sh-date-shortcuts">
-                                <button type="button" class="sh-date-chip" data-offset="1">Besok</button>
-                                <button type="button" class="sh-date-chip" data-offset="7">Minggu depan</button>
-                                <button type="button" class="sh-date-chip" data-type="next-monday">Senin depan</button>
-                                <button type="button" class="sh-date-chip" data-type="end-month">Akhir bulan</button>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
-                                <i class="ti ti-calendar-event me-1" style="color: var(--sh-primary);"></i>
-                                Tanggal Selesai <span class="text-danger">*</span>
-                            </label>
-                            <input type="date" name="end_date"
-                                   class="form-control @error('end_date') is-invalid @enderror"
-                                   value="{{ old('end_date', isset($reapplyData) ? $reapplyData->end_date->format('Y-m-d') : '') }}"
-                                   min="{{ date('Y-m-d') }}" required
-                                   style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
-                            @error('end_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            <div id="sh-duration-info" class="mt-2" style="font-size:0.85rem; color:#475569; min-height:1.4rem;"></div>
-                            <div id="sh-saldo-warning" class="mt-2 p-2" style="display:none; font-size:0.85rem; background:#fef2f2; border:1px solid #fecaca; color:#dc2626; border-radius:10px;"></div>
-                        </div>
-                    </div>
+                    {{-- ===== WIZARD PANEL 1: Info Cuti ===== --}}
+                    <div class="wiz-panel active" id="wiz-panel-1">
 
-                    {{-- Conflict Banner (#2) --}}
-                    <div class="d-none mb-3" id="conflict-banner">
-                        <div class="d-flex align-items-center gap-2 p-3" style="background: var(--sh-warning-light); border: 2px solid var(--sh-warning); border-radius: 12px;">
-                            <i class="ti ti-alert-triangle" style="color: var(--sh-warning); font-size: 1.2rem; flex-shrink: 0;"></i>
-                            <div style="font-size: 0.85rem; color: var(--sh-warning);" id="conflict-message"></div>
-                        </div>
-                    </div>
-
-                    {{-- Duration preview --}}
-                    <div class="d-none mb-4" id="duration-preview">
-                        <div class="d-flex align-items-center gap-3 p-3" id="duration-box" style="border-radius: 12px; background: var(--sh-primary-light); border: 2px solid #bbf7d0;">
-                            <div id="duration-icon-box" style="width: 44px; height: 44px; border-radius: 12px; background: var(--sh-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                <i class="ti ti-hourglass" style="color: #fff; font-size: 1.2rem;"></i>
-                            </div>
-                            <div>
-                                <div class="fw-bold" id="duration-label" style="color: var(--sh-primary);">Durasi: <span id="duration-days">0</span> hari</div>
-                                <div class="text-muted" style="font-size: 0.8rem;" id="duration-sub"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Alasan CAP (Cuti Alasan Penting only) --}}
+                    {{-- Alasan CAP (Cuti Alasan Penting only) — Panel 1 --}}
                     @if($type === 'cuti_alasan_penting')
                     <div class="mb-4">
                         <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
@@ -241,7 +214,7 @@
                     </div>
                     @endif
 
-                    {{-- Kelahiran Ke (Cuti Melahirkan only) --}}
+                    {{-- Kelahiran Ke (Cuti Melahirkan only) — Panel 1 --}}
                     @if($type === 'cuti_melahirkan')
                     <div class="mb-4">
                         <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
@@ -305,7 +278,7 @@
                         </div>
                     </div>
 
-                    {{-- Dokumen Pendukung (for types that need it) — Drag & Drop (#10) --}}
+                    {{-- Dokumen Pendukung (for types that need it) — Drag & Drop --}}
                     @if(in_array($type, ['cuti_sakit', 'cuti_besar', 'cuti_alasan_penting']))
                     <div class="mb-4">
                         <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
@@ -321,7 +294,7 @@
                              ondrop="handleFileDrop(event)">
                             <i class="ti ti-upload" style="font-size: 2rem; color: #7c3aed; opacity: 0.6;"></i>
                             <div style="font-size: 0.85rem; color: #64748b; margin-top: 0.4rem;">
-                                Seret & lepas file di sini, atau <strong style="color:#7c3aed;">klik untuk pilih</strong>
+                                Seret &amp; lepas file di sini, atau <strong style="color:#7c3aed;">klik untuk pilih</strong>
                             </div>
                             <div id="drop-file-name" style="font-size: 0.82rem; color: var(--sh-primary); margin-top: 0.25rem;"></div>
                             <input type="file" name="dokumen_pendukung" id="dokumen-input"
@@ -336,6 +309,70 @@
                         </div>
                     </div>
                     @endif
+
+                    {{-- ===== END WIZARD PANEL 1 ===== --}}
+                    </div>{{-- /wiz-panel-1 --}}
+
+                    {{-- ===== WIZARD PANEL 2: Tanggal & Lokasi ===== --}}
+                    <div class="wiz-panel" id="wiz-panel-2">
+
+                    {{-- Date fields --}}
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6">
+                            <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
+                                <i class="ti ti-calendar-event me-1" style="color: var(--sh-primary);"></i>
+                                Tanggal Mulai <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" name="start_date"
+                                   class="form-control @error('start_date') is-invalid @enderror"
+                                   value="{{ old('start_date', isset($reapplyData) ? $reapplyData->start_date->format('Y-m-d') : '') }}"
+                                   min="{{ date('Y-m-d') }}" required
+                                   style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
+                            @error('start_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            {{-- Smart date shortcuts --}}
+                            <div class="d-flex flex-wrap gap-1 mt-2" id="sh-date-shortcuts">
+                                <button type="button" class="sh-date-chip" data-offset="1">Besok</button>
+                                <button type="button" class="sh-date-chip" data-offset="7">Minggu depan</button>
+                                <button type="button" class="sh-date-chip" data-type="next-monday">Senin depan</button>
+                                <button type="button" class="sh-date-chip" data-type="end-month">Akhir bulan</button>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
+                                <i class="ti ti-calendar-event me-1" style="color: var(--sh-primary);"></i>
+                                Tanggal Selesai <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" name="end_date"
+                                   class="form-control @error('end_date') is-invalid @enderror"
+                                   value="{{ old('end_date', isset($reapplyData) ? $reapplyData->end_date->format('Y-m-d') : '') }}"
+                                   min="{{ date('Y-m-d') }}" required
+                                   style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
+                            @error('end_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <div id="sh-duration-info" class="mt-2" style="font-size:0.85rem; color:#475569; min-height:1.4rem;"></div>
+                            <div id="sh-saldo-warning" class="mt-2 p-2" style="display:none; font-size:0.85rem; background:#fef2f2; border:1px solid #fecaca; color:#dc2626; border-radius:10px;"></div>
+                        </div>
+                    </div>
+
+                    {{-- Conflict Banner (#2) --}}
+                    <div class="d-none mb-3" id="conflict-banner">
+                        <div class="d-flex align-items-center gap-2 p-3" style="background: var(--sh-warning-light); border: 2px solid var(--sh-warning); border-radius: 12px;">
+                            <i class="ti ti-alert-triangle" style="color: var(--sh-warning); font-size: 1.2rem; flex-shrink: 0;"></i>
+                            <div style="font-size: 0.85rem; color: var(--sh-warning);" id="conflict-message"></div>
+                        </div>
+                    </div>
+
+                    {{-- Duration preview --}}
+                    <div class="d-none mb-4" id="duration-preview">
+                        <div class="d-flex align-items-center gap-3 p-3" id="duration-box" style="border-radius: 12px; background: var(--sh-primary-light); border: 2px solid #bbf7d0;">
+                            <div id="duration-icon-box" style="width: 44px; height: 44px; border-radius: 12px; background: var(--sh-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <i class="ti ti-hourglass" style="color: #fff; font-size: 1.2rem;"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold" id="duration-label" style="color: var(--sh-primary);">Durasi: <span id="duration-days">0</span> hari</div>
+                                <div class="text-muted" style="font-size: 0.8rem;" id="duration-sub"></div>
+                            </div>
+                        </div>
+                    </div>
 
                     {{-- Alamat & Telepon Selama Cuti --}}
                     <div class="row g-3 mb-4">
@@ -370,16 +407,41 @@
                         </div>
                     </div>
 
-                    {{-- Actions --}}
-                    <div class="d-flex gap-2 flex-column flex-sm-row">
-                        <button type="button" id="sh-confirm-btn" class="btn btn-primary sh-btn-primary btn-lg flex-fill">
-                            <span id="submit-label"><i class="ti ti-send me-2"></i> Kirim Pengajuan</span>
-                            <span id="submit-loading" class="d-none"><span class="spinner-border spinner-border-sm me-2" role="status"></span> Mengirim...</span>
+                    </div>{{-- /wiz-panel-2 --}}
+
+                    {{-- ===== WIZARD PANEL 3: Review & Kirim ===== --}}
+                    <div class="wiz-panel" id="wiz-panel-3">
+                        <div class="card sh-card">
+                            <div class="card-body">
+                                <h5 class="fw-bold mb-3"><i class="ti ti-check me-2 text-success"></i>Konfirmasi Pengajuan</h5>
+                                <p class="text-muted mb-3">Periksa kembali detail pengajuan cuti Anda sebelum mengirim.</p>
+                                <div id="wiz-review-summary" class="border rounded p-3 bg-light">
+                                    <em class="text-muted">Mengisi ringkasan...</em>
+                                </div>
+                            </div>
+                        </div>
+                    </div>{{-- /wiz-panel-3 --}}
+
+                    {{-- Wizard Navigation Buttons --}}
+                    <div class="d-flex justify-content-between mt-4" id="wizBtnRow">
+                        <button type="button" id="btnWizPrev" class="btn btn-outline-secondary" onclick="wizPrev()" style="display:none;">
+                            <i class="ti ti-arrow-left me-1"></i> Sebelumnya
                         </button>
-                        <a href="{{ route('leave.select-type') }}" class="btn btn-outline-secondary btn-lg" style="border-radius: 10px;">
-                            Batal
-                        </a>
+                        <div class="ms-auto d-flex gap-2">
+                            <button type="button" id="btnWizNext" class="btn sh-btn-primary" onclick="wizNext()">
+                                Selanjutnya <i class="ti ti-arrow-right ms-1"></i>
+                            </button>
+                            <button type="submit" id="btnWizSubmit" class="btn sh-btn-primary" style="display:none;">
+                                <i class="ti ti-send me-1"></i> Ajukan Cuti
+                            </button>
+                        </div>
                     </div>
+
+                    {{-- Hidden confirm button (kept for modal compatibility) --}}
+                    <button type="button" id="sh-confirm-btn" class="d-none">
+                        <span id="submit-label"></span>
+                        <span id="submit-loading" class="d-none"><span class="spinner-border spinner-border-sm me-2" role="status"></span> Mengirim...</span>
+                    </button>
                 </form>
             </div>
         </div>
@@ -919,6 +981,72 @@ document.querySelectorAll('.sh-date-chip').forEach(function(btn) {
 .form-control, .form-select {
     transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
+/* ===== Wizard Styles ===== */
+.sh-wizard-nav { display: flex; align-items: center; justify-content: center; gap: 0; }
+.wiz-step { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
+.wiz-num { width: 36px; height: 36px; border-radius: 50%; background: var(--sh-gray-200, #e5e7eb); color: var(--sh-gray-600, #4b5563); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; transition: all 0.25s; }
+.wiz-step.active .wiz-num { background: var(--sh-primary, #16a34a); color: white; }
+.wiz-step.completed .wiz-num { background: var(--sh-success, #22c55e); color: white; }
+.wiz-label { font-size: 0.75rem; color: var(--sh-gray-500, #6b7280); white-space: nowrap; }
+.wiz-step.active .wiz-label { color: var(--sh-primary, #16a34a); font-weight: 600; }
+.wiz-connector { flex: 1; height: 2px; background: var(--sh-gray-200, #e5e7eb); min-width: 40px; margin-bottom: 1.2rem; }
+.wiz-panel { display: none; }
+.wiz-panel.active { display: block; }
 </style>
+<script>
+var wizCurrent = 1;
+var wizTotal = 3;
+
+function wizGoTo(step) {
+    // Update panels
+    document.querySelectorAll('.wiz-panel').forEach(function(p, i) {
+        p.classList.toggle('active', i + 1 === step);
+    });
+    // Update step indicators
+    document.querySelectorAll('.wiz-step').forEach(function(s, i) {
+        s.classList.remove('active', 'completed');
+        if (i + 1 < step) s.classList.add('completed');
+        if (i + 1 === step) s.classList.add('active');
+    });
+    // Update buttons
+    document.getElementById('btnWizPrev').style.display = step === 1 ? 'none' : '';
+    document.getElementById('btnWizNext').style.display = step === wizTotal ? 'none' : '';
+    document.getElementById('btnWizSubmit').style.display = step === wizTotal ? '' : 'none';
+    wizCurrent = step;
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function wizNext() {
+    if (wizCurrent < wizTotal) {
+        if (wizCurrent === 2) updateReviewPanel();
+        wizGoTo(wizCurrent + 1);
+    }
+}
+
+function wizPrev() {
+    if (wizCurrent > 1) wizGoTo(wizCurrent - 1);
+}
+
+function updateReviewPanel() {
+    var summary = document.getElementById('wiz-review-summary');
+    if (!summary) return;
+    var reason = document.querySelector('[name="reason"]');
+    var startDate = document.querySelector('[name="start_date"]');
+    var endDate = document.querySelector('[name="end_date"]');
+    var alamat = document.querySelector('[name="alamat_cuti"]');
+    var telepon = document.querySelector('[name="telepon_cuti"]');
+    var html = '<dl class="row mb-0">';
+    if (reason && reason.value) html += '<dt class="col-sm-4">Alasan</dt><dd class="col-sm-8">' + reason.value + '</dd>';
+    if (startDate && startDate.value) html += '<dt class="col-sm-4">Tgl Mulai</dt><dd class="col-sm-8">' + startDate.value + '</dd>';
+    if (endDate && endDate.value) html += '<dt class="col-sm-4">Tgl Selesai</dt><dd class="col-sm-8">' + endDate.value + '</dd>';
+    if (alamat && alamat.value) html += '<dt class="col-sm-4">Alamat Cuti</dt><dd class="col-sm-8">' + alamat.value + '</dd>';
+    if (telepon && telepon.value) html += '<dt class="col-sm-4">Telepon</dt><dd class="col-sm-8">' + telepon.value + '</dd>';
+    html += '</dl>';
+    summary.innerHTML = html;
+}
+
+// Init wizard on DOM ready
+document.addEventListener('DOMContentLoaded', function() { wizGoTo(1); });
+</script>
 @endpush
 @endsection
