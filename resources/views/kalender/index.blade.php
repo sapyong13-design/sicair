@@ -500,7 +500,7 @@
                 Cuti Besar
             </div>
             <div class="d-flex align-items-center gap-1">
-                <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-cal-cb-event-bg); border-left: 3px solid var(--sh-cal-cb-border);"></span>
+                <span style="width: 12px; height: 12px; border-radius: 3px; background: #1d4ed8;"></span>
                 Cuti Bersama
             </div>
             <div class="d-flex align-items-center gap-1">
@@ -508,7 +508,7 @@
                 Hari Libur
             </div>
             <div class="d-flex align-items-center gap-1">
-                <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--sh-cal-dinas-bg); border-left: 3px solid #ea580c;"></span>
+                <span style="width: 12px; height: 12px; border-radius: 3px; background: #ea580c;"></span>
                 Dinas Luar
             </div>
             <div class="d-flex align-items-center gap-1 ms-auto text-muted d-print-none">
