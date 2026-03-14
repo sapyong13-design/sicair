@@ -158,18 +158,6 @@ class CutiTahunanCalculator
 
     protected function hitungTambahanTerpencil(): int
     {
-        // SEMA 13/2019: PN Natuna ADALAH lokasi terpencil → berhak +12 hari kalender
-        // Cek berdasarkan flag lokasi_terpencil ATAU unit_kerja PN Natuna
-        $unitKerja = strtolower(trim($this->user->unit_kerja ?? ''));
-        $lokasiTerpencil = [
-            'pengadilan negeri natuna',
-        ];
-
-        // PN Natuna selalu dianggap terpencil sesuai SEMA 13/2019
-        if (in_array($unitKerja, $lokasiTerpencil)) {
-            return 12;
-        }
-
         if ($this->user->lokasi_terpencil) {
             return 12; // +12 hari kalender
         }
