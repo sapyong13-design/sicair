@@ -215,6 +215,7 @@ Route::middleware('auth')->group(function () {
 
     // === Hari Libur (admin only) ===
     Route::middleware('role:admin')->prefix('hari-libur')->name('hari-libur.')->group(function () {
+        Route::post('/import-api', [HariLiburController::class, 'importFromApi'])->name('import-api');
         Route::get('/', [HariLiburController::class, 'index'])->name('index');
         Route::get('/create', [HariLiburController::class, 'create'])->name('create');
         Route::post('/', [HariLiburController::class, 'store'])->name('store');

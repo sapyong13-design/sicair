@@ -24,6 +24,14 @@
                     @endforeach
                 </select>
             </form>
+            <form method="POST" action="{{ route('hari-libur.import-api') }}" class="d-inline"
+                  onsubmit="return confirm('Import hari libur nasional Indonesia tahun {{ date('Y') }} dari internet?\nProses ini membutuhkan koneksi internet.')">
+                @csrf
+                <input type="hidden" name="year" value="{{ date('Y') }}">
+                <button type="submit" class="btn btn-sm btn-outline-primary">
+                    <i class="ti ti-cloud-download me-1"></i> Import Nasional {{ date('Y') }}
+                </button>
+            </form>
             <a href="{{ route('hari-libur.create') }}" class="btn sh-btn-primary">
                 <i class="ti ti-plus me-1" aria-hidden="true"></i> Tambah
             </a>

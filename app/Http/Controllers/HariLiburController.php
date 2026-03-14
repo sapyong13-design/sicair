@@ -67,4 +67,57 @@ class HariLiburController extends Controller
         $hariLibur->delete();
         return redirect()->route('hari-libur.index')->with('success', 'Hari libur berhasil dihapus.');
     }
+
+    public function importFromApi(Request $request)
+    {
+        $year = (int) $request->input('year', date('Y'));
+        $imported = 0;
+        $skipped = 0;
+        $errors = [];
+
+        for ($month = 1; $month <= 12; $month++) {
+            try {
+                $response = \Illuminate\Support\Facades\Http::timeout(15)
+                    ->get('https://api-harilibur.vercel.app/api', [
+                        'month' => $month,
+                        'year'  => $year,
+                    ]);
+
+                if (!$response->successful()) {
+                    $errors[] = "Bulan {$month}: HTTP " . $response->status();
+                    continue;
+                }
+
+                $holidays = $response->json();
+                if (!is_array($holidays)) continue;
+
+                foreach ($holidays as $h) {
+                    if (empty($h['holiday_date']) || empty($h['is_national_holiday'])) continue;
+
+                    if (\App\Models\HariLibur::where('tanggal', $h['holiday_date'])->exists()) {
+                        $skipped++;
+                        continue;
+                    }
+
+                    \App\Models\HariLibur::create([
+                        'tanggal'         => $h['holiday_date'],
+                        'keterangan'      => $h['holiday_name'] ?? 'Hari Libur Nasional',
+                        'tahun'           => $year,
+                        'is_cuti_bersama' => false,
+                    ]);
+                    $imported++;
+                }
+            } catch (\Exception $e) {
+                $errors[] = "Bulan {$month}: " . $e->getMessage();
+            }
+        }
+
+        $msg = "{$imported} hari libur berhasil diimport, {$skipped} sudah ada.";
+        if ($errors) {
+            $msg .= ' Beberapa gagal: ' . implode('; ', $errors);
+            return redirect()->route('hari-libur.index')->with('warning', $msg);
+        }
+
+        return redirect()->route('hari-libur.index')->with('success', $msg);
+    }
 }
