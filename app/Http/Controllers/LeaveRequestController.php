@@ -101,6 +101,8 @@ class LeaveRequestController extends Controller
     {
         $user = Auth::user();
 
+        $type = $request->input('type', LeaveRequest::TYPE_TAHUNAN);
+
         // Fix #16: CPNS type-aware check
         if (!$user->bolehCuti($type)) {
             $pesan = $user->status_pegawai === 'cpns'
@@ -108,8 +110,6 @@ class LeaveRequestController extends Controller
                 : 'Anda belum berhak mengajukan jenis cuti ini.';
             return redirect('/dashboard')->with('error', $pesan);
         }
-
-        $type = $request->input('type', LeaveRequest::TYPE_TAHUNAN);
 
         // Validasi umum
         $rules = [
