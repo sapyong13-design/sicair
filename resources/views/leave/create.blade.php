@@ -779,6 +779,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Also handle wizard submit button
+    var wizSubmitBtn = document.getElementById('btnWizSubmit');
+    if (wizSubmitBtn) {
+        document.getElementById('leave-form').addEventListener('submit', function() {
+            wizSubmitBtn.disabled = true;
+            wizSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Mengirim...';
+        });
+    }
+
     // Character counter for reason textarea (#14)
     var reasonTextarea = document.getElementById('reason-textarea');
     var reasonCounter = document.getElementById('reason-counter');
