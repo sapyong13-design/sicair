@@ -85,7 +85,7 @@ class DatabaseSeeder extends Seeder
             'jabatan'          => 'Hakim Ad Hoc Perikanan',
             'golongan_ruang'   => null,
             'unit_kerja'       => 'Pengadilan Negeri Natuna',
-            'masa_kerja_mulai' => '2025-04-29',
+            'masa_kerja_mulai' => '2020-02-04',
             'status_pegawai'   => 'hakim',
             'jenis_kelamin'    => 'L',
             'jumlah_anak'      => 0,
