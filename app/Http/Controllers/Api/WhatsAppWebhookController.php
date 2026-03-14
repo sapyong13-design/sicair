@@ -53,11 +53,33 @@ class WhatsAppWebhookController extends Controller
         $cmd = strtoupper(preg_replace('/\s+/', ' ', trim($message)));
 
         $reply = match (true) {
-            in_array($cmd, ['SALDO', 'CEK SALDO'])   => $this->replySaldo($user),
-            $cmd === 'STATUS'                         => $this->replyStatus($user),
-            $cmd === 'HISTORY'                        => $this->replyHistory($user),
-            in_array($cmd, ['HELP', 'BANTUAN'])       => $this->replyHelp(),
-            default                                   => $this->replyUnknown(),
+            // Cek saldo / sisa cuti
+            in_array($cmd, [
+                'SALDO', 'CEK SALDO', 'CUTI', 'CEK CUTI',
+                'SISA', 'SISA CUTI', 'INFO CUTI', 'INFO',
+                'BALANCE', 'QUOTA', 'KUOTA',
+            ]) => $this->replySaldo($user),
+
+            // Status pengajuan aktif
+            in_array($cmd, [
+                'STATUS', 'CEK STATUS', 'PENGAJUAN',
+                'CEK PENGAJUAN', 'PROGRESS', 'PROSES',
+            ]) => $this->replyStatus($user),
+
+            // Riwayat cuti
+            in_array($cmd, [
+                'HISTORY', 'RIWAYAT', 'HISTORI', 'HISTORIS',
+                'CEK RIWAYAT', 'REKAP', 'LOG',
+            ]) => $this->replyHistory($user),
+
+            // Bantuan / menu
+            in_array($cmd, [
+                'HELP', 'BANTUAN', 'MENU', 'PERINTAH',
+                'PANDUAN', 'PETUNJUK', '?', 'INFO BOT',
+                'HALO', 'HI', 'HELLO', 'HAI', 'START',
+            ]) => $this->replyHelp(),
+
+            default => $this->replyUnknown(),
         };
 
         WhatsAppService::send($from, $reply);
@@ -155,10 +177,14 @@ class WhatsAppWebhookController extends Controller
     {
         return "SIHEALING WA BOT\n"
             . str_repeat('-', 30) . "\n"
-            . "SALDO    - Cek sisa cuti tahunan\n"
-            . "STATUS   - Status pengajuan aktif\n"
-            . "HISTORY  - Riwayat cuti tahun ini\n"
-            . "BANTUAN  - Tampilkan pesan ini\n"
+            . "Cek Saldo Cuti:\n"
+            . "  SALDO / CUTI / SISA / INFO\n\n"
+            . "Status Pengajuan Aktif:\n"
+            . "  STATUS / PENGAJUAN / PROSES\n\n"
+            . "Riwayat Cuti Tahun Ini:\n"
+            . "  RIWAYAT / HISTORY / REKAP\n\n"
+            . "Tampilkan Menu Ini:\n"
+            . "  BANTUAN / MENU / HELP / ?\n"
             . str_repeat('-', 30) . "\n"
             . config('app.url');
     }
