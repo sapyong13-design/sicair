@@ -8,6 +8,7 @@ use App\Mail\LeaveRequestRejected;
 use App\Mail\LeaveRequestSubmitted;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 
@@ -50,6 +51,7 @@ class Notification extends Model
             'type' => $type,
             'link' => $link,
         ]);
+        Cache::forget('notif_unread_' . $userId);
 
         // Trigger email notification if user has email and LeaveRequest is provided
         // #48: Respect user's notification preferences

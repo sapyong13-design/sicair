@@ -1037,6 +1037,36 @@ function wizGoTo(step) {
 
 function wizNext() {
     if (wizCurrent < wizTotal) {
+        // Validate required fields in current panel
+        var panel = document.getElementById('wiz-panel-' + wizCurrent);
+        var fields = panel.querySelectorAll('[required]');
+        var valid = true;
+        fields.forEach(function(field) {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                valid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        if (!valid) {
+            var errEl = document.getElementById('wiz-step-error');
+            if (!errEl) {
+                errEl = document.createElement('div');
+                errEl.id = 'wiz-step-error';
+                errEl.className = 'alert alert-danger py-2 mt-3';
+                errEl.style.fontSize = '0.85rem';
+                errEl.style.borderRadius = '10px';
+                panel.appendChild(errEl);
+            }
+            errEl.textContent = 'Harap lengkapi semua field yang wajib diisi (bertanda *) sebelum melanjutkan.';
+            errEl.style.display = '';
+            return;
+        }
+        // Clear error if previously shown
+        var errEl = document.getElementById('wiz-step-error');
+        if (errEl) errEl.style.display = 'none';
+
         if (wizCurrent === 2) updateReviewPanel();
         wizGoTo(wizCurrent + 1);
     }
@@ -1065,7 +1095,18 @@ function updateReviewPanel() {
 }
 
 // Init wizard on DOM ready
-document.addEventListener('DOMContentLoaded', function() { wizGoTo(1); });
+document.addEventListener('DOMContentLoaded', function() {
+    wizGoTo(1);
+    // Clear is-invalid when user fills a required field
+    document.querySelectorAll('[required]').forEach(function(field) {
+        field.addEventListener('input', function() {
+            if (this.value.trim()) this.classList.remove('is-invalid');
+        });
+        field.addEventListener('change', function() {
+            if (this.value.trim()) this.classList.remove('is-invalid');
+        });
+    });
+});
 </script>
 @endpush
 @endsection

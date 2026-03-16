@@ -46,6 +46,7 @@ class DashboardController extends Controller
                 LeaveRequest::STATUS_PENDING,
             ])
             ->latest()
+            ->take(50)
             ->get();
 
         $recentDecisions = LeaveRequest::with('user')
@@ -137,7 +138,7 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        $leaveRequests = $user->leaveRequests()->with(['user'])->latest()->get();
+        $leaveRequests = $user->leaveRequests()->with(['user'])->latest()->take(20)->get();
 
         // Widget: Siapa yang cuti hari ini
         $today = \Carbon\Carbon::today();

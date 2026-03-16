@@ -1,3 +1,24 @@
+@auth
+@php
+    // Pre-compute navbar counts once per request (cached 60s) — avoids 4+ duplicate DB queries
+    $unreadCount = \Illuminate\Support\Facades\Cache::remember(
+        'notif_unread_' . \Illuminate\Support\Facades\Auth::id(), 60,
+        fn() => \App\Models\Notification::where('user_id', \Illuminate\Support\Facades\Auth::id())->where('is_read', false)->count()
+    );
+    $navPendingReview = \Illuminate\Support\Facades\Auth::user()->isAtasan()
+        ? \Illuminate\Support\Facades\Cache::remember(
+            'nav_pending_' . \Illuminate\Support\Facades\Auth::id(), 60,
+            fn() => \App\Models\LeaveRequest::where('status', \App\Models\LeaveRequest::STATUS_DIAJUKAN)
+                ->whereHas('user', fn($q) => $q->where('atasan_id', \Illuminate\Support\Facades\Auth::id()))
+                ->count()
+        ) : 0;
+    $navNeedsDecision = \Illuminate\Support\Facades\Auth::user()->isKetua()
+        ? \Illuminate\Support\Facades\Cache::remember(
+            'nav_needs_decision', 60,
+            fn() => \App\Models\LeaveRequest::where('status', \App\Models\LeaveRequest::STATUS_PERTIMBANGAN)->count()
+        ) : 0;
+@endphp
+@endauth
 <!doctype html>
 <html lang="id" data-bs-theme="light">
 <head>
@@ -144,9 +165,9 @@
         .sc-navbar {
             background: linear-gradient(135deg, #14532d 0%, #166534 40%, #15803d 100%);
             box-shadow: 0 4px 20px rgba(20, 83, 45, 0.35);
-            border: none;
+            border: none !important;
             padding: 0.8rem 0;
-            border-bottom: 3px solid var(--sc-accent);
+            border-bottom: 3px solid var(--sc-accent) !important;
             display: flex;
             align-items: center;
             min-height: 68px;
@@ -195,6 +216,19 @@
         .sc-navbar .nav-link.active {
             color: #fff !important;
             background: rgba(255,255,255,0.15);
+        }
+        /* Override Tabler's absolute badge inside nav-link — keep inline */
+        .sc-navbar .nav-link .badge {
+            position: static !important;
+            top: auto !important;
+            right: auto !important;
+            transform: none !important;
+            vertical-align: middle;
+        }
+        /* Prevent nav items from wrapping to second line */
+        .sc-navbar .navbar-nav {
+            flex-wrap: nowrap;
+            align-items: center;
         }
 
         /* --- Nav Dropdown (Manajemen) --- */
@@ -1681,8 +1715,8 @@
             padding-left: env(safe-area-inset-left);
             padding-right: env(safe-area-inset-right);
         }
-        .navbar {
-            padding-top: max(0.5rem, env(safe-area-inset-top));
+        .sc-navbar {
+            padding-top: max(0.8rem, env(safe-area-inset-top));
         }
         body {
             padding-bottom: env(safe-area-inset-bottom);
@@ -1988,7 +2022,7 @@
                 {{-- Notification Bell (#8) --}}
                 @auth
                 <div class="nav-item me-2" style="position: relative;">
-                    <a href="{{ route('notifications') }}" class="sc-dark-toggle" title="Notifikasi" style="text-decoration: none;" aria-label="Notifikasi{{ ($unreadCount = \App\Models\Notification::where('user_id', Auth::id())->where('is_read', false)->count()) > 0 ? ' - ' . $unreadCount . ' belum dibaca' : '' }}">
+                    <a href="{{ route('notifications') }}" class="sc-dark-toggle" title="Notifikasi" style="text-decoration: none;" aria-label="Notifikasi{{ $unreadCount > 0 ? ' - ' . $unreadCount . ' belum dibaca' : '' }}">
                         <i class="ti ti-bell" aria-hidden="true"></i>
                         @if($unreadCount > 0)
                         <span class="sc-notif-badge notif-unread-badge" role="status" aria-label="{{ $unreadCount }} notifikasi belum dibaca">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
@@ -2097,11 +2131,6 @@
                                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-checklist"></i></span>
                                 <span class="nav-link-title">
                                     Pertimbangan
-                                    @php
-                                        $navPendingReview = \App\Models\LeaveRequest::where('status', \App\Models\LeaveRequest::STATUS_DIAJUKAN)
-                                            ->whereHas('user', fn($q) => $q->where('atasan_id', Auth::id()))
-                                            ->count();
-                                    @endphp
                                     @if($navPendingReview > 0)
                                     <span class="badge ms-1" style="font-size: 0.7rem; border-radius: 50px; min-width: 20px; background: var(--sc-accent); color: #fff;">{{ $navPendingReview }}</span>
                                     @endif
@@ -2117,9 +2146,6 @@
                                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-gavel"></i></span>
                                 <span class="nav-link-title">
                                     Keputusan
-                                    @php
-                                        $navNeedsDecision = \App\Models\LeaveRequest::where('status', \App\Models\LeaveRequest::STATUS_PERTIMBANGAN)->count();
-                                    @endphp
                                     @if($navNeedsDecision > 0)
                                     <span class="badge ms-1" style="font-size: 0.7rem; border-radius: 50px; min-width: 20px; background: var(--sc-accent); color: #fff;">{{ $navNeedsDecision }}</span>
                                     @endif
@@ -2257,7 +2283,7 @@
         </a>
         <a href="{{ route('notifications') }}" class="sc-bottom-nav-item {{ request()->is('notifications*') ? 'active' : '' }}" aria-label="Notifikasi" style="position:relative;">
             <i class="ti ti-bell"></i>
-            @php $bottomUnread = \App\Models\Notification::where('user_id', Auth::id())->where('is_read', false)->count(); @endphp
+            @php $bottomUnread = $unreadCount; @endphp
             @if($bottomUnread > 0)
             <span class="sc-bottom-nav-badge notif-unread-badge">{{ $bottomUnread > 9 ? '9+' : $bottomUnread }}</span>
             @endif
@@ -2734,7 +2760,7 @@
     <script>
     @auth
     (function() {
-        var unread = {{ \App\Models\Notification::where('user_id', Auth::id())->where('is_read', false)->count() }};
+        var unread = {{ $unreadCount }};
         if (unread <= 0) return;
         var link = document.querySelector("link[rel='icon']");
         if (!link) return;
@@ -2772,7 +2798,7 @@
             Notification.requestPermission().then(function(permission) {
                 localStorage.setItem('sc-pusc-asked', '1');
                 if (permission === 'granted') {
-                    var lastCount = {{ \App\Models\Notification::where('user_id', Auth::id())->where('is_read', false)->count() }};
+                    var lastCount = {{ $unreadCount }};
                     // Poll every 60 seconds for new notifications
                     setInterval(function() {
                         fetch('/notifications', { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
@@ -3144,9 +3170,8 @@
         .catch(function() {}); // silent fail
     }
 
-    // Polling setiap 30 detik
-    updateNotifBadge(); // run immediately on page load
-    setInterval(updateNotifBadge, 30000);
+    // Polling setiap 60 detik (badge sudah ter-render server-side di page load)
+    setInterval(updateNotifBadge, 60000);
 })();
 </script>
 @endauth
