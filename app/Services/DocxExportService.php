@@ -66,7 +66,6 @@ class DocxExportService
         // Nomor surat
         $bulanCuti = $bulanRomawi[$leaveRequest->created_at->month - 1];
         $tahunCuti = $leaveRequest->created_at->year;
-        $nomorSurat = "700/KPN.W32.U4/KP5.3/{$bulanCuti}/{$tahunCuti}";
 
         // Format lama cuti dengan kata "hari"
         $hari = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days;
@@ -88,7 +87,9 @@ class DocxExportService
 
         // Replace values in template
         $template->setValue('tanggal', $fmt($leaveRequest->created_at));
-        $template->setValue('nomor_surat', $nomorSurat);
+        $template->setValue('nomor_urut', '');
+        $template->setValue('bulan_cuti', $bulanCuti);
+        $template->setValue('tahun_cuti', $tahunCuti);
         $template->setValue('nama', $user->name);
         $template->setValue('nip', $user->nip);
         $template->setValue('jabatan', $user->jabatan ?? '-');
