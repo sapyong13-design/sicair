@@ -1134,13 +1134,18 @@
                                 {{ $req->start_date->format('d M Y') }} &mdash; {{ $req->end_date->format('d M Y') }} &middot; {{ $req->total_days }} hari
                             </div>
                         </div>
-                        @if($req->isApproved())
-                            <span class="sc-badge sc-badge-approved"><i class="ti ti-circle-check"></i> Disetujui</span>
-                        @elseif($req->isRejected())
-                            <span class="sc-badge sc-badge-rejected"><i class="ti ti-circle-x"></i> Ditolak</span>
-                        @else
-                            <span class="sc-badge sc-badge-pending"><i class="ti ti-clock"></i> {{ $req->status_label }}</span>
-                        @endif
+                        <div class="d-flex align-items-center gap-2">
+                            @if($req->isApproved())
+                                <span class="sc-badge sc-badge-approved"><i class="ti ti-circle-check"></i> Disetujui</span>
+                            @elseif($req->isRejected())
+                                <span class="sc-badge sc-badge-rejected"><i class="ti ti-circle-x"></i> Ditolak</span>
+                            @else
+                                <span class="sc-badge sc-badge-pending"><i class="ti ti-clock"></i> {{ $req->status_label }}</span>
+                            @endif
+                            <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px; font-size: 0.78rem;">
+                                <i class="ti ti-eye me-1"></i> Detail
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
