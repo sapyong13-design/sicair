@@ -144,11 +144,19 @@
 
         {{-- #21 Re-apply Notice --}}
         @if(isset($reapplyData))
+        @php
+            $reapplyStatusLabel = $reapplyData->status === 'diubah' ? 'diminta diubah' : 'ditolak';
+        @endphp
         <div class="mb-4 p-3" style="background: var(--sc-warning-light); border-radius: 14px; border: 1px solid var(--sc-warning);">
-            <div class="d-flex align-items-center gap-2">
-                <i class="ti ti-refresh" style="color: var(--sc-warning);"></i>
-                <div style="font-size: 0.85rem; color: var(--sc-warning);">
-                    <strong>Pengajuan Ulang</strong> — Data dari pengajuan sebelumnya sudah diisi ulang. Silakan periksa dan sesuaikan.
+            <div class="d-flex align-items-start gap-2">
+                <i class="ti ti-refresh" style="color: var(--sc-warning); margin-top: 2px;"></i>
+                <div style="font-size: 0.85rem;">
+                    <div class="fw-bold" style="color: var(--sc-warning);">
+                        Mengajukan ulang dari pengajuan #{{ $reapplyData->id }} yang {{ $reapplyStatusLabel }}.
+                    </div>
+                    <div class="text-muted mt-1">
+                        Pastikan Anda mengubah tanggal atau alasan sebelum mengirim ulang.
+                    </div>
                 </div>
             </div>
         </div>

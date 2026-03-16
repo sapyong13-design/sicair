@@ -59,10 +59,17 @@ class LeaveRequestController extends Controller
         }
 
         // #21 Re-apply: pre-fill from rejected leave request
+        // Supports both legacy ?reapply=X and new ?reapply_from=X (via leave.reapply route)
         $reapplyData = null;
-        if ($request->filled('reapply')) {
+        $reapplyParam = $request->filled('reapply_from') ? $request->query('reapply_from') : ($request->filled('reapply') ? $request->query('reapply') : null);
+        if ($reapplyParam) {
             $reapplySource = LeaveRequest::where('user_id', $user->id)
-                ->where('id', $request->query('reapply'))
+                ->where('id', $reapplyParam)
+                ->whereIn('status', [
+                    LeaveRequest::STATUS_DITOLAK,
+                    LeaveRequest::STATUS_REJECTED,
+                    LeaveRequest::STATUS_DIUBAH,
+                ])
                 ->first();
             if ($reapplySource) {
                 $type = $reapplySource->type;
@@ -279,16 +286,24 @@ class LeaveRequestController extends Controller
         $request->validate([
             'pertimbangan' => 'required|in:setuju,ubah,tangguhkan,tolak',
             'catatan_atasan' => 'nullable|string|max:500',
+            'rejection_reason' => 'nullable|in:tanggal_konflik,kuota_habis,alasan_tidak_jelas,dokumen_kurang,lainnya',
         ]);
 
         $pertimbangan = $request->pertimbangan;
 
         if ($pertimbangan === 'tolak') {
-            $request->validate(['catatan_atasan' => 'required|string|max:500']);
+            $request->validate([
+                'catatan_atasan' => 'required|string|max:500',
+                'rejection_reason' => 'required|in:tanggal_konflik,kuota_habis,alasan_tidak_jelas,dokumen_kurang,lainnya',
+            ]);
+            $adminNote = $request->rejection_reason
+                ? '[ALASAN: ' . $request->rejection_reason . '] ' . $request->catatan_atasan
+                : $request->catatan_atasan;
             $leaveRequest->update([
                 'atasan_reviewer_id' => $reviewer->id,
                 'pertimbangan_atasan' => $pertimbangan,
                 'catatan_atasan' => $request->catatan_atasan,
+                'admin_note' => $adminNote,
                 'reviewed_at' => now(),
                 'status' => LeaveRequest::STATUS_DITOLAK,
             ]);
@@ -387,12 +402,16 @@ class LeaveRequestController extends Controller
         $request->validate([
             'keputusan' => 'required|in:setuju,ubah,tangguhkan,tolak',
             'catatan_pejabat' => 'nullable|string|max:500',
+            'rejection_reason' => 'nullable|in:tanggal_konflik,kuota_habis,alasan_tidak_jelas,dokumen_kurang,lainnya',
         ]);
 
         $keputusan = $request->keputusan;
 
         if ($keputusan === 'tolak') {
-            $request->validate(['catatan_pejabat' => 'required|string|max:500']);
+            $request->validate([
+                'catatan_pejabat' => 'required|string|max:500',
+                'rejection_reason' => 'required|in:tanggal_konflik,kuota_habis,alasan_tidak_jelas,dokumen_kurang,lainnya',
+            ]);
         }
 
         $statusMap = [
@@ -407,10 +426,16 @@ class LeaveRequestController extends Controller
         DB::transaction(function () use ($request, $leaveRequest, $pejabat, $keputusan, $statusMap) {
             $leaveRequest = LeaveRequest::lockForUpdate()->findOrFail($leaveRequest->id);
 
+            $adminNote = null;
+            if ($keputusan === 'tolak' && $request->rejection_reason) {
+                $adminNote = '[ALASAN: ' . $request->rejection_reason . '] ' . $request->catatan_pejabat;
+            }
+
             $leaveRequest->update([
                 'pejabat_id' => $pejabat->id,
                 'keputusan_pejabat' => $keputusan,
                 'catatan_pejabat' => $request->catatan_pejabat,
+                'admin_note' => $adminNote,
                 'decided_at' => now(),
                 'status' => $statusMap[$keputusan],
             ]);
@@ -497,6 +522,31 @@ class LeaveRequestController extends Controller
         }
 
         return back()->with('success', "Pengajuan cuti {$leaveRequest->user->name} {$label}.");
+    }
+
+    /**
+     * Pengajuan ulang dari cuti yang ditolak atau diubah
+     * Redirect ke form create dengan data pre-filled dari pengajuan lama
+     */
+    public function reapply(LeaveRequest $leaveRequest)
+    {
+        $user = Auth::user();
+
+        // Hanya owner yang boleh mengajukan ulang
+        if ($leaveRequest->user_id !== $user->id) {
+            abort(403, 'Anda tidak berhak mengajukan ulang cuti ini.');
+        }
+
+        // Hanya jika status ditolak atau diubah
+        if (!in_array($leaveRequest->status, [LeaveRequest::STATUS_DITOLAK, LeaveRequest::STATUS_REJECTED, LeaveRequest::STATUS_DIUBAH])) {
+            return redirect()->route('leave.show', $leaveRequest)
+                ->with('error', 'Pengajuan ulang hanya bisa dilakukan untuk cuti yang ditolak atau diminta diubah.');
+        }
+
+        return redirect()->route('leave.create', [
+            'type'         => $leaveRequest->type,
+            'reapply_from' => $leaveRequest->id,
+        ]);
     }
 
     /**

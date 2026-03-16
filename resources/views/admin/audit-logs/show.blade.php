@@ -128,14 +128,25 @@
                 <div class="row g-4">
                     <div class="col-md-6">
                         <div>
-                            <small class="text-muted d-block">IP Address</small>
-                            <code>{{ $auditLog->ip_address ?? 'N/A' }}</code>
+                            <small class="text-muted d-block mb-1">IP Address</small>
+                            @if(!$auditLog->ip_address || $auditLog->ip_address === '127.0.0.1')
+                                <span class="badge" style="background:#f1f5f9;color:#64748b;font-size:0.8rem;border-radius:6px;">Lokal</span>
+                                @if($auditLog->ip_address)
+                                <code style="font-size:0.82rem;margin-left:6px;">{{ $auditLog->ip_address }}</code>
+                                @endif
+                            @else
+                                <code>{{ $auditLog->ip_address }}</code>
+                            @endif
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div>
-                            <small class="text-muted d-block">User Agent</small>
-                            <small class="text-muted">{{ $auditLog->user_agent }}</small>
+                            <small class="text-muted d-block mb-1">User Agent</small>
+                            @if($auditLog->user_agent)
+                                <code style="font-size:0.78rem;word-break:break-all;">{{ $auditLog->user_agent }}</code>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
                         </div>
                     </div>
                 </div>

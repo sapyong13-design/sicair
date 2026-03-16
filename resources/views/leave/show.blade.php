@@ -59,9 +59,9 @@
                 <span class="d-none d-sm-inline">Form Cuti</span>
                 <span class="d-sm-none">Form</span>
             </a>
-            {{-- #21 Re-apply button (only for rejected/cancelled) --}}
-            @if(auth()->id() === $leaveRequest->user_id && $leaveRequest->isRejected())
-            <a href="{{ route('leave.create', ['reapply' => $leaveRequest->id]) }}"
+            {{-- #21 Re-apply button (for rejected or diubah) --}}
+            @if(auth()->id() === $leaveRequest->user_id && ($leaveRequest->isRejected() || $leaveRequest->status === 'diubah'))
+            <a href="{{ route('leave.reapply', $leaveRequest) }}"
                class="btn btn-outline-warning"
                style="border-radius: 10px; font-size: 0.85rem;"
                title="Ajukan ulang dengan data yang sama">
@@ -114,6 +114,45 @@
                 </div>
             </div>
         </div>
+
+        {{-- Rejection Reason Banner --}}
+        @if($leaveRequest->isRejected() && $leaveRequest->admin_note)
+        @php
+            $alasanLabels = [
+                'tanggal_konflik'   => 'Konflik tanggal dengan cuti lain',
+                'kuota_habis'       => 'Kuota cuti habis',
+                'alasan_tidak_jelas' => 'Alasan tidak jelas',
+                'dokumen_kurang'    => 'Dokumen pendukung kurang',
+                'lainnya'           => 'Alasan lain',
+            ];
+            preg_match('/^\[ALASAN: ([^\]]+)\]\s*(.*)$/s', $leaveRequest->admin_note, $matches);
+            $alasanCode  = $matches[1] ?? null;
+            $alasanLabel = $alasanCode ? ($alasanLabels[$alasanCode] ?? $alasanCode) : null;
+            $catatanBebas = $matches[2] ?? $leaveRequest->admin_note;
+        @endphp
+        <div class="mb-4" style="background: var(--sc-danger-light); border-radius: 14px; padding: 1rem 1.25rem; border: 1px solid var(--sc-danger);">
+            <div class="d-flex align-items-start gap-2 mb-1">
+                <i class="ti ti-alert-triangle" style="color: var(--sc-danger); font-size: 1.1rem; margin-top: 2px;"></i>
+                <div>
+                    <div class="fw-bold" style="color: var(--sc-danger); font-size: 0.9rem;">Alasan Penolakan</div>
+                    @if($alasanLabel)
+                    <div style="font-size: 0.85rem; color: var(--sc-danger); margin-top: 0.2rem;">
+                        <span class="fw-semibold">Kategori:</span> {{ $alasanLabel }}
+                    </div>
+                    @endif
+                    @if($catatanBebas)
+                    <div style="font-size: 0.85rem; color: #475569; margin-top: 0.25rem;">{{ $catatanBebas }}</div>
+                    @endif
+                </div>
+            </div>
+            @if(auth()->id() === $leaveRequest->user_id)
+            <div style="font-size: 0.8rem; color: var(--sc-danger); margin-top: 0.5rem;">
+                <i class="ti ti-info-circle me-1"></i>
+                Klik <strong>Ajukan Ulang</strong> di atas untuk mengajukan kembali dengan perbaikan.
+            </div>
+            @endif
+        </div>
+        @endif
 
         {{-- Main Info Card --}}
         <div class="card sc-card mb-4">

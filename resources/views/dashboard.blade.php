@@ -103,7 +103,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="sc-stat-label mb-2">Menunggu Proses</div>
-                            <div class="sc-stat-number" style="color: var(--sc-warning);">{{ $pendingRequests->count() }}</div>
+                            <div class="sc-stat-number" id="stat-pending" style="color: var(--sc-warning);">{{ $pendingRequests->count() }}</div>
                         </div>
                         <div class="sc-stat-icon icon-warning">
                             <i class="ti ti-clock-hour-4"></i>
@@ -118,7 +118,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="sc-stat-label mb-2">Disetujui</div>
-                            <div class="sc-stat-number" style="color: var(--sc-success);">{{ $recentDecisions->filter(fn($r) => $r->isApproved())->count() }}</div>
+                            <div class="sc-stat-number" id="stat-approved" style="color: var(--sc-success);">{{ $recentDecisions->filter(fn($r) => $r->isApproved())->count() }}</div>
                         </div>
                         <div class="sc-stat-icon icon-success">
                             <i class="ti ti-circle-check"></i>
@@ -155,7 +155,7 @@
                         Cuti Hari Ini
                     </h3>
                     <span class="sc-badge sc-badge-{{ $todayOnLeave->isNotEmpty() ? 'pending' : 'approved' }}">
-                        {{ $todayOnLeave->count() }} pegawai
+                        <span id="stat-on-leave">{{ $todayOnLeave->count() }}</span> pegawai
                     </span>
                 </div>
                 <div class="card-body p-3" style="max-height: 220px; overflow-y: auto;">
@@ -1687,6 +1687,23 @@
     });
 })();
 
+</script>
+<script>
+// #10 Auto-refresh dashboard stats every 60 seconds
+function refreshDashboardStats() {
+    fetch('{{ route("dashboard.live-stats") }}')
+        .then(r => r.json())
+        .then(data => {
+            const pe = document.getElementById('stat-pending');
+            const ol = document.getElementById('stat-on-leave');
+            const ap = document.getElementById('stat-approved');
+            if (pe) pe.textContent = data.pending_count;
+            if (ol) ol.textContent = data.on_leave_today;
+            if (ap) ap.textContent = data.approved_this_month;
+        })
+        .catch(() => {}); // silent fail
+}
+setInterval(refreshDashboardStats, 60000);
 </script>
 @endpush
 @endif

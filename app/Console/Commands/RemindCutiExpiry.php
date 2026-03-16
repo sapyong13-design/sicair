@@ -46,16 +46,24 @@ class RemindCutiExpiry extends Command
 
             $sisa = $record->carry_over;
 
-            $message = "Reminder SiCAIR: Anda masih memiliki {$sisa} hari cuti carry-over dari tahun " .
-                (now()->year - 1) . " yang akan kadaluarsa pada 31 Maret " . now()->year .
-                ". Segera ajukan cuti sebelum kadaluarsa!";
+            // Pesan berbeda untuk H-30 vs reminder lainnya
+            if ($daysLeft === 30) {
+                $message = "Reminder SiCAIR: Sisa cuti Anda sebesar {$sisa} hari akan hangus pada 31 Maret " .
+                    now()->year . ". Segera ajukan cuti sebelum terlambat.";
+                $inAppMessage = "Sisa cuti Anda sebesar {$sisa} hari akan hangus pada 31 Maret. Segera ajukan cuti sebelum terlambat.";
+            } else {
+                $message = "Reminder SiCAIR: Anda masih memiliki {$sisa} hari cuti carry-over dari tahun " .
+                    (now()->year - 1) . " yang akan kadaluarsa pada 31 Maret " . now()->year .
+                    ". Segera ajukan cuti sebelum kadaluarsa!";
+                $inAppMessage = "Anda memiliki {$sisa} hari sisa cuti dari tahun sebelumnya yang kadaluarsa 31 Maret.";
+            }
 
             // In-app notification
             Notification::create([
                 'user_id' => $user->id,
                 'type'    => 'cuti_expiry_reminder',
                 'title'   => "Sisa Cuti Carry-Over Akan Kadaluarsa H-{$daysLeft}",
-                'message' => "Anda memiliki {$sisa} hari sisa cuti dari tahun sebelumnya yang kadaluarsa 31 Maret.",
+                'message' => $inAppMessage,
                 'link'    => route('leave.create'),
             ]);
 

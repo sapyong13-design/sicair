@@ -7,6 +7,7 @@ use App\Models\LeaveRequest;
 use App\Models\User;
 use App\Services\AnalyticsService;
 use App\Services\CutiTahunanCalculator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -190,6 +191,21 @@ class DashboardController extends Controller
             ->get();
 
         return view('dashboard', compact('user', 'pendingReview', 'reviewedByMe', 'leaveRequests', 'todayOnLeave'));
+    }
+
+    public function liveStats(): JsonResponse
+    {
+        return response()->json([
+            'pending_count' => LeaveRequest::where('status', 'diajukan')->count(),
+            'on_leave_today' => LeaveRequest::where('status', 'disetujui')
+                ->where('start_date', '<=', today())
+                ->where('end_date', '>=', today())
+                ->count(),
+            'approved_this_month' => LeaveRequest::where('status', 'disetujui')
+                ->whereMonth('decided_at', now()->month)
+                ->whereYear('decided_at', now()->year)
+                ->count(),
+        ]);
     }
 
     private function pegawaiDashboard(User $user, Request $request)

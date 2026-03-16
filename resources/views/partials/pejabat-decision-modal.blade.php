@@ -121,9 +121,27 @@
                         </div>
                     </div>
 
+                    {{-- Alasan Penolakan (muncul hanya saat tolak dipilih) --}}
+                    <div class="mb-3 d-none" id="pejabatRejectionGroup{{ $req->id }}">
+                        <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
+                            Alasan Penolakan <span class="text-danger">*</span>
+                        </label>
+                        <select name="rejection_reason" class="form-select" style="border-radius: 10px; border: 2px solid #e2e8f0;">
+                            <option value="">-- Pilih Alasan --</option>
+                            <option value="tanggal_konflik">Konflik tanggal dengan cuti lain</option>
+                            <option value="kuota_habis">Kuota cuti habis</option>
+                            <option value="alasan_tidak_jelas">Alasan tidak jelas</option>
+                            <option value="dokumen_kurang">Dokumen pendukung kurang</option>
+                            <option value="lainnya">Alasan lain</option>
+                        </select>
+                    </div>
+
                     {{-- Catatan --}}
                     <div class="mb-0">
-                        <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">Catatan Pejabat Berwenang</label>
+                        <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
+                            Catatan Pejabat Berwenang
+                            <span id="pejabatCatatanMark{{ $req->id }}" class="text-danger d-none"> *</span>
+                        </label>
                         <textarea name="catatan_pejabat" class="form-control" rows="2" placeholder="Catatan atau keterangan keputusan..." style="border-radius: 10px; border: 2px solid #e2e8f0;"></textarea>
                     </div>
                 </div>
@@ -148,6 +166,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let isSubmitting = false;
 
     // Handle radio button visual feedback for keputusan
+    const pejabatRejectionGroup = document.getElementById('pejabatRejectionGroup{{ $req->id }}');
+    const pejabatCatatanMark = document.getElementById('pejabatCatatanMark{{ $req->id }}');
     if (keputusanGroup) {
         const radioInputs = keputusanGroup.querySelectorAll('.keputusan-input');
         radioInputs.forEach(radio => {
@@ -167,6 +187,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (this.checked) {
                     label.style.borderColor = 'currentColor';
                 }
+                // Show/hide rejection reason group
+                if (this.value === 'tolak') {
+                    if (pejabatRejectionGroup) pejabatRejectionGroup.classList.remove('d-none');
+                    if (pejabatCatatanMark) pejabatCatatanMark.classList.remove('d-none');
+                } else {
+                    if (pejabatRejectionGroup) pejabatRejectionGroup.classList.add('d-none');
+                    if (pejabatCatatanMark) pejabatCatatanMark.classList.add('d-none');
+                }
             });
 
             // Click on label should work smoothly
@@ -177,6 +205,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     radio.dispatchEvent(new Event('change', { bubbles: true }));
                 }
             });
+        });
+    }
+
+    // Reset rejection group on modal close
+    if (modal) {
+        modal.addEventListener('hidden.bs.modal', function() {
+            if (pejabatRejectionGroup) pejabatRejectionGroup.classList.add('d-none');
+            if (pejabatCatatanMark) pejabatCatatanMark.classList.add('d-none');
         });
     }
 

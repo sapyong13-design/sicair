@@ -88,9 +88,27 @@
                         </div>
                     </div>
 
+                    {{-- Alasan Penolakan (muncul hanya saat tolak dipilih) --}}
+                    <div class="mb-3 d-none" id="rejectionReasonGroup{{ $req->id }}">
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">
+                            Alasan Penolakan <span class="text-danger">*</span>
+                        </label>
+                        <select name="rejection_reason" class="form-select" style="border-radius: 10px; border: 2px solid #e2e8f0;">
+                            <option value="">-- Pilih Alasan --</option>
+                            <option value="tanggal_konflik">Konflik tanggal dengan cuti lain</option>
+                            <option value="kuota_habis">Kuota cuti habis</option>
+                            <option value="alasan_tidak_jelas">Alasan tidak jelas</option>
+                            <option value="dokumen_kurang">Dokumen pendukung kurang</option>
+                            <option value="lainnya">Alasan lain</option>
+                        </select>
+                    </div>
+
                     {{-- Catatan --}}
                     <div class="mb-0">
-                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">Catatan Atasan</label>
+                        <label class="form-label fw-semibold" style="font-size: 0.85rem;">
+                            Catatan Atasan
+                            <span id="catatanRequiredMark{{ $req->id }}" class="text-danger d-none"> *</span>
+                        </label>
                         <textarea name="catatan_atasan" class="form-control" rows="2"
                                   placeholder="Catatan atau keterangan tambahan..."
                                   style="border-radius: 10px; border: 2px solid #e2e8f0;"></textarea>
@@ -460,11 +478,29 @@ body.sc-scroll-locked {
         return false;
     });
 
+    // Show/hide rejection_reason dropdown based on pertimbangan selection
+    const rejectionGroup = document.getElementById('rejectionReasonGroup' + modalId);
+    const catatanMark = document.getElementById('catatanRequiredMark' + modalId);
+    const pertimbanganInputs = form.querySelectorAll('input[name="pertimbangan"]');
+    pertimbanganInputs.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            if (this.value === 'tolak') {
+                if (rejectionGroup) rejectionGroup.classList.remove('d-none');
+                if (catatanMark) catatanMark.classList.remove('d-none');
+            } else {
+                if (rejectionGroup) rejectionGroup.classList.add('d-none');
+                if (catatanMark) catatanMark.classList.add('d-none');
+            }
+        });
+    });
+
     // Reset form when modal closes
     overlay.addEventListener('transitionend', function(e) {
         if (e.target === overlay && !overlay.classList.contains('sc-modal-active')) {
             if (!isSubmitting) {
                 form.reset();
+                if (rejectionGroup) rejectionGroup.classList.add('d-none');
+                if (catatanMark) catatanMark.classList.add('d-none');
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="ti ti-send me-1"></i> <span>Kirim Pertimbangan</span>';
             }

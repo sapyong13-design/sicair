@@ -90,6 +90,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/', fn () => redirect('/dashboard'));
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/live-stats', [DashboardController::class, 'liveStats'])->name('dashboard.live-stats');
 
     // === Profil ===
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
@@ -118,6 +119,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/leave/create', [LeaveRequestController::class, 'create'])->name('leave.create');
     Route::post('/leave', [LeaveRequestController::class, 'store'])->name('leave.store');
     Route::get('/leave/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave.show');
+    Route::get('/leave/{leaveRequest}/reapply', [LeaveRequestController::class, 'reapply'])->name('leave.reapply');
     Route::get('/leave/{leaveRequest}/export-pdf', [LeaveRequestController::class, 'exportPdf'])->name('leave.export-pdf');
     Route::get('/leave/{leaveRequest}/surat-permohonan', [LeaveRequestController::class, 'exportSuratPermohonan'])->name('leave.surat-permohonan');
     Route::get('/leave/{leaveRequest}/surat-permohonan-docx', [LeaveRequestController::class, 'exportSuratPermohonanDocx'])->name('leave.surat-permohonan-docx');
@@ -242,6 +244,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/export', [LaporanController::class, 'exportTahunan'])->name('export');
     });
     Route::middleware('role:admin')->get('/laporan/tahunan', [LaporanController::class, 'tahunan'])->name('laporan.tahunan');
+    Route::middleware('role:admin')->get('/laporan/unit-kerja', [LaporanController::class, 'unitKerja'])->name('laporan.unit-kerja');
 
     // === Laporan Bulanan (admin only) ===
     Route::middleware('role:admin')->prefix('laporan-bulanan')->name('laporan-bulanan.')->group(function () {

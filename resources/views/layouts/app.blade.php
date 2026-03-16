@@ -2131,7 +2131,7 @@
                         {{-- Admin: Dropdown Manajemen --}}
                         @if(Auth::user()->isAdmin())
                         @php
-                            $isManajemenActive = request()->is('pegawai*') || request()->is('hari-libur*') || request()->is('dinas-luar*') || request()->is('laporan-bulanan*') || request()->is('admin/*') || request()->is('balance-adjustments*') || request()->is('analytics*') || request()->is('laporan-saldo-cuti*');
+                            $isManajemenActive = request()->is('pegawai*') || request()->is('hari-libur*') || request()->is('dinas-luar*') || request()->is('laporan-bulanan*') || request()->is('admin/*') || request()->is('balance-adjustments*') || request()->is('analytics*') || request()->is('laporan-saldo-cuti*') || request()->is('laporan/unit-kerja*');
                         @endphp
                         <li class="nav-item dropdown sc-nav-dropdown">
                             <a class="nav-link dropdown-toggle {{ $isManajemenActive ? 'active' : '' }}"
@@ -2164,6 +2164,9 @@
                                 </a>
                                 <a class="dropdown-item {{ request()->is('laporan-saldo-cuti*') ? 'active' : '' }}" href="{{ route('laporan-saldo-cuti.index') }}">
                                     <i class="ti ti-report"></i> Laporan Saldo Cuti
+                                </a>
+                                <a class="dropdown-item {{ request()->is('laporan/unit-kerja*') ? 'active' : '' }}" href="{{ route('laporan.unit-kerja') }}">
+                                    <i class="ti ti-building"></i> Rekap Unit Kerja
                                 </a>
                                 <a class="dropdown-item {{ request()->is('admin/audit-logs*') ? 'active' : '' }}" href="{{ route('admin.audit-logs.index') }}">
                                     <i class="ti ti-clipboard-list"></i> Audit Log

@@ -54,6 +54,112 @@ class LaporanController extends Controller
         return view('laporan.tahunan', compact('pegawaiList', 'leaveTypes', 'pivot', 'year', 'years', 'unitKerja', 'unitList', 'typeLabels'));
     }
 
+    public function unitKerja(Request $request)
+    {
+        if (!auth()->check()) {
+            abort(401);
+        }
+
+        $year  = max(2000, min(2050, (int)$request->get('year', now()->year)));
+        $bulan = $request->get('bulan') ? (int)$request->get('bulan') : null;
+
+        $targetTypes = [
+            LeaveRequest::TYPE_TAHUNAN,
+            LeaveRequest::TYPE_SAKIT,
+            LeaveRequest::TYPE_BESAR,
+            LeaveRequest::TYPE_ALASAN_PENTING,
+            LeaveRequest::TYPE_LUAR_TANGGUNGAN,
+        ];
+
+        // Query: sum hari per unit_kerja per type
+        $query = LeaveRequest::join('users', 'leave_requests.user_id', '=', 'users.id')
+            ->whereIn('leave_requests.status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
+            ->whereIn('leave_requests.type', $targetTypes)
+            ->whereNull('leave_requests.deleted_at')
+            ->whereYear('leave_requests.start_date', $year)
+            ->select('users.unit_kerja', 'leave_requests.type',
+                \DB::raw('SUM(leave_requests.total_hari_kerja) as total_hari'),
+                \DB::raw('COUNT(DISTINCT leave_requests.user_id) as jumlah_pegawai_cuti'))
+            ->groupBy('users.unit_kerja', 'leave_requests.type');
+
+        if ($bulan) {
+            $query->whereMonth('leave_requests.start_date', $bulan);
+        }
+
+        $rawRows = $query->get();
+
+        // Jumlah pegawai aktif per unit_kerja
+        $pegawaiPerUnit = User::whereNotNull('unit_kerja')
+            ->where('role', '!=', 'admin')
+            ->selectRaw('unit_kerja, COUNT(*) as jumlah')
+            ->groupBy('unit_kerja')
+            ->pluck('jumlah', 'unit_kerja');
+
+        // Bangun pivot: unit_kerja => [type => total_hari]
+        $pivot   = [];
+        $unitSet = [];
+        foreach ($rawRows as $row) {
+            $uk = $row->unit_kerja ?? '(Tidak Diisi)';
+            $unitSet[$uk] = true;
+            $pivot[$uk][$row->type] = (int) $row->total_hari;
+        }
+
+        // Urutkan unit_kerja secara alfabet
+        ksort($unitSet);
+        $units = array_keys($unitSet);
+
+        // Hitung total kolom (per type) dan total baris (per unit)
+        $totalPerType = [];
+        foreach ($targetTypes as $t) {
+            $totalPerType[$t] = 0;
+        }
+        $grandTotal = 0;
+
+        $rows = [];
+        foreach ($units as $uk) {
+            $rowTotal = 0;
+            $typeTotals = [];
+            foreach ($targetTypes as $t) {
+                $val = $pivot[$uk][$t] ?? 0;
+                $typeTotals[$t] = $val;
+                $rowTotal += $val;
+                $totalPerType[$t] += $val;
+            }
+            $grandTotal += $rowTotal;
+
+            $jumlahPegawai = $pegawaiPerUnit[$uk] ?? 0;
+            $rataRata = $jumlahPegawai > 0 ? round($rowTotal / $jumlahPegawai, 1) : 0;
+
+            $rows[] = [
+                'unit_kerja'     => $uk,
+                'jumlah_pegawai' => $jumlahPegawai,
+                'types'          => $typeTotals,
+                'total'          => $rowTotal,
+                'rata_rata'      => $rataRata,
+            ];
+        }
+
+        $years   = range(now()->year, now()->year - 5);
+        $bulanList = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        ];
+
+        $typeLabels = [
+            LeaveRequest::TYPE_TAHUNAN        => 'CT',
+            LeaveRequest::TYPE_SAKIT          => 'CS',
+            LeaveRequest::TYPE_BESAR          => 'CB',
+            LeaveRequest::TYPE_ALASAN_PENTING => 'CAP',
+            LeaveRequest::TYPE_LUAR_TANGGUNGAN => 'CLTN',
+        ];
+
+        return view('laporan.unit-kerja', compact(
+            'rows', 'year', 'years', 'bulan', 'bulanList',
+            'targetTypes', 'typeLabels', 'totalPerType', 'grandTotal'
+        ));
+    }
+
     public function exportTahunan(Request $request)
     {
         if (!auth()->check()) {

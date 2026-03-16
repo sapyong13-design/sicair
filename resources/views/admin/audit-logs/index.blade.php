@@ -164,7 +164,11 @@
                             @endif
                         </td>
                         <td style="padding:0.75rem 1rem;">
-                            <small class="text-muted">{{ $log->ip_address ?? '—' }}</small>
+                            @if(!$log->ip_address || $log->ip_address === '127.0.0.1')
+                                <span class="badge" style="background:#f1f5f9;color:#64748b;font-size:0.75rem;border-radius:6px;">Lokal</span>
+                            @else
+                                <code style="font-size:0.78rem;background:#f8fafc;padding:2px 6px;border-radius:4px;color:#334155;">{{ $log->ip_address }}</code>
+                            @endif
                         </td>
                         <td style="padding:0.75rem 1rem;">
                             <a href="{{ route('admin.audit-logs.show', $log) }}" class="btn btn-sm btn-outline-primary" style="border-radius:6px;">
