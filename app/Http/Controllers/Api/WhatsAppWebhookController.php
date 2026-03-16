@@ -35,7 +35,10 @@ class WhatsAppWebhookController extends Controller
         }
 
         // Normalize nomor & cari user
-        $normalized = preg_replace('/^0/', '62', preg_replace('/\D/', '', $from));
+        // First apply prefix normalization (08xx → 628xx) on the raw input,
+        // then strip any remaining non-digit characters.
+        $prefixNormalized = preg_replace('/^(\+?62|0)/', '62', $from);
+        $normalized       = preg_replace('/\D/', '', $prefixNormalized);
         $last9      = substr($normalized, -9);
 
         $user = User::where('telepon', 'LIKE', "%{$last9}")
@@ -93,6 +96,11 @@ class WhatsAppWebhookController extends Controller
             ->where('tahun', now()->year)
             ->first();
 
+        if (!$record) {
+            return "SALDO CUTI - " . now()->year . "\n{$user->name}\n"
+                . str_repeat('-', 30) . "\nData cuti tidak ditemukan.";
+        }
+
         $text  = "SALDO CUTI - " . now()->year . "\n";
         $text .= $user->name . "\n";
         $text .= str_repeat('-', 30) . "\n";
@@ -145,7 +153,7 @@ class WhatsAppWebhookController extends Controller
     private function replyHistory(User $user): string
     {
         $list = LeaveRequest::where('user_id', $user->id)
-            ->whereRaw("strftime('%Y', start_date) = ?", [(string) now()->year])
+            ->whereYear('start_date', now()->year)
             ->orderBy('start_date', 'desc')
             ->limit(5)
             ->get();
@@ -175,7 +183,7 @@ class WhatsAppWebhookController extends Controller
 
     private function replyHelp(): string
     {
-        return "SIHEALING WA BOT\n"
+        return "SiCAIR WA BOT\n"
             . str_repeat('-', 30) . "\n"
             . "Cek Saldo Cuti:\n"
             . "  SALDO / CUTI / SISA / INFO\n\n"

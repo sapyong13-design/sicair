@@ -73,9 +73,10 @@ class CutiTahunanCalculator
     /**
      * Hitung carry-over dari tahun sebelumnya.
      * Sesuai SE MA 13/2019:
-     * - Max 6 hari dari 1 tahun sebelumnya
-     * - Jika 2 tahun berturut tidak digunakan sama sekali → total max 24
-     * - Jika 2 tahun berturut sudah digunakan → total max 18
+     * - Max 6 hari dari 1 tahun sebelumnya (kasus normal)
+     * - Jika cuti ditangguhkan: carry max 12 hari (sehingga total hak = 12 + 12 = 24)
+     * - Jika 2 tahun berturut tidak digunakan sama sekali → max 6 dari N-1 + max 6 dari N-2 = total max 24
+     * - Jika 2 tahun berturut ada yang digunakan → carry max 6 dari N-1 saja (N-2 hangus), total max 18
      * - Lebih dari 2 tahun → hangus
      */
     protected function hitungCarryOver(): int

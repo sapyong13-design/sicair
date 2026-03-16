@@ -5,12 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory;
+    use HasApiTokens, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name', 'nip', 'email', 'password', 'role', 'leave_balance',
@@ -360,5 +361,73 @@ class User extends Authenticatable
         }
 
         return $atasanAsli;
+    }
+
+    // ===== Cuti Melahirkan Eligibility =====
+
+    /**
+     * Apakah user berhak mengajukan cuti melahirkan?
+     * Hanya pegawai perempuan (jenis_kelamin = 'P') yang boleh.
+     */
+    public function canRequestCutiMelahirkan(): bool
+    {
+        return $this->jenis_kelamin === 'P';
+    }
+
+    // ===== Delegate Atasan Validation =====
+
+    /**
+     * Validasi bahwa user yang ditunjuk sebagai delegate memiliki role atasan.
+     * Mengembalikan true jika delegate_atasan_id valid (role atasan/panitera/sekretaris/wakil_ketua).
+     */
+    public function isDelegateAtasanValid(): bool
+    {
+        if (!$this->delegate_atasan_id) {
+            return true; // Tidak ada delegate = valid (tidak diatur)
+        }
+
+        $delegate = $this->relationLoaded('delegateAtasan')
+            ? $this->delegateAtasan
+            : User::find($this->delegate_atasan_id);
+
+        return $delegate && $delegate->isAtasan();
+    }
+
+    // ===== Atasan Hierarchy Circular Reference Check =====
+
+    /**
+     * Cek apakah menetapkan $candidateId sebagai atasan_id user ini
+     * akan menciptakan referensi sirkular di hierarki.
+     * Menelusuri hingga 5 level ke atas untuk mencegah loop.
+     *
+     * @param int $candidateId ID user yang akan dijadikan atasan
+     * @return bool true jika ada sirkular (tidak boleh dipakai), false jika aman
+     */
+    public function wouldCreateCircularAtasan(int $candidateId): bool
+    {
+        if ($candidateId === $this->id) {
+            return true; // Self-reference
+        }
+
+        $visited = [$this->id];
+        $currentId = $candidateId;
+        $maxDepth = 5;
+
+        for ($depth = 0; $depth < $maxDepth; $depth++) {
+            if (in_array($currentId, $visited)) {
+                return true; // Sirkular ditemukan
+            }
+
+            $visited[] = $currentId;
+            $parent = User::select('id', 'atasan_id')->find($currentId);
+
+            if (!$parent || !$parent->atasan_id) {
+                break; // Tidak ada atasan lebih lanjut, aman
+            }
+
+            $currentId = $parent->atasan_id;
+        }
+
+        return false;
     }
 }

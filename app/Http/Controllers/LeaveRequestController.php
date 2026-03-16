@@ -402,13 +402,34 @@ class LeaveRequestController extends Controller
             'tolak' => LeaveRequest::STATUS_DITOLAK,
         ];
 
-        $leaveRequest->update([
-            'pejabat_id' => $pejabat->id,
-            'keputusan_pejabat' => $keputusan,
-            'catatan_pejabat' => $request->catatan_pejabat,
-            'decided_at' => now(),
-            'status' => $statusMap[$keputusan],
-        ]);
+        // Fix: Wrap status update + balance deduction in a single DB::transaction()
+        // with lockForUpdate() on the LeaveRequest row to prevent race conditions.
+        DB::transaction(function () use ($request, $leaveRequest, $pejabat, $keputusan, $statusMap) {
+            $leaveRequest = LeaveRequest::lockForUpdate()->findOrFail($leaveRequest->id);
+
+            $leaveRequest->update([
+                'pejabat_id' => $pejabat->id,
+                'keputusan_pejabat' => $keputusan,
+                'catatan_pejabat' => $request->catatan_pejabat,
+                'decided_at' => now(),
+                'status' => $statusMap[$keputusan],
+            ]);
+
+            if ($keputusan === 'setuju' && $leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
+                $lockedUser = \App\Models\User::lockForUpdate()->find($leaveRequest->user_id);
+                $totalDays = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days;
+                $previousBalance = $lockedUser->leave_balance;
+                $lockedUser->decrement('leave_balance', $totalDays);
+
+                BalanceAuditService::logBalanceChange(
+                    $lockedUser,
+                    $previousBalance,
+                    $previousBalance - $totalDays,
+                    "Pengajuan {$leaveRequest->type_label} disetujui",
+                    $leaveRequest->id
+                );
+            }
+        });
 
         // Invalidate analytics cache so dashboard reflects the new decision immediately
         Cache::forget('analytics_annual_' . now()->year);
@@ -429,24 +450,6 @@ class LeaveRequestController extends Controller
             ['status' => $statusMap[$keputusan], 'keputusan_pejabat' => $keputusan, 'catatan_pejabat' => $request->catatan_pejabat],
             "Pejabat {$pejabat->name} memutuskan '{$keputusan}' pada pengajuan cuti #{$leaveRequest->id} milik {$leaveRequest->user?->name}"
         );
-
-        // FIX #5: Wrap balance deduction in transaction with row lock to prevent race condition
-        if ($keputusan === 'setuju' && $leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
-            DB::transaction(function () use ($leaveRequest) {
-                $lockedUser = \App\Models\User::lockForUpdate()->find($leaveRequest->user_id);
-                $totalDays = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days;
-                $previousBalance = $lockedUser->leave_balance;
-                $lockedUser->decrement('leave_balance', $totalDays);
-
-                BalanceAuditService::logBalanceChange(
-                    $lockedUser,
-                    $previousBalance,
-                    $previousBalance - $totalDays,
-                    "Pengajuan {$leaveRequest->type_label} disetujui",
-                    $leaveRequest->id
-                );
-            });
-        }
 
         // Kirim email sesuai keputusan (try-catch for OpenWrt sync queue compatibility)
         try {
@@ -620,6 +623,18 @@ class LeaveRequestController extends Controller
      */
     public function show(LeaveRequest $leaveRequest)
     {
+        $authUser = auth()->user();
+
+        // Fix: Only the owner or an authorized role may view a leave request.
+        if (
+            $leaveRequest->user_id !== $authUser->id
+            && !$authUser->isAdmin()
+            && !$authUser->isAtasan()
+            && !$authUser->canApproveAsPejabat()
+        ) {
+            abort(403);
+        }
+
         $leaveRequest->load(['user', 'atasanReviewer', 'pejabat']);
         return view('leave.show', compact('leaveRequest'));
     }
@@ -1004,7 +1019,7 @@ class LeaveRequestController extends Controller
                 $rules['dokumen_pendukung'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120';
                 break;
             case LeaveRequest::TYPE_MELAHIRKAN:
-                $rules['kelahiran_ke'] = 'required|integer|min:1';
+                $rules['kelahiran_ke'] = 'required|integer|min:1|max:10';
                 break;
             case LeaveRequest::TYPE_ALASAN_PENTING:
                 $rules['alasan_cap'] = 'required|in:' . implode(',', array_keys(LeaveRequest::capLabels()));
@@ -1015,6 +1030,7 @@ class LeaveRequestController extends Controller
                 break;
             case LeaveRequest::TYPE_BESAR:
                 $rules['dokumen_pendukung'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120';
+                $rules['kelahiran_ke'] = 'nullable|integer|min:1|max:10';
                 break;
         }
     }

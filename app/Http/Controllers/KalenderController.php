@@ -83,7 +83,7 @@ class KalenderController extends Controller
         $ics .= "X-WR-CALDESC:Jadwal Cuti & Hari Libur SiCAIR - PN Natuna\r\n";
 
         foreach ($leaves as $leave) {
-            $uid = 'leave-' . $leave->id . '@sihealing.pn-natuna';
+            $uid = 'leave-' . $leave->id . '@sicair.pn-natuna';
             $start = $leave->start_date->format('Ymd');
             $end   = $leave->end_date->copy()->addDay()->format('Ymd'); // iCal end is exclusive
             $ics .= "BEGIN:VEVENT\r\n";
@@ -97,7 +97,7 @@ class KalenderController extends Controller
         }
 
         foreach ($holidays as $holiday) {
-            $uid = 'holiday-' . $holiday->id . '@sihealing.pn-natuna';
+            $uid = 'holiday-' . $holiday->id . '@sicair.pn-natuna';
             $date = \Carbon\Carbon::parse($holiday->tanggal)->format('Ymd');
             $nextDate = \Carbon\Carbon::parse($holiday->tanggal)->addDay()->format('Ymd');
             $prefix = $holiday->is_cuti_bersama ? '[Cuti Bersama]' : '[Libur Nasional]';

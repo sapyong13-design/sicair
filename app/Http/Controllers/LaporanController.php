@@ -15,7 +15,11 @@ class LaporanController extends Controller
 {
     public function tahunan(Request $request)
     {
-        $year = (int)$request->get('year', now()->year);
+        if (!auth()->check()) {
+            abort(401);
+        }
+
+        $year = max(2000, min(2050, (int)$request->get('year', now()->year)));
         $unitKerja = $request->get('unit_kerja');
 
         $pegawaiQuery = User::where('role', '!=', 'admin');
@@ -26,13 +30,13 @@ class LaporanController extends Controller
 
         $leaveTypes = LeaveRequest::where('status', LeaveRequest::STATUS_DISETUJUI)
             ->orWhere('status', LeaveRequest::STATUS_APPROVED)
-            ->whereRaw("strftime('%Y', start_date) = ?", [(string)$year])
+            ->whereYear('start_date', $year)
             ->distinct()
             ->pluck('type');
 
         // Build pivot data: user_id => [type => total_days]
         $rawData = LeaveRequest::whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
-            ->whereRaw("strftime('%Y', start_date) = ?", [(string)$year])
+            ->whereYear('start_date', $year)
             ->when($unitKerja, fn($q) => $q->whereHas('user', fn($u) => $u->where('unit_kerja', $unitKerja)))
             ->selectRaw('user_id, type, SUM(total_hari_kerja) as total')
             ->groupBy('user_id', 'type')
@@ -52,6 +56,10 @@ class LaporanController extends Controller
 
     public function exportTahunan(Request $request)
     {
+        if (!auth()->check()) {
+            abort(401);
+        }
+
         $year = (int)$request->get('year', now()->year);
         $unitKerja = $request->get('unit_kerja');
 
@@ -59,7 +67,7 @@ class LaporanController extends Controller
 
         $rows = LeaveRequest::with('user')
             ->whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
-            ->whereRaw("strftime('%Y', start_date) = ?", [(string)$year])
+            ->whereYear('start_date', $year)
             ->when($unitKerja, fn($q) => $q->whereHas('user', fn($u) => $u->where('unit_kerja', $unitKerja)))
             ->orderBy('start_date')
             ->get();

@@ -62,10 +62,10 @@ class AnalyticsController extends Controller
      */
     public function exportAnnual(Request $request)
     {
-        $year = (int) $request->input('year', date('Y'));
+        $year = max(2000, min(2050, (int) $request->input('year', date('Y'))));
 
         $leaves = LeaveRequest::with('user')
-            ->whereRaw("strftime('%Y', start_date) = ?", [(string)$year])
+            ->whereYear('start_date', $year)
             ->orderBy('created_at')
             ->get();
 
@@ -176,8 +176,9 @@ class AnalyticsController extends Controller
      */
     private function getHeatmapData(int $year): array
     {
+        // Note: strftime('%m') and julianday() are SQLite-specific; for MySQL use MONTH() and DATEDIFF().
         $rows = LeaveRequest::join('users', 'leave_requests.user_id', '=', 'users.id')
-            ->selectRaw("users.name, users.id as user_id, CAST(strftime('%m', leave_requests.start_date) AS INTEGER) as month, sum(COALESCE(total_hari_kerja, CAST((julianday(end_date) - julianday(start_date)) AS INTEGER) + 1)) as total_days")
+            ->selectRaw("users.name, users.id as user_id, CAST(strftime('%m', leave_requests.start_date) AS INTEGER) as month, sum(COALESCE(total_hari_kerja, (julianday(end_date) - julianday(start_date) + 1))) as total_days")
             ->whereIn('leave_requests.status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
             ->whereYear('leave_requests.start_date', $year)
             ->groupBy('users.id', 'users.name', 'month')

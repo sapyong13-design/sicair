@@ -7,6 +7,8 @@
     $capLabels = \App\Models\LeaveRequest::capLabels();
     $typeLabel = $typeLabels[$type] ?? 'Cuti';
     $user = Auth::user();
+    // Use CutiTahunanCalculator for accurate balance if $cutiInfo not passed
+    $sisaCutiAkurat = $cutiInfo['sisa_cuti'] ?? $cutiInfo['sisa'] ?? $user->leave_balance ?? 0;
 @endphp
 
 @section('content')
@@ -14,7 +16,7 @@
 @if(!$user->isAdmin())
 <div class="sc-sticky-balance">
     <span><i class="ti ti-calendar-stats me-1"></i> Saldo Cuti Tahunan</span>
-    <strong>{{ $user->leave_balance ?? 0 }} hari tersisa</strong>
+    <strong>{{ $sisaCutiAkurat }} hari tersisa</strong>
 </div>
 @endif
 {{-- Breadcrumb (#10) --}}
@@ -845,7 +847,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (endEl)   endEl.addEventListener('change', updateDur);
 
     // --- Feature 2: Validasi saldo ---
-    var saldo = parseInt('{{ $user->leave_balance ?? 0 }}');
+    var saldo = parseInt('{{ $sisaCutiAkurat }}');
     var warnEl = document.getElementById('sc-saldo-warning');
     function checkSaldo(days) {
         if (!warnEl) return;
@@ -884,7 +886,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- Feature 5: Draft localStorage ---
-    var DRAFT_KEY = 'sihealing_cuti_draft';
+    var DRAFT_KEY = 'sicair_cuti_draft';
     var form = document.querySelector('form');
     if (form) {
         var fields = ['start_date','end_date','reason','alasan','address_during_leave','phone_during_leave'];

@@ -1,6 +1,6 @@
 {
-    "name": "SiHEALING — PN Natuna",
-    "short_name": "SiHEALING",
+    "name": "SiCAIR — PN Natuna",
+    "short_name": "SiCAIR",
     "description": "Sistem Informasi Hak Elektronik Cuti — Pengadilan Negeri Natuna",
     "start_url": "/dashboard",
     "display": "standalone",
