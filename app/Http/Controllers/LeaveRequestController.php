@@ -881,7 +881,7 @@ class LeaveRequestController extends Controller
             return back()->with('error', 'Anda tidak memiliki akses untuk export form ini.');
         }
 
-        return DocxExportService::exportFormPermintaanCutiTemplate($leaveRequest);
+        return DocxExportService::exportFormPermintaanCuti($leaveRequest);
     }
 
     /**
