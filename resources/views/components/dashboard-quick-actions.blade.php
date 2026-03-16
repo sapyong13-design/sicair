@@ -1,7 +1,7 @@
 {{-- Dashboard Quick Actions Component --}}
 <div class="quick-actions-grid">
     {{-- Action 1: Ajukan Cuti (hanya jika boleh cuti) --}}
-    @if(Auth::user()->bolehCuti())
+    @if(Auth::user()?->bolehCuti() ?? true)
     <a href="{{ route('leave.select-type') }}" class="quick-action-card">
         <div class="action-icon" style="background: var(--sc-primary-light); color: var(--sc-primary);">
             <i class="ti ti-file-plus"></i>
@@ -39,7 +39,7 @@
     </a>
 
     {{-- Action 4: Download Laporan --}}
-    <a href="{{ route('reports.leave-summary') }}" class="quick-action-card">
+    <a href="{{ route('leave.history') }}" class="quick-action-card">
         <div class="action-icon" style="background: var(--sc-danger-light); color: var(--sc-danger);">
             <i class="ti ti-download"></i>
         </div>
@@ -51,7 +51,7 @@
     </a>
 
     {{-- Action 5: Notifikasi --}}
-    <a href="{{ route('notifications.index') }}" class="quick-action-card">
+    <a href="{{ route('notifications') }}" class="quick-action-card">
         <div class="action-icon" style="background: var(--sc-primary-light); color: var(--sc-primary);">
             <i class="ti ti-bell"></i>
         </div>
@@ -63,7 +63,7 @@
     </a>
 
     {{-- Action 6: Kalender Cuti --}}
-    <a href="{{ route('kalender.index') }}" class="quick-action-card">
+    <a href="{{ route('kalender') }}" class="quick-action-card">
         <div class="action-icon" style="background: var(--sc-success-light); color: var(--sc-success);">
             <i class="ti ti-calendar-month"></i>
         </div>

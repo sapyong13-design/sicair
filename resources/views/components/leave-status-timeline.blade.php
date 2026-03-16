@@ -1,5 +1,5 @@
 {{-- Leave Status Timeline Component --}}
-<div class="sc-timeline">
+<div class="sc-timeline" aria-label="Timeline Status Cuti">
     <div class="timeline-container">
         {{-- Step 1: Diajukan --}}
         <div class="timeline-step {{ $leaveRequest->created_at ? 'completed' : '' }}">
@@ -21,7 +21,7 @@
             <div class="timeline-content">
                 <div class="timeline-title">Pertimbangan Atasan</div>
                 @if($leaveRequest->atasanReviewer)
-                    <div class="timeline-date">{{ $leaveRequest->pertimbangan_atasan ? $leaveRequest->updated_at->format('d M Y, H:i') : 'Menunggu...' }}</div>
+                    <div class="timeline-date">{{ $leaveRequest->pertimbangan_atasan ? (($leaveRequest->updated_at ?? null)?->format('d M Y, H:i') ?? '-') : 'Menunggu...' }}</div>
                     <div class="timeline-description">
                         <strong>{{ $leaveRequest->atasanReviewer->name }}</strong>
                         @if($leaveRequest->pertimbangan_atasan)
@@ -29,7 +29,7 @@
                                 <i class="ti ti-{{ $leaveRequest->pertimbangan_atasan === 'setuju' ? 'circle-check' : ($leaveRequest->pertimbangan_atasan === 'tolak' ? 'circle-x' : ($leaveRequest->pertimbangan_atasan === 'ubah' ? 'edit' : 'clock-pause')) }}"></i>
                                 {{ ucfirst($leaveRequest->pertimbangan_atasan === 'setuju' ? 'Disetujui' : ($leaveRequest->pertimbangan_atasan === 'tolak' ? 'Tidak Disetujui' : ($leaveRequest->pertimbangan_atasan === 'ubah' ? 'Perubahan' : 'Ditangguhkan'))) }}
                             </span>
-                            @if($leaveRequest->catatan_atasan)
+                            @if($leaveRequest->catatan_atasan ?? null)
                                 <div class="timeline-notes">
                                     <i class="ti ti-message me-1"></i>{{ $leaveRequest->catatan_atasan }}
                                 </div>
@@ -89,12 +89,12 @@
             <div class="timeline-content">
                 <div class="timeline-title">Selesai</div>
                 @if(in_array($leaveRequest->status, ['disetujui', 'ditolak']))
-                    <div class="timeline-date">{{ $leaveRequest->updated_at->format('d M Y, H:i') }}</div>
+                    <div class="timeline-date">{{ ($leaveRequest->updated_at ?? null)?->format('d M Y, H:i') ?? '-' }}</div>
                     <div class="timeline-description">
-                        Pengajuan {{ $leaveRequest->isApproved() ? 'disetujui' : 'ditolak' }}
+                        Pengajuan {{ method_exists($leaveRequest, 'isApproved') && $leaveRequest->isApproved() ? 'disetujui' : 'ditolak' }}
                     </div>
                     @php
-                        $durasi = $leaveRequest->created_at->diffInDays($leaveRequest->updated_at);
+                        $durasi = (isset($leaveRequest->created_at, $leaveRequest->updated_at) && $leaveRequest->created_at && $leaveRequest->updated_at) ? $leaveRequest->created_at->diffInDays($leaveRequest->updated_at) : 0;
                     @endphp
                     <div class="text-muted mt-1" style="font-size:0.8rem;">
                         <i class="ti ti-clock me-1"></i>Diproses dalam {{ $durasi > 0 ? $durasi . ' hari' : 'kurang dari 1 hari' }}

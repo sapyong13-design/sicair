@@ -11,7 +11,7 @@
                 <div>
                     <h4 class="approval-title">Pertimbangan Atasan Langsung</h4>
                     <div class="approval-meta">
-                        {{ $leaveRequest->atasanReviewer->name }} • {{ optional($leaveRequest->pertimbangan_atasan_at)->format('d M Y, H:i') ?? 'Pending' }}
+                        {{ $leaveRequest->atasanReviewer->name }} • {{ optional($leaveRequest->reviewed_at ?? null)->format('d M Y, H:i') ?? 'Pending' }}
                     </div>
                 </div>
                 @if($leaveRequest->pertimbangan_atasan)
@@ -70,7 +70,7 @@
                 <div>
                     <h4 class="approval-title">Keputusan Pejabat Berwenang</h4>
                     <div class="approval-meta">
-                        {{ $leaveRequest->pejabatReviewer->name }} • {{ optional($leaveRequest->decided_at)->format('d M Y, H:i') ?? 'Pending' }}
+                        {{ $leaveRequest->pejabatReviewer->name }} • {{ optional($leaveRequest->decided_at ?? null)->format('d M Y, H:i') ?? 'Pending' }}
                     </div>
                 </div>
                 @if($leaveRequest->keputusan)
@@ -103,7 +103,7 @@
                     @if($leaveRequest->durasi_ubah)
                     <div class="change-item">
                         <span class="change-label">Durasi:</span>
-                        <span class="change-value">{{ $leaveRequest->durasi_ubah }} hari (dari {{ $leaveRequest->total_days }} hari)</span>
+                        <span class="change-value">{{ $leaveRequest->durasi_ubah ?? 0 }} hari (dari {{ $leaveRequest->total_days ?? $leaveRequest->total_hari_kerja ?? 0 }} hari)</span>
                     </div>
                     @endif
                 </div>

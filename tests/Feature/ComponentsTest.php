@@ -42,7 +42,7 @@ class ComponentsTest extends TestCase
             ->create([
                 'status' => 'pertimbangan_atasan',
                 'atasan_reviewer_id' => $this->atasan->id,
-                'pejabat_reviewer_id' => $this->pejabat->id,
+                'pejabat_id' => $this->pejabat->id,
                 'pertimbangan_atasan' => 'setuju',
             ]);
 
@@ -327,10 +327,10 @@ class ComponentsTest extends TestCase
             ->create([
                 'status' => 'disetujui',
                 'atasan_reviewer_id' => $this->atasan->id,
-                'pejabat_reviewer_id' => $this->pejabat->id,
+                'pejabat_id' => $this->pejabat->id,
                 'pertimbangan_atasan' => 'setuju',
                 'catatan_atasan' => 'Pengajuan sudah oke, setuju untuk diproses',
-                'keputusan' => 'setuju',
+                'keputusan_pejabat' => 'setuju',
                 'catatan_pejabat' => 'Disetujui oleh pejabat berwenang',
             ]);
 

@@ -173,6 +173,11 @@ class LeaveRequest extends Model
         return $this->belongsTo(User::class, 'pejabat_id');
     }
 
+    public function pejabatReviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'pejabat_id');
+    }
+
     /**
      * Get amendments for this leave request
      */

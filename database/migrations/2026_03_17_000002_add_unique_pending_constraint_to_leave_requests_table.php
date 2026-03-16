@@ -7,23 +7,19 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Add a unique index on (user_id, start_date) to prevent duplicate pending
-     * leave requests for the same user on the same start date.
-     *
-     * Note: This is a table-level unique constraint. Application logic should
-     * further filter by status='diajukan'/'pending' before relying on this.
+     * Duplicate prevention for pending leave requests is handled at the
+     * application level in LeaveRequestController@store validation.
+     * A table-level unique constraint on (user_id, start_date) would wrongly
+     * block re-submissions after rejection or cancellation.
+     * This migration intentionally does nothing.
      */
     public function up(): void
     {
-        Schema::table('leave_requests', function (Blueprint $table) {
-            $table->unique(['user_id', 'start_date'], 'uq_leave_user_start_date');
-        });
+        // No-op: duplicate prevention handled in application validation layer
     }
 
     public function down(): void
     {
-        Schema::table('leave_requests', function (Blueprint $table) {
-            $table->dropUnique('uq_leave_user_start_date');
-        });
+        // No-op
     }
 };

@@ -9,13 +9,13 @@
                 <h6 class="dropdown-header">Format Dokumen</h6>
             </li>
             <li>
-                <a class="dropdown-item" href="{{ route('export.leave-pdf', $leaveRequest->id) }}" target="_blank">
+                <a class="dropdown-item" href="{{ route('leave.export-pdf', $leaveRequest->id) }}" target="_blank">
                     <i class="ti ti-file-pdf me-2" style="color: #dc2626;"></i>
                     Export sebagai PDF
                 </a>
             </li>
             <li>
-                <a class="dropdown-item" href="{{ route('export.leave-excel', $leaveRequest->id) }}">
+                <a class="dropdown-item" href="{{ route('leave.surat-permohonan', $leaveRequest->id) }}" target="_blank">
                     <i class="ti ti-file-excel me-2" style="color: #16a34a;"></i>
                     Export sebagai Excel
                 </a>
@@ -33,19 +33,19 @@
                 <h6 class="dropdown-header">Laporan</h6>
             </li>
             <li>
-                <a class="dropdown-item" href="{{ route('reports.summary-pdf') }}" target="_blank">
+                <a class="dropdown-item" href="{{ route('leave.export-summary') }}" target="_blank">
                     <i class="ti ti-report-analytics me-2" style="color: #2563eb;"></i>
                     Laporan Summary
                 </a>
             </li>
             <li>
-                <a class="dropdown-item" href="{{ route('reports.monthly-report') }}">
+                <a class="dropdown-item" href="{{ route('laporan-bulanan.index') }}">
                     <i class="ti ti-calendar-month me-2" style="color: #9333ea;"></i>
                     Laporan Bulanan
                 </a>
             </li>
             <li>
-                <a class="dropdown-item" href="{{ route('reports.annual-report') }}">
+                <a class="dropdown-item" href="{{ route('laporan.tahunan') }}">
                     <i class="ti ti-chart-line me-2" style="color: #f59e0b;"></i>
                     Laporan Tahunan
                 </a>
@@ -179,14 +179,14 @@
 
 <script>
 function shareViaEmail() {
-    const subject = encodeURIComponent('Pengajuan Cuti - {{ $leaveRequest->type_label }}');
+    const subject = encodeURIComponent('Pengajuan Cuti - {{ $leaveRequest->type_label ?? $leaveRequest->type ?? '' }}');
     const body = encodeURIComponent(`
 Saya ingin membagikan pengajuan cuti saya kepada Anda.
 
-Jenis Cuti: {{ $leaveRequest->type_label }}
-Periode: {{ $leaveRequest->start_date->format('d M Y') }} - {{ $leaveRequest->end_date->format('d M Y') }}
-Durasi: {{ $leaveRequest->total_days }} hari
-Status: {{ $leaveRequest->status }}
+Jenis Cuti: {{ $leaveRequest->type_label ?? $leaveRequest->type ?? '' }}
+Periode: {{ optional($leaveRequest->start_date ?? null)->format('d M Y') ?? '-' }} - {{ optional($leaveRequest->end_date ?? null)->format('d M Y') ?? '-' }}
+Durasi: {{ $leaveRequest->total_days ?? $leaveRequest->total_hari_kerja ?? 0 }} hari
+Status: {{ $leaveRequest->status ?? '' }}
 
 Lihat detail: ${window.location.href}
     `);

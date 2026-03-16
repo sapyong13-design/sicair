@@ -110,8 +110,8 @@
             $pbColor = $pbPct >= 80 ? '#dc2626' : ($pbPct >= 50 ? '#d97706' : '#166534');
         @endphp
         <div class="mt-3">
-            <div style="background: #e2e8f0; border-radius: 99px; height: 8px; overflow: hidden;">
-                <div style="width: {{ $pbPct }}%; background: {{ $pbColor }}; height: 100%; border-radius: 99px; transition: width 0.6s ease;"></div>
+            <div class="progress" style="border-radius: 99px; height: 8px;">
+                <div class="progress-bar" role="progressbar" style="width: {{ $pbPct }}%; background: {{ $pbColor }}; border-radius: 99px; transition: width 0.6s ease;" aria-valuenow="{{ $pbPct }}" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
             <div class="d-flex justify-content-between mt-1" style="font-size: 0.75rem; color: #64748b;">
                 <span>Terpakai: {{ $pbUsed }} hari</span>

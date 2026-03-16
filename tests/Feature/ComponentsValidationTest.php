@@ -45,7 +45,7 @@ class ComponentsValidationTest extends TestCase
 
         // Validasi komponen
         $checks = [
-            'sh-timeline class exists' => strpos($html, 'sh-timeline') !== false,
+            'sc-timeline class exists' => strpos($html, 'sc-timeline') !== false,
             'timeline-container exists' => strpos($html, 'timeline-container') !== false,
             'Diajukan step visible' => strpos($html, 'Diajukan') !== false,
             'Pertimbangan Atasan visible' => strpos($html, 'Pertimbangan Atasan') !== false,
@@ -80,7 +80,7 @@ class ComponentsValidationTest extends TestCase
         $html = $view->render();
 
         $checks = [
-            'sh-balance-card class exists' => strpos($html, 'sh-balance-card') !== false,
+            'sc-balance-card class exists' => strpos($html, 'sc-balance-card') !== false,
             'Sisa Cuti title visible' => strpos($html, 'Sisa Cuti') !== false,
             'Balance value 8 shown' => strpos($html, '8') !== false,
             'Total hak 12 shown' => strpos($html, '12') !== false,
@@ -315,8 +315,8 @@ class ComponentsValidationTest extends TestCase
 
         $view = view('components.empty-states', [
             'icon' => 'ti-inbox',
-            'iconColor' => 'var(--sh-primary)',
-            'backgroundColor' => 'var(--sh-primary-light)',
+            'iconColor' => 'var(--sc-primary)',
+            'backgroundColor' => 'var(--sc-primary-light)',
             'title' => 'Belum Ada Pengajuan Cuti',
             'description' => 'Anda belum membuat pengajuan cuti apapun.',
             'tips' => [

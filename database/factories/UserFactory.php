@@ -25,20 +25,16 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
+            'nip' => fake()->unique()->numerify('####################'),
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'role' => 'pegawai',
+            'jabatan' => 'Staff',
+            'unit_kerja' => 'Umum',
+            'status_pegawai' => 'pns',
+            'jenis_kelamin' => 'L',
+            'masa_kerja_mulai' => now()->subYears(3)->toDateString(),
         ];
-    }
-
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
     }
 }
