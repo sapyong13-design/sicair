@@ -329,4 +329,57 @@ class SmokeTest extends TestCase
         $this->get('/health')
             ->assertJsonStructure(['status', 'checks']);
     }
+
+    // =========================================================================
+    // Keputusan
+    // =========================================================================
+
+    public function test_keputusan_redirects_for_guest(): void
+    {
+        $this->get('/keputusan')->assertRedirect('/login');
+    }
+
+    public function test_keputusan_loads_for_pegawai(): void
+    {
+        $user = $this->makeUser();
+        $this->actingAs($user)->get('/keputusan')->assertStatus(200);
+    }
+
+    public function test_keputusan_loads_for_ketua(): void
+    {
+        $ketua = $this->makeKetua();
+        $this->actingAs($ketua)->get('/keputusan')->assertStatus(200);
+    }
+
+    public function test_keputusan_loads_for_atasan(): void
+    {
+        $atasan = $this->makeUser(['role' => 'sekretaris', 'nip' => '199001012020011002']);
+        $this->actingAs($atasan)->get('/keputusan')->assertStatus(200);
+    }
+
+    public function test_keputusan_loads_for_admin(): void
+    {
+        $admin = $this->makeAdmin();
+        $this->actingAs($admin)->get('/keputusan')->assertStatus(200);
+    }
+
+    public function test_keputusan_tab_riwayat_loads_for_ketua(): void
+    {
+        $ketua = $this->makeKetua();
+        $this->actingAs($ketua)->get('/keputusan?tab=riwayat')->assertStatus(200);
+    }
+
+    public function test_keputusan_tab_pengajuan_loads_for_atasan(): void
+    {
+        $atasan = $this->makeUser(['role' => 'sekretaris', 'nip' => '199001012020011003']);
+        $this->actingAs($atasan)->get('/keputusan?tab=pengajuan')->assertStatus(200);
+    }
+
+    public function test_keputusan_filter_by_type(): void
+    {
+        $user = $this->makeUser();
+        $this->actingAs($user)
+            ->get('/keputusan?type=cuti_tahunan')
+            ->assertStatus(200);
+    }
 }

@@ -91,6 +91,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/', fn () => redirect('/dashboard'));
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/live-stats', [DashboardController::class, 'liveStats'])->name('dashboard.live-stats');
+    Route::get('/keputusan', [\App\Http\Controllers\KeputusanController::class, 'index'])->name('keputusan.index');
 
     // === Profil ===
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
