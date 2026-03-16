@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Detail Audit Log - SiHEALING')
+@section('title', 'Detail Audit Log - SiCAIR')
 
 @section('content')
-<div class="sh-page-header mb-4">
+<div class="sc-page-header mb-4">
     <div class="d-flex justify-content-between align-items-center">
-        <h2 class="sh-page-title mb-0">
-            <i class="ti ti-file-text me-2" style="color: var(--sh-primary);"></i> Detail Audit Log
+        <h2 class="sc-page-title mb-0">
+            <i class="ti ti-file-text me-2" style="color: var(--sc-primary);"></i> Detail Audit Log
         </h2>
         <a href="{{ route('admin.audit-logs.index') }}" class="btn btn-outline-secondary">
             <i class="ti ti-arrow-left me-1"></i> Kembali
@@ -17,7 +17,7 @@
 <div class="row g-4">
     {{-- Log Header --}}
     <div class="col-12">
-        <div class="card sh-card">
+        <div class="card sc-card">
             <div class="card-body p-4">
                 <div class="row g-4">
                     <div class="col-md-3">
@@ -43,13 +43,13 @@
                             <small class="text-muted d-block">Aksi</small>
                             @switch($auditLog->action)
                             @case('create')
-                                <span class="sh-badge sh-badge-approved">{{ $auditLog->action_label }}</span>
+                                <span class="sc-badge sc-badge-approved">{{ $auditLog->action_label }}</span>
                             @break
                             @case('update')
-                                <span class="sh-badge" style="background: #fef08a; color: #92400e;">{{ $auditLog->action_label }}</span>
+                                <span class="sc-badge" style="background: #fef08a; color: #92400e;">{{ $auditLog->action_label }}</span>
                             @break
                             @case('delete')
-                                <span class="sh-badge sh-badge-rejected">{{ $auditLog->action_label }}</span>
+                                <span class="sc-badge sc-badge-rejected">{{ $auditLog->action_label }}</span>
                             @break
                             @endswitch
                         </div>
@@ -62,7 +62,7 @@
     {{-- Changes Details --}}
     @if($auditLog->old_values || $auditLog->new_values)
     <div class="col-12">
-        <div class="card sh-card">
+        <div class="card sc-card">
             <div class="card-header">
                 <h3 class="card-title mb-0">
                     <i class="ti ti-list me-2"></i> Detail Perubahan
@@ -71,7 +71,7 @@
             <div class="card-body p-4">
                 <div class="table-responsive">
                     <table class="table mb-0" style="font-size: 0.9rem;">
-                        <thead style="background: var(--sh-gray-100);">
+                        <thead style="background: var(--sc-gray-100);">
                             <tr>
                                 <th style="padding: 0.75rem;">Field</th>
                                 <th style="padding: 0.75rem;">Nilai Lama</th>
@@ -118,7 +118,7 @@
 
     {{-- Metadata --}}
     <div class="col-12">
-        <div class="card sh-card">
+        <div class="card sc-card">
             <div class="card-header">
                 <h3 class="card-title mb-0">
                     <i class="ti ti-info-circle me-2"></i> Metadata

@@ -2,11 +2,11 @@
 <div class="notification-center">
     <div class="notification-header">
         <h3 class="mb-0">
-            <i class="ti ti-bell me-2" style="color: var(--sh-primary);"></i>
+            <i class="ti ti-bell me-2" style="color: var(--sc-primary);"></i>
             Notifikasi
         </h3>
         @if($unreadCount > 0)
-        <span class="badge sh-badge-primary">{{ $unreadCount }}</span>
+        <span class="badge sc-badge-primary">{{ $unreadCount }}</span>
         @endif
     </div>
 
@@ -28,22 +28,22 @@
                 <div class="notification-icon">
                     @switch($notification->type)
                         @case('leave_request_submitted')
-                            <i class="ti ti-file-plus" style="color: var(--sh-primary);"></i>
+                            <i class="ti ti-file-plus" style="color: var(--sc-primary);"></i>
                             @break
                         @case('leave_request_approved')
-                            <i class="ti ti-circle-check" style="color: var(--sh-success);"></i>
+                            <i class="ti ti-circle-check" style="color: var(--sc-success);"></i>
                             @break
                         @case('leave_request_rejected')
-                            <i class="ti ti-circle-x" style="color: var(--sh-danger);"></i>
+                            <i class="ti ti-circle-x" style="color: var(--sc-danger);"></i>
                             @break
                         @case('needs_review')
-                            <i class="ti ti-user-check" style="color: var(--sh-warning);"></i>
+                            <i class="ti ti-user-check" style="color: var(--sc-warning);"></i>
                             @break
                         @case('pending_decision')
-                            <i class="ti ti-gavel" style="color: var(--sh-primary);"></i>
+                            <i class="ti ti-gavel" style="color: var(--sc-primary);"></i>
                             @break
                         @default
-                            <i class="ti ti-bell" style="color: var(--sh-gray-500);"></i>
+                            <i class="ti ti-bell" style="color: var(--sc-gray-500);"></i>
                     @endswitch
                 </div>
 
@@ -107,8 +107,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--sh-gray-100);
-    background: var(--sh-gray-50);
+    border-bottom: 1px solid var(--sc-gray-100);
+    background: var(--sc-gray-50);
 }
 
 .notification-header h3 {
@@ -127,8 +127,8 @@
 .notification-tabs {
     display: flex;
     padding: 0.75rem 0.5rem;
-    border-bottom: 1px solid var(--sh-gray-100);
-    background: var(--sh-gray-50);
+    border-bottom: 1px solid var(--sc-gray-100);
+    background: var(--sc-gray-50);
     gap: 0.25rem;
 }
 
@@ -140,7 +140,7 @@
     border-radius: 8px;
     cursor: pointer;
     font-size: 0.85rem;
-    color: var(--sh-gray-600);
+    color: var(--sc-gray-600);
     transition: all 0.2s;
     display: flex;
     align-items: center;
@@ -149,15 +149,15 @@
 }
 
 .notification-tab:hover {
-    background: var(--sh-gray-100);
-    color: var(--sh-gray-800);
+    background: var(--sc-gray-100);
+    color: var(--sc-gray-800);
 }
 
 .notification-tab.active {
     background: white;
-    color: var(--sh-primary);
+    color: var(--sc-primary);
     font-weight: 600;
-    border: 2px solid var(--sh-primary);
+    border: 2px solid var(--sc-primary);
 }
 
 .notification-list {
@@ -171,7 +171,7 @@
     align-items: flex-start;
     gap: 1rem;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--sh-gray-100);
+    border-bottom: 1px solid var(--sc-gray-100);
     cursor: pointer;
     transition: background 0.2s, transform 0.3s ease, opacity 0.3s ease, height 0.3s ease, padding 0.3s ease, margin 0.3s ease;
     position: relative;
@@ -181,13 +181,13 @@
 .notification-item.swipe-left {
     transform: translateX(-60px);
 }
-.notification-item .sh-swipe-action {
+.notification-item .sc-swipe-action {
     position: absolute;
     right: 0;
     top: 0;
     bottom: 0;
     width: 60px;
-    background: var(--sh-primary, #166534);
+    background: var(--sc-primary, #166534);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -197,17 +197,17 @@
     transform: translateX(60px);
     transition: transform 0.3s ease;
 }
-.notification-item.swipe-left .sh-swipe-action {
+.notification-item.swipe-left .sc-swipe-action {
     transform: translateX(0);
 }
 
 .notification-item:hover {
-    background: var(--sh-gray-50);
+    background: var(--sc-gray-50);
 }
 
 .notification-item.unread {
-    background: var(--sh-primary-light);
-    border-left: 3px solid var(--sh-primary);
+    background: var(--sc-primary-light);
+    border-left: 3px solid var(--sc-primary);
 }
 
 .notification-icon {
@@ -217,14 +217,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--sh-gray-100);
+    background: var(--sc-gray-100);
     flex-shrink: 0;
     font-size: 1.2rem;
 }
 
 .notification-item.unread .notification-icon {
-    background: var(--sh-primary-light);
-    color: var(--sh-primary);
+    background: var(--sc-primary-light);
+    color: var(--sc-primary);
 }
 
 .notification-content {
@@ -235,13 +235,13 @@
 .notification-title {
     font-weight: 700;
     font-size: 0.95rem;
-    color: var(--sh-gray-900);
+    color: var(--sc-gray-900);
     margin-bottom: 0.25rem;
 }
 
 .notification-message {
     font-size: 0.85rem;
-    color: var(--sh-gray-600);
+    color: var(--sc-gray-600);
     margin-bottom: 0.5rem;
     line-height: 1.4;
 }
@@ -254,12 +254,12 @@
 
 .notification-time {
     font-size: 0.75rem;
-    color: var(--sh-gray-500);
+    color: var(--sc-gray-500);
 }
 
 .notification-action {
     font-size: 0.75rem;
-    color: var(--sh-primary);
+    color: var(--sc-primary);
     text-decoration: none;
     font-weight: 600;
     padding: 0.2rem 0.5rem;
@@ -268,7 +268,7 @@
 }
 
 .notification-action:hover {
-    background: var(--sh-primary-light);
+    background: var(--sc-primary-light);
 }
 
 .notification-actions {
@@ -287,7 +287,7 @@
     border: none;
     padding: 0.4rem;
     border-radius: 6px;
-    color: var(--sh-gray-500);
+    color: var(--sc-gray-500);
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
@@ -296,8 +296,8 @@
 }
 
 .notification-btn:hover {
-    background: var(--sh-gray-200);
-    color: var(--sh-gray-700);
+    background: var(--sc-gray-200);
+    color: var(--sc-gray-700);
 }
 
 .notification-empty {
@@ -306,7 +306,7 @@
     align-items: center;
     justify-content: center;
     padding: 3rem 1rem;
-    color: var(--sh-gray-500);
+    color: var(--sc-gray-500);
     text-align: center;
 }
 
@@ -319,27 +319,27 @@
 .notification-empty-text {
     font-weight: 600;
     margin-bottom: 0.5rem;
-    color: var(--sh-gray-600);
+    color: var(--sc-gray-600);
 }
 
 .notification-empty-desc {
     font-size: 0.85rem;
-    color: var(--sh-gray-500);
+    color: var(--sc-gray-500);
 }
 
 .notification-footer {
     padding: 0.75rem 1.25rem;
-    border-top: 1px solid var(--sh-gray-100);
-    background: var(--sh-gray-50);
+    border-top: 1px solid var(--sc-gray-100);
+    background: var(--sc-gray-50);
 }
 
 .notification-footer-btn {
     width: 100%;
     padding: 0.6rem;
-    border: 1px solid var(--sh-gray-200);
+    border: 1px solid var(--sc-gray-200);
     border-radius: 8px;
     background: white;
-    color: var(--sh-gray-700);
+    color: var(--sc-gray-700);
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: 500;
@@ -350,8 +350,8 @@
 }
 
 .notification-footer-btn:hover {
-    background: var(--sh-gray-100);
-    border-color: var(--sh-gray-300);
+    background: var(--sc-gray-100);
+    border-color: var(--sc-gray-300);
 }
 
 @media (max-width: 576px) {
@@ -472,7 +472,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Add swipe action button
         var action = document.createElement('div');
-        action.className = 'sh-swipe-action';
+        action.className = 'sc-swipe-action';
         action.innerHTML = '<i class="ti ti-check"></i>';
         action.addEventListener('click', function() {
             var id = item.dataset.notificationId;

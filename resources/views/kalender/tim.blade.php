@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
-@section('title', 'Kalender Tim - SiHEALING')
+@section('title', 'Kalender Tim - SiCAIR')
 
 @section('content')
 {{-- Breadcrumb --}}
-<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+<nav class="sc-breadcrumb" aria-label="Breadcrumb">
     <a href="{{ route('dashboard') }}">Dashboard</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
     <a href="{{ route('kalender') }}">Kalender Cuti</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
-    <span class="sh-breadcrumb-current">Kalender Tim</span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-current">Kalender Tim</span>
 </nav>
 
 @php
@@ -40,11 +40,11 @@
     }
 @endphp
 
-<div class="sh-page-header">
+<div class="sc-page-header">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div>
-            <h2 class="sh-page-title mb-1">
-                <i class="ti ti-users me-1" style="color: var(--sh-primary);" aria-hidden="true"></i>
+            <h2 class="sc-page-title mb-1">
+                <i class="ti ti-users me-1" style="color: var(--sc-primary);" aria-hidden="true"></i>
                 Kalender Tim
             </h2>
             <div class="text-muted" style="font-size: 0.85rem;">
@@ -82,7 +82,7 @@
     <div class="col-6 col-md-3">
         <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
             <div class="card-body py-3 text-center">
-                <div class="fw-bold" style="font-size: 1.6rem; color: var(--sh-primary);">{{ $totalPegawai }}</div>
+                <div class="fw-bold" style="font-size: 1.6rem; color: var(--sc-primary);">{{ $totalPegawai }}</div>
                 <div class="text-muted" style="font-size: 0.8rem;">Pegawai Cuti Bulan Ini</div>
             </div>
         </div>
@@ -99,7 +99,7 @@
 
 {{-- Month grid calendar --}}
 <div class="card border-0 shadow-sm mb-4" style="border-radius: 14px; overflow: hidden;">
-    <div class="card-header d-flex align-items-center justify-content-between py-3 px-4" style="background: var(--sh-primary); color: #fff; border-bottom: none;">
+    <div class="card-header d-flex align-items-center justify-content-between py-3 px-4" style="background: var(--sc-primary); color: #fff; border-bottom: none;">
         <span class="fw-semibold" style="font-size: 1rem;">
             <i class="ti ti-calendar-month me-2"></i>{{ $monthName }} {{ $year }}
         </span>
@@ -136,11 +136,11 @@
                             <td style="vertical-align: top; height: 90px; padding: 4px 5px; background: {{ $isBlank ? '#fafafa' : ($isToday ? '#eff6ff' : ($isWeekend ? '#f9f9fb' : '#fff')) }}; border-color: #e9ecef;">
                                 @if($currentDay)
                                 <div class="d-flex align-items-center justify-content-between mb-1">
-                                    <span style="font-size: 0.78rem; font-weight: {{ $isToday ? '700' : '500' }}; color: {{ $isToday ? 'var(--sh-primary)' : ($isWeekend ? '#adb5bd' : '#343a40') }};">
+                                    <span style="font-size: 0.78rem; font-weight: {{ $isToday ? '700' : '500' }}; color: {{ $isToday ? 'var(--sc-primary)' : ($isWeekend ? '#adb5bd' : '#343a40') }};">
                                         {{ $currentDay }}
                                     </span>
                                     @if($cellLeaves->isNotEmpty())
-                                    <span class="badge" style="font-size: 0.62rem; background: var(--sh-primary); border-radius: 20px; padding: 2px 5px;">{{ $cellLeaves->count() }}</span>
+                                    <span class="badge" style="font-size: 0.62rem; background: var(--sc-primary); border-radius: 20px; padding: 2px 5px;">{{ $cellLeaves->count() }}</span>
                                     @endif
                                 </div>
                                 @if($cellLeaves->isNotEmpty())
@@ -176,7 +176,7 @@
 <div class="card border-0 shadow-sm" style="border-radius: 14px;">
     <div class="card-header py-3 px-4" style="border-bottom: 1px solid #f0f0f0; background: #fff; border-radius: 14px 14px 0 0;">
         <h6 class="mb-0 fw-semibold" style="font-size: 0.9rem;">
-            <i class="ti ti-list me-2" style="color: var(--sh-primary);"></i>
+            <i class="ti ti-list me-2" style="color: var(--sc-primary);"></i>
             Daftar Cuti — {{ $monthName }} {{ $year }}
         </h6>
     </div>

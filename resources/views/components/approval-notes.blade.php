@@ -3,7 +3,7 @@
     {{-- Atasan Review --}}
     @if($leaveRequest->atasanReviewer)
     <div class="approval-item">
-        <div class="approval-icon" style="background: var(--sh-warning-light); color: var(--sh-warning);">
+        <div class="approval-icon" style="background: var(--sc-warning-light); color: var(--sc-warning);">
             <i class="ti ti-user-check"></i>
         </div>
         <div class="approval-content">
@@ -62,7 +62,7 @@
     {{-- Pejabat Decision --}}
     @if($leaveRequest->pejabatReviewer)
     <div class="approval-item">
-        <div class="approval-icon" style="background: var(--sh-primary-light); color: var(--sh-primary);">
+        <div class="approval-icon" style="background: var(--sc-primary-light); color: var(--sc-primary);">
             <i class="ti ti-gavel"></i>
         </div>
         <div class="approval-content">
@@ -127,7 +127,7 @@
     top: 60px;
     bottom: 0;
     width: 2px;
-    background: var(--sh-gray-200);
+    background: var(--sc-gray-200);
     z-index: 0;
 }
 
@@ -153,7 +153,7 @@
 .approval-content {
     flex: 1;
     background: white;
-    border: 1px solid var(--sh-gray-200);
+    border: 1px solid var(--sc-gray-200);
     border-radius: 12px;
     padding: 1.25rem;
 }
@@ -169,13 +169,13 @@
 .approval-title {
     font-weight: 700;
     font-size: 1rem;
-    color: var(--sh-gray-900);
+    color: var(--sc-gray-900);
     margin: 0;
 }
 
 .approval-meta {
     font-size: 0.85rem;
-    color: var(--sh-gray-600);
+    color: var(--sc-gray-600);
     margin-top: 0.25rem;
 }
 
@@ -191,42 +191,42 @@
 }
 
 .approval-status-badge.setuju {
-    background: var(--sh-success-light);
-    color: var(--sh-success);
+    background: var(--sc-success-light);
+    color: var(--sc-success);
 }
 
 .approval-status-badge.tolak {
-    background: var(--sh-danger-light);
-    color: var(--sh-danger);
+    background: var(--sc-danger-light);
+    color: var(--sc-danger);
 }
 
 .approval-status-badge.ubah {
-    background: var(--sh-primary-light);
-    color: var(--sh-primary);
+    background: var(--sc-primary-light);
+    color: var(--sc-primary);
 }
 
 .approval-status-badge.tangguhkan {
-    background: var(--sh-warning-light);
-    color: var(--sh-warning);
+    background: var(--sc-warning-light);
+    color: var(--sc-warning);
 }
 
 .approval-status-badge.pending {
-    background: var(--sh-gray-100);
-    color: var(--sh-gray-600);
+    background: var(--sc-gray-100);
+    color: var(--sc-gray-600);
 }
 
 .approval-notes {
     margin-top: 1rem;
     padding: 0.75rem 1rem;
-    background: var(--sh-gray-50);
+    background: var(--sc-gray-50);
     border-radius: 8px;
-    border-left: 3px solid var(--sh-primary);
+    border-left: 3px solid var(--sc-primary);
 }
 
 .notes-label {
     font-weight: 600;
     font-size: 0.85rem;
-    color: var(--sh-gray-700);
+    color: var(--sc-gray-700);
     margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
@@ -234,7 +234,7 @@
 
 .notes-content {
     font-size: 0.9rem;
-    color: var(--sh-gray-700);
+    color: var(--sc-gray-700);
     line-height: 1.5;
     margin: 0;
 }
@@ -242,15 +242,15 @@
 .approval-changes {
     margin-top: 1rem;
     padding: 0.75rem 1rem;
-    background: var(--sh-warning-light);
+    background: var(--sc-warning-light);
     border-radius: 8px;
-    border-left: 3px solid var(--sh-warning);
+    border-left: 3px solid var(--sc-warning);
 }
 
 .changes-label {
     font-weight: 600;
     font-size: 0.85rem;
-    color: var(--sh-warning);
+    color: var(--sc-warning);
     margin-bottom: 0.75rem;
     display: flex;
     align-items: center;
@@ -271,13 +271,13 @@
 .change-label {
     font-weight: 600;
     font-size: 0.8rem;
-    color: var(--sh-gray-700);
+    color: var(--sc-gray-700);
     min-width: 80px;
 }
 
 .change-value {
     font-size: 0.9rem;
-    color: var(--sh-gray-800);
+    color: var(--sc-gray-800);
     flex: 1;
 }
 

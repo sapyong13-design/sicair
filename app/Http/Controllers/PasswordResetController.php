@@ -31,7 +31,7 @@ class PasswordResetController extends Controller
         $resetUrl = route('password.reset', ['token' => $token]) . '?email=' . urlencode($request->email);
 
         Mail::queue('emails.password-reset', ['user' => $user, 'url' => $resetUrl], function ($m) use ($user) {
-            $m->to($user->email)->subject('Reset Password — SiHEALING');
+            $m->to($user->email)->subject('Reset Password — SiCAIR');
         });
 
         return back()->with('status', 'Link reset password telah dikirim ke email Anda.');

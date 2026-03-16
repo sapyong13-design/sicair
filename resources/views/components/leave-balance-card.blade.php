@@ -1,10 +1,10 @@
 {{-- Leave Balance Card with Visual Progress --}}
-<div class="card sh-card sh-balance-card">
+<div class="card sc-card sc-balance-card">
     <div class="card-body">
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
                 <h3 class="card-title mb-1">
-                    <i class="ti ti-calendar-stats me-2" style="color: var(--sh-primary);"></i>
+                    <i class="ti ti-calendar-stats me-2" style="color: var(--sc-primary);"></i>
                     Sisa Cuti {{ date('Y') }}
                 </h3>
                 <p class="text-muted mb-0" style="font-size: 0.85rem;">Breakdown penggunaan cuti tahunan Anda</p>
@@ -17,28 +17,28 @@
                 <div style="position: relative; width: 160px; height: 160px; margin-bottom: 1rem;">
                     <svg width="160" height="160" style="transform: rotate(-90deg);">
                         {{-- Background circle --}}
-                        <circle cx="80" cy="80" r="70" fill="none" stroke="var(--sh-gray-200)" stroke-width="12"/>
+                        <circle cx="80" cy="80" r="70" fill="none" stroke="var(--sc-gray-200)" stroke-width="12"/>
                         {{-- Progress circle --}}
-                        <circle cx="80" cy="80" r="70" fill="none" stroke="var(--sh-primary)" stroke-width="12"
+                        <circle cx="80" cy="80" r="70" fill="none" stroke="var(--sc-primary)" stroke-width="12"
                                 stroke-dasharray="{{ ($sisaCuti / $totalHak) * 440 }} 440"
                                 style="transition: stroke-dasharray 0.3s ease; stroke-linecap: round;"/>
                     </svg>
                     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                        <div style="font-size: 2.2rem; font-weight: 700; color: var(--sh-primary);">{{ $sisaCuti }}</div>
-                        <div style="font-size: 0.8rem; color: var(--sh-gray-600);">dari {{ $totalHak }} hari</div>
+                        <div style="font-size: 2.2rem; font-weight: 700; color: var(--sc-primary);">{{ $sisaCuti }}</div>
+                        <div style="font-size: 0.8rem; color: var(--sc-gray-600);">dari {{ $totalHak }} hari</div>
                     </div>
                 </div>
                 <div style="text-align: center; width: 100%;">
-                    <div style="font-size: 0.9rem; color: var(--sh-gray-700); margin-bottom: 0.5rem;">
+                    <div style="font-size: 0.9rem; color: var(--sc-gray-700); margin-bottom: 0.5rem;">
                         <strong>{{ round(($sisaCuti / $totalHak) * 100) }}%</strong> masih tersedia
                     </div>
-                    <div style="font-size: 0.8rem; color: var(--sh-gray-600);">
+                    <div style="font-size: 0.8rem; color: var(--sc-gray-600);">
                         @if($sisaCuti >= 5)
-                            <span style="color: var(--sh-success);"><i class="ti ti-circle-check me-1"></i> Cukup untuk liburan</span>
+                            <span style="color: var(--sc-success);"><i class="ti ti-circle-check me-1"></i> Cukup untuk liburan</span>
                         @elseif($sisaCuti > 0)
-                            <span style="color: var(--sh-warning);"><i class="ti ti-alert-circle me-1"></i> Segera gunakan</span>
+                            <span style="color: var(--sc-warning);"><i class="ti ti-alert-circle me-1"></i> Segera gunakan</span>
                         @else
-                            <span style="color: var(--sh-danger);"><i class="ti ti-circle-x me-1"></i> Sudah habis</span>
+                            <span style="color: var(--sc-danger);"><i class="ti ti-circle-x me-1"></i> Sudah habis</span>
                         @endif
                     </div>
                 </div>
@@ -51,16 +51,16 @@
                     <div class="mb-3">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <div>
-                                <div style="font-weight: 600; color: var(--sh-gray-800); font-size: 0.95rem;">Cuti Tahunan</div>
-                                <div style="font-size: 0.8rem; color: var(--sh-gray-600);">{{ $cutiTahunan }} hari</div>
+                                <div style="font-weight: 600; color: var(--sc-gray-800); font-size: 0.95rem;">Cuti Tahunan</div>
+                                <div style="font-size: 0.8rem; color: var(--sc-gray-600);">{{ $cutiTahunan }} hari</div>
                             </div>
                             <div style="text-align: right;">
-                                <div style="font-weight: 700; color: var(--sh-primary); font-size: 1.1rem;">{{ $sisaCutiTahunan }}</div>
-                                <div style="font-size: 0.75rem; color: var(--sh-gray-600);">sisa</div>
+                                <div style="font-weight: 700; color: var(--sc-primary); font-size: 1.1rem;">{{ $sisaCutiTahunan }}</div>
+                                <div style="font-size: 0.75rem; color: var(--sc-gray-600);">sisa</div>
                             </div>
                         </div>
-                        <div style="height: 6px; border-radius: 3px; background: var(--sh-gray-100);">
-                            <div style="height: 100%; border-radius: 3px; background: var(--sh-primary); width: {{ $cutiTahunan > 0 ? (($sisaCutiTahunan / $cutiTahunan) * 100) : 0 }}%;"></div>
+                        <div style="height: 6px; border-radius: 3px; background: var(--sc-gray-100);">
+                            <div style="height: 100%; border-radius: 3px; background: var(--sc-primary); width: {{ $cutiTahunan > 0 ? (($sisaCutiTahunan / $cutiTahunan) * 100) : 0 }}%;"></div>
                         </div>
                     </div>
 
@@ -69,16 +69,16 @@
                     <div class="mb-3">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <div>
-                                <div style="font-weight: 600; color: var(--sh-gray-800); font-size: 0.95rem;">Cuti Sakit</div>
-                                <div style="font-size: 0.8rem; color: var(--sh-gray-600);">Unlimited</div>
+                                <div style="font-weight: 600; color: var(--sc-gray-800); font-size: 0.95rem;">Cuti Sakit</div>
+                                <div style="font-size: 0.8rem; color: var(--sc-gray-600);">Unlimited</div>
                             </div>
                             <div style="text-align: right;">
-                                <div style="font-weight: 700; color: var(--sh-danger); font-size: 1.1rem;">{{ $penggunaanCutiSakit }}</div>
-                                <div style="font-size: 0.75rem; color: var(--sh-gray-600);">digunakan</div>
+                                <div style="font-weight: 700; color: var(--sc-danger); font-size: 1.1rem;">{{ $penggunaanCutiSakit }}</div>
+                                <div style="font-size: 0.75rem; color: var(--sc-gray-600);">digunakan</div>
                             </div>
                         </div>
-                        <div style="height: 6px; border-radius: 3px; background: var(--sh-gray-100);">
-                            <div style="height: 100%; border-radius: 3px; background: var(--sh-danger); width: {{ min((($penggunaanCutiSakit / 30) * 100), 100) }}%;"></div>
+                        <div style="height: 6px; border-radius: 3px; background: var(--sc-gray-100);">
+                            <div style="height: 100%; border-radius: 3px; background: var(--sc-danger); width: {{ min((($penggunaanCutiSakit / 30) * 100), 100) }}%;"></div>
                         </div>
                     </div>
                     @endif
@@ -88,12 +88,12 @@
                     <div>
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <div>
-                                <div style="font-weight: 600; color: var(--sh-gray-800); font-size: 0.95rem;">Carry Over</div>
-                                <div style="font-size: 0.8rem; color: var(--sh-gray-600);">dari tahun lalu</div>
+                                <div style="font-weight: 600; color: var(--sc-gray-800); font-size: 0.95rem;">Carry Over</div>
+                                <div style="font-size: 0.8rem; color: var(--sc-gray-600);">dari tahun lalu</div>
                             </div>
                             <div style="text-align: right;">
-                                <div style="font-weight: 700; color: var(--sh-warning); font-size: 1.1rem;">{{ $carryOver }}</div>
-                                <div style="font-size: 0.75rem; color: var(--sh-gray-600);">hari</div>
+                                <div style="font-weight: 700; color: var(--sc-warning); font-size: 1.1rem;">{{ $carryOver }}</div>
+                                <div style="font-size: 0.75rem; color: var(--sc-gray-600);">hari</div>
                             </div>
                         </div>
                     </div>
@@ -121,15 +121,15 @@
 
         {{-- Prediction & Warning --}}
         @if($sisaCuti <= 5)
-        <div style="background: var(--sh-warning-light); border-radius: 10px; padding: 0.75rem 1rem; margin-top: 1.5rem;">
-            <div style="font-size: 0.85rem; color: var(--sh-warning);">
+        <div style="background: var(--sc-warning-light); border-radius: 10px; padding: 0.75rem 1rem; margin-top: 1.5rem;">
+            <div style="font-size: 0.85rem; color: var(--sc-warning);">
                 <i class="ti ti-alert-triangle me-2"></i>
                 <strong>Perhatian:</strong> Sisa cuti Anda tinggal {{ $sisaCuti }} hari. Segera rencanakan pengambilan cuti Anda untuk menghindari hangus.
             </div>
         </div>
         @else
-        <div style="background: var(--sh-success-light); border-radius: 10px; padding: 0.75rem 1rem; margin-top: 1.5rem;">
-            <div style="font-size: 0.85rem; color: var(--sh-success);">
+        <div style="background: var(--sc-success-light); border-radius: 10px; padding: 0.75rem 1rem; margin-top: 1.5rem;">
+            <div style="font-size: 0.85rem; color: var(--sc-success);">
                 <i class="ti ti-check-circle me-2"></i>
                 Anda masih memiliki waktu hingga akhir {{ date('F') }} untuk menggunakan cuti.
             </div>
@@ -139,21 +139,21 @@
 </div>
 
 <style>
-.sh-balance-card {
+.sc-balance-card {
     border: none;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.sh-balance-card .card-body {
+.sc-balance-card .card-body {
     padding: 1.5rem;
 }
 
 @media (max-width: 768px) {
-    .sh-balance-card {
+    .sc-balance-card {
         margin-bottom: 1rem;
     }
 
-    .sh-balance-card .row {
+    .sc-balance-card .row {
         flex-direction: column;
     }
 }

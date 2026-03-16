@@ -44,7 +44,7 @@ class WhatsAppWebhookController extends Controller
 
         if (!$user) {
             WhatsAppService::send($from,
-                "SiHEALING: Nomor Anda tidak terdaftar dalam sistem.\nHubungi admin untuk mendaftarkan nomor HP."
+                "SiCAIR: Nomor Anda tidak terdaftar dalam sistem.\nHubungi admin untuk mendaftarkan nomor HP."
             );
             return response()->json(['ok' => true]);
         }
@@ -191,6 +191,6 @@ class WhatsAppWebhookController extends Controller
 
     private function replyUnknown(): string
     {
-        return "SiHEALING: Perintah tidak dikenal.\nKetik *BANTUAN* untuk daftar perintah.";
+        return "SiCAIR: Perintah tidak dikenal.\nKetik *BANTUAN* untuk daftar perintah.";
     }
 }

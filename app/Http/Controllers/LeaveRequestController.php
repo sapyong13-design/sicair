@@ -210,7 +210,7 @@ class LeaveRequestController extends Controller
         if ($user->wantsWhatsAppNotification()) {
             $typeLabel = LeaveRequest::typeLabels()[$type] ?? $type;
             WhatsAppService::send($user->telepon,
-                "SiHEALING: Pengajuan {$typeLabel} Anda\n"
+                "SiCAIR: Pengajuan {$typeLabel} Anda\n"
                 . $leaveRequest->start_date->format('d/m/Y') . " s/d " . $leaveRequest->end_date->format('d/m/Y')
                 . " ({$leaveRequest->total_hari_kerja} hari kerja)\nberhasil diajukan dan sedang menunggu persetujuan."
             );
@@ -252,9 +252,9 @@ class LeaveRequestController extends Controller
                 if ($atasan && $atasan->wantsWhatsAppNotification()) {
                     $typeLabel = LeaveRequest::typeLabels()[$type] ?? $type;
                     WhatsAppService::send($atasan->telepon,
-                        "SiHEALING: {$user->name} mengajukan {$typeLabel}\n"
+                        "SiCAIR: {$user->name} mengajukan {$typeLabel}\n"
                         . $leaveRequest->start_date->format('d/m/Y') . " - " . $leaveRequest->end_date->format('d/m/Y')
-                        . "\nSilakan login ke SiHEALING untuk memberikan pertimbangan."
+                        . "\nSilakan login ke SiCAIR untuk memberikan pertimbangan."
                     );
                 }
             }
@@ -325,7 +325,7 @@ class LeaveRequestController extends Controller
             $pemohon = $leaveRequest->user;
             if ($pemohon && $pemohon->wantsWhatsAppNotification()) {
                 WhatsAppService::send($pemohon->telepon,
-                    "SiHEALING: Maaf, pengajuan {$leaveRequest->type_label} Anda\n"
+                    "SiCAIR: Maaf, pengajuan {$leaveRequest->type_label} Anda\n"
                     . $leaveRequest->start_date->format('d/m/Y') . " - " . $leaveRequest->end_date->format('d/m/Y')
                     . "\nDITOLAK oleh {$reviewer->name}."
                     . ($request->catatan_atasan ? "\nCatatan: {$request->catatan_atasan}" : '')
@@ -364,7 +364,7 @@ class LeaveRequestController extends Controller
         $pemohon = $leaveRequest->user;
         if ($pemohon && $pemohon->wantsWhatsAppNotification()) {
             WhatsAppService::send($pemohon->telepon,
-                "SiHEALING: Pengajuan {$leaveRequest->type_label} Anda\n"
+                "SiCAIR: Pengajuan {$leaveRequest->type_label} Anda\n"
                 . $leaveRequest->start_date->format('d/m/Y') . " - " . $leaveRequest->end_date->format('d/m/Y')
                 . "\ntelah dipertimbangkan oleh {$reviewer->name} dan diteruskan ke Pejabat Berwenang."
             );
@@ -485,10 +485,10 @@ class LeaveRequestController extends Controller
         if ($pemohon && $pemohon->wantsWhatsAppNotification()) {
             $tgl = $leaveRequest->start_date->format('d/m/Y') . " - " . $leaveRequest->end_date->format('d/m/Y');
             $pesan = match ($keputusan) {
-                'setuju' => "SiHEALING: Selamat! Pengajuan {$leaveRequest->type_label} Anda\n{$tgl}\ntelah DISETUJUI oleh {$pejabat->name}.\nSisa cuti: " . $pemohon->fresh()->leave_balance . " hari.",
-                'tolak'  => "SiHEALING: Maaf, pengajuan {$leaveRequest->type_label} Anda\n{$tgl}\nDITOLAK oleh {$pejabat->name}."
+                'setuju' => "SiCAIR: Selamat! Pengajuan {$leaveRequest->type_label} Anda\n{$tgl}\ntelah DISETUJUI oleh {$pejabat->name}.\nSisa cuti: " . $pemohon->fresh()->leave_balance . " hari.",
+                'tolak'  => "SiCAIR: Maaf, pengajuan {$leaveRequest->type_label} Anda\n{$tgl}\nDITOLAK oleh {$pejabat->name}."
                             . ($request->catatan_pejabat ? "\nCatatan: {$request->catatan_pejabat}" : ''),
-                default  => "SiHEALING: Pengajuan {$leaveRequest->type_label} Anda\n{$tgl}\ntelah {$label} oleh {$pejabat->name}.",
+                default  => "SiCAIR: Pengajuan {$leaveRequest->type_label} Anda\n{$tgl}\ntelah {$label} oleh {$pejabat->name}.",
             };
             WhatsAppService::send($pemohon->telepon, $pesan);
         }
@@ -598,7 +598,7 @@ class LeaveRequestController extends Controller
                 };
                 $tgl = $leave->start_date->format('d/m/Y') . " - " . $leave->end_date->format('d/m/Y');
                 WhatsAppService::send($leave->user->telepon,
-                    "SiHEALING: Pengajuan {$leave->type_label} Anda\n{$tgl}\ntelah {$statusLabel} oleh {$user->name}."
+                    "SiCAIR: Pengajuan {$leave->type_label} Anda\n{$tgl}\ntelah {$statusLabel} oleh {$user->name}."
                     . ($request->catatan ? "\nCatatan: {$request->catatan}" : '')
                 );
             }

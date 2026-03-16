@@ -76,11 +76,11 @@ class KalenderController extends Controller
 
         $ics = "BEGIN:VCALENDAR\r\n";
         $ics .= "VERSION:2.0\r\n";
-        $ics .= "PRODID:-//SiHEALING//PN Natuna//ID\r\n";
+        $ics .= "PRODID:-//SiCAIR//PN Natuna//ID\r\n";
         $ics .= "CALSCALE:GREGORIAN\r\n";
         $ics .= "METHOD:PUBLISH\r\n";
         $ics .= "X-WR-CALNAME:Kalender Cuti " . $year . "\r\n";
-        $ics .= "X-WR-CALDESC:Jadwal Cuti & Hari Libur SiHEALING - PN Natuna\r\n";
+        $ics .= "X-WR-CALDESC:Jadwal Cuti & Hari Libur SiCAIR - PN Natuna\r\n";
 
         foreach ($leaves as $leave) {
             $uid = 'leave-' . $leave->id . '@sihealing.pn-natuna';

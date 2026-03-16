@@ -68,7 +68,7 @@ class LaporanController extends Controller
             $spreadsheet = new Spreadsheet();
             $spreadsheet->getProperties()
                 ->setTitle("Rekap Cuti {$year}")
-                ->setCreator('SiHEALING - PN Natuna');
+                ->setCreator('SiCAIR - PN Natuna');
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setTitle('Rekap Cuti ' . $year);
 

@@ -90,7 +90,7 @@
     <div class="container">
         <div class="header">
             <h1>Laporan Pengajuan Cuti</h1>
-            <p>Sistem Informasi Kesehatan - SI Healing</p>
+            <p>Sistem Cuti Administrasi Elektronik - SiCAIR</p>
             <p style="margin-top: 5px;">Periode: {{ now()->format('d M Y') }}</p>
         </div>
 

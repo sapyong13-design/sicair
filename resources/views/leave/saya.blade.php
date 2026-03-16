@@ -1,23 +1,23 @@
 @extends('layouts.app')
 
-@section('title', 'Cuti Saya - SiHEALING')
+@section('title', 'Cuti Saya - SiCAIR')
 
 @section('content')
-<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+<nav class="sc-breadcrumb" aria-label="Breadcrumb">
     <a href="{{ route('dashboard') }}">Dashboard</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
-    <span class="sh-breadcrumb-current">Cuti Saya</span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-current">Cuti Saya</span>
 </nav>
 
-<div class="sh-page-header">
+<div class="sc-page-header">
     <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
         <div>
-            <h2 class="sh-page-title mb-0">Cuti Saya</h2>
+            <h2 class="sc-page-title mb-0">Cuti Saya</h2>
             <div class="text-muted" style="font-size: 0.85rem;">Ringkasan dan statistik cuti Anda tahun {{ $year }}</div>
         </div>
         <div class="d-flex gap-2">
             @if(auth()->user()->bolehCuti())
-            <a href="{{ route('leave.create') }}" class="btn sh-btn-primary" style="border-radius: 10px; font-size: 0.85rem;">
+            <a href="{{ route('leave.create') }}" class="btn sc-btn-primary" style="border-radius: 10px; font-size: 0.85rem;">
                 <i class="ti ti-file-plus me-1"></i> Ajukan Cuti
             </a>
             @endif
@@ -31,45 +31,45 @@
 {{-- Stats Cards --}}
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
-        <div class="card sh-stat-card" style="border-top: 3px solid var(--sh-primary);">
+        <div class="card sc-stat-card" style="border-top: 3px solid var(--sc-primary);">
             <div class="card-body text-center py-3">
-                <div class="sh-stat-icon icon-primary mx-auto mb-2" style="width: 44px; height: 44px; border-radius: 12px; font-size: 1.2rem;">
+                <div class="sc-stat-icon icon-primary mx-auto mb-2" style="width: 44px; height: 44px; border-radius: 12px; font-size: 1.2rem;">
                     <i class="ti ti-calendar-check"></i>
                 </div>
-                <div class="fw-bold" style="font-size: 1.8rem; color: var(--sh-primary);">{{ $leaveBalance }}</div>
+                <div class="fw-bold" style="font-size: 1.8rem; color: var(--sc-primary);">{{ $leaveBalance }}</div>
                 <div class="text-muted" style="font-size: 0.78rem;">Sisa Kuota</div>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card sh-stat-card" style="border-top: 3px solid var(--sh-warning);">
+        <div class="card sc-stat-card" style="border-top: 3px solid var(--sc-warning);">
             <div class="card-body text-center py-3">
-                <div class="sh-stat-icon icon-warning mx-auto mb-2" style="width: 44px; height: 44px; border-radius: 12px; font-size: 1.2rem;">
+                <div class="sc-stat-icon icon-warning mx-auto mb-2" style="width: 44px; height: 44px; border-radius: 12px; font-size: 1.2rem;">
                     <i class="ti ti-clock-hour-4"></i>
                 </div>
-                <div class="fw-bold" style="font-size: 1.8rem; color: var(--sh-warning);">{{ $pendingCount }}</div>
+                <div class="fw-bold" style="font-size: 1.8rem; color: var(--sc-warning);">{{ $pendingCount }}</div>
                 <div class="text-muted" style="font-size: 0.78rem;">Menunggu Proses</div>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card sh-stat-card" style="border-top: 3px solid var(--sh-success);">
+        <div class="card sc-stat-card" style="border-top: 3px solid var(--sc-success);">
             <div class="card-body text-center py-3">
-                <div class="sh-stat-icon icon-success mx-auto mb-2" style="width: 44px; height: 44px; border-radius: 12px; font-size: 1.2rem;">
+                <div class="sc-stat-icon icon-success mx-auto mb-2" style="width: 44px; height: 44px; border-radius: 12px; font-size: 1.2rem;">
                     <i class="ti ti-circle-check"></i>
                 </div>
-                <div class="fw-bold" style="font-size: 1.8rem; color: var(--sh-success);">{{ $usedThisYear }}</div>
+                <div class="fw-bold" style="font-size: 1.8rem; color: var(--sc-success);">{{ $usedThisYear }}</div>
                 <div class="text-muted" style="font-size: 0.78rem;">Hari Terpakai {{ $year }}</div>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card sh-stat-card" style="border-top: 3px solid var(--sh-accent);">
+        <div class="card sc-stat-card" style="border-top: 3px solid var(--sc-accent);">
             <div class="card-body text-center py-3">
-                <div class="sh-stat-icon mx-auto mb-2" style="width: 44px; height: 44px; border-radius: 12px; font-size: 1.2rem; background: var(--sh-accent-light); color: var(--sh-accent);">
+                <div class="sc-stat-icon mx-auto mb-2" style="width: 44px; height: 44px; border-radius: 12px; font-size: 1.2rem; background: var(--sc-accent-light); color: var(--sc-accent);">
                     <i class="ti ti-calendar-event"></i>
                 </div>
-                <div class="fw-bold" style="font-size: 1.8rem; color: var(--sh-accent);">{{ $upcoming->count() }}</div>
+                <div class="fw-bold" style="font-size: 1.8rem; color: var(--sc-accent);">{{ $upcoming->count() }}</div>
                 <div class="text-muted" style="font-size: 0.78rem;">Cuti Mendatang</div>
             </div>
         </div>
@@ -79,10 +79,10 @@
 <div class="row g-4">
     {{-- Upcoming leaves --}}
     <div class="col-12 col-md-6">
-        <div class="card sh-card h-100">
+        <div class="card sc-card h-100">
             <div class="card-header">
                 <h3 class="card-title mb-0">
-                    <i class="ti ti-calendar-time me-2" style="color: var(--sh-primary);"></i>
+                    <i class="ti ti-calendar-time me-2" style="color: var(--sc-primary);"></i>
                     Cuti Mendatang
                 </h3>
             </div>
@@ -90,10 +90,10 @@
                 @forelse($upcoming as $leave)
                 <div class="d-flex align-items-center gap-3 py-2 {{ !$loop->last ? 'border-bottom' : '' }}">
                     <div style="min-width: 46px; text-align: center;">
-                        <div style="font-size: 1.3rem; font-weight: 800; color: var(--sh-primary); line-height: 1;">
+                        <div style="font-size: 1.3rem; font-weight: 800; color: var(--sc-primary); line-height: 1;">
                             {{ $leave->start_date->format('d') }}
                         </div>
-                        <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--sh-text-muted);">
+                        <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--sc-text-muted);">
                             {{ $leave->start_date->format('M') }}
                         </div>
                     </div>
@@ -120,10 +120,10 @@
 
     {{-- Recent leaves --}}
     <div class="col-12 col-md-6">
-        <div class="card sh-card h-100">
+        <div class="card sc-card h-100">
             <div class="card-header">
                 <h3 class="card-title mb-0">
-                    <i class="ti ti-history me-2" style="color: var(--sh-primary);"></i>
+                    <i class="ti ti-history me-2" style="color: var(--sc-primary);"></i>
                     Pengajuan Terbaru
                 </h3>
             </div>
@@ -133,12 +133,12 @@
                     <div>
                         @php
                             $badgeClass = match(true) {
-                                $leave->isApproved() => 'sh-badge-approved',
-                                $leave->isRejected() => 'sh-badge-rejected',
-                                default => 'sh-badge-pending',
+                                $leave->isApproved() => 'sc-badge-approved',
+                                $leave->isRejected() => 'sc-badge-rejected',
+                                default => 'sc-badge-pending',
                             };
                         @endphp
-                        <span class="sh-badge {{ $badgeClass }}">{{ $leave->status_label }}</span>
+                        <span class="sc-badge {{ $badgeClass }}">{{ $leave->status_label }}</span>
                     </div>
                     <div class="flex-fill">
                         <div class="fw-semibold" style="font-size: 0.88rem;">{{ $leave->type_label }}</div>

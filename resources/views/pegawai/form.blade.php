@@ -1,25 +1,25 @@
 @extends('layouts.app')
 
-@section('title', ($pegawai ? 'Edit' : 'Tambah') . ' Pegawai - SiHEALING')
+@section('title', ($pegawai ? 'Edit' : 'Tambah') . ' Pegawai - SiCAIR')
 
 @section('content')
 {{-- Breadcrumb (#10) --}}
-<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+<nav class="sc-breadcrumb" aria-label="Breadcrumb">
     <a href="{{ route('dashboard') }}">Dashboard</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
     <a href="{{ route('pegawai.index') }}">Kelola Pegawai</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
-    <span class="sh-breadcrumb-current">{{ $pegawai ? 'Edit' : 'Tambah' }}</span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-current">{{ $pegawai ? 'Edit' : 'Tambah' }}</span>
 </nav>
 
 {{-- Page Header --}}
-<div class="sh-page-header">
+<div class="sc-page-header">
     <div class="d-flex align-items-center gap-3">
         <a href="{{ route('pegawai.index') }}" class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;" aria-label="Kembali ke daftar pegawai">
             <i class="ti ti-arrow-left" style="font-size: 1.2rem;" aria-hidden="true"></i>
         </a>
         <div>
-            <h2 class="sh-page-title mb-0">{{ $pegawai ? 'Edit Pegawai' : 'Tambah Pegawai Baru' }}</h2>
+            <h2 class="sc-page-title mb-0">{{ $pegawai ? 'Edit Pegawai' : 'Tambah Pegawai Baru' }}</h2>
             <div class="text-muted" style="font-size: 0.85rem;">
                 {{ $pegawai ? 'Perbarui data pegawai ' . $pegawai->name : 'Isi data lengkap pegawai baru' }}
             </div>
@@ -30,7 +30,7 @@
 <div class="row justify-content-center">
     <div class="col-lg-10">
         @if($errors->any())
-        <div class="alert mb-4" style="background: var(--sh-danger-light); color: var(--sh-danger); border-radius: 12px; border: none;">
+        <div class="alert mb-4" style="background: var(--sc-danger-light); color: var(--sc-danger); border-radius: 12px; border: none;">
             <div class="d-flex align-items-start gap-2">
                 <i class="ti ti-alert-circle" style="font-size: 1.2rem; margin-top: 2px;"></i>
                 <ul class="mb-0 ps-0" style="list-style: none;">
@@ -48,10 +48,10 @@
 
             {{-- #27 Photo/Avatar Upload --}}
             @if($pegawai)
-            <div class="card sh-card mb-4">
+            <div class="card sc-card mb-4">
                 <div class="card-header">
                     <h3 class="card-title mb-0">
-                        <i class="ti ti-camera me-2" style="color: var(--sh-primary);"></i>
+                        <i class="ti ti-camera me-2" style="color: var(--sc-primary);"></i>
                         Foto / Avatar
                     </h3>
                 </div>
@@ -60,9 +60,9 @@
                         <div id="photoPreviewWrap" style="flex-shrink:0;">
                             @if($pegawai->photo)
                             <img id="photoPreview" src="{{ Storage::url($pegawai->photo) }}" alt="{{ $pegawai->name }}"
-                                 style="width:80px;height:80px;border-radius:14px;object-fit:cover;border:3px solid var(--sh-primary);">
+                                 style="width:80px;height:80px;border-radius:14px;object-fit:cover;border:3px solid var(--sc-primary);">
                             @else
-                            <div id="photoPreview" class="sh-user-avatar" style="width:80px;height:80px;font-size:1.4rem;font-weight:800;background:var(--sh-primary-light);color:var(--sh-primary);border:none;border-radius:14px;border:3px solid var(--sh-gray-100);">
+                            <div id="photoPreview" class="sc-user-avatar" style="width:80px;height:80px;font-size:1.4rem;font-weight:800;background:var(--sc-primary-light);color:var(--sc-primary);border:none;border-radius:14px;border:3px solid var(--sc-gray-100);">
                                 {{ strtoupper(substr($pegawai->name,0,2)) }}
                             </div>
                             @endif
@@ -81,10 +81,10 @@
             @endif
 
             {{-- Section 1: Data Pribadi --}}
-            <div class="card sh-card mb-4">
+            <div class="card sc-card mb-4">
                 <div class="card-header">
                     <h3 class="card-title mb-0">
-                        <i class="ti ti-user me-2" style="color: var(--sh-primary);"></i>
+                        <i class="ti ti-user me-2" style="color: var(--sc-primary);"></i>
                         Data Pribadi
                     </h3>
                 </div>
@@ -106,7 +106,7 @@
                             @if($pegawai)
                             {{-- Readonly NIP on edit (#22) --}}
                             <input type="text" class="form-control" value="{{ $pegawai->nip }}" readonly
-                                   style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px; background: var(--sh-gray-100); color: var(--sh-text-muted); cursor: not-allowed;">
+                                   style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px; background: var(--sc-gray-100); color: var(--sc-text-muted); cursor: not-allowed;">
                             <input type="hidden" name="nip" value="{{ $pegawai->nip }}">
                             <div class="form-hint mt-1" style="font-size: 0.75rem; color: #94a3b8;"><i class="ti ti-lock" style="font-size: 0.7rem;"></i> NIP tidak dapat diubah</div>
                             @else
@@ -158,7 +158,7 @@
             </div>
 
             {{-- Section 2: Data Kepegawaian --}}
-            <div class="card sh-card mb-4">
+            <div class="card sc-card mb-4">
                 <div class="card-header">
                     <h3 class="card-title mb-0">
                         <i class="ti ti-briefcase me-2" style="color: #7c3aed;"></i>
@@ -248,7 +248,7 @@
                                     <input class="form-check-input" type="checkbox" name="lokasi_terpencil" value="1"
                                            {{ old('lokasi_terpencil', $pegawai->lokasi_terpencil ?? false) ? 'checked' : '' }}>
                                     <span class="form-check-label fw-semibold" style="font-size: 0.85rem;">
-                                        <i class="ti ti-map-pin me-1" style="color: var(--sh-warning);"></i>
+                                        <i class="ti ti-map-pin me-1" style="color: var(--sc-warning);"></i>
                                         Lokasi Terpencil (+12 hari cuti)
                                     </span>
                                 </label>
@@ -259,7 +259,7 @@
             </div>
 
             {{-- Section 3: Akun & Akses --}}
-            <div class="card sh-card mb-4">
+            <div class="card sc-card mb-4">
                 <div class="card-header">
                     <h3 class="card-title mb-0">
                         <i class="ti ti-lock me-2" style="color: #d97706;"></i>
@@ -301,7 +301,7 @@
 
             {{-- Actions --}}
             <div class="d-flex gap-2 flex-column flex-sm-row mb-4">
-                <button type="submit" class="btn btn-primary sh-btn-primary btn-lg flex-fill">
+                <button type="submit" class="btn btn-primary sc-btn-primary btn-lg flex-fill">
                     <i class="ti ti-{{ $pegawai ? 'device-floppy' : 'user-plus' }} me-2"></i>
                     {{ $pegawai ? 'Simpan Perubahan' : 'Tambah Pegawai' }}
                 </button>
@@ -322,7 +322,7 @@ function previewPhoto(input) {
         const wrap = document.getElementById('photoPreviewWrap');
         if (!wrap) return;
         wrap.innerHTML = `<img id="photoPreview" src="${e.target.result}"
-            style="width:80px;height:80px;border-radius:14px;object-fit:cover;border:3px solid var(--sh-primary);">`;
+            style="width:80px;height:80px;border-radius:14px;object-fit:cover;border:3px solid var(--sc-primary);">`;
     };
     reader.readAsDataURL(input.files[0]);
 }

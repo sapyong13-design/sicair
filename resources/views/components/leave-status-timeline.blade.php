@@ -1,5 +1,5 @@
 {{-- Leave Status Timeline Component --}}
-<div class="sh-timeline">
+<div class="sc-timeline">
     <div class="timeline-container">
         {{-- Step 1: Diajukan --}}
         <div class="timeline-step {{ $leaveRequest->created_at ? 'completed' : '' }}">
@@ -109,7 +109,7 @@
 </div>
 
 <style>
-.sh-timeline {
+.sc-timeline {
     padding: 1rem 0;
 }
 
@@ -125,7 +125,7 @@
     top: 0;
     bottom: 0;
     width: 2px;
-    background: var(--sh-gray-200);
+    background: var(--sc-gray-200);
     z-index: 0;
 }
 
@@ -144,7 +144,7 @@
     top: 0;
     bottom: -1.75rem;
     width: 2px;
-    background: var(--sh-success);
+    background: var(--sc-success);
     z-index: -1;
 }
 
@@ -158,27 +158,27 @@
     font-size: 1.5rem;
     flex-shrink: 0;
     background: white;
-    border: 3px solid var(--sh-gray-200);
-    color: var(--sh-gray-500);
+    border: 3px solid var(--sc-gray-200);
+    color: var(--sc-gray-500);
     font-weight: bold;
 }
 
 .timeline-step.completed .timeline-marker {
-    background: var(--sh-success);
-    border-color: var(--sh-success);
+    background: var(--sc-success);
+    border-color: var(--sc-success);
     color: white;
 }
 
 .timeline-step.in-progress .timeline-marker {
-    background: var(--sh-primary);
-    border-color: var(--sh-primary);
+    background: var(--sc-primary);
+    border-color: var(--sc-primary);
     color: white;
     animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--sh-primary-rgb), 0.7); }
-    50% { box-shadow: 0 0 0 8px rgba(var(--sh-primary-rgb), 0); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--sc-primary-rgb), 0.7); }
+    50% { box-shadow: 0 0 0 8px rgba(var(--sc-primary-rgb), 0); }
 }
 
 .timeline-content {
@@ -189,19 +189,19 @@
 .timeline-title {
     font-weight: 700;
     font-size: 1rem;
-    color: var(--sh-gray-900);
+    color: var(--sc-gray-900);
     margin-bottom: 0.25rem;
 }
 
 .timeline-date {
     font-size: 0.8rem;
-    color: var(--sh-gray-500);
+    color: var(--sc-gray-500);
     margin-bottom: 0.5rem;
 }
 
 .timeline-description {
     font-size: 0.9rem;
-    color: var(--sh-gray-700);
+    color: var(--sc-gray-700);
     line-height: 1.4;
 }
 
@@ -215,37 +215,37 @@
 }
 
 .timeline-status-badge.setuju {
-    background: var(--sh-success-light);
-    color: var(--sh-success);
+    background: var(--sc-success-light);
+    color: var(--sc-success);
 }
 
 .timeline-status-badge.tolak {
-    background: var(--sh-danger-light);
-    color: var(--sh-danger);
+    background: var(--sc-danger-light);
+    color: var(--sc-danger);
 }
 
 .timeline-status-badge.ubah {
-    background: var(--sh-primary-light);
-    color: var(--sh-primary);
+    background: var(--sc-primary-light);
+    color: var(--sc-primary);
 }
 
 .timeline-status-badge.tangguhkan {
-    background: var(--sh-warning-light);
-    color: var(--sh-warning);
+    background: var(--sc-warning-light);
+    color: var(--sc-warning);
 }
 
 .timeline-status-badge.pending {
-    background: var(--sh-gray-100);
-    color: var(--sh-gray-600);
+    background: var(--sc-gray-100);
+    color: var(--sc-gray-600);
 }
 
 .timeline-notes {
-    background: var(--sh-gray-50, #f9fafb);
-    border-left: 3px solid var(--sh-gray-300, #d1d5db);
+    background: var(--sc-gray-50, #f9fafb);
+    border-left: 3px solid var(--sc-gray-300, #d1d5db);
     padding: 0.5rem 0.75rem;
     border-radius: 0 6px 6px 0;
     font-size: 0.85rem;
-    color: var(--sh-gray-600, #4b5563);
+    color: var(--sc-gray-600, #4b5563);
     margin-top: 0.5rem;
     font-style: italic;
 }

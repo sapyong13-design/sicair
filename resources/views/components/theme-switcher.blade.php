@@ -44,7 +44,7 @@
         <div class="theme-menu-section">
             <label class="theme-label">Palet Warna Utama</label>
             <div class="color-palette">
-                <button class="color-option" data-color="primary" style="background: var(--sh-primary);" title="Primary"></button>
+                <button class="color-option" data-color="primary" style="background: var(--sc-primary);" title="Primary"></button>
                 <button class="color-option" data-color="indigo" style="background: #4f46e5;" title="Indigo"></button>
                 <button class="color-option" data-color="purple" style="background: #7c3aed;" title="Purple"></button>
                 <button class="color-option" data-color="pink" style="background: #ec4899;" title="Pink"></button>
@@ -87,10 +87,10 @@
 .theme-toggle-btn {
     width: 40px;
     height: 40px;
-    border: 1px solid var(--sh-gray-300);
+    border: 1px solid var(--sc-gray-300);
     border-radius: 8px;
     background: white;
-    color: var(--sh-gray-700);
+    color: var(--sc-gray-700);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -100,8 +100,8 @@
 }
 
 .theme-toggle-btn:hover {
-    background: var(--sh-gray-100);
-    border-color: var(--sh-gray-400);
+    background: var(--sc-gray-100);
+    border-color: var(--sc-gray-400);
 }
 
 .theme-menu {
@@ -112,7 +112,7 @@
     width: 320px;
     max-height: 90vh;
     background: white;
-    border: 1px solid var(--sh-gray-200);
+    border: 1px solid var(--sc-gray-200);
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
     z-index: 1050;
@@ -124,7 +124,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem;
-    border-bottom: 1px solid var(--sh-gray-200);
+    border-bottom: 1px solid var(--sc-gray-200);
 }
 
 .theme-menu-header h6 {
@@ -137,13 +137,13 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--sh-gray-600);
+    color: var(--sc-gray-600);
     font-size: 1.2rem;
 }
 
 .theme-menu-section {
     padding: 1rem;
-    border-bottom: 1px solid var(--sh-gray-100);
+    border-bottom: 1px solid var(--sc-gray-100);
 }
 
 .theme-menu-section:last-of-type {
@@ -154,7 +154,7 @@
     display: block;
     font-weight: 600;
     font-size: 0.85rem;
-    color: var(--sh-gray-700);
+    color: var(--sc-gray-700);
     margin-bottom: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -183,7 +183,7 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.75rem;
-    border: 2px solid var(--sh-gray-200);
+    border: 2px solid var(--sc-gray-200);
     border-radius: 8px;
     transition: all 0.2s;
     font-size: 0.8rem;
@@ -191,9 +191,9 @@
 }
 
 .theme-option input:checked + .theme-option-content {
-    border-color: var(--sh-primary);
-    background: var(--sh-primary-light);
-    color: var(--sh-primary);
+    border-color: var(--sc-primary);
+    background: var(--sc-primary-light);
+    color: var(--sc-primary);
 }
 
 .color-palette {
@@ -216,8 +216,8 @@
 }
 
 .color-option.active {
-    border-color: var(--sh-gray-900);
-    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--sh-gray-900);
+    border-color: var(--sc-gray-900);
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--sc-gray-900);
 }
 
 .accessibility-options {
@@ -232,33 +232,33 @@
     gap: 0.75rem;
     cursor: pointer;
     font-size: 0.9rem;
-    color: var(--sh-gray-700);
+    color: var(--sc-gray-700);
 }
 
 .accessibility-option input[type="checkbox"] {
     width: 18px;
     height: 18px;
     cursor: pointer;
-    accent-color: var(--sh-primary);
+    accent-color: var(--sc-primary);
 }
 
 .theme-menu-footer {
     padding: 1rem;
-    border-top: 1px solid var(--sh-gray-200);
+    border-top: 1px solid var(--sc-gray-200);
 }
 
 /* Dark Mode Styles */
 :root.dark-mode {
-    --sh-gray-50: #1a1a1a;
-    --sh-gray-100: #2d2d2d;
-    --sh-gray-200: #3f3f3f;
-    --sh-gray-300: #4f4f4f;
-    --sh-gray-400: #6b7280;
-    --sh-gray-500: #9ca3af;
-    --sh-gray-600: #d1d5db;
-    --sh-gray-700: #e5e7eb;
-    --sh-gray-800: #f3f4f6;
-    --sh-gray-900: #ffffff;
+    --sc-gray-50: #1a1a1a;
+    --sc-gray-100: #2d2d2d;
+    --sc-gray-200: #3f3f3f;
+    --sc-gray-300: #4f4f4f;
+    --sc-gray-400: #6b7280;
+    --sc-gray-500: #9ca3af;
+    --sc-gray-600: #d1d5db;
+    --sc-gray-700: #e5e7eb;
+    --sc-gray-800: #f3f4f6;
+    --sc-gray-900: #ffffff;
 }
 
 :root.dark-mode body {
@@ -306,7 +306,7 @@
     font-size: 18px;
 }
 
-:root.larger-text .sh-stat-label {
+:root.larger-text .sc-stat-label {
     font-size: 1rem !important;
 }
 
@@ -316,10 +316,10 @@
 
 /* High Contrast Mode */
 :root.high-contrast {
-    --sh-primary: #000;
-    --sh-danger: #000;
-    --sh-warning: #000;
-    --sh-success: #000;
+    --sc-primary: #000;
+    --sc-danger: #000;
+    --sc-warning: #000;
+    --sc-success: #000;
 }
 
 :root.high-contrast body {
@@ -366,11 +366,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const themeIcon = document.getElementById('themeIcon');
 
     // Load saved preferences
-    const savedTheme = localStorage.getItem('sh-theme') || 'auto';
-    const savedColor = localStorage.getItem('sh-color') || 'primary';
-    const highContrast = localStorage.getItem('sh-high-contrast') === 'true';
-    const largerText = localStorage.getItem('sh-larger-text') === 'true';
-    const reduceAnimations = localStorage.getItem('sh-reduce-animations') === 'true';
+    const savedTheme = localStorage.getItem('sc-theme') || 'auto';
+    const savedColor = localStorage.getItem('sc-color') || 'primary';
+    const highContrast = localStorage.getItem('sc-high-contrast') === 'true';
+    const largerText = localStorage.getItem('sc-larger-text') === 'true';
+    const reduceAnimations = localStorage.getItem('sc-reduce-animations') === 'true';
 
     // Apply saved settings
     applyTheme(savedTheme);
@@ -394,7 +394,7 @@ document.addEventListener('DOMContentLoaded', function() {
     [lightMode, darkMode, autoMode].forEach(radio => {
         radio.addEventListener('change', function() {
             applyTheme(this.value);
-            localStorage.setItem('sh-theme', this.value);
+            localStorage.setItem('sc-theme', this.value);
         });
     });
 
@@ -403,7 +403,7 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function() {
             const color = this.dataset.color;
             applyColor(color);
-            localStorage.setItem('sh-color', color);
+            localStorage.setItem('sc-color', color);
             document.querySelectorAll('.color-option').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
         });
@@ -412,17 +412,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Accessibility options
     document.getElementById('highContrast').addEventListener('change', function() {
         document.documentElement.classList.toggle('high-contrast', this.checked);
-        localStorage.setItem('sh-high-contrast', this.checked);
+        localStorage.setItem('sc-high-contrast', this.checked);
     });
 
     document.getElementById('largerText').addEventListener('change', function() {
         document.documentElement.classList.toggle('larger-text', this.checked);
-        localStorage.setItem('sh-larger-text', this.checked);
+        localStorage.setItem('sc-larger-text', this.checked);
     });
 
     document.getElementById('reduceAnimations').addEventListener('change', function() {
         document.documentElement.classList.toggle('reduce-animations', this.checked);
-        localStorage.setItem('sh-reduce-animations', this.checked);
+        localStorage.setItem('sc-reduce-animations', this.checked);
     });
 
     function applyTheme(theme) {

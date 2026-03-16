@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Audit Log - SiHEALING')
+@section('title', 'Audit Log - SiCAIR')
 
 @section('content')
-<div class="sh-page-header mb-4 d-flex align-items-center justify-content-between">
-    <h2 class="sh-page-title mb-0">
-        <i class="ti ti-file-text me-2" style="color: var(--sh-primary);"></i> Audit Log
+<div class="sc-page-header mb-4 d-flex align-items-center justify-content-between">
+    <h2 class="sc-page-title mb-0">
+        <i class="ti ti-file-text me-2" style="color: var(--sc-primary);"></i> Audit Log
     </h2>
     <small class="text-muted">Riwayat seluruh perubahan sistem</small>
 </div>
@@ -13,26 +13,26 @@
 {{-- Stats Bar --}}
 <div class="row g-3 mb-4">
     <div class="col-sm-4">
-        <div class="card sh-card text-center py-3">
-            <div style="font-size:1.8rem; font-weight:700; color:var(--sh-primary);">{{ number_format($totalLogs) }}</div>
+        <div class="card sc-card text-center py-3">
+            <div style="font-size:1.8rem; font-weight:700; color:var(--sc-primary);">{{ number_format($totalLogs) }}</div>
             <div class="text-muted" style="font-size:0.85rem;">Total Log</div>
         </div>
     </div>
     <div class="col-sm-4">
-        <div class="card sh-card text-center py-3">
+        <div class="card sc-card text-center py-3">
             <div style="font-size:1.8rem; font-weight:700; color:#16a34a;">{{ number_format($todayLogs) }}</div>
             <div class="text-muted" style="font-size:0.85rem;">Log Hari Ini</div>
         </div>
     </div>
     <div class="col-sm-4">
-        <div class="card sh-card text-center py-3">
+        <div class="card sc-card text-center py-3">
             <div style="font-size:1.8rem; font-weight:700; color:#7c3aed;">{{ number_format($uniqueModels) }}</div>
             <div class="text-muted" style="font-size:0.85rem;">Jenis Model</div>
         </div>
     </div>
 </div>
 
-<div class="card sh-card">
+<div class="card sc-card">
     <div class="card-body p-4">
         {{-- Filters --}}
         <form method="GET" class="row g-3 mb-4">
@@ -89,7 +89,7 @@
                 <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}" style="border-radius:10px;border:2px solid #e2e8f0;">
             </div>
             <div class="col-12 d-flex gap-2">
-                <button type="submit" class="btn sh-btn-primary">
+                <button type="submit" class="btn sc-btn-primary">
                     <i class="ti ti-search me-1"></i> Filter
                 </button>
                 <a href="{{ route('admin.audit-logs.index') }}" class="btn btn-outline-secondary">
@@ -106,7 +106,7 @@
         {{-- Table --}}
         <div class="table-responsive">
             <table class="table mb-0" style="font-size:0.875rem;">
-                <thead style="background:var(--sh-gray-100);">
+                <thead style="background:var(--sc-gray-100);">
                     <tr>
                         <th style="padding:0.75rem 1rem; white-space:nowrap;">Waktu</th>
                         <th style="padding:0.75rem 1rem;">Pengguna</th>
@@ -133,7 +133,7 @@
                             @endif
                         </td>
                         <td style="padding:0.75rem 1rem;">
-                            <span class="badge" style="background:var(--sh-gray-200);color:#475569;font-size:0.78rem;">
+                            <span class="badge" style="background:var(--sc-gray-200);color:#475569;font-size:0.78rem;">
                                 {{ $log->model }}@if($log->model_id) #{{ $log->model_id }}@endif
                             </span>
                         </td>
@@ -176,8 +176,8 @@
                     <tr>
                         <td colspan="7" class="py-5">
                             <div class="text-center">
-                                <div class="sh-empty-icon mb-3"><i class="ti ti-file-off"></i></div>
-                                <div class="fw-semibold mb-1" style="color:var(--sh-text);">
+                                <div class="sc-empty-icon mb-3"><i class="ti ti-file-off"></i></div>
+                                <div class="fw-semibold mb-1" style="color:var(--sc-text);">
                                     {{ request()->hasAny(['model','action','user_id','description','from_date','to_date']) ? 'Tidak ada log yang sesuai filter' : 'Belum ada audit log' }}
                                 </div>
                                 <div class="text-muted" style="font-size:0.85rem;">

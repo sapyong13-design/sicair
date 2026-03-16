@@ -11,7 +11,7 @@
                 <i class="ti ti-arrow-left" style="font-size: 1.2rem;"></i>
             </a>
             <div>
-                <h2 class="sh-page-title mb-0">Dokumen Pengajuan Cuti</h2>
+                <h2 class="sc-page-title mb-0">Dokumen Pengajuan Cuti</h2>
                 <div class="text-muted" style="font-size: 0.85rem;">
                     {{ $leaveRequest->user->name }}
                 </div>
@@ -22,10 +22,10 @@
             {{-- Main Content --}}
             <div class="col-lg-8">
                 {{-- Leave Request Info Card --}}
-                <div class="card sh-card mb-4">
+                <div class="card sc-card mb-4">
                     <div class="card-header">
                         <h3 class="card-title mb-0">
-                            <i class="ti ti-info-circle me-2" style="color: var(--sh-primary);"></i>
+                            <i class="ti ti-info-circle me-2" style="color: var(--sc-primary);"></i>
                             Informasi Pengajuan
                         </h3>
                     </div>
@@ -45,7 +45,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="text-muted" style="font-size: 0.85rem;">Status</div>
-                                <span class="sh-badge sh-badge-{{ match($leaveRequest->status) {
+                                <span class="sc-badge sc-badge-{{ match($leaveRequest->status) {
                                     'diajukan', 'pending' => 'pending',
                                     'pertimbangan_atasan' => 'pending',
                                     'disetujui', 'approved' => 'approved',
@@ -58,10 +58,10 @@
                 </div>
 
                 {{-- Documents Card --}}
-                <div class="card sh-card">
+                <div class="card sc-card">
                     <div class="card-header">
                         <h3 class="card-title mb-0">
-                            <i class="ti ti-file me-2" style="color: var(--sh-primary);"></i>
+                            <i class="ti ti-file me-2" style="color: var(--sc-primary);"></i>
                             File Dokumen
                         </h3>
                     </div>
@@ -71,9 +71,9 @@
                         <div class="row g-3">
                             @foreach($documents as $document)
                             <div class="col-12">
-                                <div class="d-flex align-items-center justify-content-between p-3" style="background: var(--sh-gray-50); border-radius: 10px; border: 1px solid var(--sh-border);">
+                                <div class="d-flex align-items-center justify-content-between p-3" style="background: var(--sc-gray-50); border-radius: 10px; border: 1px solid var(--sc-border);">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="document-icon" style="width: 44px; height: 44px; border-radius: 10px; background: var(--sh-primary-light); color: var(--sh-primary); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                                        <div class="document-icon" style="width: 44px; height: 44px; border-radius: 10px; background: var(--sc-primary-light); color: var(--sc-primary); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
                                             @php
                                                 $ext = strtolower($document['extension']);
                                                 $icon = match($ext) {
@@ -120,7 +120,7 @@
                     @else
                     <div class="card-body py-5">
                         <div class="text-center">
-                            <div class="sh-empty-icon">
+                            <div class="sc-empty-icon">
                                 <i class="ti ti-file-off"></i>
                             </div>
                             <h4 class="fw-bold text-dark mb-1">Tidak Ada Dokumen</h4>
@@ -134,10 +134,10 @@
             {{-- Sidebar --}}
             <div class="col-lg-4">
                 {{-- Information Card --}}
-                <div class="card sh-card mb-4">
+                <div class="card sc-card mb-4">
                     <div class="card-header">
                         <h3 class="card-title mb-0">
-                            <i class="ti ti-help-circle me-2" style="color: var(--sh-warning);"></i>
+                            <i class="ti ti-help-circle me-2" style="color: var(--sc-warning);"></i>
                             Informasi
                         </h3>
                     </div>
@@ -165,10 +165,10 @@
 
                 {{-- Upload Card --}}
                 @if(auth()->id() === $leaveRequest->user_id)
-                <div class="card sh-card">
+                <div class="card sc-card">
                     <div class="card-header">
                         <h3 class="card-title mb-0">
-                            <i class="ti ti-upload me-2" style="color: var(--sh-success);"></i>
+                            <i class="ti ti-upload me-2" style="color: var(--sc-success);"></i>
                             Upload Dokumen
                         </h3>
                     </div>
@@ -177,7 +177,7 @@
                             Anda dapat menambahkan dokumen pendukung untuk pengajuan cuti ini.
                         </p>
                         @if($leaveRequest->status === 'diajukan' || $leaveRequest->status === 'pertimbangan_atasan')
-                            <button type="button" class="btn btn-primary sh-btn-primary w-100" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                            <button type="button" class="btn btn-primary sc-btn-primary w-100" data-bs-toggle="modal" data-bs-target="#uploadModal">
                                 <i class="ti ti-plus me-1"></i> Upload Dokumen
                             </button>
                         @else
@@ -229,7 +229,7 @@
                 </div>
                 <div class="modal-footer border-0 pt-0 px-4 pb-4" style="justify-content: center; gap: 0.5rem;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; min-width: 100px;">Batal</button>
-                    <button type="submit" class="btn btn-primary sh-btn-primary" style="min-width: 100px;">
+                    <button type="submit" class="btn btn-primary sc-btn-primary" style="min-width: 100px;">
                         <i class="ti ti-upload me-1"></i> Upload
                     </button>
                 </div>
@@ -240,31 +240,31 @@
 
 <style>
 /* Light mode */
-.sh-empty-icon {
+.sc-empty-icon {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: var(--sh-gray-100);
+    background: var(--sc-gray-100);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-size: 2rem;
-    color: var(--sh-text-muted);
+    color: var(--sc-text-muted);
     margin-bottom: 1rem;
 }
 
 /* Dark mode adjustments */
 [data-bs-theme="dark"] .document-icon {
-    background: var(--sh-primary-light) !important;
+    background: var(--sc-primary-light) !important;
 }
 
-[data-bs-theme="dark"] [style*="background: var(--sh-gray-50)"] {
-    background: var(--sh-gray-100) !important;
+[data-bs-theme="dark"] [style*="background: var(--sc-gray-50)"] {
+    background: var(--sc-gray-100) !important;
 }
 
-[data-bs-theme="dark"] .sh-empty-icon {
-    background: var(--sh-gray-100) !important;
-    color: var(--sh-text-muted) !important;
+[data-bs-theme="dark"] .sc-empty-icon {
+    background: var(--sc-gray-100) !important;
+    color: var(--sc-text-muted) !important;
 }
 </style>
 @endsection

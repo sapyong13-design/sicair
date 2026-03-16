@@ -44,7 +44,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge badge-sm" style="background-color: var(--sh-primary);">
+                                        <span class="badge badge-sm" style="background-color: var(--sc-primary);">
                                             {{ $log->action_label }}
                                         </span>
                                     </td>
@@ -64,8 +64,8 @@
                                 <tr>
                                     <td colspan="5" class="py-5">
                                         <div class="text-center">
-                                            <div class="sh-empty-icon mb-3"><i class="ti ti-history"></i></div>
-                                            <div class="fw-semibold mb-1" style="color:var(--sh-text);">Belum ada riwayat perubahan saldo</div>
+                                            <div class="sc-empty-icon mb-3"><i class="ti ti-history"></i></div>
+                                            <div class="fw-semibold mb-1" style="color:var(--sc-text);">Belum ada riwayat perubahan saldo</div>
                                             <div class="text-muted" style="font-size:0.85rem;">Riwayat akan muncul di sini setelah ada penyesuaian saldo</div>
                                         </div>
                                     </td>

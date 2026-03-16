@@ -1,7 +1,7 @@
 {{-- Empty States & Onboarding Component --}}
 <div class="empty-state-container">
     <div class="empty-state-content">
-        <div class="empty-state-icon" style="background: {{ $backgroundColor ?? 'var(--sh-gray-50)' }}; color: {{ $iconColor ?? 'var(--sh-gray-400)' }};">
+        <div class="empty-state-icon" style="background: {{ $backgroundColor ?? 'var(--sc-gray-50)' }}; color: {{ $iconColor ?? 'var(--sc-gray-400)' }};">
             <i class="ti {{ $icon ?? 'ti-inbox' }}"></i>
         </div>
 
@@ -23,7 +23,7 @@
         @endif
 
         @if($actionUrl && $actionText)
-        <a href="{{ $actionUrl }}" class="btn sh-btn-primary mt-3">
+        <a href="{{ $actionUrl }}" class="btn sc-btn-primary mt-3">
             <i class="{{ $actionIcon ?? 'ti-plus' }} me-1"></i>
             {{ $actionText }}
         </a>
@@ -40,7 +40,7 @@
     min-height: 400px;
     background: white;
     border-radius: 12px;
-    border: 1px solid var(--sh-gray-200);
+    border: 1px solid var(--sc-gray-200);
 }
 
 .empty-state-content {
@@ -62,30 +62,30 @@
 .empty-state-title {
     font-size: 1.3rem;
     font-weight: 700;
-    color: var(--sh-gray-900);
+    color: var(--sc-gray-900);
     margin: 0 0 0.75rem;
 }
 
 .empty-state-description {
     font-size: 0.95rem;
-    color: var(--sh-gray-600);
+    color: var(--sc-gray-600);
     line-height: 1.5;
     margin: 0 0 1.5rem;
 }
 
 .empty-state-tips {
     text-align: left;
-    background: var(--sh-gray-50);
+    background: var(--sc-gray-50);
     border-radius: 8px;
     padding: 1rem;
     margin: 1.5rem 0;
-    border-left: 3px solid var(--sh-primary);
+    border-left: 3px solid var(--sc-primary);
 }
 
 .tips-title {
     font-weight: 600;
     font-size: 0.9rem;
-    color: var(--sh-gray-800);
+    color: var(--sc-gray-800);
     margin-bottom: 0.5rem;
 }
 
@@ -97,14 +97,14 @@
 
 .tips-list li {
     font-size: 0.85rem;
-    color: var(--sh-gray-700);
+    color: var(--sc-gray-700);
     padding: 0.35rem 0;
     line-height: 1.4;
 }
 
 .tips-list li:before {
     content: '✓ ';
-    color: var(--sh-success);
+    color: var(--sc-success);
     font-weight: 700;
     margin-right: 0.5rem;
 }

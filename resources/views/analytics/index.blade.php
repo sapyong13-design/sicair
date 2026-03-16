@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Analytics - SiHEALING')
+@section('title', 'Analytics - SiCAIR')
 
 @section('content')
 {{-- Page Header --}}
-<div class="sh-page-header mb-4">
+<div class="sc-page-header mb-4">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div>
-            <h2 class="sh-page-title mb-1">
-                <i class="ti ti-chart-bar me-1" style="color: var(--sh-primary);"></i>
+            <h2 class="sc-page-title mb-1">
+                <i class="ti ti-chart-bar me-1" style="color: var(--sc-primary);"></i>
                 Analytics Cuti
             </h2>
             <nav aria-label="breadcrumb">
@@ -29,7 +29,7 @@
                 </select>
             </form>
             <div class="dropdown">
-                <button class="btn btn-sm sh-btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                <button class="btn btn-sm sc-btn-primary dropdown-toggle" data-bs-toggle="dropdown">
                     <i class="ti ti-download me-1"></i> Export {{ $year }}
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
@@ -45,7 +45,7 @@
                     </li>
                 </ul>
             </div>
-            <a href="{{ route('analytics.export-pdf', ['year' => $year]) }}" target="_blank" class="btn btn-sm btn-outline-secondary sh-export-trigger">
+            <a href="{{ route('analytics.export-pdf', ['year' => $year]) }}" target="_blank" class="btn btn-sm btn-outline-secondary sc-export-trigger">
                 <i class="ti ti-printer me-1"></i> Export PDF
             </a>
         </div>
@@ -56,8 +56,8 @@
 @php $s = $analytics['summary'] ?? []; @endphp
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
-        <div class="card sh-card h-100 text-center py-3">
-            <div class="sh-stat-number" style="font-size:2rem;font-weight:700;color:var(--sh-primary);">
+        <div class="card sc-card h-100 text-center py-3">
+            <div class="sc-stat-number" style="font-size:2rem;font-weight:700;color:var(--sc-primary);">
                 {{ $s['total_requests'] ?? 0 }}
             </div>
             <div class="text-muted" style="font-size:0.8rem;">Total Pengajuan</div>
@@ -71,8 +71,8 @@
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card sh-card h-100 text-center py-3">
-            <div class="sh-stat-number" style="font-size:2rem;font-weight:700;color:#16a34a;">
+        <div class="card sc-card h-100 text-center py-3">
+            <div class="sc-stat-number" style="font-size:2rem;font-weight:700;color:#16a34a;">
                 {{ $s['approved'] ?? 0 }}
             </div>
             <div class="text-muted" style="font-size:0.8rem;">Disetujui</div>
@@ -84,16 +84,16 @@
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card sh-card h-100 text-center py-3">
-            <div class="sh-stat-number" style="font-size:2rem;font-weight:700;color:#d97706;">
+        <div class="card sc-card h-100 text-center py-3">
+            <div class="sc-stat-number" style="font-size:2rem;font-weight:700;color:#d97706;">
                 {{ $s['pending'] ?? 0 }}
             </div>
             <div class="text-muted" style="font-size:0.8rem;">Pending</div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card sh-card h-100 text-center py-3">
-            <div class="sh-stat-number" style="font-size:2rem;font-weight:700;color:#dc2626;">
+        <div class="card sc-card h-100 text-center py-3">
+            <div class="sc-stat-number" style="font-size:2rem;font-weight:700;color:#dc2626;">
                 {{ $s['rejected'] ?? 0 }}
             </div>
             <div class="text-muted" style="font-size:0.8rem;">Ditolak</div>
@@ -106,9 +106,9 @@
 
 {{-- Year Comparison Banner --}}
 @if(!empty($prevSummary))
-<div class="card sh-card mb-4" style="background: linear-gradient(135deg, var(--sh-primary-light) 0%, var(--sh-accent-light) 100%); border: 2px solid var(--sh-primary);">
+<div class="card sc-card mb-4" style="background: linear-gradient(135deg, var(--sc-primary-light) 0%, var(--sc-accent-light) 100%); border: 2px solid var(--sc-primary);">
     <div class="card-body py-3">
-        <h6 class="fw-bold mb-2" style="color:var(--sh-primary);">
+        <h6 class="fw-bold mb-2" style="color:var(--sc-primary);">
             <i class="ti ti-arrows-right-left me-1"></i> Perbandingan {{ $year }} vs {{ $prevYear }}
         </h6>
         <div class="row g-3">
@@ -126,14 +126,14 @@
                 $pct = $cmp['prev'] > 0 ? round(($d / $cmp['prev']) * 100, 1) : 0;
             @endphp
             <div class="col-6 col-md-3">
-                <div style="font-size:0.75rem;color:var(--sh-text-muted);">{{ $cmp['label'] }}</div>
-                <div class="fw-bold" style="color:var(--sh-text);">
+                <div style="font-size:0.75rem;color:var(--sc-text-muted);">{{ $cmp['label'] }}</div>
+                <div class="fw-bold" style="color:var(--sc-text);">
                     {{ $cmp['curr'] }}
                     <span style="font-size:0.75rem;color:{{ $d >= 0 ? '#16a34a' : '#dc2626' }};">
                         ({{ $d >= 0 ? '+' : '' }}{{ $d }}, {{ $pct >= 0 ? '+' : '' }}{{ $pct }}%)
                     </span>
                 </div>
-                <div style="font-size:0.72rem;color:var(--sh-text-muted);">{{ $prevYear }}: {{ $cmp['prev'] }}</div>
+                <div style="font-size:0.72rem;color:var(--sc-text-muted);">{{ $prevYear }}: {{ $cmp['prev'] }}</div>
             </div>
             @endforeach
         </div>
@@ -144,10 +144,10 @@
 {{-- Charts Row 1: Monthly Trend + Donut by Type --}}
 <div class="row g-3 mb-4">
     <div class="col-md-8">
-        <div class="card sh-card h-100">
+        <div class="card sc-card h-100">
             <div class="card-body p-4">
-                <h6 class="fw-bold mb-3" style="color:var(--sh-text);">
-                    <i class="ti ti-trending-up me-1" style="color:var(--sh-primary);"></i>
+                <h6 class="fw-bold mb-3" style="color:var(--sc-text);">
+                    <i class="ti ti-trending-up me-1" style="color:var(--sc-primary);"></i>
                     Tren Cuti Bulanan {{ $year }}
                 </h6>
                 <canvas id="chartMonthly" height="100"></canvas>
@@ -155,10 +155,10 @@
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card sh-card h-100">
+        <div class="card sc-card h-100">
             <div class="card-body p-4">
-                <h6 class="fw-bold mb-3" style="color:var(--sh-text);">
-                    <i class="ti ti-chart-donut me-1" style="color:var(--sh-primary);"></i>
+                <h6 class="fw-bold mb-3" style="color:var(--sc-text);">
+                    <i class="ti ti-chart-donut me-1" style="color:var(--sc-primary);"></i>
                     Berdasarkan Jenis Cuti
                 </h6>
                 <canvas id="chartByType" height="180"></canvas>
@@ -170,10 +170,10 @@
 {{-- Charts Row 2: By Status + By Department --}}
 <div class="row g-3 mb-4">
     <div class="col-md-5">
-        <div class="card sh-card h-100">
+        <div class="card sc-card h-100">
             <div class="card-body p-4">
-                <h6 class="fw-bold mb-3" style="color:var(--sh-text);">
-                    <i class="ti ti-chart-pie me-1" style="color:var(--sh-primary);"></i>
+                <h6 class="fw-bold mb-3" style="color:var(--sc-text);">
+                    <i class="ti ti-chart-pie me-1" style="color:var(--sc-primary);"></i>
                     Berdasarkan Status
                 </h6>
                 <canvas id="chartByStatus" height="180"></canvas>
@@ -181,10 +181,10 @@
         </div>
     </div>
     <div class="col-md-7">
-        <div class="card sh-card h-100">
+        <div class="card sc-card h-100">
             <div class="card-body p-4">
-                <h6 class="fw-bold mb-3" style="color:var(--sh-text);">
-                    <i class="ti ti-building me-1" style="color:var(--sh-primary);"></i>
+                <h6 class="fw-bold mb-3" style="color:var(--sc-text);">
+                    <i class="ti ti-building me-1" style="color:var(--sc-primary);"></i>
                     Berdasarkan Unit Kerja
                 </h6>
                 <canvas id="chartByDept" height="140"></canvas>
@@ -195,17 +195,17 @@
 
 {{-- Heatmap #42 --}}
 @if(!empty($heatmapData))
-<div class="card sh-card mb-4">
+<div class="card sc-card mb-4">
     <div class="card-body p-4">
-        <h6 class="fw-bold mb-3" style="color:var(--sh-text);">
-            <i class="ti ti-grid-dots me-1" style="color:var(--sh-primary);"></i>
+        <h6 class="fw-bold mb-3" style="color:var(--sc-text);">
+            <i class="ti ti-grid-dots me-1" style="color:var(--sc-primary);"></i>
             Heatmap Utilisasi Cuti per Pegawai {{ $year }}
             <small class="text-muted fw-normal">(hari kerja per bulan)</small>
         </h6>
         <div class="table-responsive">
             <table class="table table-sm mb-0" style="font-size:0.78rem; min-width:700px;">
                 <thead>
-                    <tr style="background: var(--sh-gray-100);">
+                    <tr style="background: var(--sc-gray-100);">
                         <th style="padding:0.4rem 0.6rem; min-width:150px;">Pegawai</th>
                         @foreach(['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'] as $mn)
                         <th class="text-center" style="padding:0.4rem 0.3rem;">{{ $mn }}</th>
@@ -228,13 +228,13 @@
                             $bg = $days > 0
                                 ? 'rgba(22, 101, 52, ' . $intensity . ')'
                                 : 'transparent';
-                            $color = $intensity > 0.5 ? '#ffffff' : ($days > 0 ? '#14532d' : 'var(--sh-text-muted)');
+                            $color = $intensity > 0.5 ? '#ffffff' : ($days > 0 ? '#14532d' : 'var(--sc-text-muted)');
                         @endphp
                         <td class="text-center" style="padding:0.3rem; background:{{ $bg }}; color:{{ $color }}; border-radius:4px;">
                             {{ $days > 0 ? $days : '—' }}
                         </td>
                         @endforeach
-                        <td class="text-center fw-bold" style="padding:0.3rem 0.6rem; color:var(--sh-primary);">
+                        <td class="text-center fw-bold" style="padding:0.3rem 0.6rem; color:var(--sc-primary);">
                             {{ $row['total'] }}
                         </td>
                     </tr>
@@ -253,10 +253,10 @@
 
 {{-- #38 Line Chart: 12-Month Rolling Trend --}}
 @if(!empty($monthly12))
-<div class="card sh-card mb-4">
+<div class="card sc-card mb-4">
     <div class="card-body p-4">
-        <h6 class="fw-bold mb-3" style="color:var(--sh-text);">
-            <i class="ti ti-chart-line me-1" style="color:var(--sh-primary);"></i>
+        <h6 class="fw-bold mb-3" style="color:var(--sc-text);">
+            <i class="ti ti-chart-line me-1" style="color:var(--sc-primary);"></i>
             Tren 12 Bulan Terakhir (Rolling)
             <small class="text-muted fw-normal">(cuti disetujui per bulan)</small>
         </h6>
@@ -267,10 +267,10 @@
 
 {{-- #39 Grouped Bar: Comparison 3 Bagian --}}
 @if(!empty($byBagian))
-<div class="card sh-card mb-4">
+<div class="card sc-card mb-4">
     <div class="card-body p-4">
-        <h6 class="fw-bold mb-3" style="color:var(--sh-text);">
-            <i class="ti ti-chart-bar me-1" style="color:var(--sh-accent);"></i>
+        <h6 class="fw-bold mb-3" style="color:var(--sc-text);">
+            <i class="ti ti-chart-bar me-1" style="color:var(--sc-accent);"></i>
             Perbandingan per Bagian {{ $year }}
             <small class="text-muted fw-normal">(Kepaniteraan · Kesekretariatan · Hakim)</small>
         </h6>
@@ -281,17 +281,17 @@
 
 {{-- #41 Heatmap per Unit Kerja --}}
 @if(!empty($heatmapByUnit))
-<div class="card sh-card mb-4">
+<div class="card sc-card mb-4">
     <div class="card-body p-4">
-        <h6 class="fw-bold mb-3" style="color:var(--sh-text);">
-            <i class="ti ti-grid-dots me-1" style="color:var(--sh-primary);"></i>
+        <h6 class="fw-bold mb-3" style="color:var(--sc-text);">
+            <i class="ti ti-grid-dots me-1" style="color:var(--sc-primary);"></i>
             Heatmap Cuti per Unit Kerja {{ $year }}
             <small class="text-muted fw-normal">(pengajuan disetujui per bulan)</small>
         </h6>
         <div class="table-responsive">
             <table class="table table-sm mb-0" style="font-size:0.78rem; min-width:700px;">
                 <thead>
-                    <tr style="background: var(--sh-gray-100);">
+                    <tr style="background: var(--sc-gray-100);">
                         <th style="padding:0.4rem 0.6rem; min-width:160px;">Unit Kerja</th>
                         @foreach(['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'] as $mn)
                         <th class="text-center" style="padding:0.4rem 0.3rem;">{{ $mn }}</th>
@@ -310,13 +310,13 @@
                         @php
                             $intensity = $cnt > 0 ? max(0.15, min(1, $cnt / $maxVal)) : 0;
                             $bg    = $cnt > 0 ? 'rgba(180,83,9,' . $intensity . ')' : 'transparent';
-                            $color = $intensity > 0.5 ? '#ffffff' : ($cnt > 0 ? '#78350f' : 'var(--sh-text-muted)');
+                            $color = $intensity > 0.5 ? '#ffffff' : ($cnt > 0 ? '#78350f' : 'var(--sc-text-muted)');
                         @endphp
                         <td class="text-center" style="padding:0.3rem; background:{{ $bg }}; color:{{ $color }}; border-radius:4px;">
                             {{ $cnt > 0 ? $cnt : '—' }}
                         </td>
                         @endforeach
-                        <td class="text-center fw-bold" style="padding:0.3rem 0.6rem; color:var(--sh-accent);">
+                        <td class="text-center fw-bold" style="padding:0.3rem 0.6rem; color:var(--sc-accent);">
                             {{ $row['total'] }}
                         </td>
                     </tr>
@@ -331,25 +331,25 @@
 {{-- Top Users + Upcoming Leaves --}}
 <div class="row g-3 mb-4">
     <div class="col-md-6">
-        <div class="card sh-card h-100">
+        <div class="card sc-card h-100">
             <div class="card-body p-4">
-                <h6 class="fw-bold mb-3" style="color:var(--sh-text);">
-                    <i class="ti ti-award me-1" style="color:var(--sh-accent);"></i>
+                <h6 class="fw-bold mb-3" style="color:var(--sc-text);">
+                    <i class="ti ti-award me-1" style="color:var(--sc-accent);"></i>
                     Top 5 Pengaju Cuti {{ $year }}
                 </h6>
                 @forelse($topUsers as $i => $u)
                 <div class="d-flex align-items-center justify-content-between py-2 {{ $i < count($topUsers) - 1 ? 'border-bottom' : '' }}">
                     <div class="d-flex align-items-center gap-2">
-                        <div style="width:28px;height:28px;border-radius:50%;background:var(--sh-primary-light);color:var(--sh-primary);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;">
+                        <div style="width:28px;height:28px;border-radius:50%;background:var(--sc-primary-light);color:var(--sc-primary);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;">
                             {{ $i + 1 }}
                         </div>
                         <div>
-                            <div class="fw-semibold" style="font-size:0.875rem;color:var(--sh-text);">{{ $u['name'] }}</div>
+                            <div class="fw-semibold" style="font-size:0.875rem;color:var(--sc-text);">{{ $u['name'] }}</div>
                             <div class="text-muted" style="font-size:0.75rem;">{{ $u['nip'] ?? '—' }}</div>
                         </div>
                     </div>
                     <div class="text-end">
-                        <span class="badge" style="background:var(--sh-primary);color:#fff;font-size:0.78rem;">
+                        <span class="badge" style="background:var(--sc-primary);color:#fff;font-size:0.78rem;">
                             {{ $u['leave_count'] ?? 0 }} pengajuan
                         </span>
                         <div class="text-muted" style="font-size:0.72rem;">{{ $u['total_days'] ?? 0 }} hari</div>
@@ -365,23 +365,23 @@
         </div>
     </div>
     <div class="col-md-6">
-        <div class="card sh-card h-100">
+        <div class="card sc-card h-100">
             <div class="card-body p-4">
-                <h6 class="fw-bold mb-3" style="color:var(--sh-text);">
-                    <i class="ti ti-calendar-event me-1" style="color:var(--sh-accent);"></i>
+                <h6 class="fw-bold mb-3" style="color:var(--sc-text);">
+                    <i class="ti ti-calendar-event me-1" style="color:var(--sc-accent);"></i>
                     Cuti Akan Datang (Disetujui)
                 </h6>
                 @forelse($upcomingLeaves as $leave)
                 <div class="d-flex align-items-start justify-content-between py-2 border-bottom">
                     <div>
-                        <div class="fw-semibold" style="font-size:0.875rem;color:var(--sh-text);">
+                        <div class="fw-semibold" style="font-size:0.875rem;color:var(--sc-text);">
                             {{ $leave['name'] ?? '—' }}
                         </div>
                         <div class="text-muted" style="font-size:0.75rem;">
                             {{ $leave['type'] ?? '—' }} &bull; {{ $leave['start_date'] ?? '' }}
                         </div>
                     </div>
-                    <span class="badge sh-badge-approved" style="font-size:0.72rem;">{{ $leave['days'] ?? 0 }} hari</span>
+                    <span class="badge sc-badge-approved" style="font-size:0.72rem;">{{ $leave['days'] ?? 0 }} hari</span>
                 </div>
                 @empty
                 <div class="text-center text-muted py-4">
@@ -598,7 +598,7 @@
     @endif
 
     // ── Count-up animation for stat cards ───────────────────────────
-    document.querySelectorAll('.sh-stat-number').forEach(el => {
+    document.querySelectorAll('.sc-stat-number').forEach(el => {
         const target = parseInt(el.textContent.replace(/\D/g, ''), 10);
         if (!target) return;
         let start = 0;

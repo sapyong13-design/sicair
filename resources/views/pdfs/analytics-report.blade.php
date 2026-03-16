@@ -149,7 +149,7 @@
 </table>
 
 <div class="footer">
-    Laporan ini digenerate otomatis oleh SiHEALING &mdash; Pengadilan Negeri Natuna
+    Laporan ini digenerate otomatis oleh SiCAIR &mdash; Pengadilan Negeri Natuna
     &copy; {{ date('Y') }}
 </div>
 

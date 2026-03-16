@@ -1,31 +1,31 @@
 @extends('layouts.app')
 
-@section('title', 'Laporan Saldo Cuti - SiHEALING')
+@section('title', 'Laporan Saldo Cuti - SiCAIR')
 
 @section('content')
-<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+<nav class="sc-breadcrumb" aria-label="Breadcrumb">
     <a href="{{ route('dashboard') }}">Dashboard</a>
-    <span class="sh-breadcrumb-sep"><i class="ti ti-chevron-right" style="font-size:0.7rem;"></i></span>
-    <span class="sh-breadcrumb-current">Laporan Saldo Cuti</span>
+    <span class="sc-breadcrumb-sep"><i class="ti ti-chevron-right" style="font-size:0.7rem;"></i></span>
+    <span class="sc-breadcrumb-current">Laporan Saldo Cuti</span>
 </nav>
 
-<div class="sh-page-header">
+<div class="sc-page-header">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div>
-            <h2 class="sh-page-title mb-1">
-                <i class="ti ti-report me-1" style="color:var(--sh-primary);"></i>
+            <h2 class="sc-page-title mb-1">
+                <i class="ti ti-report me-1" style="color:var(--sc-primary);"></i>
                 Laporan Saldo Cuti
             </h2>
             <div class="text-muted" style="font-size:0.85rem;">Sisa cuti tahunan seluruh pegawai tahun {{ $year }}</div>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('laporan-saldo-cuti.export', array_merge(request()->query(), ['format' => 'excel'])) }}"
-               class="btn btn-outline-success sh-export-btn"
+               class="btn btn-outline-success sc-export-btn"
                style="border-radius:10px;">
                 <i class="ti ti-file-spreadsheet me-1"></i> Export Excel
             </a>
             <a href="{{ route('laporan-saldo-cuti.export', request()->query()) }}"
-               class="btn btn-outline-secondary sh-export-btn"
+               class="btn btn-outline-secondary sc-export-btn"
                style="border-radius:10px;">
                 <i class="ti ti-download me-1"></i> Export CSV
             </a>
@@ -34,7 +34,7 @@
 </div>
 
 {{-- Filter --}}
-<div class="card sh-card mb-4">
+<div class="card sc-card mb-4">
     <div class="card-body p-3">
         <form method="GET">
             <div class="row g-3 align-items-end">
@@ -53,7 +53,7 @@
                 </div>
                 <div class="col-12 col-md-4">
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn sh-btn-primary flex-fill" style="height:46px;">
+                        <button type="submit" class="btn sc-btn-primary flex-fill" style="height:46px;">
                             <i class="ti ti-search me-1"></i> Filter
                         </button>
                         @if($search || $unitKerja)
@@ -68,10 +68,10 @@
     </div>
 </div>
 
-<div class="card sh-card">
+<div class="card sc-card">
     <div class="card-header d-flex align-items-center justify-content-between">
         <h3 class="card-title mb-0">
-            <i class="ti ti-calendar-stats me-2" style="color:var(--sh-primary);"></i>
+            <i class="ti ti-calendar-stats me-2" style="color:var(--sc-primary);"></i>
             Saldo Cuti Tahunan {{ $year }}
         </h3>
         <span class="text-muted" style="font-size:0.8rem;">{{ count($saldoData) }} pegawai</span>
@@ -79,12 +79,12 @@
 
     @if(empty($saldoData))
     <div class="card-body py-5 text-center">
-        <div class="sh-empty-icon"><i class="ti ti-report-off"></i></div>
+        <div class="sc-empty-icon"><i class="ti ti-report-off"></i></div>
         <p class="text-muted mb-0">Tidak ada data pegawai ditemukan.</p>
     </div>
     @else
     <div class="table-responsive">
-        <table class="table sh-table mb-0">
+        <table class="table sc-table mb-0">
             <thead>
                 <tr>
                     <th>#</th>
@@ -112,7 +112,7 @@
                             @if($row['user']->photo)
                             <img src="{{ Storage::url($row['user']->photo) }}" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">
                             @else
-                            <div class="sh-user-avatar" style="width:34px;height:34px;font-size:0.7rem;background:var(--sh-primary-light);color:var(--sh-primary);border:none;border-radius:50%;">
+                            <div class="sc-user-avatar" style="width:34px;height:34px;font-size:0.7rem;background:var(--sc-primary-light);color:var(--sc-primary);border:none;border-radius:50%;">
                                 {{ strtoupper(substr($row['user']->name, 0, 2)) }}
                             </div>
                             @endif
@@ -129,7 +129,7 @@
                     <td class="text-center fw-semibold">{{ $row['total_hak'] }}</td>
                     <td class="text-center">{{ $row['cuti_diambil'] }}</td>
                     <td class="text-center">
-                        <span class="fw-bold" style="color:{{ $sisa <= 3 ? 'var(--sh-danger)' : ($sisa <= 6 ? 'var(--sh-warning)' : 'var(--sh-primary)') }};">
+                        <span class="fw-bold" style="color:{{ $sisa <= 3 ? 'var(--sc-danger)' : ($sisa <= 6 ? 'var(--sc-warning)' : 'var(--sc-primary)') }};">
                             {{ $sisa }}
                         </span>
                     </td>
@@ -143,11 +143,11 @@
                     </td>
                     <td class="text-center">
                         @if($sisa <= 0)
-                        <span class="sh-badge" style="background:var(--sh-danger-light);color:var(--sh-danger);">Habis</span>
+                        <span class="sc-badge" style="background:var(--sc-danger-light);color:var(--sc-danger);">Habis</span>
                         @elseif($sisa <= 3)
-                        <span class="sh-badge" style="background:var(--sh-warning-light);color:var(--sh-warning);">Rendah</span>
+                        <span class="sc-badge" style="background:var(--sc-warning-light);color:var(--sc-warning);">Rendah</span>
                         @else
-                        <span class="sh-badge" style="background:var(--sh-success-light);color:var(--sh-success);">Normal</span>
+                        <span class="sc-badge" style="background:var(--sc-success-light);color:var(--sc-success);">Normal</span>
                         @endif
                     </td>
                 </tr>
@@ -169,7 +169,7 @@
 @push('scripts')
 <script>
 // Progress bar for export button
-document.querySelectorAll('.sh-export-btn').forEach(function(btn) {
+document.querySelectorAll('.sc-export-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
         var icon = btn.querySelector('i');
         if (icon) icon.className = 'spinner-border spinner-border-sm me-1';

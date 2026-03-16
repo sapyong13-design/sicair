@@ -1,38 +1,38 @@
 @extends('layouts.app')
 
-@section('title', 'Profil Saya - SiHEALING')
+@section('title', 'Profil Saya - SiCAIR')
 
 @section('content')
 {{-- Breadcrumb (#10) --}}
-<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+<nav class="sc-breadcrumb" aria-label="Breadcrumb">
     <a href="{{ route('dashboard') }}">Dashboard</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
-    <span class="sh-breadcrumb-current">Profil Saya</span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-current">Profil Saya</span>
 </nav>
 
-<div class="sh-page-header">
-    <h2 class="sh-page-title mb-0">
-        <i class="ti ti-user-circle me-1" style="color: var(--sh-primary);" aria-hidden="true"></i> Profil Saya
+<div class="sc-page-header">
+    <h2 class="sc-page-title mb-0">
+        <i class="ti ti-user-circle me-1" style="color: var(--sc-primary);" aria-hidden="true"></i> Profil Saya
     </h2>
 </div>
 
 <div class="row g-4">
     {{-- Left: Profile Card --}}
     <div class="col-lg-4">
-        <div class="card sh-card mb-4">
+        <div class="card sc-card mb-4">
             <div class="card-body p-4 text-center">
-                <div class="sh-user-avatar mx-auto mb-3" style="width: clamp(64px, 12vw, 96px); height: clamp(64px, 12vw, 96px); font-size: clamp(1.4rem, 4vw, 2rem); background: var(--sh-primary-light); color: var(--sh-primary); border: 3px solid var(--sh-accent); border-radius: 20px; flex-shrink: 0;">
+                <div class="sc-user-avatar mx-auto mb-3" style="width: clamp(64px, 12vw, 96px); height: clamp(64px, 12vw, 96px); font-size: clamp(1.4rem, 4vw, 2rem); background: var(--sc-primary-light); color: var(--sc-primary); border: 3px solid var(--sc-accent); border-radius: 20px; flex-shrink: 0;">
                     {{ strtoupper(substr($user->name, 0, 2)) }}
                 </div>
                 <h3 class="fw-bold mb-1">{{ $user->name }}</h3>
                 <div class="text-muted mb-2" style="font-size: 0.88rem;">{{ $user->jabatan ?? '-' }}</div>
                 <div class="d-flex justify-content-center gap-2 flex-wrap mb-3">
-                    <span class="sh-badge sh-badge-approved" style="font-size: 0.75rem;">{{ ucfirst($user->role) }}</span>
+                    <span class="sc-badge sc-badge-approved" style="font-size: 0.75rem;">{{ ucfirst($user->role) }}</span>
                     <span class="badge" style="background: #f1f5f9; color: #475569; border-radius: 50px; font-weight: 600; font-size: 0.75rem; padding: 0.35rem 0.75rem;">
                         {{ ucfirst($user->status_pegawai ?? '-') }}
                     </span>
                     @if($user->lokasi_terpencil)
-                    <span class="badge" style="background: var(--sh-warning-light); color: var(--sh-warning); border-radius: 50px; font-weight: 600; font-size: 0.75rem; padding: 0.35rem 0.75rem;">
+                    <span class="badge" style="background: var(--sc-warning-light); color: var(--sc-warning); border-radius: 50px; font-weight: 600; font-size: 0.75rem; padding: 0.35rem 0.75rem;">
                         <i class="ti ti-map-pin"></i> Terpencil
                     </span>
                     @endif
@@ -41,10 +41,10 @@
         </div>
 
         {{-- Cuti Balance --}}
-        <div class="card sh-card mb-4">
+        <div class="card sc-card mb-4">
             <div class="card-header">
                 <h3 class="card-title mb-0">
-                    <i class="ti ti-calendar-stats me-2" style="color: var(--sh-primary);"></i>
+                    <i class="ti ti-calendar-stats me-2" style="color: var(--sc-primary);"></i>
                     Sisa Cuti Tahunan
                 </h3>
             </div>
@@ -52,17 +52,17 @@
                 @if($cutiInfo)
                 @php $sisaProfile = $cutiInfo['sisa'] ?? 0; @endphp
                 <div class="d-flex align-items-baseline gap-2 mb-2">
-                    <span style="font-size: 2.5rem; font-weight: 800; color: {{ $sisaProfile <= 0 ? 'var(--sh-danger)' : ($sisaProfile <= 3 ? 'var(--sh-warning)' : 'var(--sh-primary)') }};">{{ $sisaProfile }}</span>
+                    <span style="font-size: 2.5rem; font-weight: 800; color: {{ $sisaProfile <= 0 ? 'var(--sc-danger)' : ($sisaProfile <= 3 ? 'var(--sc-warning)' : 'var(--sc-primary)') }};">{{ $sisaProfile }}</span>
                     <span class="text-muted">/ {{ $cutiInfo['total_hak'] }} hari</span>
                     @if($sisaProfile <= 0)
-                    <span class="badge" style="background: var(--sh-danger-light); color: var(--sh-danger); border-radius: 50px; font-size: 0.7rem;" title="Tidak ada saldo cuti tersisa">Habis</span>
+                    <span class="badge" style="background: var(--sc-danger-light); color: var(--sc-danger); border-radius: 50px; font-size: 0.7rem;" title="Tidak ada saldo cuti tersisa">Habis</span>
                     @elseif($sisaProfile <= 3)
-                    <span class="badge" style="background: var(--sh-warning-light); color: var(--sh-warning); border-radius: 50px; font-size: 0.7rem;">Rendah</span>
+                    <span class="badge" style="background: var(--sc-warning-light); color: var(--sc-warning); border-radius: 50px; font-size: 0.7rem;">Rendah</span>
                     @endif
                 </div>
-                <div style="height: 8px; border-radius: 4px; background: var(--sh-gray-100); margin-bottom: 0.75rem;">
+                <div style="height: 8px; border-radius: 4px; background: var(--sc-gray-100); margin-bottom: 0.75rem;">
                     @php $pct = $cutiInfo['total_hak'] > 0 ? ($cutiInfo['sisa'] / $cutiInfo['total_hak']) * 100 : 0; @endphp
-                    <div style="height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--sh-primary), #22c55e); width: {{ $pct }}%;"></div>
+                    <div style="height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--sc-primary), #22c55e); width: {{ $pct }}%;"></div>
                 </div>
                 <div style="font-size: 0.8rem; color: #64748b;">
                     Hak: {{ $cutiInfo['hak_dasar'] }}
@@ -72,21 +72,21 @@
                 </div>
                 @else
                 <div class="d-flex align-items-baseline gap-2 mb-2">
-                    <span style="font-size: 2.5rem; font-weight: 800; color: var(--sh-primary);">{{ $user->leave_balance }}</span>
+                    <span style="font-size: 2.5rem; font-weight: 800; color: var(--sc-primary);">{{ $user->leave_balance }}</span>
                     <span class="text-muted">hari</span>
                 </div>
-                <div style="height: 8px; border-radius: 4px; background: var(--sh-gray-100);">
-                    <div style="height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--sh-primary), #22c55e); width: {{ min(100, ($user->leave_balance / 12) * 100) }}%;"></div>
+                <div style="height: 8px; border-radius: 4px; background: var(--sc-gray-100);">
+                    <div style="height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--sc-primary), #22c55e); width: {{ min(100, ($user->leave_balance / 12) * 100) }}%;"></div>
                 </div>
                 @endif
             </div>
         </div>
 
         {{-- Kepegawaian Info --}}
-        <div class="card sh-card">
+        <div class="card sc-card">
             <div class="card-header">
                 <h3 class="card-title mb-0">
-                    <i class="ti ti-briefcase me-2" style="color: var(--sh-accent);"></i>
+                    <i class="ti ti-briefcase me-2" style="color: var(--sc-accent);"></i>
                     Data Kepegawaian
                 </h3>
             </div>
@@ -108,10 +108,10 @@
     {{-- Right: Edit Forms --}}
     <div class="col-lg-8">
         {{-- Edit Data Pribadi --}}
-        <div class="card sh-card mb-4">
+        <div class="card sc-card mb-4">
             <div class="card-header">
                 <h3 class="card-title mb-0">
-                    <i class="ti ti-edit me-2" style="color: var(--sh-primary);"></i>
+                    <i class="ti ti-edit me-2" style="color: var(--sc-primary);"></i>
                     Edit Data Pribadi
                 </h3>
             </div>
@@ -136,7 +136,7 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <button type="submit" class="btn sh-btn-primary">
+                        <button type="submit" class="btn sc-btn-primary">
                             <i class="ti ti-device-floppy me-1"></i> Simpan
                         </button>
                     </div>
@@ -145,10 +145,10 @@
         </div>
 
         {{-- #48: Preferensi Notifikasi --}}
-        <div class="card sh-card mb-4">
+        <div class="card sc-card mb-4">
             <div class="card-header">
                 <h3 class="card-title mb-0">
-                    <i class="ti ti-bell me-2" style="color: var(--sh-accent);"></i>
+                    <i class="ti ti-bell me-2" style="color: var(--sc-accent);"></i>
                     Preferensi Notifikasi Email
                 </h3>
             </div>
@@ -166,19 +166,19 @@
                                 'email_on_approve'  => ['label' => 'Cuti Disetujui', 'icon' => 'ti-circle-check', 'color' => '#16a34a', 'desc' => 'Email saat pengajuan cuti Anda disetujui'],
                                 'email_on_reject'   => ['label' => 'Cuti Ditolak', 'icon' => 'ti-circle-x', 'color' => '#dc2626', 'desc' => 'Email saat pengajuan cuti Anda ditolak'],
                                 'email_on_pending'  => ['label' => 'Ada Pengajuan Baru', 'icon' => 'ti-file-plus', 'color' => '#d97706', 'desc' => 'Email saat ada bawahan mengajukan cuti (untuk atasan)'],
-                                'email_on_decision' => ['label' => 'Keputusan Pejabat', 'icon' => 'ti-gavel', 'color' => 'var(--sh-primary)', 'desc' => 'Email saat ketua/pejabat memberikan keputusan final'],
+                                'email_on_decision' => ['label' => 'Keputusan Pejabat', 'icon' => 'ti-gavel', 'color' => 'var(--sc-primary)', 'desc' => 'Email saat ketua/pejabat memberikan keputusan final'],
                             ];
                         @endphp
                         @foreach($notifOptions as $key => $opt)
                         <div class="col-md-6">
-                            <div class="d-flex align-items-start gap-3 p-3 rounded" style="background:var(--sh-gray-50);border:1px solid var(--sh-border);">
+                            <div class="d-flex align-items-start gap-3 p-3 rounded" style="background:var(--sc-gray-50);border:1px solid var(--sc-border);">
                                 <div style="width:36px;height:36px;border-radius:10px;background:{{ $opt['color'] }}1a;color:{{ $opt['color'] }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                     <i class="ti {{ $opt['icon'] }}"></i>
                                 </div>
                                 <div class="flex-fill">
                                     <label class="d-flex align-items-center justify-content-between gap-2 mb-0" style="cursor:pointer;">
                                         <div>
-                                            <div class="fw-semibold" style="font-size:0.875rem;color:var(--sh-text);">{{ $opt['label'] }}</div>
+                                            <div class="fw-semibold" style="font-size:0.875rem;color:var(--sc-text);">{{ $opt['label'] }}</div>
                                             <div class="text-muted" style="font-size:0.78rem;">{{ $opt['desc'] }}</div>
                                         </div>
                                         <div class="form-check form-switch ms-2 mb-0">
@@ -193,7 +193,7 @@
                         @endforeach
                     </div>
                     <div class="mt-3">
-                        <button type="submit" class="btn sh-btn-primary">
+                        <button type="submit" class="btn sc-btn-primary">
                             <i class="ti ti-device-floppy me-1"></i> Simpan Preferensi
                         </button>
                     </div>
@@ -203,10 +203,10 @@
 
         {{-- Delegasi Atasan --}}
         @if(auth()->user()->canApproveAsAtasan())
-        <div class="card sh-card mb-4">
+        <div class="card sc-card mb-4">
             <div class="card-header">
                 <h3 class="card-title mb-0">
-                    <i class="ti ti-user-share me-2" style="color: var(--sh-primary);"></i>
+                    <i class="ti ti-user-share me-2" style="color: var(--sc-primary);"></i>
                     Delegasi Persetujuan
                 </h3>
             </div>
@@ -240,7 +240,7 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <button type="submit" class="btn sh-btn-primary">
+                        <button type="submit" class="btn sc-btn-primary">
                             <i class="ti ti-device-floppy me-1"></i> Simpan Delegasi
                         </button>
                     </div>
@@ -250,10 +250,10 @@
         @endif
 
         {{-- Ganti Password --}}
-        <div class="card sh-card">
+        <div class="card sc-card">
             <div class="card-header">
                 <h3 class="card-title mb-0">
-                    <i class="ti ti-lock me-2" style="color: var(--sh-danger);"></i>
+                    <i class="ti ti-lock me-2" style="color: var(--sc-danger);"></i>
                     Ganti Password
                 </h3>
             </div>
@@ -268,7 +268,7 @@
                                 <input type="password" name="current_password" id="pw_old" class="form-control @error('current_password') is-invalid @enderror" required
                                        autocomplete="current-password"
                                        style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px; padding-right: 44px; transition: border-color 0.2s;">
-                                <button type="button" class="sh-pw-eye" onclick="togglePw('pw_old', this)" title="Tampilkan/sembunyikan" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1.1rem;"><i class="ti ti-eye"></i></button>
+                                <button type="button" class="sc-pw-eye" onclick="togglePw('pw_old', this)" title="Tampilkan/sembunyikan" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1.1rem;"><i class="ti ti-eye"></i></button>
                             </div>
                             @error('current_password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                         </div>
@@ -279,7 +279,7 @@
                                        placeholder="Min. 6 karakter"
                                        autocomplete="new-password"
                                        style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px; padding-right: 44px; transition: border-color 0.2s;">
-                                <button type="button" class="sh-pw-eye" onclick="togglePw('pw_new', this)" title="Tampilkan/sembunyikan" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1.1rem;"><i class="ti ti-eye"></i></button>
+                                <button type="button" class="sc-pw-eye" onclick="togglePw('pw_new', this)" title="Tampilkan/sembunyikan" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1.1rem;"><i class="ti ti-eye"></i></button>
                             </div>
                             @error('password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                         </div>
@@ -289,12 +289,12 @@
                                 <input type="password" name="password_confirmation" id="pw_confirm" class="form-control" required
                                        autocomplete="new-password"
                                        style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px; padding-right: 44px; transition: border-color 0.2s;">
-                                <button type="button" class="sh-pw-eye" onclick="togglePw('pw_confirm', this)" title="Tampilkan/sembunyikan" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1.1rem;"><i class="ti ti-eye"></i></button>
+                                <button type="button" class="sc-pw-eye" onclick="togglePw('pw_confirm', this)" title="Tampilkan/sembunyikan" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1.1rem;"><i class="ti ti-eye"></i></button>
                             </div>
                         </div>
                     </div>
                     <div class="mt-3">
-                        <button type="submit" class="btn sh-btn-danger">
+                        <button type="submit" class="btn sc-btn-danger">
                             <i class="ti ti-key me-1"></i> Ubah Password
                         </button>
                     </div>

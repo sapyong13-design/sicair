@@ -1,19 +1,19 @@
 @extends('layouts.app')
 
-@section('title', 'Pengaturan Sistem - SiHEALING')
+@section('title', 'Pengaturan Sistem - SiCAIR')
 
 @section('content')
-<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+<nav class="sc-breadcrumb" aria-label="Breadcrumb">
     <a href="{{ route('dashboard') }}">Dashboard</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
-    <span class="sh-breadcrumb-current">Pengaturan Sistem</span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-current">Pengaturan Sistem</span>
 </nav>
 
-<div class="sh-page-header">
-    <h2 class="sh-page-title mb-0">
-        <i class="ti ti-settings me-2" style="color: var(--sh-primary);"></i> Pengaturan Sistem
+<div class="sc-page-header">
+    <h2 class="sc-page-title mb-0">
+        <i class="ti ti-settings me-2" style="color: var(--sc-primary);"></i> Pengaturan Sistem
     </h2>
-    <div class="text-muted" style="font-size: 0.85rem;">Konfigurasi nilai-nilai sistem SiHEALING</div>
+    <div class="text-muted" style="font-size: 0.85rem;">Konfigurasi nilai-nilai sistem SiCAIR</div>
 </div>
 
 @if(session('success'))
@@ -38,10 +38,10 @@
 
     @foreach($settings as $group => $items)
     @php $gl = $groupLabels[$group] ?? ['label' => ucfirst($group), 'icon' => 'ti-settings']; @endphp
-    <div class="card sh-card mb-4">
+    <div class="card sc-card mb-4">
         <div class="card-header border-0 py-3" style="background: transparent;">
             <h6 class="mb-0 fw-bold">
-                <i class="ti {{ $gl['icon'] }} me-2" style="color: var(--sh-primary);"></i>
+                <i class="ti {{ $gl['icon'] }} me-2" style="color: var(--sc-primary);"></i>
                 {{ $gl['label'] }}
             </h6>
         </div>
@@ -83,7 +83,7 @@
     @endforeach
 
     <div class="d-flex gap-2">
-        <button type="submit" class="btn sh-btn-primary" style="border-radius: 10px;">
+        <button type="submit" class="btn sc-btn-primary" style="border-radius: 10px;">
             <i class="ti ti-device-floppy me-1"></i> Simpan Pengaturan
         </button>
         <a href="{{ route('admin.backup') }}" class="btn btn-outline-secondary" style="border-radius: 10px;">

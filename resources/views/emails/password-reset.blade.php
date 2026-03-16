@@ -15,11 +15,11 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>🔐 Reset Password SiHEALING</h1>
+        <h1>🔐 Reset Password SiCAIR</h1>
     </div>
     <div class="body">
         <p>Halo, <strong>{{ $user->name }}</strong>.</p>
-        <p>Kami menerima permintaan reset password untuk akun Anda di <strong>SiHEALING — Pengadilan Negeri Natuna</strong>.</p>
+        <p>Kami menerima permintaan reset password untuk akun Anda di <strong>SiCAIR — Pengadilan Negeri Natuna</strong>.</p>
         <p>Klik tombol di bawah untuk membuat password baru:</p>
         <div style="text-align: center; margin: 2rem 0;">
             <a href="{{ $url }}" class="btn">Reset Password Saya</a>
@@ -34,7 +34,7 @@
         </p>
     </div>
     <div class="footer">
-        SiHEALING — Sistem Informasi Hak Elektronik Cuti<br>
+        SiCAIR — Sistem Informasi Hak Elektronik Cuti<br>
         Pengadilan Negeri Natuna
     </div>
 </div>

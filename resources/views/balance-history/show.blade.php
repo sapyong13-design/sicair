@@ -3,11 +3,11 @@
 @section('title', 'Riwayat Saldo Cuti — ' . $user->name)
 
 @section('content')
-<div class="sh-page-header">
+<div class="sc-page-header">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div>
-            <h2 class="sh-page-title mb-1">
-                <i class="ti ti-history me-1" style="color: var(--sh-primary);"></i>
+            <h2 class="sc-page-title mb-1">
+                <i class="ti ti-history me-1" style="color: var(--sc-primary);"></i>
                 Riwayat Saldo Cuti
             </h2>
             <div class="text-muted" style="font-size: 0.85rem;">
@@ -23,29 +23,29 @@
 {{-- Summary card --}}
 <div class="row g-3 mb-4">
     <div class="col-sm-4">
-        <div class="card sh-stat-card stat-success">
+        <div class="card sc-stat-card stat-success">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="sh-stat-label mb-1">Saldo Saat Ini</div>
-                        <div class="sh-stat-number" style="color: var(--sh-success);">{{ $currentBalance }}</div>
+                        <div class="sc-stat-label mb-1">Saldo Saat Ini</div>
+                        <div class="sc-stat-number" style="color: var(--sc-success);">{{ $currentBalance }}</div>
                         <div class="text-muted" style="font-size: 0.75rem;">hari tersisa</div>
                     </div>
-                    <div class="sh-stat-icon icon-success"><i class="ti ti-calendar-stats"></i></div>
+                    <div class="sc-stat-icon icon-success"><i class="ti ti-calendar-stats"></i></div>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-sm-4">
-        <div class="card sh-stat-card stat-warning">
+        <div class="card sc-stat-card stat-warning">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="sh-stat-label mb-1">Total Perubahan</div>
-                        <div class="sh-stat-number" style="color: var(--sh-warning);">{{ $history->count() }}</div>
+                        <div class="sc-stat-label mb-1">Total Perubahan</div>
+                        <div class="sc-stat-number" style="color: var(--sc-warning);">{{ $history->count() }}</div>
                         <div class="text-muted" style="font-size: 0.75rem;">entri tercatat</div>
                     </div>
-                    <div class="sh-stat-icon icon-warning"><i class="ti ti-history"></i></div>
+                    <div class="sc-stat-icon icon-warning"><i class="ti ti-history"></i></div>
                 </div>
             </div>
         </div>
@@ -55,15 +55,15 @@
             $totalDeducted = $history->filter(fn($l) => ($l->new_values['balance'] ?? 0) < ($l->old_values['balance'] ?? 0))
                 ->sum(fn($l) => ($l->old_values['balance'] ?? 0) - ($l->new_values['balance'] ?? 0));
         @endphp
-        <div class="card sh-stat-card stat-danger">
+        <div class="card sc-stat-card stat-danger">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="sh-stat-label mb-1">Total Terpakai</div>
-                        <div class="sh-stat-number" style="color: var(--sh-danger);">{{ $totalDeducted }}</div>
+                        <div class="sc-stat-label mb-1">Total Terpakai</div>
+                        <div class="sc-stat-number" style="color: var(--sc-danger);">{{ $totalDeducted }}</div>
                         <div class="text-muted" style="font-size: 0.75rem;">hari dikurangi</div>
                     </div>
-                    <div class="sh-stat-icon icon-danger"><i class="ti ti-calendar-minus"></i></div>
+                    <div class="sc-stat-icon icon-danger"><i class="ti ti-calendar-minus"></i></div>
                 </div>
             </div>
         </div>
@@ -71,10 +71,10 @@
 </div>
 
 {{-- History table --}}
-<div class="card sh-card animate-in">
+<div class="card sc-card animate-in">
     <div class="card-header">
         <h3 class="card-title mb-0">
-            <i class="ti ti-list me-2" style="color: var(--sh-primary);"></i>
+            <i class="ti ti-list me-2" style="color: var(--sc-primary);"></i>
             50 Perubahan Terakhir
         </h3>
     </div>
@@ -103,7 +103,7 @@
                         <div class="text-muted" style="font-size: 0.72rem;">{{ $log->created_at->format('H:i') }}</div>
                     </td>
                     <td>
-                        <span class="sh-badge sh-badge-{{ $diff > 0 ? 'approved' : ($diff < 0 ? 'rejected' : 'pending') }}"
+                        <span class="sc-badge sc-badge-{{ $diff > 0 ? 'approved' : ($diff < 0 ? 'rejected' : 'pending') }}"
                               style="font-size: 0.72rem;">
                             {{ $log->action_label }}
                         </span>
@@ -135,8 +135,8 @@
                 <tr>
                     <td colspan="6" class="py-5">
                         <div class="text-center">
-                            <div class="sh-empty-icon mb-3"><i class="ti ti-history"></i></div>
-                            <div class="fw-semibold mb-1" style="color: var(--sh-text);">Belum ada riwayat perubahan saldo</div>
+                            <div class="sc-empty-icon mb-3"><i class="ti ti-history"></i></div>
+                            <div class="fw-semibold mb-1" style="color: var(--sc-text);">Belum ada riwayat perubahan saldo</div>
                             <div class="text-muted" style="font-size: 0.85rem;">Riwayat akan muncul setelah ada penyesuaian saldo</div>
                         </div>
                     </td>

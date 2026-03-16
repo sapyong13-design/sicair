@@ -1,11 +1,11 @@
 @extends('layouts.app')
-@section('title', 'Manajemen Backup - SiHEALING')
+@section('title', 'Manajemen Backup - SiCAIR')
 
 @section('content')
-<div class="sh-page-header mb-4">
+<div class="sc-page-header mb-4">
     <div>
-        <h2 class="sh-page-title mb-1">
-            <i class="ti ti-database-export me-2" style="color:var(--sh-primary);"></i>Manajemen Backup
+        <h2 class="sc-page-title mb-1">
+            <i class="ti ti-database-export me-2" style="color:var(--sc-primary);"></i>Manajemen Backup
         </h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0" style="font-size:0.8rem;">
@@ -26,7 +26,7 @@
 @endif
 
 {{-- Manual Backup Card --}}
-<div class="card sh-card mb-4">
+<div class="card sc-card mb-4">
     <div class="card-body">
         <h5 class="fw-bold mb-1"><i class="ti ti-shield-lock me-2 text-primary"></i>Backup Manual</h5>
         <p class="text-muted mb-3" style="font-size:0.875rem;">
@@ -34,7 +34,7 @@
         </p>
         <form method="POST" action="{{ route('admin.backup.run') }}">
             @csrf
-            <button type="submit" class="btn sh-btn-primary"
+            <button type="submit" class="btn sc-btn-primary"
                     onclick="return confirm('Buat backup database sekarang?')">
                 <i class="ti ti-database-export me-1"></i> Buat Backup Sekarang
             </button>
@@ -43,7 +43,7 @@
 </div>
 
 {{-- Backup List Card --}}
-<div class="card sh-card">
+<div class="card sc-card">
     <div class="card-body">
         <h5 class="fw-bold mb-3">
             <i class="ti ti-files me-2 text-primary"></i>Daftar Backup

@@ -17,7 +17,7 @@ class WhatsAppTest extends Command
     {
         $phone   = $this->argument('phone');
         $message = $this->argument('message')
-            ?? 'Test SiHEALING WA Bot — ' . now()->format('d/m/Y H:i:s');
+            ?? 'Test SiCAIR WA Bot — ' . now()->format('d/m/Y H:i:s');
 
         $this->info("Mengirim ke : {$phone}");
         $this->line("Pesan       : {$message}");

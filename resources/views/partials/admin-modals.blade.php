@@ -5,8 +5,8 @@
             <form method="POST" action="{{ route('leave.approve', $req) }}">
                 @csrf
                 <div class="modal-body p-4 text-center">
-                    <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--sh-success-light); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
-                        <i class="ti ti-circle-check" style="font-size: 2rem; color: var(--sh-success);"></i>
+                    <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--sc-success-light); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                        <i class="ti ti-circle-check" style="font-size: 2rem; color: var(--sc-success);"></i>
                     </div>
                     <h3 class="fw-bold mb-1">Setujui Cuti?</h3>
                     <p class="text-muted mb-3">
@@ -14,7 +14,7 @@
                         <strong class="text-dark">{{ $req->total_days }} hari</strong>
                         <br><span style="font-size: 0.82rem;">({{ $req->start_date->format('d M Y') }} - {{ $req->end_date->format('d M Y') }})</span>
                     </p>
-                    <div class="alert mb-3" style="background: var(--sh-primary-light); border: none; border-radius: 10px; color: var(--sh-primary); font-size: 0.85rem;">
+                    <div class="alert mb-3" style="background: var(--sc-primary-light); border: none; border-radius: 10px; color: var(--sc-primary); font-size: 0.85rem;">
                         <i class="ti ti-info-circle me-1"></i>
                         Sisa cuti pegawai akan otomatis berkurang {{ $req->total_days }} hari.
                     </div>
@@ -25,7 +25,7 @@
                 </div>
                 <div class="modal-footer border-0 pt-0 px-4 pb-4" style="justify-content: center; gap: 0.5rem;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; min-width: 100px;">Batal</button>
-                    <button type="submit" class="btn sh-btn-success" style="min-width: 100px;">
+                    <button type="submit" class="btn sc-btn-success" style="min-width: 100px;">
                         <i class="ti ti-check me-1"></i> Setujui
                     </button>
                 </div>
@@ -41,8 +41,8 @@
             <form method="POST" action="{{ route('leave.reject', $req) }}">
                 @csrf
                 <div class="modal-body p-4 text-center">
-                    <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--sh-danger-light); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
-                        <i class="ti ti-circle-x" style="font-size: 2rem; color: var(--sh-danger);"></i>
+                    <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--sc-danger-light); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                        <i class="ti ti-circle-x" style="font-size: 2rem; color: var(--sc-danger);"></i>
                     </div>
                     <h3 class="fw-bold mb-1">Tolak Pengajuan?</h3>
                     <p class="text-muted mb-3">
@@ -56,7 +56,7 @@
                 </div>
                 <div class="modal-footer border-0 pt-0 px-4 pb-4" style="justify-content: center; gap: 0.5rem;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; min-width: 100px;">Batal</button>
-                    <button type="submit" class="btn sh-btn-danger" style="min-width: 100px;">
+                    <button type="submit" class="btn sc-btn-danger" style="min-width: 100px;">
                         <i class="ti ti-x me-1"></i> Tolak
                     </button>
                 </div>

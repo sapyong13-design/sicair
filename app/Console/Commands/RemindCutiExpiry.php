@@ -46,7 +46,7 @@ class RemindCutiExpiry extends Command
 
             $sisa = $record->carry_over;
 
-            $message = "Reminder SiHEALING: Anda masih memiliki {$sisa} hari cuti carry-over dari tahun " .
+            $message = "Reminder SiCAIR: Anda masih memiliki {$sisa} hari cuti carry-over dari tahun " .
                 (now()->year - 1) . " yang akan kadaluarsa pada 31 Maret " . now()->year .
                 ". Segera ajukan cuti sebelum kadaluarsa!";
 

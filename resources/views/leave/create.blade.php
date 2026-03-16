@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Ajukan Cuti - SiHEALING')
+@section('title', 'Ajukan Cuti - SiCAIR')
 
 @php
     $typeLabels = \App\Models\LeaveRequest::typeLabels();
@@ -12,28 +12,28 @@
 @section('content')
 {{-- T19: Sticky saldo bar (mobile only) --}}
 @if(!$user->isAdmin())
-<div class="sh-sticky-balance">
+<div class="sc-sticky-balance">
     <span><i class="ti ti-calendar-stats me-1"></i> Saldo Cuti Tahunan</span>
     <strong>{{ $user->leave_balance ?? 0 }} hari tersisa</strong>
 </div>
 @endif
 {{-- Breadcrumb (#10) --}}
-<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+<nav class="sc-breadcrumb" aria-label="Breadcrumb">
     <a href="{{ route('dashboard') }}">Dashboard</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
     <a href="{{ route('leave.select-type') }}">Pilih Jenis Cuti</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
-    <span class="sh-breadcrumb-current">{{ $typeLabel }}</span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-current">{{ $typeLabel }}</span>
 </nav>
 
 {{-- Page Header --}}
-<div class="sh-page-header">
+<div class="sc-page-header">
     <div class="d-flex align-items-center gap-3">
         <a href="{{ route('leave.select-type') }}" class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;" aria-label="Kembali ke pilih jenis cuti">
             <i class="ti ti-arrow-left" style="font-size: 1.2rem;" aria-hidden="true"></i>
         </a>
         <div>
-            <h2 class="sh-page-title mb-0">Ajukan {{ $typeLabel }}</h2>
+            <h2 class="sc-page-title mb-0">Ajukan {{ $typeLabel }}</h2>
             <div class="text-muted" style="font-size: 0.85rem;">
                 Isi formulir pengajuan cuti dengan lengkap
             </div>
@@ -42,7 +42,7 @@
 </div>
 
 {{-- Wizard Step Indicator --}}
-<div class="sh-wizard-nav mb-4" id="wizardNav">
+<div class="sc-wizard-nav mb-4" id="wizardNav">
     <div class="wiz-step active" data-step="1">
         <div class="wiz-num">1</div>
         <div class="wiz-label">Info Cuti</div>
@@ -64,13 +64,13 @@
 
         {{-- Balance info card (Cuti Tahunan) --}}
         @if($type === 'cuti_tahunan' && $cutiInfo)
-        <div class="card sh-stat-card stat-primary mb-4">
+        <div class="card sc-stat-card stat-primary mb-4">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="sh-stat-label mb-1">Sisa Cuti Tahunan {{ date('Y') }}</div>
+                        <div class="sc-stat-label mb-1">Sisa Cuti Tahunan {{ date('Y') }}</div>
                         <div class="d-flex align-items-baseline gap-1">
-                            <span class="sh-stat-number" style="color: var(--sh-primary);">{{ $cutiInfo['sisa_cuti'] ?? $cutiInfo['sisa'] ?? $user->leave_balance }}</span>
+                            <span class="sc-stat-number" style="color: var(--sc-primary);">{{ $cutiInfo['sisa_cuti'] ?? $cutiInfo['sisa'] ?? $user->leave_balance }}</span>
                             <span class="text-muted" style="font-size: 0.85rem;">/ {{ $cutiInfo['total_hak'] ?? 12 }} hari</span>
                         </div>
                         <div class="text-muted mt-1" style="font-size: 0.78rem;">
@@ -81,18 +81,18 @@
                             <span data-bs-toggle="tooltip" data-bs-placement="top"
                                   title="Tambahan cuti tahunan bagi pegawai yang bertugas di daerah terpencil: 10 hari untuk sangat terpencil, 6 hari untuk terpencil."
                                   style="cursor:help;">
-                                <i class="ti ti-info-circle" style="font-size:0.75rem;color:var(--sh-primary);"></i>
+                                <i class="ti ti-info-circle" style="font-size:0.75rem;color:var(--sc-primary);"></i>
                             </span>
                             @endif
                         </div>
                     </div>
-                    <div class="sh-stat-icon icon-primary">
+                    <div class="sc-stat-icon icon-primary">
                         <i class="ti ti-calendar-stats"></i>
                     </div>
                 </div>
-                <div style="height: 6px; border-radius: 3px; background: var(--sh-gray-100); margin-top: 0.75rem;">
+                <div style="height: 6px; border-radius: 3px; background: var(--sc-gray-100); margin-top: 0.75rem;">
                     @php $hakTotal = $cutiInfo['total_hak'] ?? 12; @endphp
-                    <div style="height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--sh-primary), #22c55e); width: {{ $hakTotal > 0 ? (($cutiInfo['sisa_cuti'] ?? $cutiInfo['sisa'] ?? $user->leave_balance) / $hakTotal) * 100 : 0 }}%;"></div>
+                    <div style="height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--sc-primary), #22c55e); width: {{ $hakTotal > 0 ? (($cutiInfo['sisa_cuti'] ?? $cutiInfo['sisa'] ?? $user->leave_balance) / $hakTotal) * 100 : 0 }}%;"></div>
                 </div>
             </div>
         </div>
@@ -101,13 +101,13 @@
         {{-- Type Info Banner --}}
         @php
             $typeInfo = match($type) {
-                'cuti_tahunan' => ['icon' => 'ti-calendar-stats', 'color' => 'var(--sh-primary)', 'bg' => 'var(--sh-primary-light)', 'desc' => '12 hari kerja/tahun. Pengajuan minimal 5 hari kerja sebelum pelaksanaan.'],
+                'cuti_tahunan' => ['icon' => 'ti-calendar-stats', 'color' => 'var(--sc-primary)', 'bg' => 'var(--sc-primary-light)', 'desc' => '12 hari kerja/tahun. Pengajuan minimal 5 hari kerja sebelum pelaksanaan.'],
                 'cuti_besar' => ['icon' => 'ti-calendar-month', 'color' => '#7c3aed', 'bg' => '#f3e8ff', 'desc' => 'Maksimal 3 bulan. Syarat: masa kerja 5 tahun. Pengajuan minimal 14 hari sebelumnya.'],
-                'cuti_sakit' => ['icon' => 'ti-stethoscope', 'color' => 'var(--sh-danger)', 'bg' => 'var(--sh-danger-light)', 'desc' => 'Maksimal 1 tahun. Wajib melampirkan surat keterangan dokter.'],
+                'cuti_sakit' => ['icon' => 'ti-stethoscope', 'color' => 'var(--sc-danger)', 'bg' => 'var(--sc-danger-light)', 'desc' => 'Maksimal 1 tahun. Wajib melampirkan surat keterangan dokter.'],
                 'cuti_melahirkan' => ['icon' => 'ti-baby-carriage', 'color' => '#db2777', 'bg' => '#fce7f3', 'desc' => '3 bulan kalender. Berlaku untuk kelahiran anak ke-1, 2, 3 saat PNS.'],
-                'cuti_alasan_penting' => ['icon' => 'ti-urgent', 'color' => 'var(--sh-warning)', 'bg' => 'var(--sh-warning-light)', 'desc' => 'Maksimal 1 bulan. Untuk keluarga sakit/meninggal, perkawinan, musibah, dll.'],
+                'cuti_alasan_penting' => ['icon' => 'ti-urgent', 'color' => 'var(--sc-warning)', 'bg' => 'var(--sc-warning-light)', 'desc' => 'Maksimal 1 bulan. Untuk keluarga sakit/meninggal, perkawinan, musibah, dll.'],
                 'cuti_luar_tanggungan' => ['icon' => 'ti-world', 'color' => '#64748b', 'bg' => '#f1f5f9', 'desc' => 'Maksimal 3 tahun. Tanpa penghasilan. Syarat: masa kerja 5 tahun, pengajuan 3 bulan sebelumnya.'],
-                default => ['icon' => 'ti-calendar', 'color' => 'var(--sh-primary)', 'bg' => 'var(--sh-primary-light)', 'desc' => ''],
+                default => ['icon' => 'ti-calendar', 'color' => 'var(--sc-primary)', 'bg' => 'var(--sc-primary-light)', 'desc' => ''],
             };
         @endphp
         <div class="mb-4" style="background: {{ $typeInfo['bg'] }}; border-radius: 14px; padding: 1rem 1.25rem;">
@@ -123,29 +123,29 @@
         </div>
 
         {{-- #22 Personal Usage Summary --}}
-        <div class="mb-4 p-3" style="background: var(--sh-gray-50); border-radius: 14px; border: 1px solid var(--sh-border);">
+        <div class="mb-4 p-3" style="background: var(--sc-gray-50); border-radius: 14px; border: 1px solid var(--sc-border);">
             <div class="d-flex align-items-center gap-2 mb-2">
-                <i class="ti ti-chart-bar" style="color: var(--sh-primary);"></i>
+                <i class="ti ti-chart-bar" style="color: var(--sc-primary);"></i>
                 <span class="fw-bold" style="font-size: 0.85rem;">Riwayat Penggunaan Cuti Anda</span>
             </div>
             <div class="row g-2">
                 <div class="col-6">
-                    <div style="font-size: 0.78rem; color: var(--sh-text-muted);">Tahun {{ date('Y') }}</div>
-                    <div class="fw-bold" style="color: var(--sh-primary);">{{ $thisYearDays ?? 0 }} hari</div>
+                    <div style="font-size: 0.78rem; color: var(--sc-text-muted);">Tahun {{ date('Y') }}</div>
+                    <div class="fw-bold" style="color: var(--sc-primary);">{{ $thisYearDays ?? 0 }} hari</div>
                 </div>
                 <div class="col-6">
-                    <div style="font-size: 0.78rem; color: var(--sh-text-muted);">Tahun {{ date('Y') - 1 }}</div>
-                    <div class="fw-bold" style="color: var(--sh-text-muted);">{{ $lastYearDays ?? 0 }} hari</div>
+                    <div style="font-size: 0.78rem; color: var(--sc-text-muted);">Tahun {{ date('Y') - 1 }}</div>
+                    <div class="fw-bold" style="color: var(--sc-text-muted);">{{ $lastYearDays ?? 0 }} hari</div>
                 </div>
             </div>
         </div>
 
         {{-- #21 Re-apply Notice --}}
         @if(isset($reapplyData))
-        <div class="mb-4 p-3" style="background: var(--sh-warning-light); border-radius: 14px; border: 1px solid var(--sh-warning);">
+        <div class="mb-4 p-3" style="background: var(--sc-warning-light); border-radius: 14px; border: 1px solid var(--sc-warning);">
             <div class="d-flex align-items-center gap-2">
-                <i class="ti ti-refresh" style="color: var(--sh-warning);"></i>
-                <div style="font-size: 0.85rem; color: var(--sh-warning);">
+                <i class="ti ti-refresh" style="color: var(--sc-warning);"></i>
+                <div style="font-size: 0.85rem; color: var(--sc-warning);">
                     <strong>Pengajuan Ulang</strong> — Data dari pengajuan sebelumnya sudah diisi ulang. Silakan periksa dan sesuaikan.
                 </div>
             </div>
@@ -153,16 +153,16 @@
         @endif
 
         {{-- Form Card --}}
-        <div class="card sh-card">
+        <div class="card sc-card">
             <div class="card-header">
                 <h3 class="card-title mb-0">
-                    <i class="ti ti-file-plus me-2" style="color: var(--sh-primary);"></i>
+                    <i class="ti ti-file-plus me-2" style="color: var(--sc-primary);"></i>
                     Formulir Pengajuan
                 </h3>
             </div>
             <div class="card-body p-4">
                 @if($errors->any())
-                <div class="alert mb-4" style="background: var(--sh-danger-light); color: var(--sh-danger); border-radius: 12px; border: none;">
+                <div class="alert mb-4" style="background: var(--sc-danger-light); color: var(--sc-danger); border-radius: 12px; border: none;">
                     <div class="d-flex align-items-start gap-2">
                         <i class="ti ti-alert-circle" style="font-size: 1.2rem; margin-top: 2px;"></i>
                         <ul class="mb-0 ps-0" style="list-style: none;">
@@ -195,7 +195,7 @@
                     @if($type === 'cuti_alasan_penting')
                     <div class="mb-4">
                         <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
-                            <i class="ti ti-list me-1" style="color: var(--sh-warning);"></i>
+                            <i class="ti ti-list me-1" style="color: var(--sc-warning);"></i>
                             Kategori Alasan Penting <span class="text-danger">*</span>
                             <span data-bs-toggle="tooltip" data-bs-placement="top"
                                   title="Pilih kategori yang paling sesuai dengan alasan cuti Anda. Setiap kategori memiliki ketentuan berbeda."
@@ -238,7 +238,7 @@
                     {{-- Reason --}}
                     <div class="mb-4">
                         <div class="mb-2">
-                            <select id="sh-reason-template" class="form-select form-select-sm" style="border-radius:8px; font-size:0.85rem;">
+                            <select id="sc-reason-template" class="form-select form-select-sm" style="border-radius:8px; font-size:0.85rem;">
                                 <option value="">-- Pilih template alasan (opsional) --</option>
                                 <option value="Keperluan keluarga yang mendesak dan tidak dapat ditunda.">Keperluan keluarga mendesak</option>
                                 <option value="Melaksanakan ibadah haji/umrah sesuai jadwal yang telah ditetapkan.">Ibadah haji/umrah</option>
@@ -248,7 +248,7 @@
                             </select>
                         </div>
                         <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
-                            <i class="ti ti-writing me-1" style="color: var(--sh-primary);"></i>
+                            <i class="ti ti-writing me-1" style="color: var(--sc-primary);"></i>
                             Alasan Cuti <span class="text-danger">*</span>
                         </label>
                         <textarea name="reason"
@@ -270,11 +270,11 @@
                         {{-- Character counter (#14) --}}
                         <div class="d-flex justify-content-between mt-1">
                             <div class="form-hint" style="font-size: 0.78rem; color: #94a3b8;">Jelaskan alasan dengan jelas dan singkat.</div>
-                            <div class="sh-char-counter" id="reason-counter">0 / 500 karakter</div>
+                            <div class="sc-char-counter" id="reason-counter">0 / 500 karakter</div>
                         </div>
                         <div class="d-flex justify-content-between mt-1" style="font-size:0.78rem; color:#94a3b8;">
                             <span>Jelaskan alasan pengajuan cuti Anda</span>
-                            <span id="sh-reason-count">0</span>/500
+                            <span id="sc-reason-count">0</span>/500
                         </div>
                     </div>
 
@@ -289,14 +289,14 @@
                             @endif
                         </label>
                         <div id="drop-zone" style="border: 2px dashed #c4b5fd; border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: background 0.2s; position: relative;"
-                             ondragover="event.preventDefault(); this.style.background='var(--sh-primary-light)';"
+                             ondragover="event.preventDefault(); this.style.background='var(--sc-primary-light)';"
                              ondragleave="this.style.background=''"
                              ondrop="handleFileDrop(event)">
                             <i class="ti ti-upload" style="font-size: 2rem; color: #7c3aed; opacity: 0.6;"></i>
                             <div style="font-size: 0.85rem; color: #64748b; margin-top: 0.4rem;">
                                 Seret &amp; lepas file di sini, atau <strong style="color:#7c3aed;">klik untuk pilih</strong>
                             </div>
-                            <div id="drop-file-name" style="font-size: 0.82rem; color: var(--sh-primary); margin-top: 0.25rem;"></div>
+                            <div id="drop-file-name" style="font-size: 0.82rem; color: var(--sc-primary); margin-top: 0.25rem;"></div>
                             <input type="file" name="dokumen_pendukung" id="dokumen-input"
                                    class="@error('dokumen_pendukung') is-invalid @enderror"
                                    accept=".pdf,.jpg,.jpeg,.png"
@@ -320,7 +320,7 @@
                     <div class="row g-3 mb-4">
                         <div class="col-sm-6">
                             <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
-                                <i class="ti ti-calendar-event me-1" style="color: var(--sh-primary);"></i>
+                                <i class="ti ti-calendar-event me-1" style="color: var(--sc-primary);"></i>
                                 Tanggal Mulai <span class="text-danger">*</span>
                             </label>
                             <input type="date" name="start_date"
@@ -330,16 +330,16 @@
                                    style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
                             @error('start_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             {{-- Smart date shortcuts --}}
-                            <div class="d-flex flex-wrap gap-1 mt-2" id="sh-date-shortcuts">
-                                <button type="button" class="sh-date-chip" data-offset="1">Besok</button>
-                                <button type="button" class="sh-date-chip" data-offset="7">Minggu depan</button>
-                                <button type="button" class="sh-date-chip" data-type="next-monday">Senin depan</button>
-                                <button type="button" class="sh-date-chip" data-type="end-month">Akhir bulan</button>
+                            <div class="d-flex flex-wrap gap-1 mt-2" id="sc-date-shortcuts">
+                                <button type="button" class="sc-date-chip" data-offset="1">Besok</button>
+                                <button type="button" class="sc-date-chip" data-offset="7">Minggu depan</button>
+                                <button type="button" class="sc-date-chip" data-type="next-monday">Senin depan</button>
+                                <button type="button" class="sc-date-chip" data-type="end-month">Akhir bulan</button>
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
-                                <i class="ti ti-calendar-event me-1" style="color: var(--sh-primary);"></i>
+                                <i class="ti ti-calendar-event me-1" style="color: var(--sc-primary);"></i>
                                 Tanggal Selesai <span class="text-danger">*</span>
                             </label>
                             <input type="date" name="end_date"
@@ -348,27 +348,27 @@
                                    min="{{ date('Y-m-d') }}" required
                                    style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
                             @error('end_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            <div id="sh-duration-info" class="mt-2" style="font-size:0.85rem; color:#475569; min-height:1.4rem;"></div>
-                            <div id="sh-saldo-warning" class="mt-2 p-2" style="display:none; font-size:0.85rem; background:#fef2f2; border:1px solid #fecaca; color:#dc2626; border-radius:10px;"></div>
+                            <div id="sc-duration-info" class="mt-2" style="font-size:0.85rem; color:#475569; min-height:1.4rem;"></div>
+                            <div id="sc-saldo-warning" class="mt-2 p-2" style="display:none; font-size:0.85rem; background:#fef2f2; border:1px solid #fecaca; color:#dc2626; border-radius:10px;"></div>
                         </div>
                     </div>
 
                     {{-- Conflict Banner (#2) --}}
                     <div class="d-none mb-3" id="conflict-banner">
-                        <div class="d-flex align-items-center gap-2 p-3" style="background: var(--sh-warning-light); border: 2px solid var(--sh-warning); border-radius: 12px;">
-                            <i class="ti ti-alert-triangle" style="color: var(--sh-warning); font-size: 1.2rem; flex-shrink: 0;"></i>
-                            <div style="font-size: 0.85rem; color: var(--sh-warning);" id="conflict-message"></div>
+                        <div class="d-flex align-items-center gap-2 p-3" style="background: var(--sc-warning-light); border: 2px solid var(--sc-warning); border-radius: 12px;">
+                            <i class="ti ti-alert-triangle" style="color: var(--sc-warning); font-size: 1.2rem; flex-shrink: 0;"></i>
+                            <div style="font-size: 0.85rem; color: var(--sc-warning);" id="conflict-message"></div>
                         </div>
                     </div>
 
                     {{-- Duration preview --}}
                     <div class="d-none mb-4" id="duration-preview">
-                        <div class="d-flex align-items-center gap-3 p-3" id="duration-box" style="border-radius: 12px; background: var(--sh-primary-light); border: 2px solid #bbf7d0;">
-                            <div id="duration-icon-box" style="width: 44px; height: 44px; border-radius: 12px; background: var(--sh-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <div class="d-flex align-items-center gap-3 p-3" id="duration-box" style="border-radius: 12px; background: var(--sc-primary-light); border: 2px solid #bbf7d0;">
+                            <div id="duration-icon-box" style="width: 44px; height: 44px; border-radius: 12px; background: var(--sc-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                 <i class="ti ti-hourglass" style="color: #fff; font-size: 1.2rem;"></i>
                             </div>
                             <div>
-                                <div class="fw-bold" id="duration-label" style="color: var(--sh-primary);">Durasi: <span id="duration-days">0</span> hari</div>
+                                <div class="fw-bold" id="duration-label" style="color: var(--sc-primary);">Durasi: <span id="duration-days">0</span> hari</div>
                                 <div class="text-muted" style="font-size: 0.8rem;" id="duration-sub"></div>
                             </div>
                         </div>
@@ -411,7 +411,7 @@
 
                     {{-- ===== WIZARD PANEL 3: Review & Kirim ===== --}}
                     <div class="wiz-panel" id="wiz-panel-3">
-                        <div class="card sh-card">
+                        <div class="card sc-card">
                             <div class="card-body">
                                 <h5 class="fw-bold mb-3"><i class="ti ti-check me-2 text-success"></i>Konfirmasi Pengajuan</h5>
                                 <p class="text-muted mb-3">Periksa kembali detail pengajuan cuti Anda sebelum mengirim.</p>
@@ -428,17 +428,17 @@
                             <i class="ti ti-arrow-left me-1"></i> Sebelumnya
                         </button>
                         <div class="ms-auto d-flex gap-2">
-                            <button type="button" id="btnWizNext" class="btn sh-btn-primary" onclick="wizNext()">
+                            <button type="button" id="btnWizNext" class="btn sc-btn-primary" onclick="wizNext()">
                                 Selanjutnya <i class="ti ti-arrow-right ms-1"></i>
                             </button>
-                            <button type="submit" id="btnWizSubmit" class="btn sh-btn-primary" style="display:none;">
+                            <button type="submit" id="btnWizSubmit" class="btn sc-btn-primary" style="display:none;">
                                 <i class="ti ti-send me-1"></i> Ajukan Cuti
                             </button>
                         </div>
                     </div>
 
                     {{-- Hidden confirm button (kept for modal compatibility) --}}
-                    <button type="button" id="sh-confirm-btn" class="d-none">
+                    <button type="button" id="sc-confirm-btn" class="d-none">
                         <span id="submit-label"></span>
                         <span id="submit-loading" class="d-none"><span class="spinner-border spinner-border-sm me-2" role="status"></span> Mengirim...</span>
                     </button>
@@ -449,19 +449,19 @@
 </div>
 
 {{-- Modal Konfirmasi Submit --}}
-<div class="modal fade" id="sh-confirm-modal" tabindex="-1">
+<div class="modal fade" id="sc-confirm-modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border-radius:16px;">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold">
-                    <i class="ti ti-file-check me-2" style="color:var(--sh-primary,#166534)"></i>Konfirmasi Pengajuan
+                    <i class="ti ti-file-check me-2" style="color:var(--sc-primary,#166534)"></i>Konfirmasi Pengajuan
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="sh-confirm-body"></div>
+            <div class="modal-body" id="sc-confirm-body"></div>
             <div class="modal-footer border-0">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary" id="sh-confirm-submit" style="border-radius:10px;">
+                <button type="button" class="btn btn-primary" id="sc-confirm-submit" style="border-radius:10px;">
                     <i class="ti ti-check me-1"></i> Ya, Ajukan
                 </button>
             </div>
@@ -486,7 +486,7 @@ function handleFileDrop(event) {
     if (files.length > 0) {
         var file = files[0];
         if (file.size > 5 * 1024 * 1024) {
-            if (window.shToast) shToast('File terlalu besar (maks. 5 MB)', 'error');
+            if (window.scToast) scToast('File terlalu besar (maks. 5 MB)', 'error');
             return;
         }
         var input = document.getElementById('dokumen-input');
@@ -495,7 +495,7 @@ function handleFileDrop(event) {
             dt.items.add(file);
             input.files = dt.files;
             document.getElementById('drop-file-name').textContent = '✓ ' + file.name;
-            event.currentTarget.style.background = 'var(--sh-primary-light)';
+            event.currentTarget.style.background = 'var(--sc-primary-light)';
         }
     }
 }
@@ -506,7 +506,7 @@ if (dokumenInput) {
         var label = document.getElementById('drop-file-name');
         if (!file) { if (label) label.textContent = ''; return; }
         if (file.size > 5 * 1024 * 1024) {
-            if (window.shToast) shToast('File terlalu besar (maks. 5 MB)', 'error');
+            if (window.scToast) scToast('File terlalu besar (maks. 5 MB)', 'error');
             this.value = '';
             if (label) label.textContent = '';
             return;
@@ -569,7 +569,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(function() {
                 conflictBanner.classList.add('d-none');
-                if (window.shToast) shToast('Gagal memeriksa konflik jadwal cuti', 'warning');
+                if (window.scToast) scToast('Gagal memeriksa konflik jadwal cuti', 'warning');
             });
         }, 400);
     }
@@ -589,21 +589,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 checkConflict(startDate.value, endDate.value);
 
                 if (type === 'cuti_tahunan' && diff > balance) {
-                    durationBox.style.background = 'var(--sh-danger-light)';
+                    durationBox.style.background = 'var(--sc-danger-light)';
                     durationBox.style.borderColor = '#fca5a5';
-                    iconBox.style.background = 'var(--sh-danger)';
-                    durationLabel.style.color = 'var(--sh-danger)';
-                    durationSub.innerHTML = '<strong style="color: var(--sh-danger);">⚠️ Melebihi sisa cuti Anda (' + balance + ' hari)!</strong>';
+                    iconBox.style.background = 'var(--sc-danger)';
+                    durationLabel.style.color = 'var(--sc-danger)';
+                    durationSub.innerHTML = '<strong style="color: var(--sc-danger);">⚠️ Melebihi sisa cuti Anda (' + balance + ' hari)!</strong>';
                     isValid = false;
                 } else {
-                    durationBox.style.background = 'var(--sh-primary-light)';
+                    durationBox.style.background = 'var(--sc-primary-light)';
                     durationBox.style.borderColor = '#bbf7d0';
-                    iconBox.style.background = 'var(--sh-primary)';
-                    durationLabel.style.color = 'var(--sh-primary)';
+                    iconBox.style.background = 'var(--sc-primary)';
+                    durationLabel.style.color = 'var(--sc-primary)';
                     if (type === 'cuti_tahunan') {
                         // Sprint 1 #1: Show sisa cuti after leave
                         var sisaSetelah = balance - diff;
-                        var sisaColor = sisaSetelah < 0 ? 'var(--sh-danger)' : (sisaSetelah <= 3 ? 'var(--sh-warning)' : 'var(--sh-primary)');
+                        var sisaColor = sisaSetelah < 0 ? 'var(--sc-danger)' : (sisaSetelah <= 3 ? 'var(--sc-warning)' : 'var(--sc-primary)');
                         durationSub.innerHTML = 'Estimasi <strong>' + diff + '</strong> hari kalender &mdash; hari kerja dihitung otomatis &bull; <strong style="color:' + sisaColor + '">Sisa setelah: ' + sisaSetelah + ' hari</strong>';
                     } else {
                         durationSub.innerHTML = diff + ' hari kalender &mdash; hari kerja dihitung otomatis';
@@ -725,13 +725,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function showDraftBanner(draft) {
         var banner = document.createElement('div');
         banner.className = 'mb-3';
-        banner.innerHTML = '<div class="d-flex align-items-center gap-2 p-3" style="background:var(--sh-primary-light);border:2px solid var(--sh-primary);border-radius:12px;">' +
-            '<i class="ti ti-restore" style="color:var(--sh-primary);font-size:1.2rem;flex-shrink:0;"></i>' +
-            '<div style="flex:1;font-size:0.85rem;color:var(--sh-primary);">' +
+        banner.innerHTML = '<div class="d-flex align-items-center gap-2 p-3" style="background:var(--sc-primary-light);border:2px solid var(--sc-primary);border-radius:12px;">' +
+            '<i class="ti ti-restore" style="color:var(--sc-primary);font-size:1.2rem;flex-shrink:0;"></i>' +
+            '<div style="flex:1;font-size:0.85rem;color:var(--sc-primary);">' +
             '<strong>Lanjutkan draft?</strong> Anda punya draft tersimpan untuk cuti ini.' +
             '</div>' +
             '<button type="button" class="btn btn-sm btn-outline-secondary" id="dismiss-draft" style="border-radius:8px;flex-shrink:0;">Abaikan</button>' +
-            '<button type="button" class="btn btn-sm sh-btn-primary ms-2" id="restore-draft" style="flex-shrink:0;">Lanjutkan</button>' +
+            '<button type="button" class="btn btn-sm sc-btn-primary ms-2" id="restore-draft" style="flex-shrink:0;">Lanjutkan</button>' +
             '</div>';
         var form = document.getElementById('leave-form');
         form.insertBefore(banner, form.firstChild);
@@ -796,9 +796,9 @@ document.addEventListener('DOMContentLoaded', function() {
         function updateCounter() {
             var len = reasonTextarea.value.length;
             reasonCounter.textContent = len + ' / 500 karakter';
-            reasonCounter.className = 'sh-char-counter';
-            if (len >= 450) reasonCounter.classList.add('sh-char-danger');
-            else if (len >= 350) reasonCounter.classList.add('sh-char-warning');
+            reasonCounter.className = 'sc-char-counter';
+            if (len >= 450) reasonCounter.classList.add('sc-char-danger');
+            else if (len >= 350) reasonCounter.classList.add('sc-char-warning');
         }
         reasonTextarea.addEventListener('input', updateCounter);
         updateCounter(); // run on page load for old() value
@@ -826,7 +826,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Feature 1: Auto-hitung durasi ---
     var startEl = document.querySelector('[name="start_date"]');
     var endEl   = document.querySelector('[name="end_date"]');
-    var durEl   = document.getElementById('sh-duration-info');
+    var durEl   = document.getElementById('sc-duration-info');
 
     function countWorkdays(s, e) {
         var count = 0, cur = new Date(s), fin = new Date(e);
@@ -846,7 +846,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Feature 2: Validasi saldo ---
     var saldo = parseInt('{{ $user->leave_balance ?? 0 }}');
-    var warnEl = document.getElementById('sh-saldo-warning');
+    var warnEl = document.getElementById('sc-saldo-warning');
     function checkSaldo(days) {
         if (!warnEl) return;
         var type = document.querySelector('[name="type"]');
@@ -861,7 +861,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Feature 3: Character counter ---
     var reasonEl = document.querySelector('[name="reason"], [name="alasan"]');
-    var countEl  = document.getElementById('sh-reason-count');
+    var countEl  = document.getElementById('sc-reason-count');
     if (reasonEl && countEl) {
         var updateCount = function() {
             countEl.textContent = reasonEl.value.length;
@@ -872,7 +872,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- Feature 4: Template alasan ---
-    var tmplEl = document.getElementById('sh-reason-template');
+    var tmplEl = document.getElementById('sc-reason-template');
     if (tmplEl) {
         tmplEl.addEventListener('change', function() {
             if (this.value && reasonEl) {
@@ -908,21 +908,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- Feature 6: Konfirmasi modal ---
-    var confirmBtn = document.getElementById('sh-confirm-btn');
-    var confirmSubmit = document.getElementById('sh-confirm-submit');
+    var confirmBtn = document.getElementById('sc-confirm-btn');
+    var confirmSubmit = document.getElementById('sc-confirm-submit');
     if (confirmBtn) {
         confirmBtn.addEventListener('click', function() {
             var s = startEl ? startEl.value : '-';
             var e = endEl ? endEl.value : '-';
             var dur = durEl ? durEl.textContent : '-';
-            var body = document.getElementById('sh-confirm-body');
+            var body = document.getElementById('sc-confirm-body');
             if (body) body.innerHTML =
                 '<div class="list-group list-group-flush">' +
                 '<div class="list-group-item px-0 py-2"><span class="text-muted" style="font-size:.85rem">Tanggal Mulai</span><strong class="float-end">' + s + '</strong></div>' +
                 '<div class="list-group-item px-0 py-2"><span class="text-muted" style="font-size:.85rem">Tanggal Selesai</span><strong class="float-end">' + e + '</strong></div>' +
                 '<div class="list-group-item px-0 py-2 border-0"><span class="text-muted" style="font-size:.85rem">Durasi</span><strong class="float-end" style="color:#166534">' + dur + '</strong></div>' +
                 '</div>';
-            var modal = new bootstrap.Modal(document.getElementById('sh-confirm-modal'));
+            var modal = new bootstrap.Modal(document.getElementById('sc-confirm-modal'));
             modal.show();
         });
     }
@@ -936,7 +936,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <script>
 // Smart date shortcuts
-document.querySelectorAll('.sh-date-chip').forEach(function(btn) {
+document.querySelectorAll('.sc-date-chip').forEach(function(btn) {
     btn.addEventListener('click', function() {
         var d = new Date();
         var offset = parseInt(this.dataset.offset);
@@ -960,25 +960,25 @@ document.querySelectorAll('.sh-date-chip').forEach(function(btn) {
 </script>
 <style>
 /* Smart date shortcut chips */
-.sh-date-chip {
+.sc-date-chip {
     font-size: 0.75rem;
     padding: 0.25rem 0.65rem;
     border-radius: 99px;
-    border: 1px solid var(--sh-primary, #166534);
-    color: var(--sh-primary, #166534);
+    border: 1px solid var(--sc-primary, #166534);
+    color: var(--sc-primary, #166534);
     background: transparent;
     cursor: pointer;
     transition: all 0.15s;
     white-space: nowrap;
 }
-.sh-date-chip:hover, .sh-date-chip:active {
-    background: var(--sh-primary, #166534);
+.sc-date-chip:hover, .sc-date-chip:active {
+    background: var(--sc-primary, #166534);
     color: white;
 }
 /* Custom invalid-feedback styling */
 .invalid-feedback {
-    background: var(--sh-danger-light, #fee2e2);
-    color: var(--sh-danger, #dc2626);
+    background: var(--sc-danger-light, #fee2e2);
+    color: var(--sc-danger, #dc2626);
     border-radius: 8px;
     padding: 0.35rem 0.75rem;
     font-size: 0.8rem;
@@ -991,14 +991,14 @@ document.querySelectorAll('.sh-date-chip').forEach(function(btn) {
     transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 /* ===== Wizard Styles ===== */
-.sh-wizard-nav { display: flex; align-items: center; justify-content: center; gap: 0; }
+.sc-wizard-nav { display: flex; align-items: center; justify-content: center; gap: 0; }
 .wiz-step { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
-.wiz-num { width: 36px; height: 36px; border-radius: 50%; background: var(--sh-gray-200, #e5e7eb); color: var(--sh-gray-600, #4b5563); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; transition: all 0.25s; }
-.wiz-step.active .wiz-num { background: var(--sh-primary, #16a34a); color: white; }
-.wiz-step.completed .wiz-num { background: var(--sh-success, #22c55e); color: white; }
-.wiz-label { font-size: 0.75rem; color: var(--sh-gray-500, #6b7280); white-space: nowrap; }
-.wiz-step.active .wiz-label { color: var(--sh-primary, #16a34a); font-weight: 600; }
-.wiz-connector { flex: 1; height: 2px; background: var(--sh-gray-200, #e5e7eb); min-width: 40px; margin-bottom: 1.2rem; }
+.wiz-num { width: 36px; height: 36px; border-radius: 50%; background: var(--sc-gray-200, #e5e7eb); color: var(--sc-gray-600, #4b5563); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; transition: all 0.25s; }
+.wiz-step.active .wiz-num { background: var(--sc-primary, #16a34a); color: white; }
+.wiz-step.completed .wiz-num { background: var(--sc-success, #22c55e); color: white; }
+.wiz-label { font-size: 0.75rem; color: var(--sc-gray-500, #6b7280); white-space: nowrap; }
+.wiz-step.active .wiz-label { color: var(--sc-primary, #16a34a); font-weight: 600; }
+.wiz-connector { flex: 1; height: 2px; background: var(--sc-gray-200, #e5e7eb); min-width: 40px; margin-bottom: 1.2rem; }
 .wiz-panel { display: none; }
 .wiz-panel.active { display: block; }
 </style>

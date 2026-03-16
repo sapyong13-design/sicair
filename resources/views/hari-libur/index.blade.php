@@ -1,19 +1,19 @@
 @extends('layouts.app')
 
-@section('title', 'Hari Libur - SiHEALING')
+@section('title', 'Hari Libur - SiCAIR')
 
 @section('content')
 {{-- Breadcrumb (#10) --}}
-<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+<nav class="sc-breadcrumb" aria-label="Breadcrumb">
     <a href="{{ route('dashboard') }}">Dashboard</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
-    <span class="sh-breadcrumb-current">Hari Libur</span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-current">Hari Libur</span>
 </nav>
 
-<div class="sh-page-header">
+<div class="sc-page-header">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <h2 class="sh-page-title mb-0">
-            <i class="ti ti-calendar-off me-1" style="color: var(--sh-danger);" aria-hidden="true"></i> Hari Libur {{ $tahun }}
+        <h2 class="sc-page-title mb-0">
+            <i class="ti ti-calendar-off me-1" style="color: var(--sc-danger);" aria-hidden="true"></i> Hari Libur {{ $tahun }}
         </h2>
         <div class="d-flex gap-2 align-items-center">
             <form method="GET" class="d-flex gap-2 align-items-center">
@@ -32,24 +32,24 @@
                     <i class="ti ti-cloud-download me-1"></i> Import Nasional {{ date('Y') }}
                 </button>
             </form>
-            <a href="{{ route('hari-libur.create') }}" class="btn sh-btn-primary">
+            <a href="{{ route('hari-libur.create') }}" class="btn sc-btn-primary">
                 <i class="ti ti-plus me-1" aria-hidden="true"></i> Tambah
             </a>
         </div>
     </div>
 </div>
 
-<div class="card sh-card">
+<div class="card sc-card">
     @if($hariLibur->isEmpty())
     <div class="card-body py-5 text-center">
-        <div class="sh-empty-icon"><i class="ti ti-calendar-off" aria-hidden="true"></i></div>
+        <div class="sc-empty-icon"><i class="ti ti-calendar-off" aria-hidden="true"></i></div>
         <h4 class="fw-bold text-dark mb-1">Belum Ada Data</h4>
         <p class="text-muted mb-3">Belum ada hari libur yang terdaftar untuk tahun {{ $tahun }}.</p>
-        <a href="{{ route('hari-libur.create') }}" class="btn sh-btn-primary"><i class="ti ti-plus me-1" aria-hidden="true"></i> Tambah Hari Libur</a>
+        <a href="{{ route('hari-libur.create') }}" class="btn sc-btn-primary"><i class="ti ti-plus me-1" aria-hidden="true"></i> Tambah Hari Libur</a>
     </div>
     @else
     <div class="table-responsive">
-        <table class="table sh-table mb-0">
+        <table class="table sc-table mb-0">
             <thead>
                 <tr>
                     <th style="width: 50px;">#</th>
@@ -69,9 +69,9 @@
                     <td>{{ $hl->keterangan }}</td>
                     <td>
                         @if($hl->is_cuti_bersama)
-                            <span class="sh-badge" style="background: var(--sh-accent-light, #fef9c3); color: var(--sh-accent);">Cuti Bersama</span>
+                            <span class="sc-badge" style="background: var(--sc-accent-light, #fef9c3); color: var(--sc-accent);">Cuti Bersama</span>
                         @else
-                            <span class="sh-badge sh-badge-rejected">Libur Nasional</span>
+                            <span class="sc-badge sc-badge-rejected">Libur Nasional</span>
                         @endif
                     </td>
                     <td class="text-end">
@@ -104,8 +104,8 @@
                 @csrf
                 @method('DELETE')
                 <div class="modal-body p-4 text-center">
-                    <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--sh-danger-light); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
-                        <i class="ti ti-alert-triangle" style="font-size: 2rem; color: var(--sh-danger);" aria-hidden="true"></i>
+                    <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--sc-danger-light); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                        <i class="ti ti-alert-triangle" style="font-size: 2rem; color: var(--sc-danger);" aria-hidden="true"></i>
                     </div>
                     <h3 class="fw-bold mb-1" id="deleteHolidayLabel{{ $hl->id }}">Hapus Hari Libur?</h3>
                     <p class="text-muted mb-1">Anda yakin ingin menghapus:</p>
@@ -116,7 +116,7 @@
                 </div>
                 <div class="modal-footer border-0 pt-0 px-4 pb-4" style="justify-content: center; gap: 0.5rem;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; min-width: 100px;">Batal</button>
-                    <button type="submit" class="btn sh-btn-danger" style="min-width: 100px;">
+                    <button type="submit" class="btn sc-btn-danger" style="min-width: 100px;">
                         <i class="ti ti-trash me-1" aria-hidden="true"></i> Hapus
                     </button>
                 </div>

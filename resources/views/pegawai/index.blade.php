@@ -1,21 +1,21 @@
 @extends('layouts.app')
 
-@section('title', 'Kelola Pegawai - SiHEALING')
+@section('title', 'Kelola Pegawai - SiCAIR')
 
 @section('content')
 {{-- Breadcrumb (#10) --}}
-<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+<nav class="sc-breadcrumb" aria-label="Breadcrumb">
     <a href="{{ route('dashboard') }}">Dashboard</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
-    <span class="sh-breadcrumb-current">Kelola Pegawai</span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-current">Kelola Pegawai</span>
 </nav>
 
 {{-- Page Header --}}
-<div class="sh-page-header">
+<div class="sc-page-header">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div>
-            <h2 class="sh-page-title mb-1">
-                <i class="ti ti-users-group me-1" style="color: var(--sh-primary);" aria-hidden="true"></i>
+            <h2 class="sc-page-title mb-1">
+                <i class="ti ti-users-group me-1" style="color: var(--sc-primary);" aria-hidden="true"></i>
                 Kelola Pegawai
             </h2>
             <div class="text-muted" style="font-size: 0.85rem;">
@@ -24,7 +24,7 @@
         </div>
         <div class="d-flex gap-2 flex-wrap">
             {{-- Sprint 5 #29: Export CSV --}}
-            <a href="{{ route('pegawai.export', request()->query()) }}" class="btn btn-outline-secondary sh-export-btn" style="border-radius:10px;">
+            <a href="{{ route('pegawai.export', request()->query()) }}" class="btn btn-outline-secondary sc-export-btn" style="border-radius:10px;">
                 <i class="ti ti-download me-1"></i> Export CSV
             </a>
             {{-- #30: Card/Table Toggle --}}
@@ -48,7 +48,7 @@
                 </button>
             </form>
             @endif
-            <a href="{{ route('pegawai.create') }}" class="btn btn-primary sh-btn-primary">
+            <a href="{{ route('pegawai.create') }}" class="btn btn-primary sc-btn-primary">
                 <i class="ti ti-user-plus me-1"></i> Tambah Pegawai
             </a>
         </div>
@@ -56,13 +56,13 @@
 </div>
 
 {{-- Search & Filters --}}
-<div class="card sh-card mb-4 animate-in">
+<div class="card sc-card mb-4 animate-in">
     <div class="card-body p-3">
         <form method="GET" action="{{ route('pegawai.index') }}">
             <div class="row g-3 align-items-end">
                 <div class="col-12 col-md-4">
                     <label class="form-label" style="font-weight: 600; font-size: 0.8rem;">
-                        <i class="ti ti-search me-1" style="color: var(--sh-primary);"></i> Cari Pegawai
+                        <i class="ti ti-search me-1" style="color: var(--sc-primary);"></i> Cari Pegawai
                     </label>
                     <input type="text"
                            name="search"
@@ -73,7 +73,7 @@
                 </div>
                 <div class="col-6 col-md-2">
                     <label class="form-label" style="font-weight: 600; font-size: 0.8rem;">
-                        <i class="ti ti-shield me-1" style="color: var(--sh-primary);"></i> Role
+                        <i class="ti ti-shield me-1" style="color: var(--sc-primary);"></i> Role
                     </label>
                     <select name="role" class="form-select" style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
                         <option value="">Semua Role</option>
@@ -89,7 +89,7 @@
                 </div>
                 <div class="col-6 col-md-3">
                     <label class="form-label" style="font-weight: 600; font-size: 0.8rem;">
-                        <i class="ti ti-id-badge me-1" style="color: var(--sh-primary);"></i> Status Pegawai
+                        <i class="ti ti-id-badge me-1" style="color: var(--sc-primary);"></i> Status Pegawai
                     </label>
                     <select name="status_pegawai" class="form-select" style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
                         <option value="">Semua Status</option>
@@ -102,7 +102,7 @@
                 </div>
                 <div class="col-6 col-md-2">
                     <label class="form-label" style="font-weight: 600; font-size: 0.8rem;">
-                        <i class="ti ti-toggle-right me-1" style="color: var(--sh-primary);"></i> Status
+                        <i class="ti ti-toggle-right me-1" style="color: var(--sc-primary);"></i> Status
                     </label>
                     <select name="active" class="form-select" style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
                         <option value="">Semua</option>
@@ -112,7 +112,7 @@
                 </div>
                 <div class="col-12 col-md-1">
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary sh-btn-primary flex-fill" style="height: 46px;">
+                        <button type="submit" class="btn btn-primary sc-btn-primary flex-fill" style="height: 46px;">
                             <i class="ti ti-search me-1"></i>
                         </button>
                         @if(request()->hasAny(['search', 'role', 'status_pegawai', 'active']))
@@ -136,7 +136,7 @@
 </form>
 
 {{-- Sprint 5 #28: Floating Bulk Action Bar --}}
-<div id="bulkActionBar" class="d-none" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:1030;background:var(--sh-card-bg);border-radius:50px;padding:0.5rem 1rem;box-shadow:0 8px 32px rgba(0,0,0,0.2);border:2px solid var(--sh-primary);display:flex;align-items:center;gap:0.5rem;">
+<div id="bulkActionBar" class="d-none" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:1030;background:var(--sc-card-bg);border-radius:50px;padding:0.5rem 1rem;box-shadow:0 8px 32px rgba(0,0,0,0.2);border:2px solid var(--sc-primary);display:flex;align-items:center;gap:0.5rem;">
     <span class="fw-semibold text-primary" style="font-size:0.85rem;" id="bulkSelectedCount">0 dipilih</span>
     <button type="button" class="btn btn-sm btn-outline-secondary" style="border-radius:50px;" onclick="doBulkAction('reset-password')">
         <i class="ti ti-key me-1"></i> Reset Password
@@ -153,10 +153,10 @@
 </div>
 
 {{-- Data Table Card --}}
-<div class="card sh-card animate-in" id="pegawaiTableCard">
+<div class="card sc-card animate-in" id="pegawaiTableCard">
     <div class="card-header d-flex align-items-center justify-content-between">
         <h3 class="card-title mb-0">
-            <i class="ti ti-list-details me-2" style="color: var(--sh-primary);"></i>
+            <i class="ti ti-list-details me-2" style="color: var(--sc-primary);"></i>
             Daftar Pegawai
         </h3>
         <span class="text-muted" style="font-size: 0.8rem;">{{ $pegawai->total() }} data</span>
@@ -165,7 +165,7 @@
     @if($pegawai->isEmpty())
     <div class="card-body py-5">
         <div class="text-center">
-            <div class="sh-empty-icon">
+            <div class="sc-empty-icon">
                 <i class="ti ti-users-minus"></i>
             </div>
             <h4 class="fw-bold text-dark mb-1">Tidak Ada Data</h4>
@@ -181,7 +181,7 @@
                 <i class="ti ti-arrow-back me-1"></i> Reset Filter
             </a>
             @else
-            <a href="{{ route('pegawai.create') }}" class="btn btn-primary sh-btn-primary">
+            <a href="{{ route('pegawai.create') }}" class="btn btn-primary sc-btn-primary">
                 <i class="ti ti-user-plus me-1"></i> Tambah Pegawai
             </a>
             @endif
@@ -192,11 +192,11 @@
     {{-- Mobile: Cards --}}
     <div class="card-body d-md-none">
         @foreach($pegawai as $p)
-        <div class="card sh-history-card mb-3" style="border-left-color: var(--sh-primary);">
+        <div class="card sc-history-card mb-3" style="border-left-color: var(--sc-primary);">
             <div class="card-body p-3">
                 <div class="d-flex align-items-start justify-content-between mb-2">
                     <div class="d-flex align-items-center gap-2">
-                        <div class="sh-user-avatar" style="width: 40px; height: 40px; font-size: 0.8rem; background: var(--sh-primary-light); color: var(--sh-primary); border: none; border-radius: 10px;">
+                        <div class="sc-user-avatar" style="width: 40px; height: 40px; font-size: 0.8rem; background: var(--sc-primary-light); color: var(--sc-primary); border: none; border-radius: 10px;">
                             {{ strtoupper(substr($p->name, 0, 2)) }}
                         </div>
                         <div>
@@ -207,13 +207,13 @@
                     @php
                         $roleBadge = match($p->role) {
                             'admin' => 'background: #f3e8ff; color: #7c3aed;',
-                            'ketua' => 'background: var(--sh-primary-light); color: var(--sh-primary);',
-                            'panitera' => 'background: var(--sh-success-light); color: var(--sh-success);',
+                            'ketua' => 'background: var(--sc-primary-light); color: var(--sc-primary);',
+                            'panitera' => 'background: var(--sc-success-light); color: var(--sc-success);',
                             'sekretaris' => 'background: #d1fae5; color: #065f46;',
                             'atasan' => 'background: #dcfce7; color: #166534;',
                             'hakim' => 'background: #fef3c7; color: #b45309;',
                             'hakim_ad_hoc' => 'background: #dbeafe; color: #0c4a6e;',
-                            default => 'background: var(--sh-gray-100); color: #64748b;',
+                            default => 'background: var(--sc-gray-100); color: #64748b;',
                         };
                         $roleLabel = match($p->role) {
                             'admin' => 'Admin',
@@ -227,7 +227,7 @@
                             default => ucfirst($p->role),
                         };
                     @endphp
-                    <span class="sh-badge" style="{{ $roleBadge }}">
+                    <span class="sc-badge" style="{{ $roleBadge }}">
                         {{ $roleLabel }}
                     </span>
                 </div>
@@ -247,21 +247,21 @@
                     </div>
                     <div class="col-6">
                         <div class="text-muted">Sisa Cuti</div>
-                        <div class="fw-semibold" style="color: var(--sh-primary);">{{ $p->leave_balance }} hari</div>
+                        <div class="fw-semibold" style="color: var(--sc-primary);">{{ $p->leave_balance }} hari</div>
                     </div>
                 </div>
 
                 @php
                     $statusBadge = match($p->status_pegawai) {
-                        'hakim' => 'background: var(--sh-primary-light); color: var(--sh-primary);',
-                        'aparatur' => 'background: var(--sh-success-light); color: var(--sh-success);',
-                        'cpns' => 'background: var(--sh-warning-light); color: var(--sh-warning);',
+                        'hakim' => 'background: var(--sc-primary-light); color: var(--sc-primary);',
+                        'aparatur' => 'background: var(--sc-success-light); color: var(--sc-success);',
+                        'cpns' => 'background: var(--sc-warning-light); color: var(--sc-warning);',
                         'cakim' => 'background: #fef9c3; color: #a16207;',
-                        default => 'background: var(--sh-gray-100); color: #64748b;',
+                        default => 'background: var(--sc-gray-100); color: #64748b;',
                     };
                 @endphp
                 <div class="mb-3">
-                    <span class="sh-badge" style="{{ $statusBadge }}">
+                    <span class="sc-badge" style="{{ $statusBadge }}">
                         {{ ucfirst($p->status_pegawai ?? '-') }}
                     </span>
                 </div>
@@ -287,7 +287,7 @@
 
     {{-- Desktop: Table --}}
     <div class="table-responsive d-none d-md-block" id="tableView">
-        <table class="table sh-table mb-0">
+        <table class="table sc-table mb-0">
             @once
             @php
                 function sortUrl($col, $currentSort, $currentDir) {
@@ -333,7 +333,7 @@
                             @if($p->photo)
                             <img src="{{ Storage::url($p->photo) }}" alt="{{ $p->name }}" style="width:38px;height:38px;border-radius:10px;object-fit:cover;flex-shrink:0;">
                             @else
-                            <div class="sh-user-avatar" style="width: 38px; height: 38px; font-size: 0.75rem; background: var(--sh-primary-light); color: var(--sh-primary); border: none; border-radius: 10px;">
+                            <div class="sc-user-avatar" style="width: 38px; height: 38px; font-size: 0.75rem; background: var(--sc-primary-light); color: var(--sc-primary); border: none; border-radius: 10px;">
                                 {{ strtoupper(substr($p->name, 0, 2)) }}
                             </div>
                             @endif
@@ -345,14 +345,14 @@
                     </td>
                     <td>
                         {{-- #31 Inline edit jabatan --}}
-                        <div class="fw-semibold sh-inline-edit" style="font-size: 0.88rem; border-radius:6px; padding:2px 4px; cursor:text;"
+                        <div class="fw-semibold sc-inline-edit" style="font-size: 0.88rem; border-radius:6px; padding:2px 4px; cursor:text;"
                              contenteditable="true"
                              data-pegawai-id="{{ $p->id }}"
                              data-field="jabatan"
                              title="Klik untuk edit jabatan"
                              spellcheck="false">{{ $p->jabatan ?? '' }}</div>
                         <div class="text-muted" style="font-size: 0.78rem;">{{ $p->golongan_ruang ?? '-' }}</div>
-                        <div class="text-muted sh-inline-edit" style="font-size: 0.75rem; border-radius:6px; padding:2px 4px; cursor:text; margin-top:2px;"
+                        <div class="text-muted sc-inline-edit" style="font-size: 0.75rem; border-radius:6px; padding:2px 4px; cursor:text; margin-top:2px;"
                              contenteditable="true"
                              data-pegawai-id="{{ $p->id }}"
                              data-field="unit_kerja"
@@ -363,13 +363,13 @@
                         @php
                             $roleBadge = match($p->role) {
                                 'admin' => 'background: #f3e8ff; color: #7c3aed;',
-                                'ketua' => 'background: var(--sh-primary-light); color: var(--sh-primary);',
-                                'panitera' => 'background: var(--sh-success-light); color: var(--sh-success);',
+                                'ketua' => 'background: var(--sc-primary-light); color: var(--sc-primary);',
+                                'panitera' => 'background: var(--sc-success-light); color: var(--sc-success);',
                                 'sekretaris' => 'background: #d1fae5; color: #065f46;',
                                 'atasan' => 'background: #dcfce7; color: #166534;',
                                 'hakim' => 'background: #fef3c7; color: #b45309;',
                                 'hakim_ad_hoc' => 'background: #dbeafe; color: #0c4a6e;',
-                                default => 'background: var(--sh-gray-100); color: #64748b;',
+                                default => 'background: var(--sc-gray-100); color: #64748b;',
                             };
                             $roleIcon = match($p->role) {
                                 'admin' => 'ti-shield-check',
@@ -393,22 +393,22 @@
                                 default => ucfirst($p->role),
                             };
                         @endphp
-                        <span class="sh-badge" style="{{ $roleBadge }}">
+                        <span class="sc-badge" style="{{ $roleBadge }}">
                             <i class="ti {{ $roleIcon }}"></i> {{ $roleLabel }}
                         </span>
                     </td>
                     <td>
                         @php
                             $statusBadge = match($p->status_pegawai) {
-                                'hakim' => 'background: var(--sh-primary-light); color: var(--sh-primary);',
-                                'aparatur' => 'background: var(--sh-success-light); color: var(--sh-success);',
-                                'cpns' => 'background: var(--sh-warning-light); color: var(--sh-warning);',
+                                'hakim' => 'background: var(--sc-primary-light); color: var(--sc-primary);',
+                                'aparatur' => 'background: var(--sc-success-light); color: var(--sc-success);',
+                                'cpns' => 'background: var(--sc-warning-light); color: var(--sc-warning);',
                                 'cakim' => 'background: #fef9c3; color: #a16207;',
                                 'pppk' => 'background: #ede9fe; color: #7c3aed;',
-                                default => 'background: var(--sh-gray-100); color: #64748b;',
+                                default => 'background: var(--sc-gray-100); color: #64748b;',
                             };
                         @endphp
-                        <span class="sh-badge" style="{{ $statusBadge }}">
+                        <span class="sc-badge" style="{{ $statusBadge }}">
                             {{ ucfirst($p->status_pegawai ?? '-') }}
                         </span>
                     </td>
@@ -417,17 +417,17 @@
                     </td>
                     <td class="text-center">
                         @php $lb = $p->leave_balance ?? 0; @endphp
-                        <span class="fw-bold" style="color: {{ $lb <= 0 ? 'var(--sh-danger)' : ($lb <= 3 ? 'var(--sh-warning)' : 'var(--sh-primary)') }}; font-size: 0.95rem;"
+                        <span class="fw-bold" style="color: {{ $lb <= 0 ? 'var(--sc-danger)' : ($lb <= 3 ? 'var(--sc-warning)' : 'var(--sc-primary)') }}; font-size: 0.95rem;"
                               title="{{ $lb <= 0 ? 'Saldo habis' : ($lb <= 3 ? 'Saldo rendah' : '') }}">{{ $lb }}</span>
                         <span class="text-muted" style="font-size: 0.75rem;">hari</span>
                         @if($p->is_active === false)
-                        <span class="d-block" style="font-size:0.7rem;color:var(--sh-danger);font-weight:600;margin-top:2px;">Non-aktif</span>
+                        <span class="d-block" style="font-size:0.7rem;color:var(--sc-danger);font-weight:600;margin-top:2px;">Non-aktif</span>
                         @endif
                     </td>
                     <td class="text-end">
                         <div class="d-flex gap-1 justify-content-end flex-wrap">
                             {{-- #38 Quick View --}}
-                            <button class="btn btn-sm btn-outline-primary sh-quick-view-btn" style="border-radius: 8px;"
+                            <button class="btn btn-sm btn-outline-primary sc-quick-view-btn" style="border-radius: 8px;"
                                 title="Lihat riwayat cuti {{ $p->name }}"
                                 aria-label="Riwayat cuti {{ $p->name }}"
                                 data-pegawai-id="{{ $p->id }}"
@@ -463,7 +463,7 @@
 
     {{-- Pagination --}}
     @if($pegawai->hasPages())
-    <div class="card-footer d-flex align-items-center justify-content-between" style="background: #fff; border-top: 2px solid var(--sh-gray-100); padding: 0.75rem 1.25rem;">
+    <div class="card-footer d-flex align-items-center justify-content-between" style="background: #fff; border-top: 2px solid var(--sc-gray-100); padding: 0.75rem 1.25rem;">
         <div class="text-muted" style="font-size: 0.82rem;">
             Menampilkan {{ $pegawai->firstItem() }}-{{ $pegawai->lastItem() }} dari {{ $pegawai->total() }} pegawai
         </div>
@@ -481,7 +481,7 @@
 <div class="modal fade" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewModalLabel">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content" style="border-radius: 16px; overflow: hidden;">
-            <div class="modal-header" style="background: var(--sh-primary); color: #fff; border: none;">
+            <div class="modal-header" style="background: var(--sc-primary); color: #fff; border: none;">
                 <h5 class="modal-title" id="quickViewModalLabel">
                     <i class="ti ti-history me-2"></i>
                     Riwayat Cuti: <span id="qvPegawaiName">-</span>
@@ -506,7 +506,7 @@
         <div class="modal-content" style="border-radius: 16px; overflow: hidden;">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold" id="importModalLabel">
-                    <i class="ti ti-file-import me-2" style="color: var(--sh-primary);"></i>
+                    <i class="ti ti-file-import me-2" style="color: var(--sc-primary);"></i>
                     Import Pegawai dari Excel
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -514,8 +514,8 @@
             <form method="POST" action="{{ route('pegawai.import') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
-                    <div class="mb-3 p-3" style="background: var(--sh-primary-light); border-radius: 10px;">
-                        <div style="font-size: 0.85rem; color: var(--sh-primary);">
+                    <div class="mb-3 p-3" style="background: var(--sc-primary-light); border-radius: 10px;">
+                        <div style="font-size: 0.85rem; color: var(--sc-primary);">
                             <i class="ti ti-info-circle me-1"></i>
                             <strong>Format file:</strong> .xlsx atau .csv<br>
                             Kolom yang diperlukan: nama, nip, jabatan, golongan_ruang, unit_kerja, role, tanggal_mulai_kerja
@@ -531,7 +531,7 @@
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn sh-btn-primary">
+                    <button type="submit" class="btn sc-btn-primary">
                         <i class="ti ti-upload me-1"></i> Import
                     </button>
                 </div>
@@ -545,13 +545,13 @@
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mb-3">
         @foreach($pegawai as $p)
         <div class="col">
-            <div class="card sh-card h-100 {{ ($p->is_active === false) ? 'opacity-50' : '' }}">
+            <div class="card sc-card h-100 {{ ($p->is_active === false) ? 'opacity-50' : '' }}">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center gap-2 mb-2">
                         @if($p->photo)
                         <img src="{{ Storage::url($p->photo) }}" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0;">
                         @else
-                        <div class="sh-user-avatar" style="width:48px;height:48px;font-size:0.9rem;background:var(--sh-primary-light);color:var(--sh-primary);border:none;border-radius:50%;flex-shrink:0;">{{ strtoupper(substr($p->name,0,2)) }}</div>
+                        <div class="sc-user-avatar" style="width:48px;height:48px;font-size:0.9rem;background:var(--sc-primary-light);color:var(--sc-primary);border:none;border-radius:50%;flex-shrink:0;">{{ strtoupper(substr($p->name,0,2)) }}</div>
                         @endif
                         <div>
                             <div class="fw-bold" style="font-size:0.95rem;">{{ $p->name }}</div>
@@ -560,7 +560,7 @@
                     </div>
                     <div style="font-size:0.82rem;" class="mb-2">
                         <div>{{ $p->jabatan ?? '-' }} &bull; {{ $p->unit_kerja ?? '-' }}</div>
-                        <div class="text-muted">Sisa Cuti: <strong style="color:var(--sh-primary);">{{ $p->leave_balance }}h</strong></div>
+                        <div class="text-muted">Sisa Cuti: <strong style="color:var(--sc-primary);">{{ $p->leave_balance }}h</strong></div>
                     </div>
                     <div class="d-flex gap-1 flex-wrap">
                         <a href="{{ route('pegawai.show', $p) }}" class="btn btn-sm btn-outline-primary" style="border-radius:8px;font-size:0.78rem;">
@@ -640,24 +640,24 @@ function togglePegawaiView() {
     var cardView = document.getElementById('cardView');
     var icon = document.getElementById('viewToggleIcon');
     var tableCard = document.getElementById('pegawaiTableCard');
-    var isCard = localStorage.getItem('sh-pegawai-view') === 'card';
+    var isCard = localStorage.getItem('sc-pegawai-view') === 'card';
     if (isCard) {
         // Switch to table
         if (tableView) tableView.classList.remove('d-none');
         if (cardView) cardView.classList.add('d-none');
         if (icon) icon.className = 'ti ti-layout-grid';
-        localStorage.setItem('sh-pegawai-view', 'table');
+        localStorage.setItem('sc-pegawai-view', 'table');
     } else {
         // Switch to card
         if (tableView) tableView.classList.add('d-none');
         if (cardView) { cardView.classList.remove('d-none'); cardView.style.display = 'block'; }
         if (icon) icon.className = 'ti ti-layout-list';
-        localStorage.setItem('sh-pegawai-view', 'card');
+        localStorage.setItem('sc-pegawai-view', 'card');
     }
 }
 // Apply saved view preference on load
 document.addEventListener('DOMContentLoaded', function() {
-    if (localStorage.getItem('sh-pegawai-view') === 'card') {
+    if (localStorage.getItem('sc-pegawai-view') === 'card') {
         var tableView = document.getElementById('tableView');
         var cardView = document.getElementById('cardView');
         var icon = document.getElementById('viewToggleIcon');
@@ -673,10 +673,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var CSRF = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').content : '';
 
     // Hover styles
-    document.querySelectorAll('.sh-inline-edit').forEach(function(el) {
+    document.querySelectorAll('.sc-inline-edit').forEach(function(el) {
         el.addEventListener('mouseenter', function() {
-            this.style.background = 'var(--sh-primary-light)';
-            this.style.outline = '1px dashed var(--sh-primary)';
+            this.style.background = 'var(--sc-primary-light)';
+            this.style.outline = '1px dashed var(--sc-primary)';
         });
         el.addEventListener('mouseleave', function() {
             if (document.activeElement !== this) {
@@ -686,8 +686,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         el.addEventListener('focus', function() {
             this._originalValue = this.textContent.trim();
-            this.style.background = 'var(--sh-primary-light)';
-            this.style.outline = '2px solid var(--sh-primary)';
+            this.style.background = 'var(--sc-primary-light)';
+            this.style.outline = '2px solid var(--sc-primary)';
         });
         el.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
@@ -718,11 +718,11 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(function(data) {
                 if (data.success) {
                     self._originalValue = newVal;
-                    self.style.color = 'var(--sh-success)';
+                    self.style.color = 'var(--sc-success)';
                     setTimeout(function() { self.style.color = ''; }, 1200);
                 } else {
                     self.textContent = self._originalValue || '';
-                    if (typeof shToast === 'function') shToast('Gagal menyimpan perubahan.', 'danger');
+                    if (typeof scToast === 'function') scToast('Gagal menyimpan perubahan.', 'danger');
                 }
             })
             .catch(function() {
@@ -733,7 +733,7 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 
 // #38 Quick View Riwayat Cuti
-document.querySelectorAll('.sh-quick-view-btn').forEach(function(btn) {
+document.querySelectorAll('.sc-quick-view-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
         var pid = this.dataset.pegawaiId;
         var name = this.dataset.pegawaiName;
@@ -749,15 +749,15 @@ document.querySelectorAll('.sh-quick-view-btn').forEach(function(btn) {
         .then(function(data) {
             var html = '';
             if (!data.leaves || data.leaves.length === 0) {
-                html = '<div class="text-center py-4"><i class="ti ti-calendar-off" style="font-size:3rem;color:var(--sh-text-muted);opacity:0.3;"></i><p class="text-muted mt-2">Tidak ada riwayat cuti dalam 1 tahun terakhir.</p></div>';
+                html = '<div class="text-center py-4"><i class="ti ti-calendar-off" style="font-size:3rem;color:var(--sc-text-muted);opacity:0.3;"></i><p class="text-muted mt-2">Tidak ada riwayat cuti dalam 1 tahun terakhir.</p></div>';
             } else {
-                html = '<div class="table-responsive"><table class="table sh-table mb-0"><thead><tr><th>Jenis</th><th>Periode</th><th>Durasi</th><th>Status</th></tr></thead><tbody>';
+                html = '<div class="table-responsive"><table class="table sc-table mb-0"><thead><tr><th>Jenis</th><th>Periode</th><th>Durasi</th><th>Status</th></tr></thead><tbody>';
                 data.leaves.forEach(function(l) {
                     var badge = l.status === 'disetujui' || l.status === 'approved'
-                        ? '<span class="sh-badge sh-badge-approved"><i class="ti ti-circle-check"></i> Disetujui</span>'
+                        ? '<span class="sc-badge sc-badge-approved"><i class="ti ti-circle-check"></i> Disetujui</span>'
                         : l.status === 'ditolak' || l.status === 'rejected'
-                        ? '<span class="sh-badge sh-badge-rejected"><i class="ti ti-circle-x"></i> Ditolak</span>'
-                        : '<span class="sh-badge sh-badge-pending"><i class="ti ti-clock"></i> ' + l.status_label + '</span>';
+                        ? '<span class="sc-badge sc-badge-rejected"><i class="ti ti-circle-x"></i> Ditolak</span>'
+                        : '<span class="sc-badge sc-badge-pending"><i class="ti ti-clock"></i> ' + l.status_label + '</span>';
                     html += '<tr><td style="font-size:0.85rem;">' + l.type_label + '</td><td style="font-size:0.82rem;">' + l.start_date + ' s.d. ' + l.end_date + '</td><td><span class="badge bg-blue-lt" style="border-radius:50px;">' + l.total_days + ' hari</span></td><td>' + badge + '</td></tr>';
                 });
                 html += '</tbody></table></div>';
@@ -781,8 +781,8 @@ document.querySelectorAll('.sh-quick-view-btn').forEach(function(btn) {
                 @csrf
                 @method('DELETE')
                 <div class="modal-body p-4 text-center">
-                    <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--sh-danger-light); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
-                        <i class="ti ti-alert-triangle" style="font-size: 2rem; color: var(--sh-danger);"></i>
+                    <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--sc-danger-light); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                        <i class="ti ti-alert-triangle" style="font-size: 2rem; color: var(--sc-danger);"></i>
                     </div>
                     <h3 class="fw-bold mb-1" id="deleteModalLabel{{ $p->id }}">Hapus Pegawai?</h3>
                     <p class="text-muted mb-1">Konfirmasi hapus dengan mengetik NIP pegawai:</p>
@@ -795,14 +795,14 @@ document.querySelectorAll('.sh-quick-view-btn').forEach(function(btn) {
                            id="nipConfirm{{ $p->id }}"
                            oninput="checkNipConfirm('{{ $p->id }}', '{{ $p->nip }}')"
                            style="border-radius:10px;border:2px solid #e2e8f0;">
-                    <div class="alert" style="background: var(--sh-danger-light); border: none; border-radius: 10px; color: var(--sh-danger); font-size: 0.82rem; text-align:left;">
+                    <div class="alert" style="background: var(--sc-danger-light); border: none; border-radius: 10px; color: var(--sc-danger); font-size: 0.82rem; text-align:left;">
                         <i class="ti ti-alert-circle me-1"></i>
                         Tindakan ini tidak dapat dibatalkan. Semua data terkait pegawai ini akan ikut terhapus.
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0 px-4 pb-4" style="justify-content: flex-end; gap: 1rem;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; min-width: 100px;">Batal</button>
-                    <button type="submit" class="btn sh-btn-danger" id="deleteBtn{{ $p->id }}" disabled style="min-width: 100px; opacity:0.5;">
+                    <button type="submit" class="btn sc-btn-danger" id="deleteBtn{{ $p->id }}" disabled style="min-width: 100px; opacity:0.5;">
                         <i class="ti ti-trash me-1"></i> Hapus
                     </button>
                 </div>

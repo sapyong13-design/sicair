@@ -1,27 +1,27 @@
 @extends('layouts.app')
 
-@section('title', 'Dinas Luar - SiHEALING')
+@section('title', 'Dinas Luar - SiCAIR')
 
 @section('content')
-<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+<nav class="sc-breadcrumb" aria-label="Breadcrumb">
     <a href="{{ route('dashboard') }}">Dashboard</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
-    <span class="sh-breadcrumb-current">Dinas Luar</span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-current">Dinas Luar</span>
 </nav>
 
-<div class="sh-page-header">
+<div class="sc-page-header">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <h2 class="sh-page-title mb-0">
+        <h2 class="sc-page-title mb-0">
             <i class="ti ti-briefcase me-1" style="color: #ea580c;" aria-hidden="true"></i> Dinas Luar
         </h2>
-        <a href="{{ route('dinas-luar.create') }}" class="btn sh-btn-primary">
+        <a href="{{ route('dinas-luar.create') }}" class="btn sc-btn-primary">
             <i class="ti ti-plus me-1" aria-hidden="true"></i> Tambah Dinas Luar
         </a>
     </div>
 </div>
 
 {{-- Filter --}}
-<div class="card sh-card mb-3">
+<div class="card sc-card mb-3">
     <div class="card-body p-3">
         <form method="GET" class="row g-2 align-items-end">
             <div class="col-sm-4">
@@ -52,7 +52,7 @@
                 </select>
             </div>
             <div class="col-sm-auto">
-                <button type="submit" class="btn sh-btn-primary" style="height: 40px; padding: 0 1.25rem;">
+                <button type="submit" class="btn sc-btn-primary" style="height: 40px; padding: 0 1.25rem;">
                     <i class="ti ti-search me-1"></i> Filter
                 </button>
                 @if(request()->hasAny(['user_id','bulan','tahun']))
@@ -66,25 +66,25 @@
 </div>
 
 @if(session('success'))
-<div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 12px; border: none; background: var(--sh-success-light); color: var(--sh-success);">
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 12px; border: none; background: var(--sc-success-light); color: var(--sc-success);">
     <i class="ti ti-circle-check me-2"></i>{{ session('success') }}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 @endif
 
-<div class="card sh-card">
+<div class="card sc-card">
     @if($dinasLuarList->isEmpty())
     <div class="card-body py-5 text-center">
-        <div class="sh-empty-icon"><i class="ti ti-briefcase" aria-hidden="true"></i></div>
+        <div class="sc-empty-icon"><i class="ti ti-briefcase" aria-hidden="true"></i></div>
         <h4 class="fw-bold text-dark mb-1">Belum Ada Data</h4>
         <p class="text-muted mb-3">Belum ada data dinas luar yang tercatat.</p>
-        <a href="{{ route('dinas-luar.create') }}" class="btn sh-btn-primary">
+        <a href="{{ route('dinas-luar.create') }}" class="btn sc-btn-primary">
             <i class="ti ti-plus me-1" aria-hidden="true"></i> Tambah Dinas Luar
         </a>
     </div>
     @else
     <div class="table-responsive">
-        <table class="table sh-table mb-0">
+        <table class="table sc-table mb-0">
             <thead>
                 <tr>
                     <th style="width: 40px;">#</th>
@@ -116,7 +116,7 @@
                         @endif
                     </td>
                     <td>
-                        <span class="sh-badge" style="background: #fff7ed; color: #ea580c; border: 1px solid #fdba74;">
+                        <span class="sc-badge" style="background: #fff7ed; color: #ea580c; border: 1px solid #fdba74;">
                             {{ $dl->durasi }} hari
                         </span>
                     </td>
@@ -161,8 +161,8 @@
                 @csrf
                 @method('DELETE')
                 <div class="modal-body p-4 text-center">
-                    <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--sh-danger-light); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
-                        <i class="ti ti-alert-triangle" style="font-size: 2rem; color: var(--sh-danger);" aria-hidden="true"></i>
+                    <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--sc-danger-light); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                        <i class="ti ti-alert-triangle" style="font-size: 2rem; color: var(--sc-danger);" aria-hidden="true"></i>
                     </div>
                     <h3 class="fw-bold mb-1" id="deleteLabel{{ $dl->id }}">Hapus Data Dinas Luar?</h3>
                     <p class="text-muted mb-1">Anda yakin ingin menghapus data dinas luar:</p>
@@ -173,7 +173,7 @@
                 </div>
                 <div class="modal-footer border-0 pt-0 px-4 pb-4" style="justify-content: center; gap: 0.5rem;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; min-width: 100px;">Batal</button>
-                    <button type="submit" class="btn sh-btn-danger" style="min-width: 100px;">
+                    <button type="submit" class="btn sc-btn-danger" style="min-width: 100px;">
                         <i class="ti ti-trash me-1" aria-hidden="true"></i> Hapus
                     </button>
                 </div>

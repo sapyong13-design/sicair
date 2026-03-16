@@ -1,20 +1,20 @@
 @extends('layouts.app')
 
-@section('title', 'Notifikasi - SiHEALING')
+@section('title', 'Notifikasi - SiCAIR')
 
 @section('content')
 {{-- Breadcrumb (#10) --}}
-<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+<nav class="sc-breadcrumb" aria-label="Breadcrumb">
     <a href="{{ route('dashboard') }}">Dashboard</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
-    <span class="sh-breadcrumb-current">Notifikasi</span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-current">Notifikasi</span>
 </nav>
 
-<div class="sh-page-header">
+<div class="sc-page-header">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div>
-            <h2 class="sh-page-title mb-1">
-                <i class="ti ti-bell me-1" style="color: var(--sh-primary);" aria-hidden="true"></i>
+            <h2 class="sc-page-title mb-1">
+                <i class="ti ti-bell me-1" style="color: var(--sc-primary);" aria-hidden="true"></i>
                 Notifikasi
             </h2>
             <div class="text-muted" style="font-size: 0.85rem;">
@@ -32,17 +32,17 @@
     </div>
 </div>
 
-<div class="card sh-card">
+<div class="card sc-card">
     @if($notifications->isEmpty())
     <div class="card-body py-5">
         <div class="text-center">
             {{-- #46 Empty state SVG: no-notifications --}}
             <svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-3" aria-hidden="true">
-                <circle cx="48" cy="48" r="44" fill="var(--sh-primary-light)"/>
-                <path d="M48 22C38.06 22 30 30.06 30 40V56L24 62V65H72V62L66 56V40C66 30.06 57.94 22 48 22Z" fill="var(--sh-primary)" opacity="0.25"/>
-                <path d="M48 26C39.16 26 32 33.16 32 42V56L26 62H70L64 56V42C64 33.16 56.84 26 48 26Z" stroke="var(--sh-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                <path d="M44 66C44 68.21 45.79 70 48 70C50.21 70 52 68.21 52 66H44Z" fill="var(--sh-primary)" opacity="0.6"/>
-                <path d="M38 28L58 68" stroke="var(--sh-danger)" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+                <circle cx="48" cy="48" r="44" fill="var(--sc-primary-light)"/>
+                <path d="M48 22C38.06 22 30 30.06 30 40V56L24 62V65H72V62L66 56V40C66 30.06 57.94 22 48 22Z" fill="var(--sc-primary)" opacity="0.25"/>
+                <path d="M48 26C39.16 26 32 33.16 32 42V56L26 62H70L64 56V42C64 33.16 56.84 26 48 26Z" stroke="var(--sc-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <path d="M44 66C44 68.21 45.79 70 48 70C50.21 70 52 68.21 52 66H44Z" fill="var(--sc-primary)" opacity="0.6"/>
+                <path d="M38 28L58 68" stroke="var(--sc-danger)" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
             </svg>
             <h4 class="fw-bold text-dark mb-1">Belum Ada Notifikasi</h4>
             <p class="text-muted mb-0">Anda belum memiliki notifikasi apapun.</p>
@@ -68,27 +68,27 @@
     <div class="list-group list-group-flush">
         @foreach($grouped as $dateLabel => $groupNotifs)
         {{-- Date separator --}}
-        <div class="sh-notif-date-sep px-4 py-2 d-flex align-items-center gap-2">
-            <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--sh-text-muted);">
+        <div class="sc-notif-date-sep px-4 py-2 d-flex align-items-center gap-2">
+            <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--sc-text-muted);">
                 {{ $dateLabel }}
             </span>
-            <div style="flex: 1; height: 1px; background: var(--sh-gray-100);"></div>
+            <div style="flex: 1; height: 1px; background: var(--sc-gray-100);"></div>
         </div>
         @foreach($groupNotifs as $notif)
-        <div class="list-group-item px-4 py-3 {{ !$notif->is_read ? 'sh-notif-unread' : '' }}" style="border-left: 4px solid {{ match($notif->type) {
-            'cuti_disetujui' => 'var(--sh-success)',
-            'cuti_ditolak' => 'var(--sh-danger)',
-            'cuti_diajukan', 'cuti_pertimbangan' => 'var(--sh-warning)',
-            default => 'var(--sh-primary)',
+        <div class="list-group-item px-4 py-3 {{ !$notif->is_read ? 'sc-notif-unread' : '' }}" style="border-left: 4px solid {{ match($notif->type) {
+            'cuti_disetujui' => 'var(--sc-success)',
+            'cuti_ditolak' => 'var(--sc-danger)',
+            'cuti_diajukan', 'cuti_pertimbangan' => 'var(--sc-warning)',
+            default => 'var(--sc-primary)',
         } }};">
             <div class="d-flex align-items-start gap-3">
                 @php
                     $iconMap = [
-                        'cuti_disetujui' => ['ti-circle-check', 'var(--sh-success)', 'var(--sh-success-light)'],
-                        'cuti_ditolak' => ['ti-circle-x', 'var(--sh-danger)', 'var(--sh-danger-light)'],
-                        'cuti_diajukan' => ['ti-file-plus', 'var(--sh-warning)', 'var(--sh-warning-light)'],
-                        'cuti_pertimbangan' => ['ti-checklist', 'var(--sh-warning)', 'var(--sh-warning-light)'],
-                        'info' => ['ti-info-circle', 'var(--sh-primary)', 'var(--sh-primary-light)'],
+                        'cuti_disetujui' => ['ti-circle-check', 'var(--sc-success)', 'var(--sc-success-light)'],
+                        'cuti_ditolak' => ['ti-circle-x', 'var(--sc-danger)', 'var(--sc-danger-light)'],
+                        'cuti_diajukan' => ['ti-file-plus', 'var(--sc-warning)', 'var(--sc-warning-light)'],
+                        'cuti_pertimbangan' => ['ti-checklist', 'var(--sc-warning)', 'var(--sc-warning-light)'],
+                        'info' => ['ti-info-circle', 'var(--sc-primary)', 'var(--sc-primary-light)'],
                     ];
                     $icon = $iconMap[$notif->type] ?? $iconMap['info'];
                 @endphp
@@ -102,7 +102,7 @@
                             <div class="text-muted" style="font-size: 0.82rem;">{{ $notif->message }}</div>
                         </div>
                         @if(!$notif->is_read)
-                        <span class="badge rounded-pill" style="background: var(--sh-primary); font-size: 0.65rem;">Baru</span>
+                        <span class="badge rounded-pill" style="background: var(--sc-primary); font-size: 0.65rem;">Baru</span>
                         @endif
                     </div>
                     <div class="d-flex align-items-center gap-3 mt-2">
@@ -130,7 +130,7 @@
     </div>
 
     @if($notifications->hasPages())
-    <div class="card-footer" style="background: #fff; border-top: 2px solid var(--sh-gray-100); padding: 0.75rem 1.25rem;">
+    <div class="card-footer" style="background: #fff; border-top: 2px solid var(--sc-gray-100); padding: 0.75rem 1.25rem;">
         {{ $notifications->links() }}
     </div>
     @endif

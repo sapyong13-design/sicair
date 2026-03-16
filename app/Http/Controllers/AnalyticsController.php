@@ -75,7 +75,7 @@ class AnalyticsController extends Controller
             $spreadsheet = new Spreadsheet();
             $spreadsheet->getProperties()
                 ->setTitle("Analytics Cuti {$year}")
-                ->setCreator('SiHEALING - PN Natuna');
+                ->setCreator('SiCAIR - PN Natuna');
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setTitle('Analytics ' . $year);
 

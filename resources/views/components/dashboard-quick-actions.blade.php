@@ -3,7 +3,7 @@
     {{-- Action 1: Ajukan Cuti (hanya jika boleh cuti) --}}
     @if(Auth::user()->bolehCuti())
     <a href="{{ route('leave.select-type') }}" class="quick-action-card">
-        <div class="action-icon" style="background: var(--sh-primary-light); color: var(--sh-primary);">
+        <div class="action-icon" style="background: var(--sc-primary-light); color: var(--sc-primary);">
             <i class="ti ti-file-plus"></i>
         </div>
         <div class="action-content">
@@ -16,7 +16,7 @@
 
     {{-- Action 2: Sisa Cuti --}}
     <a href="#balanceModal" class="quick-action-card" data-bs-toggle="modal">
-        <div class="action-icon" style="background: var(--sh-success-light); color: var(--sh-success);">
+        <div class="action-icon" style="background: var(--sc-success-light); color: var(--sc-success);">
             <i class="ti ti-calendar-stats"></i>
         </div>
         <div class="action-content">
@@ -28,7 +28,7 @@
 
     {{-- Action 3: Lihat Pengajuan --}}
     <a href="{{ route('dashboard') . '?tab=pengajuan' }}" class="quick-action-card">
-        <div class="action-icon" style="background: var(--sh-warning-light); color: var(--sh-warning);">
+        <div class="action-icon" style="background: var(--sc-warning-light); color: var(--sc-warning);">
             <i class="ti ti-list-check"></i>
         </div>
         <div class="action-content">
@@ -40,7 +40,7 @@
 
     {{-- Action 4: Download Laporan --}}
     <a href="{{ route('reports.leave-summary') }}" class="quick-action-card">
-        <div class="action-icon" style="background: var(--sh-danger-light); color: var(--sh-danger);">
+        <div class="action-icon" style="background: var(--sc-danger-light); color: var(--sc-danger);">
             <i class="ti ti-download"></i>
         </div>
         <div class="action-content">
@@ -52,7 +52,7 @@
 
     {{-- Action 5: Notifikasi --}}
     <a href="{{ route('notifications.index') }}" class="quick-action-card">
-        <div class="action-icon" style="background: var(--sh-primary-light); color: var(--sh-primary);">
+        <div class="action-icon" style="background: var(--sc-primary-light); color: var(--sc-primary);">
             <i class="ti ti-bell"></i>
         </div>
         <div class="action-content">
@@ -64,7 +64,7 @@
 
     {{-- Action 6: Kalender Cuti --}}
     <a href="{{ route('kalender.index') }}" class="quick-action-card">
-        <div class="action-icon" style="background: var(--sh-success-light); color: var(--sh-success);">
+        <div class="action-icon" style="background: var(--sc-success-light); color: var(--sc-success);">
             <i class="ti ti-calendar-month"></i>
         </div>
         <div class="action-content">
@@ -89,7 +89,7 @@
     gap: 1rem;
     padding: 1rem 1.25rem;
     background: white;
-    border: 1px solid var(--sh-gray-200);
+    border: 1px solid var(--sc-gray-200);
     border-radius: 12px;
     text-decoration: none;
     color: inherit;
@@ -98,7 +98,7 @@
 }
 
 .quick-action-card:hover {
-    border-color: var(--sh-primary);
+    border-color: var(--sc-primary);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
 }
@@ -121,17 +121,17 @@
 .action-title {
     font-weight: 700;
     font-size: 0.95rem;
-    color: var(--sh-gray-900);
+    color: var(--sc-gray-900);
     margin-bottom: 0.25rem;
 }
 
 .action-desc {
     font-size: 0.8rem;
-    color: var(--sh-gray-600);
+    color: var(--sc-gray-600);
 }
 
 .action-arrow {
-    color: var(--sh-gray-400);
+    color: var(--sc-gray-400);
     font-size: 1.2rem;
     flex-shrink: 0;
     transition: all 0.3s;
@@ -139,7 +139,7 @@
 
 .quick-action-card:hover .action-arrow {
     transform: translateX(4px);
-    color: var(--sh-primary);
+    color: var(--sc-primary);
 }
 
 @media (max-width: 768px) {

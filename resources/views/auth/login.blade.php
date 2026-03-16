@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-    <title>Login - SiHEALING PN Natuna</title>
+    <title>Login - SiCAIR PN Natuna</title>
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/favicon-pn.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
@@ -269,10 +269,10 @@
             margin-bottom: 0.4rem;
         }
 
-        .sh-input-group {
+        .sc-input-group {
             position: relative;
         }
-        .sh-input-group .input-icon {
+        .sc-input-group .input-icon {
             position: absolute;
             left: 14px;
             top: 50%;
@@ -281,7 +281,7 @@
             font-size: 1.1rem;
             z-index: 2;
         }
-        .sh-input-group input {
+        .sc-input-group input {
             padding-left: 44px;
             height: 48px;
             border-radius: 12px;
@@ -290,13 +290,13 @@
             transition: all 0.2s ease;
             background: #f6fbf7;
         }
-        .sh-input-group input:focus {
+        .sc-input-group input:focus {
             border-color: #166534;
             box-shadow: 0 0 0 4px rgba(22, 101, 52, 0.08);
             background: #fff;
         }
 
-        .sh-login-btn {
+        .sc-login-btn {
             height: 48px;
             border-radius: 12px;
             font-weight: 700;
@@ -306,18 +306,18 @@
             box-shadow: 0 4px 14px rgba(20, 83, 45, 0.35);
             transition: all 0.2s ease;
         }
-        .sh-login-btn:hover {
+        .sc-login-btn:hover {
             transform: translateY(-1px);
             box-shadow: 0 6px 20px rgba(20, 83, 45, 0.45);
             background: linear-gradient(135deg, #0d3320, #14532d, #166534);
         }
-        .sh-login-btn:active {
+        .sc-login-btn:active {
             transform: translateY(0) scale(0.98);
             box-shadow: 0 2px 8px rgba(20, 83, 45, 0.3);
         }
 
         /* Password toggle */
-        .sh-pw-toggle {
+        .sc-pw-toggle {
             position: absolute;
             right: 14px;
             top: 50%;
@@ -331,9 +331,9 @@
             z-index: 3;
             transition: color 0.2s;
         }
-        .sh-pw-toggle:hover { color: #166534; }
+        .sc-pw-toggle:hover { color: #166534; }
 
-        .sh-alert-error {
+        .sc-alert-error {
             background: #fef2f2;
             border: 1px solid #fecaca;
             color: #dc2626;
@@ -422,7 +422,7 @@
 
             <div class="banner-divider"></div>
 
-            <div class="banner-system-name"><span>Si</span>HEALING</div>
+            <div class="banner-system-name"><span>Si</span>CAIR</div>
             <div class="banner-system-desc">
                 Sistem Informasi Hak Elektronik Cuti<br>
                 Pengelolaan cuti pegawai sesuai SE MA No. 13/2019
@@ -464,7 +464,7 @@
                 <p class="login-hint">Masuk menggunakan NIP dan password Anda</p>
 
                 @if($errors->any())
-                <div class="sh-alert-error mb-3">
+                <div class="sc-alert-error mb-3">
                     <i class="ti ti-alert-circle me-1"></i>
                     {{ $errors->first() }}
                 </div>
@@ -474,7 +474,7 @@
                     @csrf
                     <div class="mb-3">
                         <label class="form-label" for="nip_input">NIP (Nomor Induk Pegawai)</label>
-                        <div class="sh-input-group">
+                        <div class="sc-input-group">
                             <i class="ti ti-id-badge input-icon" aria-hidden="true"></i>
                             <input type="text"
                                    id="nip_input"
@@ -489,7 +489,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="password_input">Password</label>
-                        <div class="sh-input-group">
+                        <div class="sc-input-group">
                             <i class="ti ti-lock input-icon" aria-hidden="true"></i>
                             <input type="password"
                                    id="password_input"
@@ -499,7 +499,7 @@
                                    autocomplete="current-password"
                                    style="padding-right: 44px;"
                                    required>
-                            <button type="button" class="sh-pw-toggle" id="pwToggle" aria-label="Tampilkan password" title="Tampilkan/sembunyikan password">
+                            <button type="button" class="sc-pw-toggle" id="pwToggle" aria-label="Tampilkan password" title="Tampilkan/sembunyikan password">
                                 <i class="ti ti-eye" id="pwToggleIcon"></i>
                             </button>
                         </div>
@@ -513,7 +513,7 @@
                             <span class="form-check-label" style="font-size: 0.85rem; color: #475569;">Ingat saya di perangkat ini</span>
                         </label>
                     </div>
-                    <button type="submit" class="btn btn-primary sh-login-btn w-100" id="loginBtn">
+                    <button type="submit" class="btn btn-primary sc-login-btn w-100" id="loginBtn">
                         <span id="loginBtnText"><i class="ti ti-login me-2"></i> Masuk</span>
                         <span id="loginBtnLoading" style="display:none;"><span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Memproses...</span>
                     </button>
@@ -521,7 +521,7 @@
             </div>
 
             <div class="footer-text">
-                &copy; {{ date('Y') }} <strong>SiHEALING</strong> &mdash; Pengadilan Negeri Natuna
+                &copy; {{ date('Y') }} <strong>SiCAIR</strong> &mdash; Pengadilan Negeri Natuna
             </div>
         </div>
     </div>

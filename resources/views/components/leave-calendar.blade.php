@@ -1,9 +1,9 @@
 {{-- Smart Leave Calendar Component --}}
-<div class="card sh-card sh-calendar-card">
+<div class="card sc-card sc-calendar-card">
     <div class="card-body">
         <div class="d-flex align-items-center justify-content-between mb-4">
             <h3 class="card-title mb-0">
-                <i class="ti ti-calendar me-2" style="color: var(--sh-primary);"></i>
+                <i class="ti ti-calendar me-2" style="color: var(--sc-primary);"></i>
                 Kalender Cuti {{ date('Y') }}
             </h3>
             <div class="calendar-nav">
@@ -37,19 +37,19 @@
         {{-- Legend --}}
         <div class="calendar-legend mt-4">
             <div class="legend-item">
-                <div class="legend-color" style="background: var(--sh-primary-light);"></div>
+                <div class="legend-color" style="background: var(--sc-primary-light);"></div>
                 <span>Cuti Tahunan</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: var(--sh-danger-light);"></div>
+                <div class="legend-color" style="background: var(--sc-danger-light);"></div>
                 <span>Cuti Sakit</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: var(--sh-warning-light);"></div>
+                <div class="legend-color" style="background: var(--sc-warning-light);"></div>
                 <span>Cuti Lainnya</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: var(--sh-success-light);"></div>
+                <div class="legend-color" style="background: var(--sc-success-light);"></div>
                 <span>Hari Libur</span>
             </div>
         </div>
@@ -57,12 +57,12 @@
 </div>
 
 <style>
-.sh-calendar-card {
+.sc-calendar-card {
     border: none;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.sh-calendar-card .card-body {
+.sc-calendar-card .card-body {
     padding: 1.5rem;
 }
 
@@ -79,7 +79,7 @@
 }
 
 .calendar-grid {
-    border: 1px solid var(--sh-gray-200);
+    border: 1px solid var(--sc-gray-200);
     border-radius: 10px;
     overflow: hidden;
     background: white;
@@ -88,8 +88,8 @@
 .calendar-header {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    background: var(--sh-gray-50);
-    border-bottom: 2px solid var(--sh-gray-200);
+    background: var(--sc-gray-50);
+    border-bottom: 2px solid var(--sc-gray-200);
 }
 
 .calendar-day-header {
@@ -97,7 +97,7 @@
     text-align: center;
     font-weight: 700;
     font-size: 0.85rem;
-    color: var(--sh-gray-700);
+    color: var(--sc-gray-700);
 }
 
 .calendar-days {
@@ -110,7 +110,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--sh-gray-100);
+    border: 1px solid var(--sc-gray-100);
     position: relative;
     cursor: pointer;
     transition: all 0.2s;
@@ -119,22 +119,22 @@
 }
 
 .calendar-day:hover {
-    background: var(--sh-gray-50);
+    background: var(--sc-gray-50);
     z-index: 2;
 }
 
 .calendar-day.other-month {
-    color: var(--sh-gray-300);
-    background: var(--sh-gray-50);
+    color: var(--sc-gray-300);
+    background: var(--sc-gray-50);
 }
 
 .calendar-day.weekend {
-    background: var(--sh-gray-50);
+    background: var(--sc-gray-50);
 }
 
 .calendar-day.holiday {
-    background: var(--sh-success-light);
-    color: var(--sh-success);
+    background: var(--sc-success-light);
+    color: var(--sc-success);
     font-weight: 700;
 }
 
@@ -145,20 +145,20 @@
 }
 
 .calendar-day.leave.cuti_tahunan {
-    background: var(--sh-primary);
+    background: var(--sc-primary);
 }
 
 .calendar-day.leave.cuti_sakit {
-    background: var(--sh-danger);
+    background: var(--sc-danger);
 }
 
 .calendar-day.leave.leave-other {
-    background: var(--sh-warning);
+    background: var(--sc-warning);
 }
 
 .calendar-day.leave.pending {
     opacity: 0.7;
-    background: var(--sh-gray-400);
+    background: var(--sc-gray-400);
 }
 
 .calendar-day .tooltip {
@@ -166,7 +166,7 @@
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--sh-gray-900);
+    background: var(--sc-gray-900);
     color: white;
     padding: 0.5rem 0.75rem;
     border-radius: 6px;
@@ -188,7 +188,7 @@
     flex-wrap: wrap;
     gap: 1.5rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--sh-gray-100);
+    border-top: 1px solid var(--sc-gray-100);
 }
 
 .legend-item {
@@ -196,7 +196,7 @@
     align-items: center;
     gap: 0.5rem;
     font-size: 0.85rem;
-    color: var(--sh-gray-700);
+    color: var(--sc-gray-700);
 }
 
 .legend-color {

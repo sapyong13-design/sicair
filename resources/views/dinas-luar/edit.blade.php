@@ -1,23 +1,23 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Dinas Luar - SiHEALING')
+@section('title', 'Edit Dinas Luar - SiCAIR')
 
 @section('content')
-<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+<nav class="sc-breadcrumb" aria-label="Breadcrumb">
     <a href="{{ route('dashboard') }}">Dashboard</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
     <a href="{{ route('dinas-luar.index') }}">Dinas Luar</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
-    <span class="sh-breadcrumb-current">Edit</span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-current">Edit</span>
 </nav>
 
-<div class="sh-page-header">
-    <h2 class="sh-page-title mb-0">
+<div class="sc-page-header">
+    <h2 class="sc-page-title mb-0">
         <i class="ti ti-briefcase me-1" style="color: #ea580c;" aria-hidden="true"></i> Edit Dinas Luar
     </h2>
 </div>
 
-<div class="card sh-card" style="max-width: 720px;">
+<div class="card sc-card" style="max-width: 720px;">
     <div class="card-body p-4">
         <form method="POST" action="{{ route('dinas-luar.update', $dinasLuar) }}" enctype="multipart/form-data">
             @csrf
@@ -96,7 +96,7 @@
             </div>
 
             <div class="d-flex gap-2">
-                <button type="submit" class="btn sh-btn-primary">
+                <button type="submit" class="btn sc-btn-primary">
                     <i class="ti ti-device-floppy me-1"></i> Simpan Perubahan
                 </button>
                 <a href="{{ route('dinas-luar.index') }}" class="btn btn-outline-secondary" style="border-radius: 10px;">

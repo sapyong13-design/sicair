@@ -5,7 +5,7 @@
 @section('content')
 
 {{-- Page Header --}}
-<div class="sh-page-header">
+<div class="sc-page-header">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div class="d-flex align-items-center gap-3">
             <a href="{{ route('pegawai.show', $pegawai) }}"
@@ -14,7 +14,7 @@
                 <i class="ti ti-arrow-left" style="font-size: 1.2rem;"></i>
             </a>
             <div>
-                <h2 class="sh-page-title mb-0">
+                <h2 class="sc-page-title mb-0">
                     {{ $leaveRequest ? 'Edit Riwayat Cuti' : 'Tambah Riwayat Cuti' }}
                 </h2>
                 <div class="text-muted" style="font-size: 0.85rem;">
@@ -25,18 +25,18 @@
         </div>
         {{-- Saldo Cuti Tahunan --}}
         <div class="d-flex align-items-center gap-2 px-3 py-2"
-             style="background: var(--sh-primary-light); border-radius: 12px;">
-            <i class="ti ti-calendar-stats" style="color: var(--sh-primary); font-size: 1.3rem;"></i>
+             style="background: var(--sc-primary-light); border-radius: 12px;">
+            <i class="ti ti-calendar-stats" style="color: var(--sc-primary); font-size: 1.3rem;"></i>
             <div>
-                <div style="font-size: 0.72rem; color: var(--sh-text-muted); font-weight: 600; text-transform: uppercase;">Saldo Cuti Tahunan</div>
-                <div style="font-size: 1.25rem; font-weight: 800; color: var(--sh-primary); line-height: 1;">{{ $pegawai->leave_balance }} hari</div>
+                <div style="font-size: 0.72rem; color: var(--sc-text-muted); font-weight: 600; text-transform: uppercase;">Saldo Cuti Tahunan</div>
+                <div style="font-size: 1.25rem; font-weight: 800; color: var(--sc-primary); line-height: 1;">{{ $pegawai->leave_balance }} hari</div>
             </div>
         </div>
     </div>
 </div>
 
 {{-- Info Banner --}}
-<div class="alert sh-alert mb-4" style="background: var(--sh-warning-light); color: var(--sh-warning); border-left: 4px solid var(--sh-warning);">
+<div class="alert sc-alert mb-4" style="background: var(--sc-warning-light); color: var(--sc-warning); border-left: 4px solid var(--sc-warning);">
     <div class="d-flex align-items-start gap-2">
         <i class="ti ti-alert-triangle" style="font-size: 1.3rem; flex-shrink: 0; margin-top: 2px;"></i>
         <div>
@@ -52,17 +52,17 @@
 
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="card sh-card">
+        <div class="card sc-card">
             <div class="card-header">
                 <h3 class="card-title mb-0">
-                    <i class="ti ti-file-plus me-2" style="color: var(--sh-primary);"></i>
+                    <i class="ti ti-file-plus me-2" style="color: var(--sc-primary);"></i>
                     {{ $leaveRequest ? 'Edit Data Cuti' : 'Input Riwayat Cuti' }}
                 </h3>
             </div>
             <div class="card-body p-4">
 
                 @if($errors->any())
-                <div class="alert sh-alert alert-danger mb-4" style="background: var(--sh-danger-light); color: var(--sh-danger);">
+                <div class="alert sc-alert alert-danger mb-4" style="background: var(--sc-danger-light); color: var(--sc-danger);">
                     <i class="ti ti-alert-circle me-2"></i>
                     <ul class="mb-0 ps-3">
                         @foreach($errors->all() as $error)
@@ -207,7 +207,7 @@
                                class="btn btn-outline-secondary" style="border-radius: 10px; min-width: 100px;">
                                 Batal
                             </a>
-                            <button type="submit" class="btn sh-btn-primary text-white" style="min-width: 150px;">
+                            <button type="submit" class="btn sc-btn-primary text-white" style="min-width: 150px;">
                                 <i class="ti ti-device-floppy me-1"></i>
                                 {{ $leaveRequest ? 'Simpan Perubahan' : 'Tambah Riwayat' }}
                             </button>

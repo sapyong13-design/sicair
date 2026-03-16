@@ -56,7 +56,7 @@ class LaporanBulananController extends Controller
         $spreadsheet = new Spreadsheet();
         $spreadsheet->getProperties()
             ->setTitle("Laporan Bulanan $monthLabel")
-            ->setCreator('SiHEALING - PN Natuna');
+            ->setCreator('SiCAIR - PN Natuna');
 
         // ---- Sheet 1: Cuti ----
         $sheet1 = $spreadsheet->getActiveSheet();
@@ -100,7 +100,7 @@ class LaporanBulananController extends Controller
         $sheet->getRowDimension(1)->setRowHeight(30);
 
         $sheet->mergeCells('A2:J2');
-        $sheet->setCellValue('A2', 'Pengadilan Negeri Natuna — SiHEALING');
+        $sheet->setCellValue('A2', 'Pengadilan Negeri Natuna — SiCAIR');
         $sheet->getStyle('A2')->applyFromArray([
             'font' => ['italic' => true, 'size' => 10, 'color' => ['argb' => 'FF' . $primaryColor]],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
@@ -194,7 +194,7 @@ class LaporanBulananController extends Controller
         $sheet->getRowDimension(1)->setRowHeight(30);
 
         $sheet->mergeCells('A2:H2');
-        $sheet->setCellValue('A2', 'Pengadilan Negeri Natuna — SiHEALING');
+        $sheet->setCellValue('A2', 'Pengadilan Negeri Natuna — SiCAIR');
         $sheet->getStyle('A2')->applyFromArray([
             'font' => ['italic' => true, 'size' => 10, 'color' => ['argb' => 'FF' . $primaryColor]],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],

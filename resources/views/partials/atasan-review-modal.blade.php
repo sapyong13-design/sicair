@@ -1,16 +1,16 @@
 {{-- Atasan Review Modal - Custom Implementation (No Flicker) --}}
 
 {{-- Modal Overlay - Custom (not Bootstrap) --}}
-<div class="sh-modal-overlay" id="reviewModalOverlay{{ $req->id }}" data-modal-id="{{ $req->id }}">
+<div class="sc-modal-overlay" id="reviewModalOverlay{{ $req->id }}" data-modal-id="{{ $req->id }}">
     {{-- Modal Container --}}
-    <div class="sh-modal-container" data-modal-container>
-        <div class="sh-modal-content">
+    <div class="sc-modal-container" data-modal-container>
+        <div class="sc-modal-content">
             <form method="POST" action="{{ route('leave.review', $req) }}" id="reviewForm{{ $req->id }}">
                 @csrf
-                <div class="sh-modal-body">
+                <div class="sc-modal-body">
                     {{-- Header --}}
                     <div class="text-center mb-3">
-                        <div class="sh-modal-icon">
+                        <div class="sc-modal-icon">
                             <i class="ti ti-checklist"></i>
                         </div>
                         <h3 class="fw-bold mb-1">Pertimbangan Atasan</h3>
@@ -21,7 +21,7 @@
                     </div>
 
                     {{-- Request Summary --}}
-                    <div class="sh-modal-summary">
+                    <div class="sc-modal-summary">
                         <div class="row g-2" style="font-size: 0.85rem;">
                             <div class="col-6">
                                 <div class="text-muted mb-1">Jenis Cuti</div>
@@ -49,39 +49,39 @@
                         <label class="form-label fw-bold" style="font-size: 0.85rem;">
                             Pertimbangan <span class="text-danger">*</span>
                         </label>
-                        <div class="sh-pertimbangan-options" id="pertimbanganGroup{{ $req->id }}">
+                        <div class="sc-pertimbangan-options" id="pertimbanganGroup{{ $req->id }}">
                             {{-- Setuju --}}
-                            <label class="sh-option sh-option-success" data-option="setuju">
+                            <label class="sc-option sc-option-success" data-option="setuju">
                                 <input type="radio" name="pertimbangan" value="setuju" id="pertimbangan_setuju{{ $req->id }}" required>
-                                <span class="sh-option-indicator"></span>
-                                <span class="sh-option-content">
+                                <span class="sc-option-indicator"></span>
+                                <span class="sc-option-content">
                                     <i class="ti ti-circle-check"></i> Disetujui
                                 </span>
                             </label>
 
                             {{-- Ubah --}}
-                            <label class="sh-option sh-option-primary" data-option="ubah">
+                            <label class="sc-option sc-option-primary" data-option="ubah">
                                 <input type="radio" name="pertimbangan" value="ubah" id="pertimbangan_ubah{{ $req->id }}">
-                                <span class="sh-option-indicator"></span>
-                                <span class="sh-option-content">
+                                <span class="sc-option-indicator"></span>
+                                <span class="sc-option-content">
                                     <i class="ti ti-edit"></i> Perubahan
                                 </span>
                             </label>
 
                             {{-- Tangguhkan --}}
-                            <label class="sh-option sh-option-warning" data-option="tangguhkan">
+                            <label class="sc-option sc-option-warning" data-option="tangguhkan">
                                 <input type="radio" name="pertimbangan" value="tangguhkan" id="pertimbangan_tangguhkan{{ $req->id }}">
-                                <span class="sh-option-indicator"></span>
-                                <span class="sh-option-content">
+                                <span class="sc-option-indicator"></span>
+                                <span class="sc-option-content">
                                     <i class="ti ti-clock-pause"></i> Ditangguhkan
                                 </span>
                             </label>
 
                             {{-- Tolak --}}
-                            <label class="sh-option sh-option-danger" data-option="tolak">
+                            <label class="sc-option sc-option-danger" data-option="tolak">
                                 <input type="radio" name="pertimbangan" value="tolak" id="pertimbangan_tolak{{ $req->id }}">
-                                <span class="sh-option-indicator"></span>
-                                <span class="sh-option-content">
+                                <span class="sc-option-indicator"></span>
+                                <span class="sc-option-content">
                                     <i class="ti ti-circle-x"></i> Tidak Disetujui
                                 </span>
                             </label>
@@ -98,12 +98,12 @@
                 </div>
 
                 {{-- Footer --}}
-                <div class="sh-modal-footer">
-                    <button type="button" class="btn btn-secondary sh-modal-cancel"
+                <div class="sc-modal-footer">
+                    <button type="button" class="btn btn-secondary sc-modal-cancel"
                             data-modal-close="{{ $req->id }}" style="border-radius: 10px; min-width: 100px;">
                         Batal
                     </button>
-                    <button type="submit" class="btn sh-btn-primary text-white"
+                    <button type="submit" class="btn sc-btn-primary text-white"
                             style="min-width: 120px;" id="submitBtn{{ $req->id }}">
                         <i class="ti ti-send me-1"></i> <span>Kirim Pertimbangan</span>
                     </button>
@@ -116,7 +116,7 @@
 {{-- Custom Modal Styles (Inline for scoping) --}}
 <style>
 /* === Modal Overlay - Custom System (No Layout Shift) === */
-.sh-modal-overlay {
+.sc-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -137,14 +137,14 @@
 }
 
 /* Modal Open State */
-.sh-modal-overlay.sh-modal-active {
+.sc-modal-overlay.sc-modal-active {
     opacity: 1;
     visibility: visible;
     background: rgba(0, 0, 0, 0.5);
 }
 
 /* Modal Container */
-.sh-modal-container {
+.sc-modal-container {
     max-width: 520px;
     width: 100%;
     margin: auto;
@@ -153,54 +153,54 @@
     will-change: transform;
 }
 
-.sh-modal-active .sh-modal-container {
+.sc-modal-active .sc-modal-container {
     transform: scale(1) translateY(0);
 }
 
 /* Modal Content */
-.sh-modal-content {
-    background: var(--sh-card-bg);
+.sc-modal-content {
+    background: var(--sc-card-bg);
     border-radius: 16px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     overflow: hidden;
 }
 
 /* Modal Body */
-.sh-modal-body {
+.sc-modal-body {
     padding: 1.5rem;
 }
 
 /* Modal Icon */
-.sh-modal-icon {
+.sc-modal-icon {
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: var(--sh-primary-light);
+    background: var(--sc-primary-light);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 0.75rem;
     font-size: 2rem;
-    color: var(--sh-primary);
+    color: var(--sc-primary);
 }
 
 /* Modal Summary */
-.sh-modal-summary {
-    background: var(--sh-gray-50);
+.sc-modal-summary {
+    background: var(--sc-gray-50);
     border-radius: 12px;
     padding: 0.85rem 1rem;
     margin-bottom: 1rem;
 }
 
 /* Pertimbangan Options */
-.sh-pertimbangan-options {
+.sc-pertimbangan-options {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
 /* Option Item */
-.sh-option {
+.sc-option {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -214,7 +214,7 @@
 }
 
 /* Hide native radio */
-.sh-option input[type="radio"] {
+.sc-option input[type="radio"] {
     position: absolute;
     opacity: 0;
     width: 0;
@@ -223,7 +223,7 @@
 }
 
 /* Custom Radio Indicator */
-.sh-option-indicator {
+.sc-option-indicator {
     width: 20px;
     height: 20px;
     border-radius: 50%;
@@ -234,71 +234,71 @@
 }
 
 /* Radio Indicator - Checked State */
-.sh-option input[type="radio"]:checked + .sh-option-indicator {
+.sc-option input[type="radio"]:checked + .sc-option-indicator {
     background: currentColor;
-    box-shadow: inset 0 0 0 4px var(--sh-card-bg);
+    box-shadow: inset 0 0 0 4px var(--sc-card-bg);
 }
 
 /* Option Content */
-.sh-option-content {
+.sc-option-content {
     font-weight: 600;
     flex: 1;
 }
 
 /* Option Variants */
-.sh-option-success {
-    background: var(--sh-success-light);
-    color: var(--sh-success);
+.sc-option-success {
+    background: var(--sc-success-light);
+    color: var(--sc-success);
 }
 
-.sh-option-primary {
-    background: var(--sh-primary-light);
-    color: var(--sh-primary);
+.sc-option-primary {
+    background: var(--sc-primary-light);
+    color: var(--sc-primary);
 }
 
-.sh-option-warning {
-    background: var(--sh-warning-light);
-    color: var(--sh-warning);
+.sc-option-warning {
+    background: var(--sc-warning-light);
+    color: var(--sc-warning);
 }
 
-.sh-option-danger {
-    background: var(--sh-danger-light);
-    color: var(--sh-danger);
+.sc-option-danger {
+    background: var(--sc-danger-light);
+    color: var(--sc-danger);
 }
 
 /* Hover States */
-.sh-option:hover {
+.sc-option:hover {
     filter: brightness(1.05);
     transform: translateY(-1px);
 }
 
-.sh-option input[type="radio"]:checked ~ .sh-option-content {
+.sc-option input[type="radio"]:checked ~ .sc-option-content {
     font-weight: 700;
 }
 
 /* Selected State */
-.sh-option:has(input[type="radio"]:checked) {
+.sc-option:has(input[type="radio"]:checked) {
     border-color: currentColor;
     filter: brightness(1.1);
 }
 
 /* Modal Footer */
-.sh-modal-footer {
+.sc-modal-footer {
     padding: 1rem 1.5rem;
-    border-top: 2px solid var(--sh-gray-100);
+    border-top: 2px solid var(--sc-gray-100);
     display: flex;
     justify-content: center;
     gap: 0.5rem;
 }
 
 /* Scroll Lock Body (applied via JS) */
-body.sh-scroll-locked {
+body.sc-scroll-locked {
     /* Important: Don't change overflow or padding - use fixed wrapper instead */
     position: relative;
 }
 
 /* Scroll Lock Wrapper - prevents scrolling without layout shift */
-.sh-scroll-lock-wrapper {
+.sc-scroll-lock-wrapper {
     position: fixed;
     top: 0;
     left: 0;
@@ -309,37 +309,37 @@ body.sh-scroll-locked {
     pointer-events: none;
 }
 
-.sh-scroll-lock-wrapper.sh-active {
+.sc-scroll-lock-wrapper.sc-active {
     pointer-events: auto;
 }
 
 /* Mobile Responsive */
 @media (max-width: 576px) {
-    .sh-modal-overlay {
+    .sc-modal-overlay {
         padding: 0.5rem;
     }
 
-    .sh-modal-body {
+    .sc-modal-body {
         padding: 1rem;
     }
 
-    .sh-modal-footer {
+    .sc-modal-footer {
         padding: 0.75rem 1rem;
         flex-direction: column;
     }
 
-    .sh-modal-footer button {
+    .sc-modal-footer button {
         width: 100%;
     }
 }
 
 /* Animation Keyframes */
-@keyframes sh-spin {
+@keyframes sc-spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
 
-@keyframes sh-fadeOut {
+@keyframes sc-fadeOut {
     from { opacity: 1; transform: translateY(0); }
     to { opacity: 0; transform: translateY(-10px); }
 }
@@ -361,7 +361,7 @@ body.sh-scroll-locked {
     window['openReviewModal' + modalId] = function() {
         // Create scroll lock wrapper
         scrollLockWrapper = document.createElement('div');
-        scrollLockWrapper.className = 'sh-scroll-lock-wrapper';
+        scrollLockWrapper.className = 'sc-scroll-lock-wrapper';
         document.body.appendChild(scrollLockWrapper);
 
         // Force reflow
@@ -369,16 +369,16 @@ body.sh-scroll-locked {
 
         // Activate (no body manipulation = no layout shift)
         requestAnimationFrame(() => {
-            overlay.classList.add('sh-modal-active');
-            scrollLockWrapper.classList.add('sh-active');
-            document.body.classList.add('sh-scroll-locked');
+            overlay.classList.add('sc-modal-active');
+            scrollLockWrapper.classList.add('sc-active');
+            document.body.classList.add('sc-scroll-locked');
         });
     };
 
     // Close Modal Function
     window['closeReviewModal' + modalId] = function() {
-        overlay.classList.remove('sh-modal-active');
-        document.body.classList.remove('sh-scroll-locked');
+        overlay.classList.remove('sc-modal-active');
+        document.body.classList.remove('sc-scroll-locked');
 
         setTimeout(() => {
             if (scrollLockWrapper && scrollLockWrapper.parentNode) {
@@ -406,7 +406,7 @@ body.sh-scroll-locked {
 
     // Close on ESC key
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && overlay.classList.contains('sh-modal-active')) {
+        if (e.key === 'Escape' && overlay.classList.contains('sc-modal-active')) {
             window['closeReviewModal' + modalId]();
         }
     });
@@ -419,7 +419,7 @@ body.sh-scroll-locked {
 
         isSubmitting = true;
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="ti ti-loader me-1" style="animation: sh-spin 1s linear infinite;"></i> Mengirim...';
+        submitBtn.innerHTML = '<i class="ti ti-loader me-1" style="animation: sc-spin 1s linear infinite;"></i> Mengirim...';
 
         const formData = new FormData(form);
 
@@ -439,7 +439,7 @@ body.sh-scroll-locked {
             // Remove request card from DOM
             const requestCard = document.querySelector('[data-request-id="{{ $req->id }}"]');
             if (requestCard) {
-                requestCard.style.animation = 'sh-fadeOut 0.3s ease-out';
+                requestCard.style.animation = 'sc-fadeOut 0.3s ease-out';
                 setTimeout(() => requestCard.remove(), 300);
             }
 
@@ -462,7 +462,7 @@ body.sh-scroll-locked {
 
     // Reset form when modal closes
     overlay.addEventListener('transitionend', function(e) {
-        if (e.target === overlay && !overlay.classList.contains('sh-modal-active')) {
+        if (e.target === overlay && !overlay.classList.contains('sc-modal-active')) {
             if (!isSubmitting) {
                 form.reset();
                 submitBtn.disabled = false;
@@ -478,18 +478,18 @@ body.sh-scroll-locked {
         toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 99999; min-width: 300px; border-radius: 12px; border: none; padding: 1rem; box-shadow: 0 10px 40px rgba(0,0,0,0.15);';
 
         if (type === 'success') {
-            toast.style.background = 'var(--sh-success-light)';
-            toast.style.color = 'var(--sh-success)';
+            toast.style.background = 'var(--sc-success-light)';
+            toast.style.color = 'var(--sc-success)';
         } else {
-            toast.style.background = 'var(--sh-danger-light)';
-            toast.style.color = 'var(--sh-danger)';
+            toast.style.background = 'var(--sc-danger-light)';
+            toast.style.color = 'var(--sc-danger)';
         }
 
         toast.innerHTML = message;
         document.body.appendChild(toast);
 
         setTimeout(() => {
-            toast.style.animation = 'sh-fadeOut 0.3s ease-out';
+            toast.style.animation = 'sc-fadeOut 0.3s ease-out';
             setTimeout(() => toast.remove(), 300);
         }, type === 'success' ? 3000 : 5000);
     }

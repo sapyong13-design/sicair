@@ -1,18 +1,18 @@
 @extends('layouts.app')
 
-@section('title', 'Riwayat Cuti - SiHEALING')
+@section('title', 'Riwayat Cuti - SiCAIR')
 
 @section('content')
-<nav class="sh-breadcrumb" aria-label="Breadcrumb">
+<nav class="sc-breadcrumb" aria-label="Breadcrumb">
     <a href="{{ route('dashboard') }}">Dashboard</a>
-    <span class="sh-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
-    <span class="sh-breadcrumb-current">Riwayat Cuti</span>
+    <span class="sc-breadcrumb-sep" aria-hidden="true"><i class="ti ti-chevron-right" style="font-size: 0.7rem;"></i></span>
+    <span class="sc-breadcrumb-current">Riwayat Cuti</span>
 </nav>
 
-<div class="sh-page-header">
+<div class="sc-page-header">
     <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
         <div>
-            <h2 class="sh-page-title mb-0">Riwayat Cuti Saya</h2>
+            <h2 class="sc-page-title mb-0">Riwayat Cuti Saya</h2>
             <div class="text-muted" style="font-size: 0.85rem;">Semua pengajuan cuti yang pernah diajukan</div>
         </div>
         <a href="{{ route('leave.saya') }}" class="btn btn-outline-secondary" style="border-radius: 10px; font-size: 0.85rem;">
@@ -22,7 +22,7 @@
 </div>
 
 {{-- Filter --}}
-<div class="card sh-card mb-4">
+<div class="card sc-card mb-4">
     <div class="card-body">
         <form method="GET" class="row g-3 align-items-end">
             <div class="col-12 col-md-3">
@@ -53,7 +53,7 @@
                 </select>
             </div>
             <div class="col-12 col-md-4 d-flex gap-2">
-                <button type="submit" class="btn sh-btn-primary btn-sm flex-fill">
+                <button type="submit" class="btn sc-btn-primary btn-sm flex-fill">
                     <i class="ti ti-filter me-1"></i> Filter
                 </button>
                 <a href="{{ route('leave.history') }}" class="btn btn-outline-secondary btn-sm flex-fill">
@@ -65,7 +65,7 @@
 </div>
 
 {{-- Table --}}
-<div class="card sh-card">
+<div class="card sc-card">
     <div class="card-body p-0">
         @if($leaves->isEmpty())
         <div class="text-center py-5 text-muted">
@@ -74,7 +74,7 @@
         </div>
         @else
         <div class="table-responsive">
-            <table class="table sh-table mb-0">
+            <table class="table sc-table mb-0">
                 <thead>
                     <tr>
                         <th>Jenis Cuti</th>
@@ -88,7 +88,7 @@
                 <tbody>
                     @foreach($leaves as $leave)
                     <tr>
-                        <td class="fw-semibold" style="color: var(--sh-primary);">{{ $leave->type_label }}</td>
+                        <td class="fw-semibold" style="color: var(--sc-primary);">{{ $leave->type_label }}</td>
                         <td>
                             <span style="font-size: 0.85rem;">
                                 {{ $leave->start_date->format('d M Y') }}
@@ -105,12 +105,12 @@
                         <td>
                             @php
                                 $badgeClass = match(true) {
-                                    $leave->isApproved() => 'sh-badge-approved',
-                                    $leave->isRejected() => 'sh-badge-rejected',
-                                    default => 'sh-badge-pending',
+                                    $leave->isApproved() => 'sc-badge-approved',
+                                    $leave->isRejected() => 'sc-badge-rejected',
+                                    default => 'sc-badge-pending',
                                 };
                             @endphp
-                            <span class="sh-badge {{ $badgeClass }}">{{ $leave->status_label }}</span>
+                            <span class="sc-badge {{ $badgeClass }}">{{ $leave->status_label }}</span>
                         </td>
                         <td class="text-muted" style="font-size: 0.85rem;">
                             {{ $leave->pejabat?->name ?? $leave->atasanReviewer?->name ?? '-' }}
