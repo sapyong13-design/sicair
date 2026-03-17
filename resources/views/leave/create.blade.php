@@ -335,7 +335,7 @@
                             </label>
                             <input type="date" name="start_date"
                                    class="form-control @error('start_date') is-invalid @enderror"
-                                   value="{{ old('start_date', isset($reapplyData) ? $reapplyData->start_date->format('Y-m-d') : '') }}"
+                                   value="{{ $prefillStart ?? old('start_date', isset($reapplyData) ? $reapplyData->start_date->format('Y-m-d') : '') }}"
                                    min="{{ date('Y-m-d') }}" required
                                    style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
                             @error('start_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -893,29 +893,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- Feature 5: Draft localStorage ---
-    var DRAFT_KEY = 'sicair_cuti_draft';
-    var form = document.querySelector('form');
-    if (form) {
-        var fields = ['start_date','end_date','reason','alasan','address_during_leave','phone_during_leave'];
-        var saved = {};
-        try { saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}'); } catch(e) {}
-        fields.forEach(function(name) {
-            var el = form.querySelector('[name="' + name + '"]');
-            if (el && saved[name]) el.value = saved[name];
-        });
-        form.addEventListener('input', function() {
-            var data = {};
-            fields.forEach(function(name) {
-                var el = form.querySelector('[name="' + name + '"]');
-                if (el) data[name] = el.value;
-            });
-            try { localStorage.setItem(DRAFT_KEY, JSON.stringify(data)); } catch(e) {}
-        });
-        form.addEventListener('submit', function() {
-            try { localStorage.removeItem(DRAFT_KEY); } catch(e) {}
-        });
-    }
 
     // --- Feature 6: Konfirmasi modal ---
     var confirmBtn = document.getElementById('sc-confirm-btn');
