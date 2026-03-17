@@ -100,11 +100,11 @@
                             <input type="checkbox" name="ids[]" value="{{ $req->id }}"
                                 class="sc-bulk-cb form-check-input" style="width:18px;height:18px;flex-shrink:0;margin-top:0;">
                             <div class="sc-user-avatar" style="width:40px;height:40px;font-size:0.8rem;background:var(--sc-primary-light);color:var(--sc-primary);border:none;border-radius:10px;">
-                                {{ strtoupper(substr($req->user->name, 0, 2)) }}
+                                {{ strtoupper(substr(optional($req->user)->name ?? 'N/A', 0, 2)) }}
                             </div>
                             <div>
-                                <div class="fw-bold" style="font-size:0.95rem;">{{ $req->user->name }}</div>
-                                <div class="text-muted" style="font-size:0.78rem;">{{ $req->user->jabatan ?? $req->user->nip }}</div>
+                                <div class="fw-bold" style="font-size:0.95rem;">{{ optional($req->user)->name ?? 'N/A' }}</div>
+                                <div class="text-muted" style="font-size:0.78rem;">{{ optional($req->user)->jabatan ?? optional($req->user)->nip ?? '-' }}</div>
                             </div>
                         </div>
                         <span class="sc-badge sc-badge-pending">{{ $req->type_label ?? ucfirst($req->type) }}</span>
@@ -205,11 +205,11 @@
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <div class="d-flex align-items-center gap-2">
                         <div class="sc-user-avatar" style="width:40px;height:40px;font-size:0.8rem;background:var(--sc-primary-light);color:var(--sc-primary);border:none;border-radius:10px;">
-                            {{ strtoupper(substr($req->user->name, 0, 2)) }}
+                            {{ strtoupper(substr(optional($req->user)->name ?? 'N/A', 0, 2)) }}
                         </div>
                         <div>
-                            <div class="fw-bold" style="font-size:0.95rem;">{{ $req->user->name }}</div>
-                            <div class="text-muted" style="font-size:0.78rem;">{{ $req->user->jabatan ?? $req->user->nip }}</div>
+                            <div class="fw-bold" style="font-size:0.95rem;">{{ optional($req->user)->name ?? 'N/A' }}</div>
+                            <div class="text-muted" style="font-size:0.78rem;">{{ optional($req->user)->jabatan ?? optional($req->user)->nip ?? '-' }}</div>
                         </div>
                     </div>
                     <span class="sc-badge sc-badge-{{ in_array($req->status, ['disetujui','approved']) ? 'approved' : (in_array($req->status, ['ditolak','rejected']) ? 'rejected' : 'pending') }}">
