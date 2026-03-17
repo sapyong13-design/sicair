@@ -757,7 +757,7 @@
                 <i class="ti ti-gavel me-2" style="color: var(--sc-warning);"></i>
                 Menunggu Keputusan Anda
             </h3>
-            @if($needsDecision->isNotEmpty())
+            @if($needsDecisionCount > 0)
             <span class="sc-badge sc-badge-pending">{{ $needsDecisionCount }} antrian</span>
             @endif
             <a href="{{ route('keputusan.index') }}" class="btn btn-sm btn-outline-secondary ms-auto" style="border-radius:8px;font-size:0.8rem;">
