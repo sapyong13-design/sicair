@@ -20,7 +20,7 @@
         .login-banner {
             display: none;
             width: 50%;
-            background-image: url('/gedung.webp');
+            background-image: url("{{ asset('gedung.webp') }}");
             background-size: cover;
             background-position: center center;
             position: relative;
@@ -354,7 +354,7 @@
         /* Mobile: full-screen background + glass card */
         @media (max-width: 991px) {
             body {
-                background-image: url('/gedung.webp');
+                background-image: url("{{ asset('gedung.webp') }}");
                 background-size: cover;
                 background-position: center center;
                 background-attachment: fixed;
@@ -424,7 +424,7 @@
 
             <div class="banner-system-name"><span>Si</span>CAIR</div>
             <div class="banner-system-desc">
-                Sistem Informasi Hak Elektronik Cuti<br>
+                Sistem Cuti Administrasi Elektronik<br>
                 Pengelolaan cuti pegawai sesuai SE MA No. 13/2019
             </div>
 
@@ -456,7 +456,7 @@
                     <div class="mobile-logo-fallback"><i class="ti ti-scale"></i></div>
                 @endif
                 <div class="mobile-institution">Pengadilan Negeri Natuna</div>
-                <div class="mobile-subtitle">Sistem Informasi Hak Elektronik Cuti</div>
+                <div class="mobile-subtitle">Sistem Cuti Administrasi Elektronik</div>
             </div>
 
             <div class="login-card">
@@ -483,6 +483,7 @@
                                    placeholder="Masukkan NIP Anda"
                                    value="{{ old('nip') }}"
                                    autocomplete="username"
+                                   maxlength="18"
                                    autofocus
                                    required>
                         </div>
@@ -508,10 +509,10 @@
                         <a href="{{ route('password.request') }}" class="text-muted small" style="font-size: 0.82rem;">Lupa password?</a>
                     </div>
                     <div class="mb-4">
-                        <label class="form-check" style="cursor: pointer;">
-                            <input type="checkbox" name="remember" class="form-check-input" style="border-radius: 6px; border-color: #166534;"/>
-                            <span class="form-check-label" style="font-size: 0.85rem; color: #475569;">Ingat saya di perangkat ini</span>
-                        </label>
+                        <div class="form-check" style="cursor: pointer;">
+                            <input type="checkbox" name="remember" id="remember" class="form-check-input" style="border-radius: 6px; border-color: #166634;"/>
+                            <label class="form-check-label" for="remember" style="font-size: 0.85rem; color: #475569; cursor: pointer;">Ingat saya di perangkat ini</label>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary sc-login-btn w-100" id="loginBtn">
                         <span id="loginBtnText"><i class="ti ti-login me-2"></i> Masuk</span>
@@ -544,7 +545,8 @@
         var loginForm = document.getElementById('loginForm');
         var loginBtn  = document.getElementById('loginBtn');
         if (loginForm) {
-            loginForm.addEventListener('submit', function() {
+            loginForm.addEventListener('submit', function(e) {
+                if (!loginForm.checkValidity()) return;
                 loginBtn.disabled = true;
                 document.getElementById('loginBtnText').style.display    = 'none';
                 document.getElementById('loginBtnLoading').style.display = 'inline-flex';

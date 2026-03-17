@@ -34,7 +34,7 @@
         </p>
     </div>
     <div class="footer">
-        SiCAIR — Sistem Informasi Hak Elektronik Cuti<br>
+        SiCAIR — Sistem Cuti Administrasi Elektronik<br>
         Pengadilan Negeri Natuna
     </div>
 </div>

@@ -1,7 +1,7 @@
 {
     "name": "SiCAIR — PN Natuna",
     "short_name": "SiCAIR",
-    "description": "Sistem Informasi Hak Elektronik Cuti — Pengadilan Negeri Natuna",
+    "description": "Sistem Cuti Administrasi Elektronik — Pengadilan Negeri Natuna",
     "start_url": "/dashboard",
     "display": "standalone",
     "background_color": "#ffffff",

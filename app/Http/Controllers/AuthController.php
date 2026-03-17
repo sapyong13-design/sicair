@@ -46,7 +46,7 @@ class AuthController extends Controller
             'model_id'   => null,
             'old_values' => null,
             'new_values' => json_encode([
-                'username_attempted' => $request->input('nip', $request->input('email', $request->input('username', '-')))
+                'nip_attempted' => $request->input('nip', '-'),
             ]),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
