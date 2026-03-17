@@ -382,4 +382,70 @@ class SmokeTest extends TestCase
             ->get('/keputusan?type=cuti_tahunan')
             ->assertStatus(200);
     }
+
+    // -------------------------------------------------------------------------
+    // Sprint A: Form & Flow Tests
+    // -------------------------------------------------------------------------
+
+    public function test_hari_libur_api_returns_json_by_year(): void
+    {
+        $user = $this->makeUser(); // role pegawai
+        $response = $this->actingAs($user)->get('/hari-libur/api?year=2026');
+        $response->assertStatus(200);
+        $response->assertJsonIsArray();
+    }
+
+    public function test_leave_reason_templates_api_returns_json(): void
+    {
+        $user = $this->makeUser();
+        $response = $this->actingAs($user)->get('/leave-reason-templates/api');
+        $response->assertStatus(200);
+        $response->assertJsonIsArray();
+    }
+
+    public function test_leave_reason_templates_admin_can_create(): void
+    {
+        $admin = $this->makeAdmin();
+        $response = $this->actingAs($admin)->post('/admin/leave-reason-templates', [
+            'label'      => 'Keperluan Keluarga',
+            'body'       => 'Saya perlu menghadiri acara keluarga yang tidak dapat ditunda.',
+            'sort_order' => 1,
+        ]);
+        $response->assertRedirect();
+        $this->assertDatabaseHas('leave_reason_templates', ['label' => 'Keperluan Keluarga']);
+    }
+
+    public function test_leave_reason_templates_admin_can_delete(): void
+    {
+        $admin = $this->makeAdmin();
+        $tpl = \App\Models\LeaveReasonTemplate::create([
+            'label'      => 'Template Hapus',
+            'body'       => 'Isi template.',
+            'is_active'  => true,
+            'sort_order' => 0,
+        ]);
+        $response = $this->actingAs($admin)->delete("/admin/leave-reason-templates/{$tpl->id}");
+        $response->assertRedirect();
+        $this->assertDatabaseMissing('leave_reason_templates', ['id' => $tpl->id]);
+    }
+
+    public function test_leave_create_accepts_start_query_param(): void
+    {
+        $user = $this->makeUser();
+        $response = $this->actingAs($user)->get('/leave/create?type=cuti_tahunan&start=2026-03-17');
+        $response->assertStatus(200);
+    }
+
+    public function test_kalender_loads_with_panel_data(): void
+    {
+        $user = $this->makeUser();
+        $this->actingAs($user)->get('/kalender')->assertStatus(200);
+    }
+
+    public function test_leave_select_type_accepts_start_query_param(): void
+    {
+        $user = $this->makeUser();
+        $response = $this->actingAs($user)->get('/leave/select-type?start=2026-03-17');
+        $response->assertStatus(200);
+    }
 }
