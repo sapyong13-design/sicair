@@ -135,7 +135,8 @@ IDs yang tidak lolos guard atau kondisi status di-skip silently. Hanya proses ya
 ### Flash Message
 
 ```php
-session()->flash('success', "{$count} pengajuan berhasil diteruskan ke ketua.");
+// Via redirect()->with() — idiom Laravel standar, equivalent dengan session()->flash():
+// return redirect()->route(...)->with('success', "{$count} pengajuan berhasil diteruskan ke ketua.");
 ```
 
 ### Redirect
