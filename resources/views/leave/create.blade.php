@@ -352,8 +352,13 @@
                                    value="{{ old('end_date', isset($reapplyData) ? $reapplyData->end_date->format('Y-m-d') : '') }}"
                                    min="{{ date('Y-m-d') }}" required
                                    style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
+                            <div id="workingDaysBadge" class="mt-1" style="font-size:0.82rem; display:none;"></div>
+                            <div id="holidayWarning" class="alert alert-warning py-1 px-2 mt-1" style="font-size:0.82rem; display:none; border-radius:8px;">
+                                <i class="ti ti-alert-triangle me-1"></i>
+                                <span id="holidayWarningText"></span>
+                            </div>
                             @error('end_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            <div id="sc-duration-info" class="mt-2" style="font-size:0.85rem; color:#475569; min-height:1.4rem;"></div>
+                            <div id="sc-duration-info" class="mt-2" style="font-size:0.85rem; color:#475569; min-height:1.4rem; display:none!important;"></div>
                             <div id="sc-saldo-warning" class="mt-2 p-2" style="display:none; font-size:0.85rem; background:#fef2f2; border:1px solid #fecaca; color:#dc2626; border-radius:10px;"></div>
                         </div>
                     </div>
@@ -367,7 +372,7 @@
                     </div>
 
                     {{-- Duration preview --}}
-                    <div class="d-none mb-4" id="duration-preview">
+                    <div class="d-none mb-4" id="duration-preview" style="display:none!important;">
                         <div class="d-flex align-items-center gap-3 p-3" id="duration-box" style="border-radius: 12px; background: var(--sc-primary-light); border: 2px solid #bbf7d0;">
                             <div id="duration-icon-box" style="width: 44px; height: 44px; border-radius: 12px; background: var(--sc-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                 <i class="ti ti-hourglass" style="color: #fff; font-size: 1.2rem;"></i>
@@ -1105,6 +1110,71 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch(e) {
         // Gagal — dropdown tetap tersembunyi, user isi manual
     }
+})();
+
+// Date picker cerdas — hitung hari kerja (skip weekend + libur nasional)
+(async function() {
+    var holidays = [];
+    var year = new Date().getFullYear();
+    try {
+        var res = await fetch('/hari-libur/api?year=' + year, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        if (res.ok) holidays = await res.json();
+    } catch(e) { /* fallback: hanya skip weekend */ }
+
+    // Use manual date string to avoid timezone UTC offset issues (WIB = UTC+7)
+    function toDateStr(d) {
+        return d.getFullYear() + '-' +
+               String(d.getMonth() + 1).padStart(2, '0') + '-' +
+               String(d.getDate()).padStart(2, '0');
+    }
+    function isHoliday(dateStr) { return holidays.includes(dateStr); }
+    function isWeekend(dateStr) { var d = new Date(dateStr + 'T00:00:00'); return d.getDay() === 0 || d.getDay() === 6; }
+    function countWorkingDays(start, end) {
+        var count = 0;
+        var cur = new Date(start + 'T00:00:00');
+        var endDate = new Date(end + 'T00:00:00');
+        while (cur <= endDate) {
+            var s = toDateStr(cur);
+            if (!isWeekend(s) && !isHoliday(s)) count++;
+            cur.setDate(cur.getDate() + 1);
+        }
+        return count;
+    }
+
+    function updateDateInfo() {
+        var startEl = document.querySelector('[name="start_date"]');
+        var endEl   = document.querySelector('[name="end_date"]');
+        var badge   = document.getElementById('workingDaysBadge');
+        var warn    = document.getElementById('holidayWarning');
+        var warnTxt = document.getElementById('holidayWarningText');
+        if (!startEl || !endEl || !badge) return;
+        var s = startEl.value, e = endEl.value;
+
+        // Warning hari libur
+        if (s && isHoliday(s)) {
+            if (warn) { warn.style.display = ''; warnTxt.textContent = 'Tanggal mulai adalah hari libur.'; }
+        } else if (e && isHoliday(e)) {
+            if (warn) { warn.style.display = ''; warnTxt.textContent = 'Tanggal selesai adalah hari libur.'; }
+        } else {
+            if (warn) warn.style.display = 'none';
+        }
+
+        // Badge hari kerja
+        if (s && e && s <= e) {
+            var days = countWorkingDays(s, e);
+            badge.style.display = '';
+            badge.innerHTML = '<span class="badge bg-primary-subtle text-primary">' +
+                '<i class="ti ti-calendar-check me-1"></i>' + days + ' hari kerja</span>';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    var startEl = document.querySelector('[name="start_date"]');
+    var endEl = document.querySelector('[name="end_date"]');
+    if (startEl) startEl.addEventListener('change', updateDateInfo);
+    if (endEl) endEl.addEventListener('change', updateDateInfo);
+    updateDateInfo(); // run on load jika ada prefill
 })();
 </script>
 @endpush
