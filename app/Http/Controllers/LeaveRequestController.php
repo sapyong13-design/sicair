@@ -39,6 +39,9 @@ class LeaveRequestController extends Controller
         }
 
         $prefillStart = $request->query('start');
+        if ($prefillStart && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $prefillStart)) {
+            $prefillStart = null;
+        }
         return view('leave.select-type', compact('prefillStart'));
     }
 
@@ -50,6 +53,9 @@ class LeaveRequestController extends Controller
     {
         $type = $request->query('type', LeaveRequest::TYPE_TAHUNAN);
         $prefillStart = $request->query('start');
+        if ($prefillStart && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $prefillStart)) {
+            $prefillStart = null;
+        }
         $user = Auth::user();
 
         // Fix #16: CPNS type-aware check — boleh cuti sakit/melahirkan/alasan penting

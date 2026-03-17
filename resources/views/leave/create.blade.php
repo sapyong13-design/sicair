@@ -1059,6 +1059,12 @@ function wizPrev() {
     if (wizCurrent > 1) wizGoTo(wizCurrent - 1);
 }
 
+function escHtml(s) {
+    var d = document.createElement('span');
+    d.textContent = s;
+    return d.innerHTML;
+}
+
 function updateReviewPanel() {
     var summary = document.getElementById('wiz-review-summary');
     if (!summary) return;
@@ -1068,11 +1074,11 @@ function updateReviewPanel() {
     var alamat = document.querySelector('[name="alamat_cuti"]');
     var telepon = document.querySelector('[name="telepon_cuti"]');
     var html = '<dl class="row mb-0">';
-    if (reason && reason.value) html += '<dt class="col-sm-4">Alasan</dt><dd class="col-sm-8">' + reason.value + '</dd>';
-    if (startDate && startDate.value) html += '<dt class="col-sm-4">Tgl Mulai</dt><dd class="col-sm-8">' + startDate.value + '</dd>';
-    if (endDate && endDate.value) html += '<dt class="col-sm-4">Tgl Selesai</dt><dd class="col-sm-8">' + endDate.value + '</dd>';
-    if (alamat && alamat.value) html += '<dt class="col-sm-4">Alamat Cuti</dt><dd class="col-sm-8">' + alamat.value + '</dd>';
-    if (telepon && telepon.value) html += '<dt class="col-sm-4">Telepon</dt><dd class="col-sm-8">' + telepon.value + '</dd>';
+    if (reason && reason.value) html += '<dt class="col-sm-4">Alasan</dt><dd class="col-sm-8">' + escHtml(reason.value) + '</dd>';
+    if (startDate && startDate.value) html += '<dt class="col-sm-4">Tgl Mulai</dt><dd class="col-sm-8">' + escHtml(startDate.value) + '</dd>';
+    if (endDate && endDate.value) html += '<dt class="col-sm-4">Tgl Selesai</dt><dd class="col-sm-8">' + escHtml(endDate.value) + '</dd>';
+    if (alamat && alamat.value) html += '<dt class="col-sm-4">Alamat Cuti</dt><dd class="col-sm-8">' + escHtml(alamat.value) + '</dd>';
+    if (telepon && telepon.value) html += '<dt class="col-sm-4">Telepon</dt><dd class="col-sm-8">' + escHtml(telepon.value) + '</dd>';
     html += '</dl>';
     summary.innerHTML = html;
 }
