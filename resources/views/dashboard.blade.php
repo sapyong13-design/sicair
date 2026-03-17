@@ -538,7 +538,14 @@
                             <div class="text-muted" style="font-size: 0.75rem;">s.d. {{ $req->end_date->format('d M Y') }} &middot; {{ $req->total_days }} hari</div>
                         </td>
                         <td>
-                            <span class="sc-badge sc-badge-pending">{{ $req->status_label }}</span>
+                            @php
+                                $bc = match(true) {
+                                    $req->isApproved() => 'sc-badge-approved',
+                                    $req->isRejected() => 'sc-badge-rejected',
+                                    default            => 'sc-badge-pending',
+                                };
+                            @endphp
+                            <span class="sc-badge {{ $bc }}">{{ $req->status_label }}</span>
                         </td>
                         <td class="text-end">
                             <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">
@@ -566,7 +573,14 @@
                                 <div class="text-muted" style="font-size: 0.75rem;">{{ $req->user->jabatan ?? $req->user->nip }}</div>
                             </div>
                         </div>
-                        <span class="sc-badge sc-badge-pending">{{ $req->status_label }}</span>
+                        @php
+                            $bc2 = match(true) {
+                                $req->isApproved() => 'sc-badge-approved',
+                                $req->isRejected() => 'sc-badge-rejected',
+                                default            => 'sc-badge-pending',
+                            };
+                        @endphp
+                        <span class="sc-badge {{ $bc2 }}">{{ $req->status_label }}</span>
                     </div>
                     <div class="row g-2 mb-2" style="font-size: 0.82rem;">
                         <div class="col-6">
