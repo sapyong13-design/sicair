@@ -67,7 +67,7 @@ $steps = [
                 @elseif($step['state'] === 'rejected')
                     <i class="ti ti-x" style="font-size: 0.6rem;"></i>
                 @elseif($step['state'] === 'warn')
-                    <i class="ti {{ $warnIcon === 'ti-clock-pause' ? 'ti-clock-pause' : 'ti-edit' }}" style="font-size: 0.6rem;"></i>
+                    <i class="ti {{ $warnIcon }}" style="font-size: 0.6rem;"></i>
                 @endif
             </div>
             <div style="font-size: 0.6rem; color: var(--sc-text-muted); margin-top: 3px; white-space: nowrap;">
