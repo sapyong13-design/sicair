@@ -37,11 +37,13 @@ class KeputusanController extends Controller
 
         if ($tab === 'menunggu') {
             $this->applyTypeAndDateFilters($menunggQuery, $request);
+            $this->applyNameFilter($menunggQuery, $request);
             $menunggu = $menunggQuery->paginate(15)->withQueryString();
             $riwayat  = collect();
         } else {
             $this->applyStatusFilter($riwayatQuery, $request);
             $this->applyTypeAndDateFilters($riwayatQuery, $request);
+            $this->applyNameFilter($riwayatQuery, $request);
             $riwayat  = $riwayatQuery->paginate(15)->withQueryString();
             $menunggu = collect();
         }
@@ -62,6 +64,7 @@ class KeputusanController extends Controller
         if ($tab === 'review') {
             $this->applyStatusFilter($reviewQuery, $request);
             $this->applyTypeAndDateFilters($reviewQuery, $request);
+            $this->applyNameFilter($reviewQuery, $request);
             $review    = $reviewQuery->paginate(15)->withQueryString();
             $pengajuan = collect();
         } else {
@@ -102,5 +105,12 @@ class KeputusanController extends Controller
         if ($request->filled('type'))       $query->where('type', $request->type);
         if ($request->filled('start_date')) $query->where('start_date', '>=', $request->start_date);
         if ($request->filled('end_date'))   $query->where('end_date', '<=', $request->end_date);
+    }
+
+    private function applyNameFilter($query, Request $request): void
+    {
+        if (!$request->filled('q')) return;
+        $q = $request->q;
+        $query->whereHas('user', fn($u) => $u->where('name', 'like', "%{$q}%"));
     }
 }

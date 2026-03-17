@@ -477,4 +477,28 @@ class SmokeTest extends TestCase
             'status' => \App\Models\LeaveRequest::STATUS_PERTIMBANGAN,
         ]);
     }
+
+    public function test_keputusan_filter_by_name_for_ketua(): void
+    {
+        $ketua = $this->makeKetua();
+
+        // Buat dua pegawai dengan nama berbeda, keduanya punya leave pertimbangan
+        $pegawai1 = $this->makeUser(['name' => 'Zulkifli Harahap', 'nip' => '999999999999999994']);
+        $pegawai2 = $this->makeUser(['name' => 'Maria Ningsih',    'nip' => '999999999999999995']);
+        \App\Models\LeaveRequest::factory()->create([
+            'user_id' => $pegawai1->id,
+            'status'  => \App\Models\LeaveRequest::STATUS_PERTIMBANGAN,
+        ]);
+        \App\Models\LeaveRequest::factory()->create([
+            'user_id' => $pegawai2->id,
+            'status'  => \App\Models\LeaveRequest::STATUS_PERTIMBANGAN,
+        ]);
+
+        // Cari hanya "Zulkifli" — Maria Ningsih seharusnya tidak muncul
+        $this->actingAs($ketua)
+             ->get('/keputusan?q=Zulkifli')
+             ->assertStatus(200)
+             ->assertSee('Zulkifli Harahap')
+             ->assertDontSee('Maria Ningsih');
+    }
 }
