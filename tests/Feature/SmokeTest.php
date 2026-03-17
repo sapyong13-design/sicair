@@ -501,4 +501,30 @@ class SmokeTest extends TestCase
              ->assertSee('Zulkifli Harahap')
              ->assertDontSee('Maria Ningsih');
     }
+
+    public function test_keputusan_filter_by_name_for_atasan(): void
+    {
+        $atasan   = $this->makeUser(['role' => 'atasan', 'nip' => '999999999999999996']);
+        $pegawai1 = $this->makeUser(['name' => 'Bambang Suharto', 'nip' => '999999999999999997']);
+        $pegawai2 = $this->makeUser(['name' => 'Siti Rahayu',     'nip' => '999999999999999998']);
+
+        // Keduanya bawahan atasan ini, status diajukan (muncul di review tab)
+        \App\Models\LeaveRequest::factory()->create([
+            'user_id'            => $pegawai1->id,
+            'atasan_reviewer_id' => $atasan->id,
+            'status'             => \App\Models\LeaveRequest::STATUS_DIAJUKAN,
+        ]);
+        \App\Models\LeaveRequest::factory()->create([
+            'user_id'            => $pegawai2->id,
+            'atasan_reviewer_id' => $atasan->id,
+            'status'             => \App\Models\LeaveRequest::STATUS_DIAJUKAN,
+        ]);
+
+        // Filter berdasarkan nama — hanya Bambang yang seharusnya muncul
+        $this->actingAs($atasan)
+             ->get('/keputusan?tab=review&q=Bambang')
+             ->assertStatus(200)
+             ->assertSee('Bambang Suharto')
+             ->assertDontSee('Siti Rahayu');
+    }
 }
