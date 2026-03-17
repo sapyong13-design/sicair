@@ -448,4 +448,33 @@ class SmokeTest extends TestCase
         $response = $this->actingAs($user)->get('/leave/select-type?start=2026-03-17');
         $response->assertStatus(200);
     }
+
+    public function test_bulk_pertimbangan_forbidden_for_pegawai(): void
+    {
+        $pegawai = $this->makeUser(['nip' => '999999999999999991']);
+        $this->actingAs($pegawai)
+             ->post('/leave/bulk-pertimbangan', ['ids' => [999]])
+             ->assertStatus(403);
+    }
+
+    public function test_bulk_pertimbangan_updates_status(): void
+    {
+        $atasan  = $this->makeUser(['role' => 'atasan', 'nip' => '999999999999999992']);
+        $pegawai = $this->makeUser(['nip' => '999999999999999993']);
+
+        $leave = \App\Models\LeaveRequest::factory()->create([
+            'user_id'            => $pegawai->id,
+            'atasan_reviewer_id' => $atasan->id,
+            'status'             => \App\Models\LeaveRequest::STATUS_DIAJUKAN,
+        ]);
+
+        $this->actingAs($atasan)
+             ->post('/leave/bulk-pertimbangan', ['ids' => [$leave->id]])
+             ->assertRedirect(route('keputusan.index', ['tab' => 'review']));
+
+        $this->assertDatabaseHas('leave_requests', [
+            'id'     => $leave->id,
+            'status' => \App\Models\LeaveRequest::STATUS_PERTIMBANGAN,
+        ]);
+    }
 }

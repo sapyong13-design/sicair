@@ -677,6 +677,39 @@ class LeaveRequestController extends Controller
     }
 
     /**
+     * Bulk teruskan ke ketua (pertimbangan_atasan) oleh Atasan
+     */
+    public function bulkPertimbangan(Request $request)
+    {
+        $request->validate([
+            'ids'   => 'required|array|min:1',
+            'ids.*' => 'exists:leave_requests,id',
+        ]);
+
+        $user  = auth()->user();
+        $count = 0;
+
+        foreach ($request->ids as $id) {
+            $leave = LeaveRequest::where('id', $id)
+                ->where('atasan_reviewer_id', $user->id)
+                ->whereIn('status', [
+                    LeaveRequest::STATUS_DIAJUKAN,
+                    LeaveRequest::STATUS_PENDING,
+                ])
+                ->first();
+
+            if (!$leave) continue;
+
+            $leave->status = LeaveRequest::STATUS_PERTIMBANGAN;
+            $leave->save();
+            $count++;
+        }
+
+        return redirect()->route('keputusan.index', ['tab' => 'review'])
+            ->with('success', "{$count} pengajuan berhasil diteruskan ke ketua.");
+    }
+
+    /**
      * Detail pengajuan cuti
      */
     public function show(LeaveRequest $leaveRequest)
