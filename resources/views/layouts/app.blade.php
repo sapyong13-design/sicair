@@ -2196,6 +2196,9 @@
                                 <a class="dropdown-item {{ request()->is('admin/audit-logs*') ? 'active' : '' }}" href="{{ route('admin.audit-logs.index') }}">
                                     <i class="ti ti-clipboard-list"></i> Audit Log
                                 </a>
+                                <a class="dropdown-item {{ request()->routeIs('admin.leave-reason-templates.*') ? 'active' : '' }}" href="{{ route('admin.leave-reason-templates.index') }}">
+                                    <i class="ti ti-file-text"></i> Template Alasan
+                                </a>
                             </div>
                         </li>
                         @endif
