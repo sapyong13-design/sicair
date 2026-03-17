@@ -665,6 +665,9 @@
     </div>
 </div>
 
+{{-- Sidebar Panel --}}
+<x-leave-sidebar-panel />
+
 @push('scripts')
 <style>
 /* #25 Print styles */
@@ -704,7 +707,64 @@ const DAYS_ID   = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 
 let dayModalInstance = null;
 
+// Sidebar panel functions
+function showSidePanel(dateStr, leavesOnDay, holidayLabel) {
+    var panel   = document.getElementById('calSidePanel');
+    var overlay = document.getElementById('calSidePanelOverlay');
+    if (!panel) return;
+
+    // Format tanggal: "Senin, 17 Maret 2026"
+    var d = new Date(dateStr + 'T00:00:00');
+    var opts = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    document.getElementById('panelDateLabel').textContent = d.toLocaleDateString('id-ID', opts);
+
+    // Hari libur label
+    var hlEl = document.getElementById('panelHolidayLabel');
+    if (hlEl) {
+        hlEl.textContent = holidayLabel || '';
+        hlEl.style.display = holidayLabel ? '' : 'none';
+    }
+
+    // Daftar pegawai yang cuti
+    var listEl = document.getElementById('panelLeaveList');
+    if (listEl) {
+        if (leavesOnDay && leavesOnDay.length) {
+            listEl.innerHTML = leavesOnDay.map(function(l) {
+                return '<div class="d-flex align-items-center gap-2 mb-2">' +
+                    '<div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" ' +
+                    'style="width:32px;height:32px;flex-shrink:0;color:#fff;font-size:0.75rem;">' +
+                    (l.name ? l.name.charAt(0).toUpperCase() : '?') +
+                    '</div>' +
+                    '<div><div style="font-size:0.85rem;font-weight:600;">' + (l.name || '-') + '</div>' +
+                    '<div style="font-size:0.75rem;color:#64748b;">' + (l.type_label || '') + '</div></div>' +
+                    '</div>';
+            }).join('');
+        } else {
+            listEl.innerHTML = '<div class="text-muted" style="font-size:0.85rem;">Tidak ada yang cuti.</div>';
+        }
+    }
+
+    // Tombol ajukan cuti
+    var btn = document.getElementById('panelAjukanBtn');
+    if (btn) btn.href = '/leave/select-type?start=' + dateStr;
+
+    // Tampilkan panel
+    panel.style.transform = 'translateX(0)';
+    if (overlay) overlay.style.display = '';
+
+    // Mobile: full width
+    panel.style.width = window.innerWidth < 576 ? '100vw' : '320px';
+}
+
+function closeSidePanel() {
+    var panel   = document.getElementById('calSidePanel');
+    var overlay = document.getElementById('calSidePanelOverlay');
+    if (panel)   panel.style.transform = 'translateX(100%)';
+    if (overlay) overlay.style.display = 'none';
+}
+
 function openDayModal(dateStr) {
+    window._calCurrentDate = dateStr; // for sidebar panel
     if (!dayModalInstance) {
         dayModalInstance = new bootstrap.Modal(document.getElementById('dayDetailModal'));
     }
@@ -831,6 +891,21 @@ function renderDayModal(data) {
     }
 
     document.getElementById('modalDayBody').innerHTML = html;
+
+    // Show sidebar panel alongside modal
+    (function() {
+        var leavesOnDay = [];
+        if (data.leaves && data.leaves.length) {
+            leavesOnDay = data.leaves.map(function(l) {
+                return {
+                    name: l.user_name || (l.user && l.user.name) || l.name || '-',
+                    type_label: l.type_label || ''
+                };
+            });
+        }
+        var holidayLabel = data.holiday ? data.holiday.keterangan : null;
+        showSidePanel(window._calCurrentDate || '', leavesOnDay, holidayLabel);
+    })();
 }
 
 function escHtml(str) {
