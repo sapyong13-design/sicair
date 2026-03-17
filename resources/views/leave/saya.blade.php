@@ -130,16 +130,7 @@
             <div class="card-body">
                 @forelse($recentLeaves as $leave)
                 <div class="d-flex align-items-center gap-3 py-2 {{ !$loop->last ? 'border-bottom' : '' }}">
-                    <div>
-                        @php
-                            $badgeClass = match(true) {
-                                $leave->isApproved() => 'sc-badge-approved',
-                                $leave->isRejected() => 'sc-badge-rejected',
-                                default => 'sc-badge-pending',
-                            };
-                        @endphp
-                        <span class="sc-badge {{ $badgeClass }}">{{ $leave->status_label }}</span>
-                    </div>
+                    <x-leave-status-stepper :leave="$leave" />
                     <div class="flex-fill">
                         <div class="fw-semibold" style="font-size: 0.88rem;">{{ $leave->type_label }}</div>
                         <div class="text-muted" style="font-size: 0.78rem;">
