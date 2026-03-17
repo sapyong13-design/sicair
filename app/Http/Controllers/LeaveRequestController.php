@@ -29,7 +29,7 @@ class LeaveRequestController extends Controller
      * Pilih jenis cuti
      * Fix #16: CPNS type-aware — tampilkan halaman select-type dengan info cuti terbatas
      */
-    public function selectType()
+    public function selectType(Request $request)
     {
         $user = Auth::user();
         // Fix #16: Jangan blokir total, biarkan CPNS memilih jenis cuti yang diperbolehkan
@@ -38,7 +38,8 @@ class LeaveRequestController extends Controller
             return redirect('/dashboard')->with('error', $pesan);
         }
 
-        return view('leave.select-type');
+        $prefillStart = $request->query('start');
+        return view('leave.select-type', compact('prefillStart'));
     }
 
     /**
@@ -48,6 +49,7 @@ class LeaveRequestController extends Controller
     public function create(Request $request)
     {
         $type = $request->query('type', LeaveRequest::TYPE_TAHUNAN);
+        $prefillStart = $request->query('start');
         $user = Auth::user();
 
         // Fix #16: CPNS type-aware check — boleh cuti sakit/melahirkan/alasan penting
@@ -99,7 +101,7 @@ class LeaveRequestController extends Controller
             ->whereYear('created_at', date('Y') - 1)
             ->get()->sum(fn($r) => $r->total_hari_kerja ?? $r->total_days ?? 0);
 
-        return view('leave.create', compact('type', 'cutiInfo', 'reapplyData', 'thisYearDays', 'lastYearDays'));
+        return view('leave.create', compact('type', 'cutiInfo', 'reapplyData', 'thisYearDays', 'lastYearDays', 'prefillStart'));
     }
 
     /**
