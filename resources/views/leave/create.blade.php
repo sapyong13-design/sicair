@@ -248,13 +248,8 @@
                     {{-- Reason --}}
                     <div class="mb-4">
                         <div class="mb-2">
-                            <select id="sc-reason-template" class="form-select form-select-sm" style="border-radius:8px; font-size:0.85rem;">
-                                <option value="">-- Pilih template alasan (opsional) --</option>
-                                <option value="Keperluan keluarga yang mendesak dan tidak dapat ditunda.">Keperluan keluarga mendesak</option>
-                                <option value="Melaksanakan ibadah haji/umrah sesuai jadwal yang telah ditetapkan.">Ibadah haji/umrah</option>
-                                <option value="Istirahat dan pemulihan kondisi kesehatan.">Istirahat/pemulihan kesehatan</option>
-                                <option value="Menghadiri acara pernikahan anggota keluarga inti.">Pernikahan keluarga</option>
-                                <option value="Keperluan pribadi yang tidak dapat ditinggalkan.">Keperluan pribadi</option>
+                            <select id="sc-reason-template" class="form-select form-select-sm" style="border-radius:8px; font-size:0.85rem; display:none;">
+                                <option value="">-- Gunakan Template Alasan --</option>
                             </select>
                         </div>
                         <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
@@ -899,16 +894,22 @@ document.addEventListener('DOMContentLoaded', function() {
     var confirmSubmit = document.getElementById('sc-confirm-submit');
     if (confirmBtn) {
         confirmBtn.addEventListener('click', function() {
-            var s = startEl ? startEl.value : '-';
-            var e = endEl ? endEl.value : '-';
-            var dur = durEl ? durEl.textContent : '-';
             var body = document.getElementById('sc-confirm-body');
-            if (body) body.innerHTML =
-                '<div class="list-group list-group-flush">' +
-                '<div class="list-group-item px-0 py-2"><span class="text-muted" style="font-size:.85rem">Tanggal Mulai</span><strong class="float-end">' + s + '</strong></div>' +
-                '<div class="list-group-item px-0 py-2"><span class="text-muted" style="font-size:.85rem">Tanggal Selesai</span><strong class="float-end">' + e + '</strong></div>' +
-                '<div class="list-group-item px-0 py-2 border-0"><span class="text-muted" style="font-size:.85rem">Durasi</span><strong class="float-end" style="color:#166534">' + dur + '</strong></div>' +
-                '</div>';
+            if (body) {
+                var g = function(name) { var el = document.querySelector('[name="' + name + '"]'); return el ? (el.value || '-') : '-'; };
+                var daysBadge = document.getElementById('workingDaysBadge');
+                var daysText = daysBadge ? daysBadge.textContent.trim() : '-';
+                var reason = g('reason');
+                body.innerHTML =
+                    '<div class="p-3" style="background:var(--sc-gray-50);border-radius:12px;">' +
+                    '<table class="table table-borderless mb-0" style="font-size:0.9rem;">' +
+                    '<tr><td class="text-muted" style="width:40%">Jenis Cuti</td><td class="fw-semibold">{{ $typeLabel }}</td></tr>' +
+                    '<tr><td class="text-muted">Tanggal Mulai</td><td class="fw-semibold">' + g('start_date') + '</td></tr>' +
+                    '<tr><td class="text-muted">Tanggal Selesai</td><td class="fw-semibold">' + g('end_date') + '</td></tr>' +
+                    '<tr><td class="text-muted">Hari Kerja</td><td class="fw-semibold">' + daysText + '</td></tr>' +
+                    '<tr><td class="text-muted">Alasan</td><td class="fw-semibold" style="white-space:pre-line;">' + (reason.substring(0,100) + (reason.length > 100 ? '…' : '')) + '</td></tr>' +
+                    '</table></div>';
+            }
             var modal = new bootstrap.Modal(document.getElementById('sc-confirm-modal'));
             modal.show();
         });
@@ -1084,6 +1085,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+</script>
+<script>
+// Load template alasan dari API (menggantikan opsi hardcoded)
+(async function() {
+    try {
+        var res = await fetch('/leave-reason-templates/api', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        if (!res.ok) throw new Error();
+        var templates = await res.json();
+        var sel = document.getElementById('sc-reason-template');
+        if (!sel || !templates.length) return;
+        templates.forEach(function(t) {
+            var opt = document.createElement('option');
+            opt.value = t.body;
+            opt.textContent = t.label;
+            sel.appendChild(opt);
+        });
+        sel.style.display = ''; // tampilkan sekarang ada data
+    } catch(e) {
+        // Gagal — dropdown tetap tersembunyi, user isi manual
+    }
+})();
 </script>
 @endpush
 @endsection
