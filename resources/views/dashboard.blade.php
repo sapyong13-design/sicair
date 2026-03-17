@@ -696,7 +696,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="sc-stat-label mb-2">Perlu Keputusan</div>
-                            <div class="sc-stat-number" style="color: var(--sc-warning);">{{ $needsDecision->count() }}</div>
+                            <div class="sc-stat-number" style="color: var(--sc-warning);">{{ $needsDecisionCount }}</div>
                             <div class="text-muted mt-1" style="font-size: 0.8rem;">menunggu keputusan Anda</div>
                         </div>
                         <div class="sc-stat-icon icon-warning">
@@ -758,8 +758,11 @@
                 Menunggu Keputusan Anda
             </h3>
             @if($needsDecision->isNotEmpty())
-            <span class="sc-badge sc-badge-pending">{{ $needsDecision->count() }} antrian</span>
+            <span class="sc-badge sc-badge-pending">{{ $needsDecisionCount }} antrian</span>
             @endif
+            <a href="{{ route('keputusan.index') }}" class="btn btn-sm btn-outline-secondary ms-auto" style="border-radius:8px;font-size:0.8rem;">
+                Lihat semua <i class="ti ti-arrow-right ms-1"></i>
+            </a>
         </div>
         @if($needsDecision->isEmpty())
         <div class="card-body py-5">

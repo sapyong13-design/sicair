@@ -12,7 +12,7 @@
                 ->whereHas('user', fn($q) => $q->where('atasan_id', \Illuminate\Support\Facades\Auth::id()))
                 ->count()
         ) : 0;
-    $navNeedsDecision = \Illuminate\Support\Facades\Auth::user()->isKetua()
+    $navNeedsDecision = (\Illuminate\Support\Facades\Auth::user()->isKetua() || \Illuminate\Support\Facades\Auth::user()->isAdmin())
         ? \Illuminate\Support\Facades\Cache::remember(
             'nav_needs_decision', 60,
             fn() => \App\Models\LeaveRequest::where('status', \App\Models\LeaveRequest::STATUS_PERTIMBANGAN)->count()
@@ -2139,10 +2139,10 @@
                         </li>
                         @endif
 
-                        {{-- Ketua: badge count for pending decisions --}}
-                        @if(Auth::user()->isKetua())
+                        {{-- Keputusan: tampil untuk semua role --}}
                         <li class="nav-item">
-                            <a class="nav-link" href="/dashboard#needs-decision">
+                            <a class="nav-link {{ request()->is('keputusan*') ? 'active' : '' }}"
+                               href="{{ route('keputusan.index') }}">
                                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-gavel"></i></span>
                                 <span class="nav-link-title">
                                     Keputusan
@@ -2152,7 +2152,6 @@
                                 </span>
                             </a>
                         </li>
-                        @endif
 
                         {{-- Admin: Dropdown Manajemen --}}
                         @if(Auth::user()->isAdmin())
