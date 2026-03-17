@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminLeaveController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AmendmentController;
 use App\Http\Controllers\LaporanSaldoCutiController;
+use App\Http\Controllers\LeaveReasonTemplateController;
 use App\Http\Controllers\AppealController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
@@ -94,6 +95,18 @@ Route::middleware('auth')->group(function () {
 
     // === Hari Libur JSON API (semua role) ===
     Route::get('/hari-libur/api', [HariLiburController::class, 'apiByYear'])->name('hari-libur.api');
+
+    // === Template Alasan Cuti JSON API (semua role) ===
+    Route::get('/leave-reason-templates/api', [LeaveReasonTemplateController::class, 'api'])->name('leave-reason-templates.api');
+
+    // === Template Alasan Cuti CRUD (admin only) ===
+    Route::middleware('role:admin')->prefix('admin/leave-reason-templates')->name('admin.leave-reason-templates.')->group(function () {
+        Route::get('/', [LeaveReasonTemplateController::class, 'index'])->name('index');
+        Route::post('/', [LeaveReasonTemplateController::class, 'store'])->name('store');
+        Route::put('/{leaveReasonTemplate}', [LeaveReasonTemplateController::class, 'update'])->name('update');
+        Route::delete('/{leaveReasonTemplate}', [LeaveReasonTemplateController::class, 'destroy'])->name('destroy');
+        Route::post('/{leaveReasonTemplate}/toggle', [LeaveReasonTemplateController::class, 'toggleActive'])->name('toggle');
+    });
 
     Route::get('/keputusan', [\App\Http\Controllers\KeputusanController::class, 'index'])->name('keputusan.index');
 
