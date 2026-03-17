@@ -20,6 +20,20 @@ class HariLiburController extends Controller
         return view('hari-libur.index', compact('hariLibur', 'tahun', 'tahunList'));
     }
 
+    /**
+     * Return hari libur sebagai JSON array tanggal untuk frontend date picker.
+     * Accessible oleh semua role (auth middleware).
+     */
+    public function apiByYear(Request $request)
+    {
+        $year = (int) $request->query('year', date('Y'));
+        $tanggal = HariLibur::getHolidaysForYear($year)
+            ->pluck('tanggal')
+            ->map(fn($t) => $t->format('Y-m-d'));
+
+        return response()->json($tanggal);
+    }
+
     public function create()
     {
         return view('hari-libur.form', ['hariLibur' => null]);

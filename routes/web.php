@@ -91,6 +91,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/', fn () => redirect('/dashboard'));
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/live-stats', [DashboardController::class, 'liveStats'])->name('dashboard.live-stats');
+
+    // === Hari Libur JSON API (semua role) ===
+    Route::get('/hari-libur/api', [HariLiburController::class, 'apiByYear'])->name('hari-libur.api');
+
     Route::get('/keputusan', [\App\Http\Controllers\KeputusanController::class, 'index'])->name('keputusan.index');
 
     // === Profil ===
