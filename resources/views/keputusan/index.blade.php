@@ -52,9 +52,10 @@
     </ul>
 
     @include('keputusan._filter', [
-        'showStatus' => ($tab ?? 'menunggu') === 'riwayat',
-        'showType'   => true,
-        'showDate'   => true,
+        'showStatus'     => ($tab ?? 'menunggu') === 'riwayat',
+        'showType'       => true,
+        'showDate'       => true,
+        'showNameSearch' => true,
     ])
 
     {{-- Tab: Menunggu Keputusan --}}
@@ -189,7 +190,7 @@
         </li>
     </ul>
 
-    @include('keputusan._filter', ['showStatus' => true, 'showType' => true, 'showDate' => true])
+    @include('keputusan._filter', ['showStatus' => true, 'showType' => true, 'showDate' => true, 'showNameSearch' => true])
 
     @if(($tab ?? 'review') === 'review')
         @if(!isset($review) || (method_exists($review, 'isEmpty') ? $review->isEmpty() : $review->count() === 0))
@@ -199,11 +200,31 @@
             <p class="text-muted mb-0">Anda belum pernah mereview pengajuan bawahan.</p>
         </div></div>
         @else
+        <form method="POST" action="{{ route('leave.bulk-pertimbangan') }}">
+            @csrf
+            <div class="mb-3 d-flex justify-content-between align-items-center">
+                <label class="d-flex align-items-center gap-2" style="font-size:0.85rem;cursor:pointer;">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           style="width:18px;height:18px;"
+                           onclick="document.querySelectorAll('.sc-bulk-cb').forEach(cb => cb.checked = this.checked)">
+                    Pilih Semua
+                </label>
+                <button type="submit" class="btn btn-sm sc-btn-primary">
+                    <i class="ti ti-send me-1"></i> Teruskan ke Ketua
+                </button>
+            </div>
         @foreach($review as $req)
         <div class="card sc-history-card status-{{ $req->status }} mb-3">
             <div class="card-body p-3">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <div class="d-flex align-items-center gap-2">
+                        @if(in_array($req->status, [\App\Models\LeaveRequest::STATUS_DIAJUKAN, \App\Models\LeaveRequest::STATUS_PENDING]))
+                        <input type="checkbox" name="ids[]" value="{{ $req->id }}"
+                            class="sc-bulk-cb form-check-input" style="width:18px;height:18px;flex-shrink:0;margin-top:0;">
+                        @else
+                        <div style="width:18px;flex-shrink:0;"></div>
+                        @endif
                         <div class="sc-user-avatar" style="width:40px;height:40px;font-size:0.8rem;background:var(--sc-primary-light);color:var(--sc-primary);border:none;border-radius:10px;">
                             {{ strtoupper(substr(optional($req->user)->name ?? 'N/A', 0, 2)) }}
                         </div>
@@ -243,6 +264,7 @@
             </div>
         </div>
         @endforeach
+        </form>
         {{ $review->links() }}
         @endif
     @endif
