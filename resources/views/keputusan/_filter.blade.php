@@ -45,6 +45,17 @@
             </div>
             @endif
 
+            @if($showNameSearch ?? false)
+            <div class="col-sm-auto">
+                <label class="form-label mb-1" style="font-size:0.8rem;">Nama Pegawai</label>
+                <input type="text"
+                       name="q"
+                       class="form-control form-control-sm"
+                       placeholder="Cari nama..."
+                       value="{{ request('q') }}"
+                       style="min-width:160px;">
+            </div>
+            @endif
             <div class="col-sm-auto d-flex gap-2">
                 <button type="submit" class="btn btn-sm sc-btn-primary">
                     <i class="ti ti-search me-1"></i> Filter
