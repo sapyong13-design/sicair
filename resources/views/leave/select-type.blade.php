@@ -35,7 +35,7 @@
 <div class="row g-3">
     {{-- Cuti Tahunan --}}
     <div class="col-md-6 animate-in">
-        <a href="{{ route('leave.create', ['type' => 'cuti_tahunan']) }}" class="text-decoration-none" aria-label="Ajukan Cuti Tahunan">
+        <a href="{{ route('leave.create', array_filter(['type' => 'cuti_tahunan', 'start' => $prefillStart ?? null])) }}" class="text-decoration-none" aria-label="Ajukan Cuti Tahunan">
             <div class="card sc-card sc-leave-type-card h-100" style="cursor: pointer;">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3">
@@ -59,7 +59,7 @@
 
     {{-- Cuti Besar --}}
     <div class="col-md-6 animate-in">
-        <a href="{{ route('leave.create', ['type' => 'cuti_besar']) }}" class="text-decoration-none" aria-label="Ajukan Cuti Besar">
+        <a href="{{ route('leave.create', array_filter(['type' => 'cuti_besar', 'start' => $prefillStart ?? null])) }}" class="text-decoration-none" aria-label="Ajukan Cuti Besar">
             <div class="card sc-card sc-leave-type-card h-100" style="cursor: pointer;">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3">
@@ -83,7 +83,7 @@
 
     {{-- Cuti Sakit --}}
     <div class="col-md-6 animate-in">
-        <a href="{{ route('leave.create', ['type' => 'cuti_sakit']) }}" class="text-decoration-none" aria-label="Ajukan Cuti Sakit">
+        <a href="{{ route('leave.create', array_filter(['type' => 'cuti_sakit', 'start' => $prefillStart ?? null])) }}" class="text-decoration-none" aria-label="Ajukan Cuti Sakit">
             <div class="card sc-card sc-leave-type-card h-100" style="cursor: pointer;">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3">
@@ -107,7 +107,7 @@
 
     {{-- Cuti Melahirkan --}}
     <div class="col-md-6 animate-in">
-        <a href="{{ route('leave.create', ['type' => 'cuti_melahirkan']) }}" class="text-decoration-none" aria-label="Ajukan Cuti Melahirkan">
+        <a href="{{ route('leave.create', array_filter(['type' => 'cuti_melahirkan', 'start' => $prefillStart ?? null])) }}" class="text-decoration-none" aria-label="Ajukan Cuti Melahirkan">
             <div class="card sc-card sc-leave-type-card h-100" style="cursor: pointer;">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3">
@@ -131,7 +131,7 @@
 
     {{-- Cuti Alasan Penting --}}
     <div class="col-md-6 animate-in">
-        <a href="{{ route('leave.create', ['type' => 'cuti_alasan_penting']) }}" class="text-decoration-none" aria-label="Ajukan Cuti Alasan Penting">
+        <a href="{{ route('leave.create', array_filter(['type' => 'cuti_alasan_penting', 'start' => $prefillStart ?? null])) }}" class="text-decoration-none" aria-label="Ajukan Cuti Alasan Penting">
             <div class="card sc-card sc-leave-type-card h-100" style="cursor: pointer;">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3">
@@ -155,7 +155,7 @@
 
     {{-- Cuti di Luar Tanggungan Negara --}}
     <div class="col-md-6 animate-in">
-        <a href="{{ route('leave.create', ['type' => 'cuti_luar_tanggungan']) }}" class="text-decoration-none" aria-label="Ajukan Cuti di Luar Tanggungan Negara">
+        <a href="{{ route('leave.create', array_filter(['type' => 'cuti_luar_tanggungan', 'start' => $prefillStart ?? null])) }}" class="text-decoration-none" aria-label="Ajukan Cuti di Luar Tanggungan Negara">
             <div class="card sc-card sc-leave-type-card h-100" style="cursor: pointer;">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3">
