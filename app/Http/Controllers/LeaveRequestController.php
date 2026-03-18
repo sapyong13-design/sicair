@@ -16,6 +16,7 @@ use App\Services\WhatsAppService;
 use App\Services\DocxExportService;
 use App\Services\HariKerjaCalculator;
 use App\Services\PdfExportService;
+use App\Support\CacheKeys;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -471,10 +472,7 @@ class LeaveRequestController extends Controller
         });
 
         // Invalidate analytics cache so dashboard reflects the new decision immediately
-        Cache::forget('analytics_annual_' . now()->year);
-        Cache::forget('analytics_dashboard_' . now()->year);
-        Cache::forget('analytics_balance_overview_' . now()->year);
-        Cache::forget('analytics_heatmap_by_unit_' . now()->year);
+        CacheKeys::forgetAnalytics(now()->year);
 
         $auditAction = match ($keputusan) {
             'setuju'     => 'approve',
@@ -674,10 +672,7 @@ class LeaveRequestController extends Controller
         }
 
         // Invalidate analytics cache
-        Cache::forget('analytics_annual_' . now()->year);
-        Cache::forget('analytics_dashboard_' . now()->year);
-        Cache::forget('analytics_balance_overview_' . now()->year);
-        Cache::forget('analytics_heatmap_by_unit_' . now()->year);
+        CacheKeys::forgetAnalytics(now()->year);
 
         return back()->with('success', "{$count} pengajuan berhasil diproses.");
     }
@@ -785,10 +780,7 @@ class LeaveRequestController extends Controller
         }
 
         // Invalidate analytics cache so dashboard reflects the approval immediately
-        Cache::forget('analytics_annual_' . now()->year);
-        Cache::forget('analytics_dashboard_' . now()->year);
-        Cache::forget('analytics_balance_overview_' . now()->year);
-        Cache::forget('analytics_heatmap_by_unit_' . now()->year);
+        CacheKeys::forgetAnalytics(now()->year);
 
         AuditLog::log(
             'approve',

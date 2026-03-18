@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\CutiRecord;
 use App\Models\LeaveRequest;
 use App\Models\User;
+use App\Support\CacheKeys;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
@@ -17,7 +18,7 @@ class AnalyticsService
     {
         $year = $year ?? date('Y');
 
-        return Cache::remember("analytics_dashboard_{$year}", 3600, function () use ($year) {
+        return Cache::remember(CacheKeys::analyticsDashboard($year), 3600, function () use ($year) {
             return [
                 'summary' => $this->getSummaryStats($year),
                 'charts' => $this->getChartData($year),
@@ -253,7 +254,7 @@ class AnalyticsService
     {
         $year = $year ?? date('Y');
 
-        return Cache::remember("analytics_balance_overview_{$year}", 3600, function () use ($year) {
+        return Cache::remember(CacheKeys::analyticsBalanceOverview($year), 3600, function () use ($year) {
             $users = User::where('status_pegawai', '!=', 'cpns')
                 ->with(['cutiRecords' => fn($q) => $q->where('tahun', $year)])
                 ->get()
@@ -383,7 +384,7 @@ class AnalyticsService
      */
     public function getHeatmapByUnit(int $year): array
     {
-        return Cache::remember("analytics_heatmap_by_unit_{$year}", 3600, function () use ($year) {
+        return Cache::remember(CacheKeys::analyticsHeatmapByUnit($year), 3600, function () use ($year) {
             $rows = LeaveRequest::join('users', 'leave_requests.user_id', '=', 'users.id')
                 ->selectRaw("
                     users.unit_kerja,
