@@ -13,7 +13,7 @@
 
         @if($tips)
         <div class="empty-state-tips">
-            <div class="tips-title">💡 Tips:</div>
+            <div class="tips-title"><i class="ti ti-bulb me-1"></i> Tips:</div>
             <ul class="tips-list">
                 @foreach($tips as $tip)
                 <li>{{ $tip }}</li>

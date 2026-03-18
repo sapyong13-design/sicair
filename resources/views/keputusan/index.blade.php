@@ -77,7 +77,7 @@
                     <i class="ti ti-check me-1"></i> Setujui Semua
                 </button>
                 <button type="submit" name="keputusan" value="ditolak" class="btn btn-danger btn-sm"
-                    onclick="return confirm('Tolak semua yang dipilih?')">
+                    onclick="return confirm('Tolak semua pengajuan yang dipilih?')">
                     <i class="ti ti-x me-1"></i> Tolak Semua
                 </button>
                 <button type="button" class="btn btn-outline-secondary btn-sm" id="bulkKeputusanClear">Batal</button>
@@ -103,7 +103,7 @@
                     </div>
                     <div class="form-text mb-2" style="color: var(--sc-warning); font-size:0.8rem;">
                         <i class="ti ti-info-circle me-1"></i>
-                        Bulk action hanya berlaku untuk item yang ditampilkan di halaman ini ({{ $menunggu->count() }} dari {{ $menunggu->total() }}).
+                        Aksi ini hanya berlaku untuk item yang ditampilkan di halaman ini ({{ $menunggu->count() }} dari {{ $menunggu->total() }}).
                     </div>
                     <textarea name="catatan" class="form-control form-control-sm" rows="2"
                         placeholder="Catatan untuk semua pengajuan yang dipilih (opsional)..."></textarea>
@@ -160,7 +160,7 @@
                     <div class="d-flex gap-2 mt-2">
                         <button type="button" class="btn btn-sm sc-btn-primary flex-fill"
                             data-bs-toggle="modal" data-bs-target="#decisionModal{{ $req->id }}">
-                            <i class="ti ti-gavel me-1"></i> Beri Keputusan
+                            <i class="ti ti-gavel me-1"></i> Berikan Keputusan
                         </button>
                         <a href="{{ route('leave.show', $req) }}" class="btn btn-sm btn-outline-secondary" style="border-radius:8px;">
                             <i class="ti ti-eye"></i>

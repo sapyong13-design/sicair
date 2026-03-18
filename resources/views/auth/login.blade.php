@@ -506,7 +506,7 @@
                         </div>
                     </div>
                     <div class="d-flex justify-content-end mb-2">
-                        <a href="{{ route('password.request') }}" class="text-muted small" style="font-size: 0.82rem;">Lupa password?</a>
+                        <a href="{{ route('password.request') }}" class="text-muted small" style="font-size: 0.82rem;">Lupa Password?</a>
                     </div>
                     <div class="mb-4">
                         <div class="form-check" style="cursor: pointer;">

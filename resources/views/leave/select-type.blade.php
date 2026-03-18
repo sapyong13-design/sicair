@@ -45,7 +45,7 @@
                         <div class="flex-fill">
                             <h4 class="fw-bold mb-1" style="color: var(--sc-text); font-size: 1.05rem;">Cuti Tahunan</h4>
                             <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.5;">
-                                12 hari kerja/tahun. Syarat: bekerja min 1 tahun.
+                                12 hari kerja/tahun. Syarat: bekerja min. 1 tahun.
                             </p>
                             <span class="btn btn-sm sc-btn-primary">
                                 <i class="ti ti-arrow-right me-1"></i> Ajukan

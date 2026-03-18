@@ -22,7 +22,7 @@
             </a>
             @endif
             <a href="{{ route('leave.history') }}" class="btn btn-outline-secondary" style="border-radius: 10px; font-size: 0.85rem;">
-                <i class="ti ti-history me-1"></i> Riwayat Lengkap
+                <i class="ti ti-history me-1"></i> Lihat Semua Riwayat
             </a>
         </div>
     </div>
