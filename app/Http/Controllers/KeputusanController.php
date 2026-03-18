@@ -6,12 +6,14 @@ use App\Models\AuditLog;
 use App\Models\LeaveRequest;
 use App\Models\Notification;
 use App\Services\BalanceAuditService;
+use App\Traits\LeaveQueryFilters;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class KeputusanController extends Controller
 {
+    use LeaveQueryFilters;
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -91,31 +93,6 @@ class KeputusanController extends Controller
         $pengajuan = $pengajuanQuery->paginate(15)->withQueryString();
 
         return view('keputusan.index', compact('user', 'pengajuan'));
-    }
-
-    private function applyStatusFilter($query, Request $request): void
-    {
-        if (!$request->filled('status')) return;
-
-        match ($request->status) {
-            'disetujui'  => $query->whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED]),
-            'ditolak'    => $query->whereIn('status', [LeaveRequest::STATUS_DITOLAK, LeaveRequest::STATUS_REJECTED]),
-            default      => $query->where('status', $request->status),
-        };
-    }
-
-    private function applyTypeAndDateFilters($query, Request $request): void
-    {
-        if ($request->filled('type'))       $query->where('type', $request->type);
-        if ($request->filled('start_date')) $query->where('start_date', '>=', $request->start_date);
-        if ($request->filled('end_date'))   $query->where('end_date', '<=', $request->end_date);
-    }
-
-    private function applyNameFilter($query, Request $request): void
-    {
-        if (!$request->filled('q')) return;
-        $q = $request->q;
-        $query->whereHas('user', fn($u) => $u->where('name', 'like', "%{$q}%"));
     }
 
     public function bulkKeputusan(Request $request): \Illuminate\Http\RedirectResponse
