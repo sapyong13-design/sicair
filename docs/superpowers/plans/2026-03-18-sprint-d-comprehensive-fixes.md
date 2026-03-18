@@ -422,27 +422,35 @@ git commit -m "fix: wakil_ketua menggunakan ketuaDashboard bukan atasanDashboard
 
 Baca baris sekitar method `reapply` dan awal `store` untuk memahami flow.
 
-- [ ] **Step A5.2: Verifikasi bahwa `store()` sudah menggunakan `DB::transaction()` sebelum menambah catch**
+- [ ] **Step A5.2: Bungkus `LeaveRequest::create()` dengan `DB::transaction()` dan tangani duplikat**
 
-Pertama, grep untuk menemukan apakah transaction sudah ada:
+> **Diketahui:** `LeaveRequest::create()` di `store()` (baris ~202) belum dibungkus transaction. `DB::transaction()` sudah ada di method lain (baris 434, 601, 745) tapi bukan di `store()`.
 
-```bash
-grep -n "DB::transaction" app/Http/Controllers/LeaveRequestController.php
-```
-
-**Jika transaction sudah ada**, bungkus dengan try/catch:
+Cari baris `LeaveRequest::create([` di `store()`, bungkus beserta logic setelahnya:
 
 ```php
+// Ganti:
+$leaveRequest = LeaveRequest::create([...]);
+// ... (redirect atau code setelahnya)
+
+// Jadi:
 try {
-    DB::transaction(function () use (...) {
-        // ... existing store logic
+    $leaveRequest = DB::transaction(function () use ($request, $user) {
+        return LeaveRequest::create([
+            // ... isi yang sama dengan sebelumnya
+        ]);
     });
 } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
     return back()->withErrors(['reason' => 'Anda sudah memiliki pengajuan aktif yang sedang diproses. Tunggu keputusan sebelum mengajukan ulang.'])->withInput();
 }
 ```
 
-**Jika transaction belum ada**, bungkus seluruh logic insert dengan `DB::transaction()` dulu, baru tambah try/catch di luarnya.
+> **Tip:** Baca seluruh method `store()` dulu sebelum mengedit untuk memahami variabel scope yang perlu di-pass ke closure `use (...)`.
+
+**Verifikasi dengan grep:**
+```bash
+grep -n "DB::transaction\|LeaveRequest::create" app/Http/Controllers/LeaveRequestController.php
+```
 
 - [ ] **Step A5.3: Verifikasi reapply meng-soft-delete entry lama sebelum buat baru**
 
@@ -954,8 +962,9 @@ public function impersonate(\App\Models\User $pegawai): \Illuminate\Http\Redirec
     ]);
     Auth::login($pegawai);
 
+    // AuditLog::log() signature: (action, model, modelId, oldValues, newValues, description) — 6 params
     AuditLog::log('impersonate', 'User', $pegawai->id, null, null,
-        "Admin {$admin->name} masuk sebagai {$pegawai->name}", request());
+        "Admin {$admin->name} masuk sebagai {$pegawai->name}");
 
     return redirect()->route('dashboard')
         ->with('success', "Anda sekarang masuk sebagai {$pegawai->name}.");
@@ -1403,35 +1412,46 @@ git commit -m "feat: tambah session timeout warning modal 5 menit sebelum sesi h
 - Modify: `app/Http/Controllers/ProfileController.php`
 - Modify: `app/Http/Controllers/SystemSettingController.php`
 
-- [ ] **Step D5.1: Baca ProfileController — cari method update() dan updatePassword()**
+- [ ] **Step D5.1: Verifikasi apakah AuditLog sudah ada di ProfileController & SystemSettingController**
 
-Cek apakah ada `AuditLog::log(...)` di sana.
+```bash
+grep -n "AuditLog" app/Http/Controllers/ProfileController.php
+grep -n "AuditLog" app/Http/Controllers/SystemSettingController.php
+```
+
+Jika output kosong, lanjut ke step berikutnya. Jika sudah ada, skip task ini.
+
+> **Penting:** `AuditLog::log()` signature = `(action, model, modelId, oldValues, newValues, description)` — **6 parameter saja**, IP/user-agent di-capture otomatis dari `auth()->id()`. Jangan tambah `request()` sebagai argumen ke-7.
 
 - [ ] **Step D5.2: Tambah audit log di ProfileController::update()**
 
 ```php
+// Sebelum $user->update([...]):
+$oldValues = $user->only(['name', 'phone', 'unit_kerja', 'jabatan']);
+
 // Setelah $user->update([...]):
 AuditLog::log(
     'update_profile',
     'User',
     $user->id,
-    $oldValues,      // capture sebelum update: $oldValues = $user->only(['name', 'phone', ...])
-    $user->fresh()->only(['name', 'phone', 'email']),
-    'User memperbarui profil',
-    request()
+    $oldValues,
+    $user->fresh()->only(['name', 'phone', 'unit_kerja', 'jabatan']),
+    'User memperbarui profil'
 );
 ```
 
 - [ ] **Step D5.3: Tambah audit log di ProfileController::updatePassword()**
 
 ```php
-AuditLog::log('change_password', 'User', $user->id, null, null, 'User mengganti password', request());
+// 6 parameter — tanpa request()
+AuditLog::log('change_password', 'User', $user->id, null, null, 'User mengganti password');
 ```
 
 - [ ] **Step D5.4: Tambah audit log di SystemSettingController::update()**
 
 ```php
-AuditLog::log('update_settings', 'SystemSetting', 1, $oldSettings, $newSettings, 'Admin memperbarui pengaturan sistem', request());
+// Capture $oldSettings sebelum update, $newSettings setelah
+AuditLog::log('update_settings', 'SystemSetting', 1, $oldSettings, $newSettings, 'Admin memperbarui pengaturan sistem');
 ```
 
 - [ ] **Step D5.5: Jalankan test**
