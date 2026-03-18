@@ -573,10 +573,8 @@ class LeaveRequestController extends Controller
             'catatan'  => 'nullable|string|max:500',
         ]);
 
+        // Akses dijamin middleware role:ketua,admin di routes/web.php
         $user = auth()->user();
-        if (!$user->canApproveAsPejabat() && !$user->isAdmin()) {
-            abort(403);
-        }
 
         $statusMap = [
             'setuju'     => LeaveRequest::STATUS_DISETUJUI,
