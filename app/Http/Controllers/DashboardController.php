@@ -103,7 +103,7 @@ class DashboardController extends Controller
 
         // Sprint 3 #19: Top 5 pegawai paling banyak cuti tahun ini
         $top5Cuti = LeaveRequest::join('users', 'leave_requests.user_id', '=', 'users.id')
-            ->selectRaw("users.id, users.name, SUM(COALESCE(total_hari_kerja, CAST((julianday(end_date) - julianday(start_date)) AS INTEGER) + 1)) as total_hari")
+            ->selectRaw("users.id, users.name, SUM(COALESCE(leave_requests.total_hari_kerja, 0)) as total_hari")
             ->whereIn('leave_requests.status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
             ->whereYear('leave_requests.start_date', $year)
             ->groupBy('users.id', 'users.name')
