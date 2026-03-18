@@ -585,26 +585,32 @@ class LeaveRequestController extends Controller
         ];
 
         $newStatus = $statusMap[$request->decision];
+
+        // Pre-load semua leave sekaligus — tidak ada lagi N+1
+        $leaves = LeaveRequest::with('user')
+            ->whereIn('id', $request->ids)
+            ->whereIn('status', [LeaveRequest::STATUS_PERTIMBANGAN, LeaveRequest::STATUS_DIAJUKAN])
+            ->get();
+
+        if ($leaves->isEmpty()) {
+            return back()->with('error', 'Tidak ada pengajuan valid yang dapat diproses.');
+        }
+
         $count = 0;
 
-        foreach ($request->ids as $id) {
-            $leave = LeaveRequest::with('user')->find($id);
-            if (!$leave || !in_array($leave->status, [LeaveRequest::STATUS_PERTIMBANGAN, LeaveRequest::STATUS_DIAJUKAN])) {
-                continue;
-            }
+        DB::transaction(function () use ($leaves, $newStatus, $request, $user, &$count) {
+            foreach ($leaves as $leave) {
+                $leave->update([
+                    'status'            => $newStatus,
+                    'pejabat_id'        => $user->id,
+                    'keputusan_pejabat' => $request->decision,
+                    'catatan_pejabat'   => $request->catatan,
+                    'decided_at'        => now(),
+                ]);
 
-            $leave->update([
-                'status'            => $newStatus,
-                'pejabat_id'        => $user->id,
-                'keputusan_pejabat' => $request->decision,
-                'catatan_pejabat'   => $request->catatan,
-                'decided_at'        => now(),
-            ]);
-
-            if ($request->decision === 'setuju' && in_array($leave->type, [LeaveRequest::TYPE_TAHUNAN, LeaveRequest::TYPE_BERSAMA])) {
-                DB::transaction(function () use ($leave) {
+                if ($request->decision === 'setuju' && in_array($leave->type, [LeaveRequest::TYPE_TAHUNAN, LeaveRequest::TYPE_BERSAMA])) {
                     $lockedUser = \App\Models\User::lockForUpdate()->find($leave->user_id);
-                    $totalDays = $leave->total_hari_kerja ?? $leave->total_days ?? 0;
+                    $totalDays = $leave->total_hari_kerja ?? 0;
                     $previousBalance = $lockedUser->leave_balance;
                     $lockedUser->decrement('leave_balance', $totalDays);
 
@@ -615,18 +621,23 @@ class LeaveRequestController extends Controller
                         "Pengajuan {$leave->type_label} disetujui (bulk)",
                         $leave->id
                     );
-                });
+                }
+
+                AuditLog::log(
+                    $request->decision === 'setuju' ? 'approve' : ($request->decision === 'tolak' ? 'reject' : $request->decision),
+                    LeaveRequest::class,
+                    $leave->id,
+                    null,
+                    ['status' => $newStatus, 'keputusan_pejabat' => $request->decision, 'catatan_pejabat' => $request->catatan],
+                    "Pejabat {$user->name} bulk-{$request->decision} pengajuan cuti #{$leave->id} milik {$leave->user?->name}"
+                );
+
+                $count++;
             }
+        });
 
-            AuditLog::log(
-                $request->decision === 'setuju' ? 'approve' : ($request->decision === 'tolak' ? 'reject' : $request->decision),
-                LeaveRequest::class,
-                $leave->id,
-                null,
-                ['status' => $newStatus, 'keputusan_pejabat' => $request->decision, 'catatan_pejabat' => $request->catatan],
-                "Pejabat {$user->name} bulk-{$request->decision} pengajuan cuti #{$leave->id} milik {$leave->user?->name}"
-            );
-
+        // Notifikasi & WA dikirim di luar transaction (I/O tidak perlu di dalam transaction)
+        foreach ($leaves as $leave) {
             $notifType = $request->decision === 'setuju'
                 ? Notification::TYPE_CUTI_DISETUJUI
                 : ($request->decision === 'tolak' ? Notification::TYPE_CUTI_DITOLAK : Notification::TYPE_CUTI_PERTIMBANGAN);
@@ -646,29 +657,21 @@ class LeaveRequestController extends Controller
                 " oleh {$user->name}" .
                 ($request->catatan ? '. Catatan: ' . $request->catatan : '.');
 
-            Notification::kirim(
-                $leave->user_id,
-                $notifTitle,
-                $notifMessage,
-                $notifType,
-                route('leave.show', $leave->id)
-            );
+            Notification::kirim($leave->user_id, $notifTitle, $notifMessage, $notifType, route('leave.show', $leave->id));
 
-            // WA: notif bulk decision
             if ($leave->user && $leave->user->wantsWhatsAppNotification()) {
                 $statusLabel = match ($request->decision) {
                     'setuju'     => 'DISETUJUI',
                     'tolak'      => 'DITOLAK',
                     'tangguhkan' => 'DITANGGUHKAN',
                 };
-                $tgl = $leave->start_date->format('d/m/Y') . " - " . $leave->end_date->format('d/m/Y');
-                WhatsAppService::send($leave->user->telepon,
-                    "SiCAIR: Pengajuan {$leave->type_label} Anda\n{$tgl}\ntelah {$statusLabel} oleh {$user->name}."
-                    . ($request->catatan ? "\nCatatan: {$request->catatan}" : '')
+                $tgl = $leave->start_date->format('d/m/Y') . ' — ' . $leave->end_date->format('d/m/Y');
+                WhatsAppService::send(
+                    $leave->user->telepon,
+                    "SiCAIR: Pengajuan {$leave->type_label} Anda\n{$tgl}\ntelah {$statusLabel} oleh {$user->name}." .
+                    ($request->catatan ? "\nCatatan: {$request->catatan}" : '')
                 );
             }
-
-            $count++;
         }
 
         // Invalidate analytics cache
