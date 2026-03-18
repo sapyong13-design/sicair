@@ -156,4 +156,42 @@
         </div>
     </div>
 </div>
+
+{{-- Semua Pengajuan (paginated) --}}
+<div class="card sc-card mt-4">
+    <div class="card-header">
+        <h3 class="card-title mb-0">
+            <i class="ti ti-list me-2" style="color: var(--sc-primary);"></i>
+            Semua Pengajuan
+        </h3>
+    </div>
+    <div class="card-body p-0">
+        @forelse($leaveRequests as $leave)
+        <div class="d-flex align-items-center gap-3 px-3 py-2 {{ !$loop->last ? 'border-bottom' : '' }}">
+            <x-leave-status-stepper :leave="$leave" />
+            <div class="flex-fill">
+                <div class="fw-semibold" style="font-size: 0.88rem;">{{ $leave->type_label }}</div>
+                <div class="text-muted" style="font-size: 0.78rem;">
+                    {{ $leave->start_date->format('d M Y') }}
+                    &bull; {{ $leave->created_at->diffForHumans() }}
+                </div>
+            </div>
+            <a href="{{ route('leave.show', $leave) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">
+                <i class="ti ti-eye"></i>
+            </a>
+        </div>
+        @empty
+        <div class="text-center text-muted py-4">
+            <p class="mb-0" style="font-size: 0.85rem;">Belum ada pengajuan cuti.</p>
+        </div>
+        @endforelse
+    </div>
+    @if($leaveRequests->hasPages())
+    <div class="card-footer border-top py-3">
+        <div class="d-flex justify-content-center mt-3">
+            {{ $leaveRequests->links() }}
+        </div>
+    </div>
+    @endif
+</div>
 @endsection

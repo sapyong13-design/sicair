@@ -1093,8 +1093,14 @@ class LeaveRequestController extends Controller
             ->take(5)
             ->get();
 
+        $leaveRequests = LeaveRequest::where('user_id', $user->id)
+            ->with(['pejabat', 'atasanReviewer'])
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
         return view('leave.saya', compact(
-            'year', 'leaveBalance', 'upcoming', 'pendingCount', 'usedThisYear', 'recentLeaves'
+            'year', 'leaveBalance', 'upcoming', 'pendingCount', 'usedThisYear', 'recentLeaves', 'leaveRequests'
         ));
     }
 
