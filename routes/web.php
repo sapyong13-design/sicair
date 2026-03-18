@@ -111,7 +111,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/keputusan', [\App\Http\Controllers\KeputusanController::class, 'index'])->name('keputusan.index');
     Route::post('/keputusan/bulk-keputusan', [\App\Http\Controllers\KeputusanController::class, 'bulkKeputusan'])
         ->name('keputusan.bulk-keputusan')
-        ->middleware('role:ketua,wakil_ketua,admin');
+        ->middleware(['role:ketua,wakil_ketua,admin', 'throttle:10,1']);
 
     // === Profil ===
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
@@ -138,7 +138,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/leave/saya', [LeaveRequestController::class, 'saya'])->name('leave.saya');
     Route::get('/leave/select-type', [LeaveRequestController::class, 'selectType'])->name('leave.select-type');
     Route::get('/leave/create', [LeaveRequestController::class, 'create'])->name('leave.create');
-    Route::post('/leave', [LeaveRequestController::class, 'store'])->name('leave.store');
+    Route::post('/leave', [LeaveRequestController::class, 'store'])
+        ->name('leave.store')
+        ->middleware('throttle:5,1');
     Route::get('/leave/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave.show');
     Route::get('/leave/{leaveRequest}/reapply', [LeaveRequestController::class, 'reapply'])->name('leave.reapply');
     Route::get('/leave/{leaveRequest}/export-pdf', [LeaveRequestController::class, 'exportPdf'])->name('leave.export-pdf');
@@ -184,7 +186,9 @@ Route::middleware('auth')->group(function () {
     // Atasan: pertimbangan level 1
     Route::middleware('role:atasan,panitera,sekretaris,wakil_ketua,ketua,admin')->group(function () {
         Route::post('/leave/{leaveRequest}/review', [LeaveRequestController::class, 'reviewAtasan'])->name('leave.review');
-        Route::post('/leave/bulk-pertimbangan', [LeaveRequestController::class, 'bulkPertimbangan'])->name('leave.bulk-pertimbangan');
+        Route::post('/leave/bulk-pertimbangan', [LeaveRequestController::class, 'bulkPertimbangan'])
+            ->name('leave.bulk-pertimbangan')
+            ->middleware('throttle:10,1');
     });
 
     // Ketua/Pejabat Berwenang: keputusan final
