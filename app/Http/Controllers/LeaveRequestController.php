@@ -101,11 +101,11 @@ class LeaveRequestController extends Controller
         $thisYearDays = LeaveRequest::where('user_id', $user->id)
             ->whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
             ->whereYear('created_at', date('Y'))
-            ->get()->sum(fn($r) => $r->total_hari_kerja ?? $r->total_days ?? 0);
+            ->sum('total_hari_kerja');
         $lastYearDays = LeaveRequest::where('user_id', $user->id)
             ->whereIn('status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
             ->whereYear('created_at', date('Y') - 1)
-            ->get()->sum(fn($r) => $r->total_hari_kerja ?? $r->total_days ?? 0);
+            ->sum('total_hari_kerja');
 
         return view('leave.create', compact('type', 'cutiInfo', 'reapplyData', 'thisYearDays', 'lastYearDays', 'prefillStart'));
     }
