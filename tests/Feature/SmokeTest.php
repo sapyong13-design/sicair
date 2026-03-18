@@ -550,4 +550,25 @@ class SmokeTest extends TestCase
         ]);
         $response->assertSessionHasErrors();
     }
+
+    public function test_cuti_bersama_cek_saldo_saat_pengajuan(): void
+    {
+        $atasan = User::factory()->create(['role' => 'atasan']);
+        $user = User::factory()->create([
+            'role'            => 'pegawai',
+            'leave_balance'   => 0, // saldo habis
+            'masa_kerja_mulai' => now()->subYears(2),
+            'atasan_id'       => $atasan->id,
+        ]);
+
+        $response = $this->actingAs($user)->post(route('leave.store'), [
+            'type'        => 'cuti_bersama',
+            'start_date'  => now()->addDays(5)->format('Y-m-d'),
+            'end_date'    => now()->addDays(5)->format('Y-m-d'),
+            'reason'      => 'Libur bersama nasional',
+            'alamat_cuti' => 'Rumah',
+            'telepon_cuti' => '081234567890',
+        ]);
+        $response->assertSessionHasErrors();
+    }
 }

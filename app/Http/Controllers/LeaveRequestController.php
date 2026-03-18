@@ -448,7 +448,7 @@ class LeaveRequestController extends Controller
                 'status' => $statusMap[$keputusan],
             ]);
 
-            if ($keputusan === 'setuju' && $leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
+            if ($keputusan === 'setuju' && in_array($leaveRequest->type, [LeaveRequest::TYPE_TAHUNAN, LeaveRequest::TYPE_BERSAMA])) {
                 $lockedUser = \App\Models\User::lockForUpdate()->find($leaveRequest->user_id);
                 $totalDays = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days;
                 $previousBalance = $lockedUser->leave_balance;
@@ -597,7 +597,7 @@ class LeaveRequestController extends Controller
                 'decided_at'        => now(),
             ]);
 
-            if ($request->decision === 'setuju' && $leave->type === LeaveRequest::TYPE_TAHUNAN) {
+            if ($request->decision === 'setuju' && in_array($leave->type, [LeaveRequest::TYPE_TAHUNAN, LeaveRequest::TYPE_BERSAMA])) {
                 DB::transaction(function () use ($leave) {
                     $lockedUser = \App\Models\User::lockForUpdate()->find($leave->user_id);
                     $totalDays = $leave->total_hari_kerja ?? $leave->total_days ?? 0;
@@ -746,7 +746,7 @@ class LeaveRequestController extends Controller
             $lockedUser = \App\Models\User::lockForUpdate()->find($leaveRequest->user_id);
             $totalDays = $leaveRequest->total_hari_kerja ?? $leaveRequest->total_days;
 
-            if ($leaveRequest->type === LeaveRequest::TYPE_TAHUNAN && $totalDays > $lockedUser->leave_balance) {
+            if (in_array($leaveRequest->type, [LeaveRequest::TYPE_TAHUNAN, LeaveRequest::TYPE_BERSAMA]) && $totalDays > $lockedUser->leave_balance) {
                 return "Sisa cuti pegawai tidak mencukupi ({$lockedUser->leave_balance} hari tersisa).";
             }
 
@@ -758,7 +758,7 @@ class LeaveRequestController extends Controller
                 'decided_at' => now(),
             ]);
 
-            if ($leaveRequest->type === LeaveRequest::TYPE_TAHUNAN) {
+            if (in_array($leaveRequest->type, [LeaveRequest::TYPE_TAHUNAN, LeaveRequest::TYPE_BERSAMA])) {
                 $previousBalance = $lockedUser->leave_balance;
                 $lockedUser->decrement('leave_balance', $totalDays);
 
@@ -1240,6 +1240,13 @@ class LeaveRequestController extends Controller
                 $maxCLTN = LeaveRequest::MAX_CLTN_YEARS + LeaveRequest::MAX_CLTN_EXTENSION_YEARS;
                 if ($durasiTahun > $maxCLTN) {
                     return "CLTN maksimal {$maxCLTN} tahun (3 tahun + 1 tahun perpanjangan).";
+                }
+                break;
+
+            case LeaveRequest::TYPE_BERSAMA:
+                // Cuti bersama deduct dari saldo tahunan — cek saldo
+                if ($hariKerja > $user->leave_balance) {
+                    return "Jumlah hari cuti bersama ($hariKerja hari) melebihi sisa cuti tahunan Anda ($user->leave_balance hari). Cuti bersama deduct dari saldo tahunan.";
                 }
                 break;
         }
