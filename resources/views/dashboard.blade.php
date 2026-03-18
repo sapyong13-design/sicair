@@ -103,7 +103,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="sc-stat-label mb-2">Menunggu Proses</div>
-                            <div class="sc-stat-number" id="stat-pending" style="color: var(--sc-warning);">{{ $pendingRequests->count() }}</div>
+                            <div class="sc-stat-number sc-skeleton" id="stat-pending" style="color: var(--sc-warning);">{{ $pendingRequests->count() }}</div>
                         </div>
                         <div class="sc-stat-icon icon-warning">
                             <i class="ti ti-clock-hour-4"></i>
@@ -118,7 +118,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="sc-stat-label mb-2">Disetujui</div>
-                            <div class="sc-stat-number" id="stat-approved" style="color: var(--sc-success);">{{ $recentDecisions->filter(fn($r) => $r->isApproved())->count() }}</div>
+                            <div class="sc-stat-number sc-skeleton" id="stat-approved" style="color: var(--sc-success);">{{ $recentDecisions->filter(fn($r) => $r->isApproved())->count() }}</div>
                         </div>
                         <div class="sc-stat-icon icon-success">
                             <i class="ti ti-circle-check"></i>
@@ -155,7 +155,7 @@
                         Cuti Hari Ini
                     </h3>
                     <span class="sc-badge sc-badge-{{ $todayOnLeave->isNotEmpty() ? 'pending' : 'approved' }}">
-                        <span id="stat-on-leave">{{ $todayOnLeave->count() }}</span> pegawai
+                        <span id="stat-on-leave" class="sc-skeleton">{{ $todayOnLeave->count() }}</span> pegawai
                     </span>
                 </div>
                 <div class="card-body p-3" style="max-height: 220px; overflow-y: auto;">
@@ -1711,7 +1711,7 @@
 
 </script>
 <script>
-// #10 Auto-refresh dashboard stats every 60 seconds
+// #10 / B5: Auto-refresh dashboard stats every 60 seconds + skeleton loading state
 function refreshDashboardStats() {
     fetch('{{ route("dashboard.live-stats") }}')
         .then(r => r.json())
@@ -1722,10 +1722,14 @@ function refreshDashboardStats() {
             if (pe) pe.textContent = data.pending_count;
             if (ol) ol.textContent = data.on_leave_today;
             if (ap) ap.textContent = data.approved_this_month;
+            // B5: Remove skeleton class after first successful data load
+            document.querySelectorAll('.sc-skeleton').forEach(el => el.classList.remove('sc-skeleton'));
         })
         .catch(() => {}); // silent fail
 }
 setInterval(refreshDashboardStats, 60000);
+// B5: Trigger immediately on page load so skeleton is removed quickly
+document.addEventListener('DOMContentLoaded', function() { refreshDashboardStats(); });
 </script>
 @endpush
 @endif
