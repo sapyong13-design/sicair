@@ -92,6 +92,7 @@
                 </h3>
             </div>
             <div class="card-body p-0">
+                <div class="table-responsive">
                 <table class="table mb-0" style="font-size: 0.88rem;">
                     <tbody>
                         <tr>
@@ -142,6 +143,7 @@
                         </tr>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
 
@@ -255,6 +257,7 @@
             <div class="px-3 pb-3">
                 <details>
                     <summary class="text-muted" style="font-size: 0.82rem; cursor: pointer;">Lihat rekap tahun sebelumnya ({{ $olderRecords->count() }} tahun)</summary>
+                    <div class="table-responsive">
                     <table class="table table-sm mt-2 mb-0" style="font-size: 0.82rem;">
                         <thead><tr><th>Tahun</th><th>Hak</th><th>Diambil</th><th>Sisa</th></tr></thead>
                         <tbody>
@@ -268,6 +271,7 @@
                         @endforeach
                         </tbody>
                     </table>
+                    </div>
                 </details>
             </div>
             @endif

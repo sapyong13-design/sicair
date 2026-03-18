@@ -163,6 +163,7 @@
                 </h3>
             </div>
             <div class="card-body p-0">
+                <div class="table-responsive">
                 <table class="table mb-0" style="font-size: 0.88rem;">
                     <tbody>
                         <tr>
@@ -286,6 +287,7 @@
                         </tr>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
 

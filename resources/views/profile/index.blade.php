@@ -91,6 +91,7 @@
                 </h3>
             </div>
             <div class="card-body p-0">
+                <div class="table-responsive">
                 <table class="table mb-0" style="font-size: 0.88rem;">
                     <tbody>
                         <tr><td class="text-muted" style="width: 40%; padding: 0.7rem 1rem;">NIP</td><td class="fw-semibold" style="padding: 0.7rem 1rem;">{{ $user->nip }}</td></tr>
@@ -101,6 +102,7 @@
                         <tr><td class="text-muted" style="padding: 0.7rem 1rem;">Atasan</td><td class="fw-semibold" style="padding: 0.7rem 1rem;">{{ $user->atasan->name ?? '-' }}</td></tr>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     </div>
