@@ -438,6 +438,49 @@ class PegawaiController extends Controller
     }
 
     /**
+     * C3: Admin impersonate pegawai.
+     */
+    public function impersonate(\App\Models\User $pegawai): \Illuminate\Http\RedirectResponse
+    {
+        $admin = \Illuminate\Support\Facades\Auth::user();
+        if (!$admin->isAdmin()) {
+            abort(403);
+        }
+        if ($pegawai->isAdmin()) {
+            abort(403, 'Tidak bisa impersonate admin lain.');
+        }
+
+        \Illuminate\Support\Facades\Session::put('impersonating', [
+            'admin_id'   => $admin->id,
+            'admin_name' => $admin->name,
+        ]);
+        \Illuminate\Support\Facades\Auth::login($pegawai);
+
+        AuditLog::log(
+            'impersonate', 'User', $pegawai->id, null, null,
+            "Admin {$admin->name} masuk sebagai {$pegawai->name}"
+        );
+
+        return redirect()->route('dashboard')
+            ->with('success', "Anda sekarang masuk sebagai {$pegawai->name}.");
+    }
+
+    public function stopImpersonate(): \Illuminate\Http\RedirectResponse
+    {
+        $impersonating = \Illuminate\Support\Facades\Session::get('impersonating');
+        if (!$impersonating) {
+            return redirect()->route('dashboard');
+        }
+
+        $admin = User::findOrFail($impersonating['admin_id']);
+        \Illuminate\Support\Facades\Session::forget('impersonating');
+        \Illuminate\Support\Facades\Auth::login($admin);
+
+        return redirect()->route('pegawai.index')
+            ->with('success', 'Sesi impersonasi berakhir. Anda kembali sebagai admin.');
+    }
+
+    /**
      * C4: Update notification channels (Email/WhatsApp) per user.
      */
     public function updateChannels(Request $request, User $user)

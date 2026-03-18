@@ -225,6 +225,12 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{pegawai}', [PegawaiController::class, 'destroy'])->name('destroy');
     });
 
+    // === Admin: Impersonate Pegawai (C3) ===
+    Route::middleware('role:admin')->group(function () {
+        Route::post('/admin/impersonate/{pegawai}', [PegawaiController::class, 'impersonate'])->name('admin.impersonate');
+        Route::post('/admin/stop-impersonate', [PegawaiController::class, 'stopImpersonate'])->name('admin.stop-impersonate');
+    });
+
     // === Admin: Generate Quota Cuti Otomatis (C5) ===
     Route::post('/admin/generate-quota', function (\Illuminate\Http\Request $req) {
         $year = (int) $req->input('year', now()->year);

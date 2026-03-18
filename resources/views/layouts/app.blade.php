@@ -1947,6 +1947,17 @@
 <script src="https://cdn.jsdelivr.net/npm/@lottiefiles/lottie-player@2/dist/lottie-player.js" defer></script>
 </head>
 <body class="d-flex flex-column min-vh-100">
+@if(\Illuminate\Support\Facades\Session::has('impersonating'))
+<div class="alert alert-warning text-center mb-0 py-2 rounded-0" style="font-size:0.85rem;border-radius:0!important;position:sticky;top:0;z-index:1060;">
+    <i class="ti ti-eye me-1"></i>
+    Mode impersonasi: Anda masuk sebagai <strong>{{ Auth::user()->name }}</strong>
+    (oleh admin <strong>{{ \Illuminate\Support\Facades\Session::get('impersonating.admin_name') }}</strong>).
+    <form method="POST" action="{{ route('admin.stop-impersonate') }}" class="d-inline ms-2">
+        @csrf
+        <button type="submit" class="btn btn-sm py-0 px-2" style="background:#856404;color:#fff;border:none;">Kembali ke Admin</button>
+    </form>
+</div>
+@endif
 <!-- Landscape hint -->
 <div class="sc-landscape-hint" id="sc-landscape-hint">
     <i class="ti ti-rotate" style="font-size: 3rem; animation: sc-rotate-hint 1.5s ease-in-out infinite alternate;"></i>

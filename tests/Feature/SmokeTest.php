@@ -619,4 +619,26 @@ class SmokeTest extends TestCase
         ]);
         $response->assertForbidden();
     }
+
+    // C3: Admin Impersonate Pegawai
+    public function test_admin_can_impersonate_pegawai(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $pegawai = User::factory()->create(['role' => 'pegawai']);
+
+        $response = $this->actingAs($admin)->post(route('admin.impersonate', $pegawai));
+
+        $response->assertRedirect(route('dashboard'));
+        $this->assertAuthenticatedAs($pegawai);
+    }
+
+    public function test_pegawai_cannot_impersonate(): void
+    {
+        $pegawai1 = User::factory()->create(['role' => 'pegawai']);
+        $pegawai2 = User::factory()->create(['role' => 'pegawai']);
+
+        $response = $this->actingAs($pegawai1)->post(route('admin.impersonate', $pegawai2));
+
+        $response->assertForbidden();
+    }
 }

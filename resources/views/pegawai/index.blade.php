@@ -450,6 +450,16 @@
                                     <i class="ti {{ ($p->is_active ?? true) ? 'ti-user-off' : 'ti-user-check' }}" aria-hidden="true"></i>
                                 </button>
                             </form>
+                            {{-- C3: Impersonate --}}
+                            @if(Auth::user()->isAdmin() && !Session::has('impersonating') && !$p->isAdmin())
+                            <form method="POST" action="{{ route('admin.impersonate', $p) }}" class="d-inline"
+                                onsubmit="return confirm('Masuk sebagai {{ addslashes($p->name) }}?')">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-secondary btn-sm" style="border-radius: 8px;" title="Masuk Sebagai">
+                                    <i class="ti ti-user-share" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                            @endif
                             <button class="btn btn-sm btn-outline-danger" style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $p->id }}" title="Hapus {{ $p->name }}">
                                 <i class="ti ti-trash" aria-hidden="true"></i>
                             </button>
