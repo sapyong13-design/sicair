@@ -35,7 +35,7 @@ class KeputusanController extends Controller
             ->where('status', LeaveRequest::STATUS_PERTIMBANGAN)
             ->latest();
 
-        $riwayatQuery = LeaveRequest::with(['user'])
+        $riwayatQuery = LeaveRequest::with(['user', 'atasanReviewer'])
             ->where('pejabat_id', $user->id)
             ->latest();
 
@@ -59,11 +59,11 @@ class KeputusanController extends Controller
     {
         $tab = $request->get('tab', 'review');
 
-        $reviewQuery   = LeaveRequest::with(['user'])
+        $reviewQuery   = LeaveRequest::with(['user', 'pejabat'])
             ->where('atasan_reviewer_id', $user->id)
             ->latest();
 
-        $pengajuanQuery = $user->leaveRequests()->with(['user'])->latest();
+        $pengajuanQuery = $user->leaveRequests()->with(['user', 'pejabat'])->latest();
 
         if ($tab === 'review') {
             $this->applyStatusFilter($reviewQuery, $request);
@@ -83,7 +83,7 @@ class KeputusanController extends Controller
 
     private function pegawaiView($user, Request $request)
     {
-        $pengajuanQuery = $user->leaveRequests()->with(['user'])->latest();
+        $pengajuanQuery = $user->leaveRequests()->with(['user', 'pejabat'])->latest();
 
         $this->applyStatusFilter($pengajuanQuery, $request);
         $this->applyTypeAndDateFilters($pengajuanQuery, $request);
