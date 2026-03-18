@@ -114,7 +114,7 @@
                 </div>
                 <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--sc-gray-200);">
                     <div style="font-size: 0.85rem; color: var(--sc-gray-600);">
-                        📊 Trend cenderung menurun. Anda menggunakan lebih sedikit cuti dibanding bulan lalu.
+                        <i class="ti ti-chart-line me-1"></i> Tren cenderung menurun. Anda menggunakan lebih sedikit cuti dibanding bulan lalu.
                     </div>
                 </div>
             </div>

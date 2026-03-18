@@ -25,7 +25,7 @@
                     <label class="form-label" style="font-size: 0.78rem; font-weight: 600; color: var(--sc-text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Status</label>
                     <select name="status" class="form-select" style="border-radius: 10px; border: 2px solid var(--sc-border); height: 42px;">
                         <option value="">Semua Status</option>
-                        <option value="pending" @selected(request('status') === 'pending')>Pending</option>
+                        <option value="pending" @selected(request('status') === 'pending')>Menunggu</option>
                         <option value="approved" @selected(request('status') === 'approved')>Disetujui</option>
                         <option value="rejected" @selected(request('status') === 'rejected')>Ditolak</option>
                     </select>

@@ -35,7 +35,7 @@ class StoreLeaveRequestRequest extends FormRequest
             'reason.required'            => 'Alasan cuti wajib diisi.',
             'reason.min'                 => 'Alasan minimal 10 karakter.',
             'reason.max'                 => 'Alasan maksimal 500 karakter.',
-            'dokumen_pendukung.max'      => 'File maksimal 5MB.',
+            'dokumen_pendukung.max'      => 'Dokumen pendukung maksimal 5MB.',
             'dokumen_pendukung.mimes'    => 'File harus berformat PDF, JPG, atau PNG.',
         ];
     }

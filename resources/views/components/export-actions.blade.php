@@ -65,7 +65,7 @@
             <li>
                 <a class="dropdown-item" href="javascript:copyShareLink()">
                     <i class="ti ti-link me-2" style="color: #7c3aed;"></i>
-                    Salin Tautan Bagian
+                    Salin Tautan Berbagi
                 </a>
             </li>
         </ul>
@@ -199,7 +199,7 @@ function copyShareLink() {
         // Show success toast
         const toast = document.createElement('div');
         toast.className = 'alert alert-success position-fixed bottom-0 end-0 m-3';
-        toast.innerHTML = '<i class="ti ti-check me-2"></i> Link berhasil disalin!';
+        toast.innerHTML = '<i class="ti ti-check me-2"></i> Tautan berhasil disalin!';
         toast.style.cssText = 'z-index: 9999; animation: slideIn 0.3s ease;';
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
