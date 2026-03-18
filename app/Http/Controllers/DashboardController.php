@@ -25,6 +25,10 @@ class DashboardController extends Controller
             return $this->ketuaDashboard($user);
         }
 
+        if ($user->isWakilKetua()) {
+            return $this->ketuaDashboard($user);
+        }
+
         if ($user->isAtasan()) {
             return $this->atasanDashboard($user, $request);
         }
