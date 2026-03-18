@@ -571,4 +571,50 @@ class SmokeTest extends TestCase
         ]);
         $response->assertSessionHasErrors();
     }
+
+    // =========================================================================
+    // Ketua Bulk Keputusan (Task A3)
+    // =========================================================================
+
+    public function test_bulk_keputusan_updates_status_for_ketua(): void
+    {
+        $ketua = User::factory()->create(['role' => 'ketua']);
+        $pegawai = User::factory()->create([
+            'role' => 'pegawai',
+            'leave_balance' => 12,
+            'masa_kerja_mulai' => now()->subYears(2),
+        ]);
+
+        $leaves = \App\Models\LeaveRequest::factory()->count(3)->create([
+            'user_id'          => $pegawai->id,
+            'status'           => \App\Models\LeaveRequest::STATUS_PERTIMBANGAN,
+            'type'             => \App\Models\LeaveRequest::TYPE_TAHUNAN,
+            'total_hari_kerja' => 1,
+            'start_date'       => now()->addDays(10),
+            'end_date'         => now()->addDays(10),
+        ]);
+
+        $response = $this->actingAs($ketua)->post(route('keputusan.bulk-keputusan'), [
+            'ids'       => $leaves->pluck('id')->toArray(),
+            'keputusan' => 'disetujui',
+        ]);
+
+        $response->assertRedirect();
+        foreach ($leaves as $leave) {
+            $this->assertDatabaseHas('leave_requests', [
+                'id'     => $leave->id,
+                'status' => \App\Models\LeaveRequest::STATUS_DISETUJUI,
+            ]);
+        }
+    }
+
+    public function test_bulk_keputusan_forbidden_for_pegawai(): void
+    {
+        $pegawai = User::factory()->create(['role' => 'pegawai']);
+        $response = $this->actingAs($pegawai)->post(route('keputusan.bulk-keputusan'), [
+            'ids'       => [1],
+            'keputusan' => 'disetujui',
+        ]);
+        $response->assertForbidden();
+    }
 }

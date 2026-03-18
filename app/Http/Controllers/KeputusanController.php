@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LeaveRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class KeputusanController extends Controller
 {
@@ -112,5 +113,52 @@ class KeputusanController extends Controller
         if (!$request->filled('q')) return;
         $q = $request->q;
         $query->whereHas('user', fn($u) => $u->where('name', 'like', "%{$q}%"));
+    }
+
+    public function bulkKeputusan(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $request->validate([
+            'ids'       => 'required|array|min:1|max:50',
+            'ids.*'     => 'integer|exists:leave_requests,id',
+            'keputusan' => 'required|in:disetujui,ditolak,ditangguhkan',
+        ]);
+
+        // Akses sudah dijamin middleware route
+        $user = Auth::user();
+
+        $statusMap = [
+            'disetujui'    => LeaveRequest::STATUS_DISETUJUI,
+            'ditolak'      => LeaveRequest::STATUS_DITOLAK,
+            'ditangguhkan' => LeaveRequest::STATUS_DITANGGUHKAN,
+        ];
+
+        $leaves = LeaveRequest::whereIn('id', $request->ids)
+            ->where('status', LeaveRequest::STATUS_PERTIMBANGAN)
+            ->get();
+
+        $processed = 0;
+        foreach ($leaves as $leave) {
+            DB::transaction(function () use ($leave, $user, $request, $statusMap) {
+                $leave->update([
+                    'status'            => $statusMap[$request->keputusan],
+                    'pejabat_id'        => $user->id,
+                    'keputusan_pejabat' => $request->keputusan,
+                    'decided_at'        => now(),
+                ]);
+
+                if ($request->keputusan === 'disetujui') {
+                    if (in_array($leave->type, [
+                        LeaveRequest::TYPE_TAHUNAN,
+                        LeaveRequest::TYPE_BERSAMA,
+                    ])) {
+                        $leave->user->decrement('leave_balance', $leave->total_hari_kerja ?? 1);
+                    }
+                }
+            });
+            $processed++;
+        }
+
+        return redirect()->route('keputusan.index')
+            ->with('success', "Bulk keputusan berhasil: $processed pengajuan diproses.");
     }
 }

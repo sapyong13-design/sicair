@@ -67,6 +67,23 @@
             <p class="text-muted mb-0">Tidak ada pengajuan yang menunggu keputusan Anda.</p>
         </div></div>
         @else
+        @if(Auth::user()->isKetua() || Auth::user()->isWakilKetua())
+        <form id="bulkKeputusanForm" method="POST" action="{{ route('keputusan.bulk-keputusan') }}" class="mb-3" style="display:none;">
+            @csrf
+            <div id="bulkKeputusanIds"></div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="text-muted" id="bulkKeputusanCount">0 dipilih</span>
+                <button type="submit" name="keputusan" value="disetujui" class="btn btn-success btn-sm">
+                    <i class="ti ti-check me-1"></i> Setujui Semua
+                </button>
+                <button type="submit" name="keputusan" value="ditolak" class="btn btn-danger btn-sm"
+                    onclick="return confirm('Tolak semua yang dipilih?')">
+                    <i class="ti ti-x me-1"></i> Tolak Semua
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="bulkKeputusanClear">Batal</button>
+            </div>
+        </form>
+        @endif
         <form method="POST" action="{{ route('leave.bulk-decide') }}">
             @csrf
             <div id="sc-bulk-actions" style="display:none;" class="mb-3">
@@ -100,6 +117,10 @@
                         <div class="d-flex align-items-center gap-2">
                             <input type="checkbox" name="ids[]" value="{{ $req->id }}"
                                 class="sc-bulk-cb form-check-input" style="width:18px;height:18px;flex-shrink:0;margin-top:0;">
+                            @if(Auth::user()->isKetua() || Auth::user()->isWakilKetua())
+                            <input type="checkbox" class="bulk-keputusan-cb form-check-input" value="{{ $req->id }}"
+                                style="width:18px;height:18px;flex-shrink:0;margin-top:0;">
+                            @endif
                             <div class="sc-user-avatar" style="width:40px;height:40px;font-size:0.8rem;background:var(--sc-primary-light);color:var(--sc-primary);border:none;border-radius:10px;">
                                 {{ strtoupper(substr(optional($req->user)->name ?? 'N/A', 0, 2)) }}
                             </div>
@@ -302,6 +323,40 @@ if (clearBtn) {
         if (bar) bar.style.display = 'none';
     });
 }
+
+// Bulk Keputusan (ketua/wakil_ketua)
+(function() {
+    var form = document.getElementById('bulkKeputusanForm');
+    if (!form) return;
+    var countEl = document.getElementById('bulkKeputusanCount');
+    var idsContainer = document.getElementById('bulkKeputusanIds');
+
+    function updateBulk() {
+        var checked = document.querySelectorAll('.bulk-keputusan-cb:checked');
+        idsContainer.innerHTML = '';
+        checked.forEach(function(cb) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = cb.value;
+            idsContainer.appendChild(input);
+        });
+        countEl.textContent = checked.length + ' dipilih';
+        form.style.display = checked.length > 0 ? '' : 'none';
+    }
+
+    document.querySelectorAll('.bulk-keputusan-cb').forEach(function(cb) {
+        cb.addEventListener('change', updateBulk);
+    });
+
+    var clearBulkKeputusan = document.getElementById('bulkKeputusanClear');
+    if (clearBulkKeputusan) {
+        clearBulkKeputusan.addEventListener('click', function() {
+            document.querySelectorAll('.bulk-keputusan-cb').forEach(function(cb) { cb.checked = false; });
+            updateBulk();
+        });
+    }
+})();
 </script>
 @endpush
 

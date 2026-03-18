@@ -109,6 +109,9 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::get('/keputusan', [\App\Http\Controllers\KeputusanController::class, 'index'])->name('keputusan.index');
+    Route::post('/keputusan/bulk-keputusan', [\App\Http\Controllers\KeputusanController::class, 'bulkKeputusan'])
+        ->name('keputusan.bulk-keputusan')
+        ->middleware('role:ketua,wakil_ketua,admin');
 
     // === Profil ===
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
