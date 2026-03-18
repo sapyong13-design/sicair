@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 
 class WhatsAppService
 {
-    public static function send(string $phone, string $message): bool
+    public static function send(string $phone, string $message, ?string $email = null, ?string $subject = null): bool
     {
         if (!config('whatsapp.enabled')) return false;
 
@@ -16,6 +16,7 @@ class WhatsAppService
         if (empty($phone)) return false;
 
         $driver = config('whatsapp.driver', 'fonnte');
+        $waSuccess = false;
 
         try {
             if ($driver === 'fonnte') {
@@ -25,22 +26,35 @@ class WhatsAppService
                     'target'  => $phone,
                     'message' => $message,
                 ]);
-                return $response->successful();
-            }
-
-            if ($driver === 'wablas') {
+                $waSuccess = $response->successful();
+            } elseif ($driver === 'wablas') {
                 $response = Http::withHeaders([
                     'Authorization' => config('whatsapp.wablas.token'),
                 ])->post(config('whatsapp.wablas.endpoint') . '/send-message', [
                     'phone'   => $phone,
                     'message' => $message,
                 ]);
-                return $response->successful();
+                $waSuccess = $response->successful();
             }
         } catch (\Exception $e) {
             Log::warning('WhatsApp send failed: ' . $e->getMessage());
         }
 
-        return false;
+        if (!$waSuccess && $email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($email)->send(
+                    new \App\Mail\LeaveNotificationMail(
+                        $subject ?? config('app.name') . ' — Notifikasi',
+                        $message
+                    )
+                );
+                \Illuminate\Support\Facades\Log::info("Email fallback sent to {$email}");
+                return true;
+            } catch (\Exception $mailEx) {
+                \Illuminate\Support\Facades\Log::error("Email fallback gagal: " . $mailEx->getMessage());
+            }
+        }
+
+        return $waSuccess;
     }
 }
