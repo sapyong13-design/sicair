@@ -341,8 +341,19 @@ class User extends Authenticatable
         return $this->belongsTo(User::class, 'delegate_atasan_id');
     }
 
+    /**
+     * Dapatkan atasan efektif (mempertimbangkan delegasi).
+     *
+     * PERHATIAN: Jika dipanggil dalam loop banyak user, pastikan eager load:
+     *   User::with('atasan')->get()->each->getEffectiveAtasan()
+     */
     public function getEffectiveAtasan(): ?User
     {
+        // Ensure relation loaded to avoid N+1 in loops
+        if (!$this->relationLoaded('atasan')) {
+            $this->load('atasan');
+        }
+
         // Cek apakah atasan asli sedang cuti aktif
         $atasanAsli = $this->atasan;
         if (!$atasanAsli) return null;
