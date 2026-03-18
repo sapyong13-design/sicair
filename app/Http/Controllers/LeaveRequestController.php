@@ -199,20 +199,26 @@ class LeaveRequestController extends Controller
             ? LeaveRequest::STATUS_PERTIMBANGAN
             : LeaveRequest::STATUS_DIAJUKAN;
 
-        $leaveRequest = LeaveRequest::create([
-            'user_id' => $user->id,
-            'type' => $type,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'reason' => $request->reason,
-            'alamat_cuti' => $request->alamat_cuti,
-            'telepon_cuti' => $request->telepon_cuti,
-            'alasan_cap' => $request->alasan_cap,
-            'kelahiran_ke' => $request->kelahiran_ke,
-            'dokumen_pendukung' => $dokumenPath,
-            'total_hari_kerja' => $hariKerja,
-            'status' => $initialStatus,
-        ]);
+        try {
+            $leaveRequest = DB::transaction(function () use ($request, $user, $type, $dokumenPath, $hariKerja, $initialStatus) {
+                return LeaveRequest::create([
+                    'user_id' => $user->id,
+                    'type' => $type,
+                    'start_date' => $request->start_date,
+                    'end_date' => $request->end_date,
+                    'reason' => $request->reason,
+                    'alamat_cuti' => $request->alamat_cuti,
+                    'telepon_cuti' => $request->telepon_cuti,
+                    'alasan_cap' => $request->alasan_cap,
+                    'kelahiran_ke' => $request->kelahiran_ke,
+                    'dokumen_pendukung' => $dokumenPath,
+                    'total_hari_kerja' => $hariKerja,
+                    'status' => $initialStatus,
+                ]);
+            });
+        } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+            return back()->withErrors(['reason' => 'Anda sudah memiliki pengajuan aktif yang sedang diproses. Tunggu keputusan sebelum mengajukan ulang.'])->withInput();
+        }
 
         // Kirim email ke pemohon (try-catch for OpenWrt sync queue compatibility)
         try {
