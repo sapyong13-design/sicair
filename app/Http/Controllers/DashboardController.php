@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        private readonly AnalyticsService $analyticsService
+    ) {}
+
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -38,7 +42,6 @@ class DashboardController extends Controller
 
     private function adminDashboard(User $user)
     {
-        $analyticsService = new AnalyticsService();
         $year = date('Y');
         $today = \Carbon\Carbon::today();
 
@@ -81,8 +84,8 @@ class DashboardController extends Controller
             ->get();
 
         // Get comprehensive analytics
-        $analytics = $analyticsService->getDashboardAnalytics($year);
-        $leaveBalances = $analyticsService->getLeaveBalanceOverview($year);
+        $analytics = $this->analyticsService->getDashboardAnalytics($year);
+        $leaveBalances = $this->analyticsService->getLeaveBalanceOverview($year);
 
         $chartByDepartment = $analytics['charts']['by_department']['values'] ?? [];
 
@@ -99,7 +102,7 @@ class DashboardController extends Controller
         }
 
         // Sprint 3 #18: Trend indicator (this month vs last month)
-        $monthTrend = $analyticsService->getMonthTrend();
+        $monthTrend = $this->analyticsService->getMonthTrend();
 
         // Sprint 3 #19: Top 5 pegawai paling banyak cuti tahun ini
         $top5Cuti = LeaveRequest::join('users', 'leave_requests.user_id', '=', 'users.id')
