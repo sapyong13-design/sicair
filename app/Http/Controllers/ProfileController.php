@@ -31,7 +31,16 @@ class ProfileController extends Controller
             'alamat' => 'nullable|string|max:500',
         ]);
 
+        $oldValues = $user->only(['telepon', 'alamat']);
+
         $user->update($validated);
+
+        \App\Models\AuditLog::log(
+            'update_profile', 'User', $user->id,
+            $oldValues,
+            $user->fresh()->only(['telepon', 'alamat']),
+            'User memperbarui profil'
+        );
 
         return back()->with('success', 'Profil berhasil diperbarui.');
     }
@@ -85,6 +94,8 @@ class ProfileController extends Controller
         $user->update([
             'password' => Hash::make($request->password),
         ]);
+
+        \App\Models\AuditLog::log('change_password', 'User', $user->id, null, null, 'User mengganti password');
 
         return back()->with('success', 'Password berhasil diubah.');
     }

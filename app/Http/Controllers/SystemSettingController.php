@@ -35,6 +35,12 @@ class SystemSettingController extends Controller
 
         $data = $request->input('settings', []);
 
+        // Capture old values before update
+        $affectedKeys = array_keys($data);
+        $oldSettings = SystemSetting::whereIn('key', $affectedKeys)
+            ->pluck('value', 'key')
+            ->toArray();
+
         foreach ($data as $key => $value) {
             SystemSetting::where('key', $key)->update(['value' => $value]);
         }
@@ -46,6 +52,13 @@ class SystemSettingController extends Controller
                 SystemSetting::where('key', $boolKey)->update(['value' => '0']);
             }
         }
+
+        \App\Models\AuditLog::log(
+            'update_settings', 'SystemSetting', 0,
+            $oldSettings,
+            $data,
+            'Admin memperbarui pengaturan sistem'
+        );
 
         return redirect()->route('admin.settings')->with('success', 'Pengaturan berhasil disimpan.');
     }
