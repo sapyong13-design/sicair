@@ -1395,13 +1395,15 @@
             animation: notifPulse 2s ease infinite;
         }
 
-        /* ===== Sprint 2 #6: Loading Skeleton ===== */
+        /* ===== Sprint 2 #6 / B5: Loading Skeleton (live stats) ===== */
         .sc-skeleton {
-            background: linear-gradient(90deg, var(--sc-gray-100) 25%, var(--sc-gray-50) 50%, var(--sc-gray-100) 75%);
+            background: linear-gradient(90deg, var(--sc-gray-200, #e9ecef) 25%, var(--sc-gray-100, #f8f9fa) 50%, var(--sc-gray-200, #e9ecef) 75%);
             background-size: 200% 100%;
-            animation: sc-shimmer 1.4s infinite;
-            border-radius: 6px;
+            animation: sc-shimmer 1.5s infinite;
+            border-radius: 4px;
             display: inline-block;
+            min-height: 1em;
+            min-width: 2ch;
         }
         @keyframes sc-shimmer {
             0% { background-position: 200% 0; }
@@ -2227,8 +2229,8 @@
         </div>
     </header>
 
-    {{-- Toast Container (#13) --}}
-    <div class="sc-toast-container" id="scToastContainer" aria-live="polite"></div>
+    {{-- Toast Container (#13) — legacy custom CSS toasts --}}
+    <div class="sc-toast-container" id="scToastContainerLegacy" aria-live="polite"></div>
 
     <div class="page-wrapper flex-fill sc-page-wrapper" id="main-content" role="main" tabindex="-1">
         <div class="container-xl">
@@ -2470,10 +2472,10 @@
 
     {{-- Fitur 8: Loading States + Network Error + Toast (#1, #5, #13) --}}
     <script>
-    // Toast notification system (#13)
-    window.scToast = function(message, type) {
+    // Toast notification system (#13) — legacy custom CSS (kept for fallback)
+    window.scToastLegacy = function(message, type) {
         type = type || 'success';
-        var container = document.getElementById('scToastContainer');
+        var container = document.getElementById('scToastContainerLegacy');
         if (!container) return;
         var toast = document.createElement('div');
         toast.className = 'sc-toast sc-toast-' + type;
@@ -2485,6 +2487,7 @@
             setTimeout(function() { toast.remove(); }, 300);
         }, 4000);
     };
+    // scToast will be overridden below by Bootstrap-based implementation
 
     document.addEventListener('DOMContentLoaded', function() {
         // Show toast for flash messages
@@ -2924,38 +2927,66 @@
         }
     }, true);
 
-    // T17: Session timeout warning (15 min idle)
+    // D4: Session timeout warning — uses session.lifetime, AJAX extend, activity throttle
     @auth
     (function() {
-        var WARNING_MS  = 15 * 60 * 1000;
-        var COUNTDOWN_S = 5 * 60;
-        var timer, interval, modalInstance;
+        var LIFETIME_MS  = {{ config('session.lifetime') * 60 * 1000 }};
+        var WARNING_MS   = 5 * 60 * 1000;
+        var warningTimer, countdownInterval, modal;
+
+        function getModal() {
+            if (!modal) modal = new bootstrap.Modal(document.getElementById('sessionTimeoutModal'));
+            return modal;
+        }
+
+        function startTimer() {
+            clearTimeout(warningTimer);
+            warningTimer = setTimeout(showWarning, LIFETIME_MS - WARNING_MS);
+        }
 
         function showWarning() {
-            var el = document.getElementById('sc-session-modal');
-            if (!el) return;
-            modalInstance = new bootstrap.Modal(el, { backdrop: 'static', keyboard: false });
-            modalInstance.show();
-            var secs = COUNTDOWN_S;
-            interval = setInterval(function() {
-                secs--;
-                var cd = document.getElementById('sc-countdown');
-                if (cd) cd.textContent = Math.floor(secs/60).toString().padStart(2,'0') + ':' + (secs%60).toString().padStart(2,'0');
-                if (secs <= 0) { clearInterval(interval); window.location.href = '{{ route("login") }}'; }
+            var remaining = WARNING_MS;
+            getModal().show();
+            countdownInterval = setInterval(function() {
+                remaining -= 1000;
+                if (remaining <= 0) {
+                    clearInterval(countdownInterval);
+                    document.getElementById('sc-logout-form').submit();
+                    return;
+                }
+                var m = Math.floor(remaining / 60000);
+                var s = Math.floor((remaining % 60000) / 1000);
+                document.getElementById('sessionCountdown').textContent = m + ':' + (s < 10 ? '0' : '') + s;
             }, 1000);
         }
 
-        function resetTimer() {
-            clearTimeout(timer);
-            clearInterval(interval);
-            if (modalInstance) { try { modalInstance.hide(); } catch(e) {} modalInstance = null; }
-            timer = setTimeout(showWarning, WARNING_MS);
-        }
-
-        ['click','keydown','touchstart','mousemove'].forEach(function(ev) {
-            document.addEventListener(ev, resetTimer, { passive: true });
+        document.getElementById('sessionExtendBtn').addEventListener('click', function() {
+            fetch('/dashboard/live-stats', { credentials: 'same-origin' })
+                .finally(function() {
+                    clearInterval(countdownInterval);
+                    getModal().hide();
+                    startTimer();
+                });
         });
-        resetTimer();
+
+        document.getElementById('sessionLogoutBtn').addEventListener('click', function() {
+            document.getElementById('sc-logout-form').submit();
+        });
+
+        // Reset timer on user activity (throttled to once per 30s)
+        var lastReset = 0;
+        function onActivity() {
+            var now = Date.now();
+            if (now - lastReset > 30000) {
+                lastReset = now;
+                startTimer();
+            }
+        }
+        ['click', 'keydown', 'touchstart'].forEach(function(e) {
+            document.addEventListener(e, onActivity, { passive: true });
+        });
+
+        startTimer();
     })();
     @endauth
 
@@ -2995,24 +3026,24 @@
     </script>
 
     @auth
-    {{-- T17: Session Timeout Warning --}}
-    <div class="modal fade" id="sc-session-modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content" style="border-radius:16px;">
-                <div class="modal-body text-center p-4">
-                    <i class="ti ti-clock-exclamation mb-3" style="font-size:3rem; color:#d97706; display:block;"></i>
-                    <h5 class="fw-bold mb-2">Sesi Hampir Habis</h5>
-                    <p class="text-muted mb-3" style="font-size:0.88rem;">
-                        Sesi Anda akan berakhir dalam <strong id="sc-countdown">5:00</strong>.<br>Perpanjang sesi?
-                    </p>
-                    <div class="d-flex gap-2 justify-content-center">
-                        <button onclick="window.location.reload()" class="btn btn-primary btn-sm" style="border-radius:8px;">
-                            <i class="ti ti-refresh me-1"></i> Perpanjang
-                        </button>
-                        <a href="{{ route('logout') }}"
-                           onclick="event.preventDefault(); document.getElementById('sc-logout-form').submit();"
-                           class="btn btn-outline-secondary btn-sm" style="border-radius:8px;">Logout</a>
-                    </div>
+    {{-- D4: Session Timeout Warning Modal (improved — uses session.lifetime, AJAX extend) --}}
+    <div class="modal fade" id="sessionTimeoutModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title">
+                        <i class="ti ti-clock-off me-2" style="color:var(--sc-warning,#ffc107);"></i>Sesi Hampir Habis
+                    </h5>
+                </div>
+                <div class="modal-body text-center py-2">
+                    <p class="mb-1">Sesi Anda akan berakhir dalam <strong id="sessionCountdown">5:00</strong>.</p>
+                    <p class="text-muted" style="font-size:0.8rem;">Klik "Perpanjang" untuk tetap login.</p>
+                </div>
+                <div class="modal-footer border-0 pt-0 justify-content-center gap-2">
+                    <button type="button" class="btn btn-primary btn-sm" id="sessionExtendBtn">
+                        <i class="ti ti-refresh me-1"></i>Perpanjang
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="sessionLogoutBtn">Logout</button>
                 </div>
             </div>
         </div>
@@ -3146,6 +3177,86 @@
 })();
 @endif
 </script>
+{{-- ===== GLOBAL TOAST NOTIFICATION (B4) ===== --}}
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;" id="scToastContainer">
+    @if(session('success'))
+    <div class="toast align-items-center text-white border-0"
+         role="alert" aria-live="polite"
+         data-bs-autohide="true" data-bs-delay="4000"
+         style="background: var(--sc-success, #28a745);">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="ti ti-circle-check me-2"></i>{{ session('success') }}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    @endif
+    @if(session('error'))
+    <div class="toast align-items-center text-white border-0"
+         role="alert" aria-live="assertive"
+         data-bs-autohide="true" data-bs-delay="6000"
+         style="background: var(--sc-danger, #dc3545);">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="ti ti-alert-circle me-2"></i>{{ session('error') }}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    @endif
+    @if(session('warning'))
+    <div class="toast align-items-center text-white border-0"
+         role="alert" aria-live="polite"
+         data-bs-autohide="true" data-bs-delay="5000"
+         style="background: var(--sc-warning, #ffc107); color: #000 !important;">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="ti ti-alert-triangle me-2"></i>{{ session('warning') }}
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    @endif
+</div>
+
+<script>
+// Init and show all session toasts (B4)
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('#scToastContainer .toast').forEach(function(el) {
+        var t = new bootstrap.Toast(el);
+        t.show();
+    });
+});
+
+// Global helper: scToast('Pesan', 'success'|'error'|'warning') — Bootstrap-based (B4)
+window.scToast = function(msg, type) {
+    type = type || 'success';
+    var cfg = {
+        success: { bg: 'var(--sc-success, #28a745)', icon: 'circle-check', delay: 4000, closeClass: 'btn-close-white' },
+        error:   { bg: 'var(--sc-danger, #dc3545)',  icon: 'alert-circle',  delay: 6000, closeClass: 'btn-close-white' },
+        warning: { bg: 'var(--sc-warning, #ffc107)', icon: 'alert-triangle',delay: 5000, closeClass: '' },
+    };
+    var c = cfg[type] || cfg.success;
+    var el = document.createElement('div');
+    el.className = 'toast align-items-center text-white border-0';
+    el.setAttribute('role', 'alert');
+    el.style.background = c.bg;
+    if (type === 'warning') el.style.color = '#000';
+    el.innerHTML =
+        '<div class="d-flex">' +
+        '<div class="toast-body"><i class="ti ti-' + c.icon + ' me-2"></i>' +
+        msg.replace(/</g,'&lt;').replace(/>/g,'&gt;') +
+        '</div>' +
+        '<button type="button" class="btn-close ' + c.closeClass + ' me-2 m-auto" data-bs-dismiss="toast"></button>' +
+        '</div>';
+    document.getElementById('scToastContainer').appendChild(el);
+    var t = new bootstrap.Toast(el, { delay: c.delay });
+    t.show();
+    el.addEventListener('hidden.bs.toast', function() { el.remove(); });
+};
+</script>
+
 @auth
 <script>
 (function() {
