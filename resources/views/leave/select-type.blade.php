@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Pilih Jenis Cuti - SiCAIR')
+@section('title', 'Pilih Jenis Cuti — SiCAIR')
 
 @section('content')
 {{-- T19: Sticky saldo bar (mobile only) --}}
@@ -69,7 +69,7 @@
                         <div class="flex-fill">
                             <h4 class="fw-bold mb-1" style="color: var(--sc-text); font-size: 1.05rem;">Cuti Besar</h4>
                             <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.5;">
-                                Max 3 bulan. Syarat: masa kerja 5 tahun.
+                                Maks. 3 bulan. Syarat: masa kerja 5 tahun.
                             </p>
                             <span class="btn btn-sm" style="background: linear-gradient(135deg, #7c3aed, #8b5cf6); color: #fff; border: none; border-radius: 8px; font-weight: 600; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);">
                                 <i class="ti ti-arrow-right me-1"></i> Ajukan
@@ -93,7 +93,7 @@
                         <div class="flex-fill">
                             <h4 class="fw-bold mb-1" style="color: var(--sc-text); font-size: 1.05rem;">Cuti Sakit</h4>
                             <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.5;">
-                                Max 1 tahun. Wajib surat dokter.
+                                Maks. 1 tahun. Wajib surat dokter.
                             </p>
                             <span class="btn btn-sm sc-btn-danger">
                                 <i class="ti ti-arrow-right me-1"></i> Ajukan
@@ -141,7 +141,7 @@
                         <div class="flex-fill">
                             <h4 class="fw-bold mb-1" style="color: var(--sc-text); font-size: 1.05rem;">Cuti Alasan Penting</h4>
                             <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.5;">
-                                Max 1 bulan. Keluarga sakit/meninggal, perkawinan, dll.
+                                Maks. 1 bulan. Keluarga sakit/meninggal, perkawinan, dll.
                             </p>
                             <span class="btn btn-sm" style="background: linear-gradient(135deg, #d97706, #f59e0b); color: #fff; border: none; border-radius: 8px; font-weight: 600; box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);">
                                 <i class="ti ti-arrow-right me-1"></i> Ajukan
@@ -165,7 +165,7 @@
                         <div class="flex-fill">
                             <h4 class="fw-bold mb-1" style="color: var(--sc-text); font-size: 1.05rem;">Cuti di Luar Tanggungan Negara</h4>
                             <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.5;">
-                                Max 3 tahun. Tanpa penghasilan.
+                                Maks. 3 tahun. Tanpa penghasilan.
                             </p>
                             <span class="btn btn-sm" style="background: linear-gradient(135deg, #475569, #64748b); color: #fff; border: none; border-radius: 8px; font-weight: 600; box-shadow: 0 2px 8px rgba(71, 85, 105, 0.3);">
                                 <i class="ti ti-arrow-right me-1"></i> Ajukan

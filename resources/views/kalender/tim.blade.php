@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Kalender Tim - SiCAIR')
+@section('title', 'Kalender Tim — SiCAIR')
 
 @section('content')
 {{-- Breadcrumb --}}

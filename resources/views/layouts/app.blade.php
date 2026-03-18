@@ -32,7 +32,7 @@
     <!-- PWA manifest -->
     <link rel="manifest" href="/manifest.json">
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>@yield('title', 'SiCAIR - PN Natuna')</title>
+    <title>@yield('title', 'SiCAIR — PN Natuna')</title>
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/favicon-pn.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
     <!-- Tabler CSS CDN -->
@@ -1977,7 +1977,7 @@
             <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu" aria-label="Toggle navigasi">
                 <i class="ti ti-menu-2" style="font-size: 1.4rem;" aria-hidden="true"></i>
             </button>
-            <a href="/dashboard" class="navbar-brand-text">
+            <a href="/dashboard" class="navbar-brand-text" title="Sistem Cuti Administrasi Elektronik">
                 @if(file_exists(public_path('images/favicon-pn.png')))
                     <img src="{{ asset('images/favicon-pn.png') }}" alt="Logo PN Natuna" class="brand-logo">
                 @else
@@ -2143,7 +2143,7 @@
                             <a class="nav-link" href="/dashboard#pending-review">
                                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-checklist"></i></span>
                                 <span class="nav-link-title">
-                                    Pertimbangan
+                                    Pertimbangan Cuti
                                     @if($navPendingReview > 0)
                                     <span class="badge ms-1" style="font-size: 0.7rem; border-radius: 50px; min-width: 20px; background: var(--sc-accent); color: #fff;">{{ $navPendingReview }}</span>
                                     @endif
@@ -2176,7 +2176,7 @@
                                href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside"
                                aria-expanded="false" aria-haspopup="true">
                                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-settings"></i></span>
-                                <span class="nav-link-title">Manajemen</span>
+                                <span class="nav-link-title">Administrasi</span>
                             </a>
                             <div class="dropdown-menu sc-nav-dropdown-menu">
                                 <div class="sc-nav-dropdown-section">Kepegawaian</div>
@@ -2184,7 +2184,7 @@
                                     <i class="ti ti-users"></i> Kelola Pegawai
                                 </a>
                                 <a class="dropdown-item {{ request()->is('balance-adjustments*') ? 'active' : '' }}" href="{{ route('balance-adjustment.index') }}">
-                                    <i class="ti ti-adjustments-horizontal"></i> Penyesuaian Saldo
+                                    <i class="ti ti-adjustments-horizontal"></i> Koreksi Saldo Cuti
                                 </a>
                                 <div class="sc-nav-dropdown-section">Kalender & Kehadiran</div>
                                 <a class="dropdown-item {{ request()->is('hari-libur*') ? 'active' : '' }}" href="{{ route('hari-libur.index') }}">
@@ -2875,7 +2875,7 @@
             setTimeout(function() {
                 introJs().setOptions({
                     steps: [
-                        { title: 'Selamat Datang! 👋', intro: 'Ini adalah SiCAIR — Sistem Informasi Cuti Pengadilan Negeri Natuna. Mari kita kenalkan fitur-fiturnya.' },
+                        { title: 'Selamat Datang! 👋', intro: 'Ini adalah SiCAIR — Sistem Cuti Administrasi Elektronik Pengadilan Negeri Natuna. Mari kita kenalkan fitur-fiturnya.' },
                         { element: '.sc-navbar', title: 'Navigasi', intro: 'Gunakan menu di sini untuk berpindah halaman. Di mobile, ada navigasi bawah yang praktis.' },
                         { element: '#main-content', title: 'Area Konten', intro: 'Di sini ditampilkan informasi dan fitur utama sesuai halaman yang sedang dibuka.' },
                         { element: '.sc-qa-toggle', title: 'Aksi Cepat', intro: 'Tombol ini membuka panel aksi cepat — ajukan cuti, lihat kalender, dll.' },

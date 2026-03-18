@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Manajemen Backup - SiCAIR')
+@section('title', 'Manajemen Backup — SiCAIR')
 
 @section('content')
 <div class="sc-page-header mb-4">

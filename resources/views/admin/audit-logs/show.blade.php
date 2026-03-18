@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Detail Audit Log - SiCAIR')
+@section('title', 'Detail Audit Log — SiCAIR')
 
 @section('content')
 <div class="sc-page-header mb-4">

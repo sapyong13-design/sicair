@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Detail Cuti - SiCAIR')
+@section('title', 'Detail Cuti — SiCAIR')
 
 @section('content')
 {{-- Breadcrumb (#10) --}}
@@ -97,8 +97,8 @@
                 $leaveRequest->isRejected() => ['bg' => 'var(--sc-danger-light)', 'color' => 'var(--sc-danger)', 'icon' => 'ti-circle-x', 'text' => 'Ditolak'],
                 $leaveRequest->status === 'ditangguhkan' => ['bg' => 'var(--sc-warning-light)', 'color' => 'var(--sc-warning)', 'icon' => 'ti-clock-pause', 'text' => 'Ditangguhkan'],
                 $leaveRequest->status === 'diubah' => ['bg' => 'var(--sc-primary-light)', 'color' => 'var(--sc-primary)', 'icon' => 'ti-edit', 'text' => 'Diubah'],
-                $leaveRequest->status === 'pertimbangan_atasan' => ['bg' => '#fef3c7', 'color' => '#d97706', 'icon' => 'ti-user-check', 'text' => 'Menunggu Keputusan Pejabat'],
-                default => ['bg' => '#e0f2fe', 'color' => '#0284c7', 'icon' => 'ti-clock-hour-4', 'text' => 'Diajukan / Menunggu Pertimbangan'],
+                $leaveRequest->status === 'pertimbangan_atasan' => ['bg' => '#fef3c7', 'color' => '#d97706', 'icon' => 'ti-user-check', 'text' => 'Menunggu Pertimbangan Atasan'],
+                default => ['bg' => '#e0f2fe', 'color' => '#0284c7', 'icon' => 'ti-clock-hour-4', 'text' => 'Diajukan — Menunggu Pertimbangan Atasan'],
             };
         @endphp
         <div class="mb-4" style="background: {{ $statusConfig['bg'] }}; border-radius: 14px; padding: 1rem 1.25rem;">

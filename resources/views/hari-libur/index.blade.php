@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Hari Libur - SiCAIR')
+@section('title', 'Hari Libur — SiCAIR')
 
 @section('content')
 {{-- Breadcrumb (#10) --}}

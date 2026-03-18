@@ -90,7 +90,7 @@
     <div class="container">
         <div class="header">
             <h1>Laporan Pengajuan Cuti</h1>
-            <p>Sistem Cuti Administrasi Elektronik - SiCAIR</p>
+            <p>SiCAIR — Sistem Cuti Administrasi Elektronik</p>
             <p style="margin-top: 5px;">Periode: {{ now()->format('d M Y') }}</p>
         </div>
 

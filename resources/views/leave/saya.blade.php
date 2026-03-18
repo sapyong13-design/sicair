@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Cuti Saya - SiCAIR')
+@section('title', 'Cuti Saya — SiCAIR')
 
 @section('content')
 <nav class="sc-breadcrumb" aria-label="Breadcrumb">

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Analytics - SiCAIR')
+@section('title', 'Analytics — SiCAIR')
 
 @section('content')
 {{-- Page Header --}}

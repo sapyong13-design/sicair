@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', ($hariLibur ? 'Edit' : 'Tambah') . ' Hari Libur - SiCAIR')
+@section('title', ($hariLibur ? 'Edit' : 'Tambah') . ' Hari Libur — SiCAIR')
 
 @section('content')
 {{-- Breadcrumb (#10) --}}

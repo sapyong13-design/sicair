@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Audit Log - SiCAIR')
+@section('title', 'Audit Log — SiCAIR')
 
 @section('content')
 <div class="sc-page-header mb-4 d-flex align-items-center justify-content-between">

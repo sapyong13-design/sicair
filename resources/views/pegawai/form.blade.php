@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', ($pegawai ? 'Edit' : 'Tambah') . ' Pegawai - SiCAIR')
+@section('title', ($pegawai ? 'Edit' : 'Tambah') . ' Pegawai — SiCAIR')
 
 @section('content')
 {{-- Breadcrumb (#10) --}}
@@ -281,17 +281,17 @@
                                 <option value="panitera" {{ old('role', $pegawai->role ?? '') === 'panitera' ? 'selected' : '' }}>Panitera</option>
                                 <option value="sekretaris" {{ old('role', $pegawai->role ?? '') === 'sekretaris' ? 'selected' : '' }}>Sekretaris</option>
                                 <option value="atasan" {{ old('role', $pegawai->role ?? '') === 'atasan' ? 'selected' : '' }}>Atasan Lainnya</option>
-                                <option value="ketua" {{ old('role', $pegawai->role ?? '') === 'ketua' ? 'selected' : '' }}>Ketua Pengadilan (Pejabat Berwenang)</option>
+                                <option value="ketua" {{ old('role', $pegawai->role ?? '') === 'ketua' ? 'selected' : '' }}>Ketua Pengadilan</option>
                                 <option value="admin" {{ old('role', $pegawai->role ?? '') === 'admin' ? 'selected' : '' }}>Admin Kepegawaian</option>
                             </select>
                             @error('role') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">
-                                Password {{ $pegawai ? '(kosongkan jika tidak diubah)' : '' }} {{ !$pegawai ? '*' : '' }}
+                                Password {{ $pegawai ? '(kosongkan jika tidak ingin mengubah)' : '' }} {{ !$pegawai ? '*' : '' }}
                             </label>
                             <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
-                                   {{ !$pegawai ? 'required' : '' }} placeholder="{{ $pegawai ? 'Biarkan kosong jika tidak diubah' : 'Min. 6 karakter' }}"
+                                   {{ !$pegawai ? 'required' : '' }} placeholder="{{ $pegawai ? 'Kosongkan jika tidak ingin mengubah password' : 'Min. 6 karakter' }}"
                                    style="border-radius: 10px; border: 2px solid #e2e8f0; height: 46px;">
                             @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>

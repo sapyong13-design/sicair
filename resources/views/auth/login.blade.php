@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-    <title>Login - SiCAIR PN Natuna</title>
+    <title>Login — SiCAIR</title>
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/favicon-pn.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
@@ -496,7 +496,7 @@
                                    id="password_input"
                                    name="password"
                                    class="form-control"
-                                   placeholder="Masukkan password"
+                                   placeholder="Masukkan Password Anda"
                                    autocomplete="current-password"
                                    style="padding-right: 44px;"
                                    required>

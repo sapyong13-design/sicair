@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Perubahan Saldo Cuti - SiCAIR')
+@section('title', 'Perubahan Saldo Cuti — SiCAIR')
 
 @section('content')
 {{-- Page Header --}}

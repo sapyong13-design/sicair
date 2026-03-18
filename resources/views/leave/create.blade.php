@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Ajukan Cuti - SiCAIR')
+@section('title', 'Ajukan Cuti — SiCAIR')
 
 @php
     $typeLabels = \App\Models\LeaveRequest::typeLabels();
@@ -274,7 +274,7 @@
                         @error('reason') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         {{-- Character counter (#14) --}}
                         <div class="d-flex justify-content-between mt-1">
-                            <div class="form-hint" style="font-size: 0.78rem; color: #94a3b8;">Jelaskan alasan dengan jelas dan singkat.</div>
+                            <div class="form-hint" style="font-size: 0.78rem; color: #94a3b8;">Jelaskan alasan secara singkat dan spesifik.</div>
                             <div class="sc-char-counter" id="reason-counter">0 / 500 karakter</div>
                         </div>
                         <div class="d-flex justify-content-between mt-1" style="font-size:0.78rem; color:#94a3b8;">

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Rekap Cuti Per Unit Kerja - SiCAIR')
+@section('title', 'Rekap Cuti Per Unit Kerja — SiCAIR')
 
 @section('content')
 <nav class="sc-breadcrumb" aria-label="Breadcrumb">
