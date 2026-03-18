@@ -92,13 +92,25 @@ class DocumentController extends Controller
         }
 
         $request->validate([
-            'dokumen' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'dokumen' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240',
         ], [
-            'dokumen.required' => 'File dokumen harus dipilih.',
+            'dokumen.required' => 'File dokumen harus diupload.',
             'dokumen.file' => 'Input harus berupa file.',
-            'dokumen.mimes' => 'File harus berformat PDF, JPG, JPEG, atau PNG.',
-            'dokumen.max' => 'Ukuran file maksimal 5 MB.',
+            'dokumen.mimes' => 'File harus berformat PDF, JPG, PNG, DOC, atau DOCX.',
+            'dokumen.max' => 'Ukuran file maksimal 10MB.',
         ]);
+
+        // Double-check MIME type manually (D3)
+        $file = $request->file('dokumen');
+        $allowedMimes = [
+            'application/pdf',
+            'image/jpeg', 'image/png',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ];
+        if (!in_array($file->getMimeType(), $allowedMimes)) {
+            return back()->withErrors(['dokumen' => 'Tipe file tidak diizinkan: ' . $file->getMimeType()]);
+        }
 
         // Delete old document if exists
         if ($leaveRequest->dokumen_pendukung && Storage::disk('public')->exists($leaveRequest->dokumen_pendukung)) {
