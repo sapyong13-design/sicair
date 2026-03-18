@@ -1147,6 +1147,10 @@ class LeaveRequestController extends Controller
                 if ($hariKerja > $user->leave_balance) {
                     return "Jumlah hari kerja ($hariKerja hari) melebihi sisa cuti Anda ($user->leave_balance hari).";
                 }
+                // Batas consecutive: max 12 hari kerja per pengajuan
+                if ($hariKerja > 12) {
+                    return 'Cuti tahunan tidak boleh lebih dari 12 hari kerja dalam satu pengajuan. Ajukan terpisah untuk periode berbeda.';
+                }
                 // Kuota 30%
                 $persen = HariKerjaCalculator::hitungPersentaseCutiSaatIni($startDate, $endDate, $user);
                 if ($persen >= 30) {

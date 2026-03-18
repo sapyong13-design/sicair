@@ -527,4 +527,27 @@ class SmokeTest extends TestCase
              ->assertSee('Bambang Suharto')
              ->assertDontSee('Siti Rahayu');
     }
+
+    public function test_cuti_tahunan_rejects_more_than_12_working_days(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'pegawai',
+            'leave_balance' => 20,
+            'masa_kerja_mulai' => now()->subYears(2),
+        ]);
+        // 3 minggu kalender = sekitar 15-19 hari kerja (> 12 hari kerja limit)
+        // addDays(20) ensures >= 5 working days advance notice required for TYPE_TAHUNAN
+        $start = now()->addDays(20)->startOfWeek(); // Senin
+        $end = $start->copy()->addWeeks(3)->endOfWeek()->subDays(2); // Jumat 3 minggu kemudian
+
+        $response = $this->actingAs($user)->post(route('leave.store'), [
+            'type'           => 'cuti_tahunan',
+            'start_date'     => $start->format('Y-m-d'),
+            'end_date'       => $end->format('Y-m-d'),
+            'reason'         => 'Liburan keluarga besar',
+            'alamat_cuti'    => 'Jl Test',
+            'telepon_cuti'   => '081234567890',
+        ]);
+        $response->assertSessionHasErrors();
+    }
 }
