@@ -35,6 +35,13 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->runInBackground();
 
+        // Backup database harian pukul 03:00, simpan 7 versi terakhir
+        $schedule->command('backup:database --keep=7')
+            ->dailyAt('03:00')
+            ->onOneServer()
+            ->withoutOverlapping()
+            ->runInBackground();
+
         // Alternative: Run daily and check if it's January 1st (useful for testing)
         // $schedule->command('app:carry-over-unused-leave')
         //     ->daily()
