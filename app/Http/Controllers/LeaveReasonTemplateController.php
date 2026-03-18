@@ -42,7 +42,7 @@ class LeaveReasonTemplateController extends Controller
         // Checkbox tidak dikirim browser saat unchecked — gunakan boolean() helper
         $validated['is_active'] = $request->boolean('is_active');
         $leaveReasonTemplate->update($validated);
-        return back()->with('success', 'Template berhasil diupdate.');
+        return back()->with('success', 'Template berhasil diperbarui.');
     }
 
     public function destroy(LeaveReasonTemplate $leaveReasonTemplate)

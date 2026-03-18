@@ -94,7 +94,7 @@ class DocumentController extends Controller
         $request->validate([
             'dokumen' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240',
         ], [
-            'dokumen.required' => 'File dokumen harus diupload.',
+            'dokumen.required' => 'File dokumen wajib diunggah.',
             'dokumen.file' => 'Input harus berupa file.',
             'dokumen.mimes' => 'File harus berformat PDF, JPG, PNG, DOC, atau DOCX.',
             'dokumen.max' => 'Ukuran file maksimal 10MB.',
@@ -109,7 +109,7 @@ class DocumentController extends Controller
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         ];
         if (!in_array($file->getMimeType(), $allowedMimes)) {
-            return back()->withErrors(['dokumen' => 'Tipe file tidak diizinkan: ' . $file->getMimeType()]);
+            return back()->withErrors(['dokumen' => 'Format file tidak diizinkan. Format yang diterima: PDF, JPG, PNG, DOC, DOCX.']);
         }
 
         // Delete old document if exists
@@ -125,7 +125,7 @@ class DocumentController extends Controller
             'dokumen_pendukung' => $path,
         ]);
 
-        return back()->with('success', 'Dokumen berhasil diupload.');
+        return back()->with('success', 'Dokumen berhasil diunggah.');
     }
 
     /**

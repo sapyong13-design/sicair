@@ -126,7 +126,7 @@ class HariLiburController extends Controller
             }
         }
 
-        $msg = "{$imported} hari libur berhasil diimport, {$skipped} sudah ada.";
+        $msg = "{$imported} hari libur berhasil diimpor, {$skipped} sudah ada.";
         if ($errors) {
             $msg .= ' Beberapa gagal: ' . implode('; ', $errors);
             return redirect()->route('hari-libur.index')->with('warning', $msg);

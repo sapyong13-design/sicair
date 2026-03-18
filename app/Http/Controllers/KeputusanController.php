@@ -196,6 +196,6 @@ class KeputusanController extends Controller
         }
 
         return redirect()->route('keputusan.index')
-            ->with('success', "Bulk keputusan berhasil: $processed pengajuan diproses.");
+            ->with('success', "$processed pengajuan berhasil diputuskan.");
     }
 }

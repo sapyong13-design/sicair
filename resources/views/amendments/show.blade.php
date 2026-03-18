@@ -10,12 +10,12 @@
             <div class="d-flex align-items-center gap-3 mb-4">
                 <a href="{{ route('leave.show', $amendment->leaveRequest) }}"
                    class="btn btn-outline-secondary" style="border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0;">
-                    <i class="bi bi-arrow-left"></i>
+                    <i class="ti ti-arrow-left"></i>
                 </a>
                 <div>
                     <h2 class="mb-0">Detail Perubahan Cuti</h2>
                     <div class="text-muted" style="font-size: 0.85rem;">
-                        {{ $amendment->leaveRequest->user->name }} — {{ $amendment->leaveRequest->type }}
+                        {{ $amendment->leaveRequest->user->name }} — {{ $amendment->leaveRequest->type_label }}
                     </div>
                 </div>
             </div>
@@ -23,13 +23,18 @@
             {{-- Status Badge --}}
             <div class="mb-4">
                 <span class="badge bg-{{ $amendment->getStatusBadgeClass() }} fs-5 px-3 py-2">
-                    <i class="bi bi-{{ match($amendment->status) {
-                        'pending' => 'clock-history',
-                        'approved' => 'check-circle',
-                        'rejected' => 'x-circle',
-                        default => 'question-circle'
+                    <i class="ti ti-{{ match($amendment->status) {
+                        'pending' => 'clock-hour-4',
+                        'approved' => 'circle-check',
+                        'rejected' => 'circle-x',
+                        default => 'question-mark'
                     } }}"></i>
-                    {{ ucfirst($amendment->status) }}
+                    {{ match($amendment->status) {
+                        'pending' => 'Menunggu',
+                        'approved' => 'Disetujui',
+                        'rejected' => 'Ditolak',
+                        default => ucfirst($amendment->status)
+                    } }}
                 </span>
             </div>
 
@@ -37,7 +42,7 @@
             <div class="card shadow-sm mb-4">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="bi bi-arrow-left-right"></i> Perubahan yang Diminta
+                        <i class="ti ti-switch-horizontal"></i> Perubahan yang Diminta
                     </h5>
                 </div>
                 <div class="card-body">
@@ -74,7 +79,7 @@
                     <div class="row text-sm">
                         <div class="col-md-6">
                             <p class="mb-1">
-                                <strong>Diminta oleh:</strong> {{ $amendment->requester->name }}
+                                <strong>Pemohon:</strong> {{ $amendment->requester->name }}
                             </p>
                             <p class="mb-0 text-muted" style="font-size: 0.85rem;">
                                 {{ $amendment->created_at->format('d M Y, H:i') }}
@@ -99,7 +104,8 @@
                 <div class="card shadow-sm mb-4 border-{{ $amendment->status === 'approved' ? 'success' : 'danger' }}">
                     <div class="card-header bg-{{ $amendment->status === 'approved' ? 'success' : 'danger' }} text-white">
                         <h6 class="mb-0">
-                            {{ $amendment->status === 'approved' ? '✓ Catatan Persetujuan' : '✗ Catatan Penolakan' }}
+                            <i class="ti ti-{{ $amendment->status === 'approved' ? 'circle-check' : 'circle-x' }} me-1"></i>
+                            {{ $amendment->status === 'approved' ? 'Catatan Persetujuan' : 'Catatan Penolakan' }}
                         </h6>
                     </div>
                     <div class="card-body">
@@ -112,18 +118,18 @@
             @if($amendment->isPending() && (auth()->user()->isAdmin() || auth()->user()->isKetua() || auth()->user()->id === $amendment->leaveRequest->user->atasan_id))
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-light">
-                        <h6 class="mb-0"><i class="bi bi-check-circle"></i> Tindakan</h6>
+                        <h6 class="mb-0"><i class="ti ti-circle-check me-1"></i> Tindakan</h6>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#approveModal">
-                                    <i class="bi bi-check-circle"></i> Setujui Perubahan
+                                    <i class="ti ti-circle-check me-1"></i> Setujui Perubahan
                                 </button>
                             </div>
                             <div class="col-md-6">
                                 <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#rejectModal">
-                                    <i class="bi bi-x-circle"></i> Tolak Perubahan
+                                    <i class="ti ti-circle-x me-1"></i> Tolak Perubahan
                                 </button>
                             </div>
                         </div>
@@ -135,7 +141,7 @@
             <div class="card shadow-sm">
                 <div class="card-header">
                     <h6 class="mb-0">
-                        <i class="bi bi-file-earmark"></i> Pengajuan Cuti Terkait
+                        <i class="ti ti-file me-1"></i> Pengajuan Cuti Terkait
                     </h6>
                 </div>
                 <div class="card-body">
@@ -147,7 +153,7 @@
                     </p>
                     <p class="mb-0">
                         <a href="{{ route('leave.show', $amendment->leaveRequest) }}" class="btn btn-sm btn-primary">
-                            <i class="bi bi-link-45deg"></i> Lihat Pengajuan Lengkap
+                            <i class="ti ti-external-link me-1"></i> Lihat Pengajuan Lengkap
                         </a>
                     </p>
                 </div>
@@ -168,8 +174,8 @@
                 @csrf
                 <div class="modal-body">
                     <div class="alert alert-success">
-                        <i class="bi bi-info-circle"></i>
-                        Tanggal cuti akan diubah menjadi {{ $amendment->requested_start_date->format('d M Y') }} - {{ $amendment->requested_end_date->format('d M Y') }}
+                        <i class="ti ti-info-circle me-1"></i>
+                        Tanggal cuti akan diubah menjadi {{ $amendment->requested_start_date->format('d M Y') }} — {{ $amendment->requested_end_date->format('d M Y') }}
                     </div>
                     <div class="mb-3">
                         <label for="approval_note" class="form-label">Catatan (Opsional)</label>
@@ -179,7 +185,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-success">
-                        <i class="bi bi-check-circle"></i> Setujui
+                        <i class="ti ti-circle-check me-1"></i> Setujui
                     </button>
                 </div>
             </form>
@@ -199,8 +205,8 @@
                 @csrf
                 <div class="modal-body">
                     <div class="alert alert-danger">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        Perubahan akan ditolak dan pemohon akan diberitahu
+                        <i class="ti ti-alert-triangle me-1"></i>
+                        Perubahan akan ditolak dan pemohon akan diberitahu.
                     </div>
                     <div class="mb-3">
                         <label for="rejection_note" class="form-label">Alasan Penolakan *</label>
@@ -215,7 +221,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-x-circle"></i> Tolak
+                        <i class="ti ti-circle-x me-1"></i> Tolak
                     </button>
                 </div>
             </form>
