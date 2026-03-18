@@ -606,6 +606,8 @@ class SmokeTest extends TestCase
                 'status' => \App\Models\LeaveRequest::STATUS_DISETUJUI,
             ]);
         }
+        $pegawai->refresh();
+        $this->assertEquals(9, $pegawai->leave_balance); // 12 - 3 leaves x 1 day = 9
     }
 
     public function test_bulk_keputusan_forbidden_for_pegawai(): void

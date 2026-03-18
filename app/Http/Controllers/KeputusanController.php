@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\LeaveRequest;
+use App\Models\Notification;
+use App\Services\BalanceAuditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -146,12 +149,46 @@ class KeputusanController extends Controller
                     'decided_at'        => now(),
                 ]);
 
+                // Fix 2: AuditLog untuk compliance
+                AuditLog::log(
+                    $request->keputusan === 'disetujui' ? 'approve' : ($request->keputusan === 'ditolak' ? 'reject' : 'tangguhkan'),
+                    'LeaveRequest',
+                    $leave->id,
+                    null,
+                    ['status' => $statusMap[$request->keputusan], 'keputusan_pejabat' => $request->keputusan],
+                    "Ketua {$user->name} bulk-{$request->keputusan} pengajuan cuti"
+                );
+
+                // Fix 3: Notifikasi ke pegawai
+                $notifType = $request->keputusan === 'disetujui'
+                    ? Notification::TYPE_CUTI_DISETUJUI
+                    : Notification::TYPE_CUTI_DITOLAK;
+                $notifMsg = $request->keputusan === 'disetujui'
+                    ? "Pengajuan cuti Anda telah disetujui oleh {$user->name}."
+                    : "Pengajuan cuti Anda telah {$request->keputusan} oleh {$user->name}.";
+                Notification::kirim($leave->user_id, 'Update Pengajuan Cuti', $notifMsg, $notifType, '/leave/saya');
+
                 if ($request->keputusan === 'disetujui') {
                     if (in_array($leave->type, [
                         LeaveRequest::TYPE_TAHUNAN,
                         LeaveRequest::TYPE_BERSAMA,
                     ])) {
-                        $leave->user->decrement('leave_balance', $leave->total_hari_kerja ?? 1);
+                        // Fix 1: lockForUpdate untuk menghindari race condition
+                        $lockedUser = \App\Models\User::lockForUpdate()->find($leave->user_id);
+                        $totalDays = $leave->total_hari_kerja ?? 1;
+                        if ($lockedUser && $lockedUser->leave_balance >= $totalDays) {
+                            $previousBalance = $lockedUser->leave_balance;
+                            $lockedUser->decrement('leave_balance', $totalDays);
+
+                            // Fix 4: BalanceAuditService untuk audit trail
+                            BalanceAuditService::logBalanceChange(
+                                $lockedUser,
+                                $previousBalance,
+                                $previousBalance - $totalDays,
+                                "Pengajuan {$leave->type_label} disetujui (bulk ketua)",
+                                $leave->id
+                            );
+                        }
                     }
                 }
             });
