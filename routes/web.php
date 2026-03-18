@@ -204,6 +204,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/leave/export/all-pdf', [LeaveRequestController::class, 'exportAllPdf'])->name('leave.export-all-pdf');
     });
 
+    // Pegawai upload foto diri sendiri (controller checks ownership)
+    Route::post('/pegawai/{pegawai}/upload-photo', [PegawaiController::class, 'uploadPhoto'])
+        ->name('pegawai.upload-photo.self');
+
     // === Manajemen Pegawai (admin only) ===
     Route::middleware('role:admin')->prefix('pegawai')->name('pegawai.')->group(function () {
         Route::get('/', [PegawaiController::class, 'index'])->name('index');

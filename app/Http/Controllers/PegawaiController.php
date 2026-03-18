@@ -418,13 +418,18 @@ class PegawaiController extends Controller
      */
     public function uploadPhoto(Request $request, User $pegawai)
     {
+        // Allow: admin bisa upload siapa saja, pegawai hanya diri sendiri
+        if (!auth()->user()->isAdmin() && auth()->id() !== $pegawai->id) {
+            abort(403, 'Anda tidak berhak mengubah foto profil pegawai lain.');
+        }
+
         $request->validate(['photo' => 'required|image|max:2048|mimes:jpg,jpeg,png,webp']);
         if ($pegawai->photo) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete($pegawai->photo);
         }
         $path = $request->file('photo')->store('avatars', 'public');
         $pegawai->update(['photo' => $path]);
-        return back()->with('success', 'Foto profil pegawai berhasil diperbarui.');
+        return back()->with('success', 'Foto profil berhasil diperbarui.');
     }
 
     /**
