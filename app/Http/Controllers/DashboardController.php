@@ -263,7 +263,7 @@ class DashboardController extends Controller
         $cutiPerBulan = \App\Models\LeaveRequest::where('user_id', $user->id)
             ->whereIn('status', [\App\Models\LeaveRequest::STATUS_DISETUJUI, \App\Models\LeaveRequest::STATUS_APPROVED])
             ->where('start_date', '>=', now()->subMonths(11)->startOfMonth())
-            ->selectRaw("strftime('%Y-%m', start_date) as bulan_key, SUM(total_hari_kerja) as total")
+            ->selectRaw("TO_CHAR(start_date, 'YYYY-MM') as bulan_key, SUM(total_hari_kerja) as total")
             ->groupBy('bulan_key')
             ->orderBy('bulan_key')
             ->get()

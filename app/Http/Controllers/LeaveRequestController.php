@@ -1028,7 +1028,7 @@ class LeaveRequestController extends Controller
         $query = LeaveRequest::where('user_id', $user->id)
             ->when($filterStatus, fn($q) => $q->where('status', $filterStatus))
             ->when($filterType,   fn($q) => $q->where('type', $filterType))
-            ->when($filterYear,   fn($q) => $q->whereRaw("strftime('%Y', start_date) = ?", [(string)$filterYear]))
+            ->when($filterYear,   fn($q) => $q->whereRaw("TO_CHAR(start_date, 'YYYY') = ?", [(string)$filterYear]))
             ->with(['pejabat', 'atasanReviewer'])
             ->latest();
 
@@ -1038,7 +1038,7 @@ class LeaveRequestController extends Controller
         $typeLabels   = LeaveRequest::typeLabels();
 
         $years = LeaveRequest::where('user_id', $user->id)
-            ->selectRaw("strftime('%Y', start_date) as yr")
+            ->selectRaw("TO_CHAR(start_date, 'YYYY') as yr")
             ->distinct()
             ->orderByDesc('yr')
             ->pluck('yr');

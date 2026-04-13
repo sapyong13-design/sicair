@@ -26,7 +26,7 @@ return new class extends Migration
         });
 
         Schema::table('cuti_records', function (Blueprint $table) {
-            $table->index(['user_id', 'year'], 'idx_cuti_user_year');
+            $table->index(['user_id', 'tahun'], 'idx_cuti_user_year');
         });
     }
 

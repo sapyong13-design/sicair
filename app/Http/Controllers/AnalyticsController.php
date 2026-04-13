@@ -178,7 +178,7 @@ class AnalyticsController extends Controller
     {
         // Note: strftime('%m') and julianday() are SQLite-specific; for MySQL use MONTH() and DATEDIFF().
         $rows = LeaveRequest::join('users', 'leave_requests.user_id', '=', 'users.id')
-            ->selectRaw("users.name, users.id as user_id, CAST(strftime('%m', leave_requests.start_date) AS INTEGER) as month, sum(COALESCE(total_hari_kerja, (julianday(end_date) - julianday(start_date) + 1))) as total_days")
+            ->selectRaw("users.name, users.id as user_id, EXTRACT(MONTH FROM leave_requests.start_date)::INTEGER as month, sum(COALESCE(total_hari_kerja, EXTRACT(EPOCH FROM (end_date::timestamp - start_date::timestamp)) / 86400 + 1)) as total_days")
             ->whereIn('leave_requests.status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
             ->whereYear('leave_requests.start_date', $year)
             ->groupBy('users.id', 'users.name', 'month')

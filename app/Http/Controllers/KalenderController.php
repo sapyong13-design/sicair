@@ -146,8 +146,8 @@ class KalenderController extends Controller
             ->whereIn('status', [\App\Models\LeaveRequest::STATUS_DISETUJUI, \App\Models\LeaveRequest::STATUS_APPROVED])
             ->where(function ($q) use ($year, $month) {
                 $ym = sprintf('%04d-%02d', $year, $month);
-                $q->whereRaw("strftime('%Y-%m', start_date) = ?", [$ym])
-                  ->orWhereRaw("strftime('%Y-%m', end_date) = ?", [$ym]);
+                $q->whereRaw("TO_CHAR(start_date, 'YYYY-MM') = ?", [$ym])
+                  ->orWhereRaw("TO_CHAR(end_date, 'YYYY-MM') = ?", [$ym]);
             })
             ->orderBy('start_date')
             ->get();

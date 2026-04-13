@@ -148,7 +148,7 @@ class AnalyticsService
      */
     private function getMonthlyTrend(int $year): array
     {
-        $rows = LeaveRequest::selectRaw('CAST(strftime(\'%m\', created_at) AS INTEGER) as month, status, count(*) as total')
+        $rows = LeaveRequest::selectRaw('EXTRACT(MONTH FROM created_at)::INTEGER as month, status, count(*) as total')
             ->whereYear('created_at', $year)
             ->groupBy('month', 'status')
             ->get()
@@ -202,7 +202,7 @@ class AnalyticsService
             ->whereYear('created_at', $year)
             ->select('user_id')
             ->selectRaw('count(*) as leave_count')
-            ->selectRaw('sum(COALESCE(total_hari_kerja, CAST((julianday(end_date) - julianday(start_date)) AS INTEGER))) as total_days')
+            ->selectRaw('sum(COALESCE(total_hari_kerja, EXTRACT(EPOCH FROM (end_date::timestamp - start_date::timestamp)) / 86400)) as total_days')
             ->groupBy('user_id')
             ->orderByDesc('leave_count')
             ->take($limit)
@@ -327,7 +327,7 @@ class AnalyticsService
                     ELSE 'Kesekretariatan'
                 END AS bagian,
                 COUNT(*) as total_pengajuan,
-                SUM(COALESCE(total_hari_kerja, CAST((julianday(end_date) - julianday(start_date)) AS INTEGER) + 1)) as total_hari
+                SUM(COALESCE(total_hari_kerja, EXTRACT(EPOCH FROM (end_date::timestamp - start_date::timestamp)) / 86400 + 1)) as total_hari
             ")
             ->whereIn('leave_requests.status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
             ->whereYear('leave_requests.start_date', $year)
@@ -388,7 +388,7 @@ class AnalyticsService
             $rows = LeaveRequest::join('users', 'leave_requests.user_id', '=', 'users.id')
                 ->selectRaw("
                     users.unit_kerja,
-                    CAST(strftime('%m', leave_requests.start_date) AS INTEGER) as month,
+                    EXTRACT(MONTH FROM leave_requests.start_date)::INTEGER as month,
                     COUNT(*) as count
                 ")
                 ->whereIn('leave_requests.status', [LeaveRequest::STATUS_DISETUJUI, LeaveRequest::STATUS_APPROVED])
