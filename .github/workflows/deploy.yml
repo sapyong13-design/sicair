@@ -1,0 +1,32 @@
+name: Deploy to sicair.duckdns.org
+
+on:
+  push:
+    branches:
+      - postgresql
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy code to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 43.129.38.24
+          username: ubuntu
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "."
+          target: /home/ubuntu/sicair-new
+          rm: true
+
+      - name: Build and restart container
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 43.129.38.24
+          username: ubuntu
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: /home/ubuntu/deploy-sicair.sh
+          command_timeout: 30m
