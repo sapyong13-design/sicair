@@ -17,10 +17,10 @@ jobs:
           php-version: '8.3'
 
       - name: Composer install
-        run: composer install --no-dev --prefer-dist --no-interaction
+        run: composer install --prefer-dist --no-interaction
 
       - name: Run unit tests
-        run: php artisan test --testsuite=Unit --no-interaction
+        run: ./vendor/bin/phpunit --testsuite=Unit
 
   deploy:
     needs: build-check
