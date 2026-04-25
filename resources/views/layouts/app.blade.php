@@ -41,6 +41,19 @@
     <!-- NProgress (#2) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
     <style>
+        /* === Disable semua animasi modal === */
+        .modal,
+        .modal-dialog,
+        .modal-content,
+        .modal-backdrop,
+        .modal.fade,
+        .modal.fade .modal-dialog,
+        .modal-blur,
+        .sc-modal-overlay,
+        .sc-modal-container {
+            transition: none !important;
+            animation: none !important;
+        }
         /* ===== SiCAIR - Tema Pengadilan Negeri Natuna ===== */
         :root {
             --sc-primary: #166534;
@@ -355,7 +368,6 @@
         }
         .sc-card:hover {
             box-shadow: 0 6px 20px rgba(0,0,0,0.09), 0 12px 32px rgba(0,0,0,0.07);
-            transform: translateY(-1px);
         }
         [data-bs-theme="dark"] .sc-card {
             border: 1px solid rgba(255,255,255,0.06);
@@ -507,7 +519,6 @@
             font-weight: 600;
             padding: 0.6rem 1.5rem;
             box-shadow: 0 4px 14px rgba(22, 101, 52, 0.3);
-            transition: background 0.2s ease, box-shadow 0.2s ease;
             color: #fff;
         }
         .sc-btn-primary:hover {
@@ -1474,7 +1485,7 @@
             transition: transform 0.08s ease !important;
         }
         .sc-card a.text-decoration-none:active .sc-leave-type-card,
-        .sc-leave-type-card:active { transform: translateY(-1px) scale(0.99) !important; }
+        .sc-leave-type-card:active { transform: scale(0.99) !important; }
 
         /* --- Inline edit dark mode hover fix --- */
         [data-bs-theme="dark"] .sc-inline-edit:hover,

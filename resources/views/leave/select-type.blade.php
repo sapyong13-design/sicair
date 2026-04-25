@@ -207,7 +207,6 @@
         transform: scale(1.15) rotate(-5deg);
     }
     .sc-leave-type-card:active {
-        transform: translateY(-1px);
     }
 </style>
 @endpush
